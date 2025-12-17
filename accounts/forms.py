@@ -11,9 +11,13 @@ class SignUpForm(UserCreationForm):
         help_text="이메일 주소를 입력해주세요.",
     )
 
+    first_name = forms.CharField(
+        max_length=30, required=True, help_text="이름을 입력해주세요.", label="이름"
+    )
+
     class Meta:
         model = User
-        fields = ("username", "email", "password1", "password2")
+        fields = ("username", "first_name", "email", "password1", "password2")
 
     def clean_username(self):
         username = self.cleaned_data.get("username")
