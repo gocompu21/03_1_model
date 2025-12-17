@@ -141,6 +141,77 @@
             </form>
         </div>
     </div>
+    <!-- Analysis Section -->
+    <div class="profile-container" style="margin-top: 30px;">
+        <div class="profile-header">
+            <h3>📊 과목별 실력 분석</h3>
+        </div>
+
+        <div style="position: relative; height:300px; width:100%">
+            <canvas id="radarChart"></canvas>
+        </div>
+
+        {% if weakest_subject and weakest_subject != "아직 학습 데이터가 충분하지 않습니다." %}
+        <div
+            style="margin-top: 20px; padding: 15px; background-color: #ffe5e5; border-left: 5px solid #e03131; border-radius: 5px;">
+            <strong style="color: #c92a2a;">🔥 집중 케어 필요:</strong>
+            <span style="color: #333;">{{ weakest_subject }} 과목의 보충 학습이 권장됩니다.</span>
+        </div>
+        {% elif weakest_subject %}
+        <div style="margin-top: 20px; text-align: center; color: #666;">
+            {{ weakest_subject }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const labels = JSON.parse('{{ radar_labels|safe }}');
+            const data = JSON.parse('{{ radar_data|safe }}');
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '정답률 (%)',
+                        data: data,
+                        fill: true,
+                        backgroundColor: 'rgba(64, 145, 108, 0.2)',
+                        borderColor: 'rgba(64, 145, 108, 1)',
+                        pointBackgroundColor: 'rgba(45, 106, 79, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(45, 106, 79, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
