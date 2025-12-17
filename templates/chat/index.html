@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 나무의사 채팅</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 300px;
+            background-color: #1b4332;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #2d6a4f;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #40916c;
+            padding-bottom: 10px;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .history-item {
+            margin-bottom: 2px;
+        }
+
+        .history-link {
+            display: block;
+            padding: 6px 10px;
+            color: #d8f3dc;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .history-link:hover {
+            background-color: #2d6a4f;
+            color: white;
+        }
+
+        .history-link.active {
+            background-color: #40916c;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Removed history-meta styles */
+
+        .new-chat-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #52b788;
+            color: #081c15;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .new-chat-btn:hover {
+            background-color: #40916c;
+            color: white;
+        }
+
+        .home-link-sidebar {
+            margin-top: 20px;
+            color: #95d5b2;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            background-color: #f0f7f4;
+            overflow-y: auto;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            height: fit-content;
+        }
+
+        h1 {
+            color: #2d6a4f;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .chat-box {
+            border: 1px solid #d8f3dc;
+            border-radius: 10px;
+            padding: 20px;
+            min-height: 400px;
+            background-color: #fafdfb;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE 10+ */
+        }
+
+        .chat-box::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        .message {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            /* Legacy support */
+            overflow-wrap: break-word;
+            /* Standard */
+            word-break: break-all;
+            /* Force break for long strings */
+        }
+
+        .user-message {
+            background-color: #e8f5e9;
+            border-left: 5px solid #2d6a4f;
+        }
+
+        .ai-message {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-left: 5px solid #40916c;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: start;
+            position: relative;
+            /* For absolute positioning of progress */
+        }
+
+        textarea {
+            flex-grow: 1;
+            padding: 15px;
+            border: 2px solid #d8f3dc;
+            border-radius: 10px;
+            resize: none;
+            height: 60px;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #40916c;
+        }
+
+        .send-btn {
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            height: 60px;
+            white-space: nowrap;
+            font-size: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            line-height: 1.2;
+        }
+
+        .send-btn:hover {
+            background-color: #1b4332;
+        }
+
+        .send-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .stop-btn {
+            background-color: #e63946;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .stop-btn:hover {
+            background-color: #d62828;
+        }
+
+        /* Progress UI */
+        .progress-ui {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 8px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            color: #2d6a4f;
+            font-weight: bold;
+            z-index: 10;
+            width: 200px;
+            border: 1px solid #d8f3dc;
+        }
+
+        .progress-text {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 2px;
+            background-color: #d8f3dc;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #40916c;
+            width: 30%;
+            /* Initial width */
+            animation: loading 2s infinite ease-in-out;
+            border-radius: 2px;
+        }
+
+        @keyframes loading {
+            0% {
+                width: 0%;
+                transform: translateX(-50%);
+            }
+
+            50% {
+                width: 80%;
+            }
+
+            100% {
+                width: 100%;
+                transform: translateX(100%);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="{% url 'chat:index' %}" class="new-chat-btn">+ 새로운 질문</a>
+
+        <ul class="history-list">
+            {% for history in page_obj %}
+            <li class="history-item">
+                <a href="?history_id={{ history.id }}" title="{{ history.user_input }}"
+                    class="history-link {% if selected_history and selected_history.id == history.id %}active{% endif %}">
+                    {{ history.user_input }}
+                </a>
+            </li>
+            {% empty %}
+            <li style="color: #95d5b2; text-align: center; padding: 20px;">기록이 없습니다.</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Pagination Controls -->
+        <div style="margin-top: 10px; text-align: center; font-size: 0.8rem; color: #d8f3dc;">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" style="color: white; text-decoration: none;">&laquo;
+                이전</a>
+            {% endif %}
+
+            <span style="margin: 0 10px;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" style="color: white; text-decoration: none;">다음 &raquo;</a>
+            {% endif %}
+        </div>
+
+        <a href="{% url 'main:index' %}" class="home-link-sidebar">메인으로 돌아가기</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="chat-container">
+
+            <div class="chat-box" id="chat-box">
+                {% if user_input %}
+                <div class="message user-message">
+                    <strong>질문:</strong><br>
+                    {{ user_input }}
+                </div>
+                {% endif %}
+
+                {% if response_text %}
+                <div class="message ai-message">
+                    <strong>나무주치의 답변:</strong><br>
+                    {{ response_text|safe }}
+                </div>
+                {% elif user_input and not selected_history %}
+                <div class="message ai-message">
+                    답변을 생성 중이거나 오류가 발생했습니다.
+                </div>
+                {% elif not user_input %}
+                <div class="message ai-message" id="welcome-msg">
+                    궁금한 점을 물어보시면 바로 답변해드리겠습니다.
+                </div>
+                {% endif %}
+            </div>
+
+            <form id="chat-form" method="post" class="input-group">
+                {% csrf_token %}
+                <textarea id="user-input" name="user_input" placeholder="질문을 입력하세요..." required></textarea>
+
+                <button type="submit" id="send-btn" class="send-btn">
+                    <span>보내기</span>
+                    <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; opacity: 0.9;">
+                        <!-- Ctrl Key Icon -->
+                        <svg width="24" height="14" viewBox="0 0 36 20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="1" y="1" width="34" height="18" rx="3" ry="3"></rect>
+                            <text x="18" y="13" font-size="10" text-anchor="middle" stroke="none" fill="currentColor"
+                                font-family="sans-serif" font-weight="bold">Ctrl</text>
+                        </svg>
+                        <span>+</span>
+                        <!-- Enter Key Icon -->
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 10 4 15 9 20"></polyline>
+                            <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
+                        </svg>
+                    </div>
+                </button>
+                <button type="button" id="stop-btn" class="stop-btn" style="display: none;">🛑</button>
+
+                <div id="progress-ui" class="progress-ui">
+                    <div class="progress-text">답변 생성 중... <span id="timer">0.0</span>s</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Link Handling
+            function processLinks() {
+                const aiMessages = document.querySelectorAll('.ai-message');
+                aiMessages.forEach(msg => {
+                    const links = msg.querySelectorAll('a');
+                    links.forEach(link => {
+                        link.setAttribute('target', '_blank');
+                        link.setAttribute('rel', 'noopener noreferrer');
+                    });
+                });
+            }
+            processLinks(); // Run initially
+
+            const chatForm = document.getElementById('chat-form');
+            const userInput = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const progressUi = document.getElementById('progress-ui');
+            const timerSpan = document.getElementById('timer');
+            const chatBox = document.getElementById('chat-box');
+            const welcomeMsg = document.getElementById('welcome-msg');
+
+            let abortController = null;
+            let timerInterval = null;
+            let startTime = 0;
+
+            function startTimer() {
+                startTime = Date.now();
+                timerSpan.textContent = "0.0";
+                timerInterval = setInterval(() => {
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    timerSpan.textContent = elapsed.toFixed(1);
+                }, 100);
+            }
+
+            function stopTimer() {
+                clearInterval(timerInterval);
+            }
+
+            function appendMessage(role, text) {
+                if (welcomeMsg) welcomeMsg.style.display = 'none';
+
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${role}-message`;
+                msgDiv.innerHTML = `<strong>${role === 'user' ? '질문' : '나무주치의 답변'}:</strong><br>${text}`;
+                chatBox.appendChild(msgDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+                processLinks(); // Process links for new messages
+            }
+
+            userInput.addEventListener('keydown', function (e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    if (!userInput.disabled && userInput.value.trim() !== "") {
+                        chatForm.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+
+            chatForm.onsubmit = async function (e) {
+                e.preventDefault();
+                const question = userInput.value.trim();
+                if (!question) return;
+
+                // UI Reset
+                userInput.value = '';
+                userInput.disabled = true;
+                sendBtn.style.display = 'none';
+                stopBtn.style.display = 'flex';
+                progressUi.style.display = 'block';
+
+                // Show User Message immediately
+                appendMessage('user', question);
+
+                // Start Request
+                abortController = new AbortController();
+                startTimer();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('user_input', question);
+                    formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+
+                    const response = await fetch("{% url 'chat:api_ask' %}", {
+                        method: 'POST',
+                        body: formData,
+                        signal: abortController.signal
+                    });
+
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const data = await response.json();
+
+                    // Show AI Response
+                    appendMessage('ai', data.response_text);
+
+                    // Update Sidebar History
+                    const historyList = document.querySelector('.history-list');
+                    const noRecordMsg = historyList.querySelector('li[style*="text-align: center"]');
+                    if (noRecordMsg) {
+                        noRecordMsg.remove();
+                    }
+
+                    // Remove active class from existing items
+                    document.querySelectorAll('.history-link').forEach(link => link.classList.remove('active'));
+
+                    const newItem = document.createElement('li');
+                    newItem.className = 'history-item';
+                    newItem.innerHTML = `
+                        <a href="?history_id=${data.history_id}" title="${data.user_input}" class="history-link active">
+                            ${data.user_input}
+                        </a>
+                    `;
+
+                    // Prepend to list (insert after existing items if any, or first)
+                    if (historyList.firstChild) {
+                        historyList.insertBefore(newItem, historyList.firstChild);
+                    } else {
+                        historyList.appendChild(newItem);
+                    }
+
+                } catch (error) {
+                    if (error.name === 'AbortError') {
+                        appendMessage('ai', '<span style="color: #e63946;">🛑 요청이 중단되었습니다.</span>');
+                    } else {
+                        appendMessage('ai', `오류가 발생했습니다: ${error.message}`);
+                    }
+                } finally {
+                    // Reset UI
+                    stopTimer();
+                    userInput.disabled = false;
+                    userInput.focus();
+                    sendBtn.style.display = 'block';
+                    sendBtn.disabled = false;
+                    stopBtn.style.display = 'none';
+                    progressUi.style.display = 'none';
+                    abortController = null;
+                }
+            };
+
+            stopBtn.onclick = function () {
+                if (abortController) {
+                    abortController.abort();
+                }
+            };
+        });
+    </script>
+</body>
+
+</html>

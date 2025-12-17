@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나무의사 자격시험 대비반</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+            color: #333;
+        }
+
+        /* Navbar */
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #b7e4c7;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* Dashboard Cards */
+        .container {
+            max-width: 1200px;
+            margin: -50px auto 50px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            /* Reduced min-width */
+            gap: 20px;
+            /* Reduced gap */
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+            padding: 25px 15px;
+            /* Reduced padding */
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            /* Reduced hover movement */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .icon {
+            font-size: 2.2rem;
+            /* Reduced icon font size */
+            margin-bottom: 15px;
+            /* Reduced margin */
+            background-color: #d8f3dc;
+            width: 60px;
+            /* Reduced dimension */
+            height: 60px;
+            line-height: 60px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .card h3 {
+            color: #1b4332;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            /* Reduced font size */
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 25px;
+            background-color: #40916c;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2d6a4f;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid #40916c;
+            color: #40916c;
+        }
+
+        .btn-outline:hover {
+            background-color: #40916c;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <nav class="nav-links">
+
+            {% if user.is_authenticated %}
+            <span>{{ user.username }}님 환영합니다</span>
+            <a href="{% url 'user_profile' %}">마이페이지</a>
+            <form action="{% url 'user_logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit"
+                    style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
+            </form>
+            {% else %}
+            <a href="{% url 'user_login' %}">로그인</a>
+            <a href="{% url 'user_signup' %}">회원가입</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="hero">
+        <h1>나무의 미래를 지키는 전문가</h1>
+        <p>나무의사 자격 시험, 체계적인 학습 관리와 실전 모의고사를 통해 합격의 꿈을 이루세요.</p>
+    </div>
+
+    <div class="container">
+        <!-- Card 1: Study/Exam -->
+        <div class="card">
+            <div class="icon">📖</div>
+            <h3>기출문제 학습</h3>
+            <p>회차별로 모든 문제와 해설을<br>한눈에 보며 학습하세요.</p>
+            <a href="{% url 'study:index' %}" class="btn">학습 하기</a>
+        </div>
+
+        <!-- Card 2: Community/Blog -->
+        <div class="card">
+            <div class="icon">📝</div>
+            <h3>기출 모의고사</h3>
+            <p>최신 기출 경향을 반영한 문제로<br>실력을 점검해보세요.</p>
+            <a href="{% url 'exam:index' %}" class="btn">문제 풀러 가기</a>
+        </div>
+
+        <!-- Card 3: Profile/Stats -->
+        <div class="card">
+            <div class="icon">💾</div>
+            <h3>기본서에 물어보세요</h3>
+            <p>나무의사 시험은 기본서 숙지가 중요합니다.</p>
+            <a href="{% url 'notebook:index' %}" class="btn">질문 하기</a>
+        </div>
+
+        <!-- Card 4: Study (New) -->
+        <div class="card">
+            <div class="icon">👨‍⚕️</div>
+            <h3>나무주치의에게 물어보세요</h3>
+            <p>폭넓은 지식으로 궁금증을<br>해결해드립니다.</p>
+            <a href="{% url 'chat:index' %}" class="btn">질문 하러 가기</a>
+        </div>
+
+
+        <!-- Card 5: BBS -->
+        <div class="card">
+            <div class="icon">🗣️</div>
+            <h3>자유게시판</h3>
+            <p>지식나눔과 소통의 공간</p>
+            <a href="{% url 'bbs:post_list' %}" class="btn">게시판 입장</a>
+        </div>
+        <!-- Card 6: Knowledge Repository (New) -->
+        <div class="card">
+            <div class="icon">📊</div>
+            <h3>나의 학습 현황</h3>
+            <p>지금까지의 학습 기록을 확인하고<br>취약점을 분석하세요.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'user_profile' %}" class="btn btn-outline">내 정보 보기</a>
+            {% else %}
+            <a href="{% url 'user_login' %}" class="btn btn-outline">로그인 후 확인</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+
+</html>

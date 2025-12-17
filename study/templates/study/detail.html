@@ -1,0 +1,525 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load markdown_extras %}
+
+{% block content %}
+<style>
+    /* Global Background matching exam_take.html */
+    body {
+        background-color: #f8f6e6;
+        margin: 0;
+        font-family: sans-serif;
+    }
+
+    /* Hide global header only on this page */
+    header {
+        display: none !important;
+    }
+
+    .study-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 60px);
+        /* Adjust for base.html header if it exists */
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #f8f6e6;
+    }
+
+    /* Tab Navigation */
+    /* Tab Navigation Layout */
+    /* Tab Navigation Layout */
+    .tabs-header {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        background: white;
+        border-bottom: 2px solid #e0e0e0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 15px 20px;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .subject-tabs-scroll {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto;
+        gap: 10px;
+        flex: 1;
+        /* Take all available space */
+        scrollbar-width: none;
+        /* Firefox */
+        align-items: center;
+    }
+
+    .subject-tabs-scroll::-webkit-scrollbar {
+        display: none;
+        /* Chrome/Safari */
+    }
+
+    .tab-btn {
+        flex: 0 0 auto;
+        /* Prevent shrinking/growing unexpectedly */
+        padding: 10px 20px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        background: #fdfdfd;
+        font-size: 1.0em;
+        font-weight: 600;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-btn img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+
+    .tab-btn:hover {
+        background-color: #f0f7f4;
+        border-color: #97bc62;
+        color: #2c5f2d;
+    }
+
+    .tab-btn.active {
+        color: white;
+        background-color: #2c5f2d;
+        border-color: #2c5f2d;
+        box-shadow: 0 4px 6px rgba(44, 95, 45, 0.3);
+    }
+
+    /* Content Area */
+    .content-area {
+        flex: 1;
+        padding: 20px 0;
+        /* Reduced side padding to match header alignment */
+        overflow-y: auto;
+    }
+
+    .question-card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+        display: none;
+        /* Hidden by default, shown by filter */
+    }
+
+    .question-card.active {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .q-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .q-badge {
+        background: #eee;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.9em;
+        color: #555;
+    }
+
+    .q-content {
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .q-choices {
+        padding-left: 20px;
+        margin-bottom: 20px;
+    }
+
+    .choice-item {
+        margin-bottom: 8px;
+        font-size: 1.05em;
+    }
+
+    .choice-num {
+        display: inline-block;
+        width: auto;
+        height: auto;
+        border: none;
+        border-radius: 0;
+        text-align: center;
+        line-height: 1;
+        margin-right: 5px;
+        font-size: 1.1em;
+        background: transparent;
+    }
+
+    .choice-num.correct {
+        color: #d93025;
+        font-weight: bold;
+        background: transparent;
+    }
+
+    /* Explanation Section */
+    .explanation-section {
+        margin-top: 30px;
+        background-color: #fdfdfd;
+        border: 1px dashed #bbb;
+        border-radius: 5px;
+        padding: 20px;
+    }
+
+    .exp-title {
+        font-weight: bold;
+        color: #d35400;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .exp-text {
+        font-size: 1.0em;
+        line-height: 1.7;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .text-blue {
+        color: blue;
+        font-weight: bold;
+    }
+
+    .text-red {
+        color: red;
+        font-weight: bold;
+    }
+
+    .infographic-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .infographic-container img {
+        max-width: 100%;
+        border: 2px solid #333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    /* Image Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-content {
+        margin: 5% auto;
+        display: block;
+        width: 80%;
+        max-width: 1000px;
+    }
+
+    .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+</style>
+
+<div class="study-container">
+    <div class="tabs-header">
+        <div class="subject-tabs-scroll" id="subject-tabs">
+            <!-- Tabs will be generated by JS -->
+        </div>
+
+        <!-- Fixed Back Button -->
+        <a href="{% url 'study:index' %}" class="tab-btn back-btn" style="background-color: #f7f7f7; color: #555;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                style="margin-right:5px;">
+                <path
+                    d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5304 5.21071 21.0391 5.58579 21.4142C5.96086 21.7893 6.46957 22 7 22H17C17.5304 22 18.0391 21.7893 18.4142 21.4142C18.7893 21.0391 19 20.5304 19 20V10M19 10L21 12"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+            </svg>
+            <span>기출학습</span>
+        </a>
+    </div>
+
+    <div class="content-area" id="question-list">
+        {% for q in questions %}
+        <div class="question-card" data-subject="{{ q.subject.name }}">
+            <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
+                <div style="margin-bottom: 10px;">
+                    <span class="q-badge" style="float: right;">{{ q.subject.name }}</span>
+                </div>
+                <div class="q-content">
+                    {{ q.number }}. {{ q.content|linebreaksbr }}
+                </div>
+            </div>
+
+            {% if q.image %}
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="{{ q.image.url }}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc;">
+            </div>
+            {% endif %}
+
+            <div class="q-choices">
+                <div class="choice-item">
+                    <span class="choice-num {% if q.answer == 1 %}correct{% endif %}">①</span> {{ q.choice1 }}
+                </div>
+                <div class="choice-item">
+                    <span class="choice-num {% if q.answer == 2 %}correct{% endif %}">②</span> {{ q.choice2 }}
+                </div>
+                <div class="choice-item">
+                    <span class="choice-num {% if q.answer == 3 %}correct{% endif %}">③</span> {{ q.choice3 }}
+                </div>
+                <div class="choice-item">
+                    <span class="choice-num {% if q.answer == 4 %}correct{% endif %}">④</span> {{ q.choice4 }}
+                </div>
+                <div class="choice-item">
+                    <span class="choice-num {% if q.answer == 5 %}correct{% endif %}">⑤</span> {{ q.choice5 }}
+                </div>
+            </div>
+
+            <div class="explanation-section">
+                <div class="exp-title">
+                    <span>💡 정답 및 해설</span>
+                </div>
+
+                <div class="exp-tabs"
+                    style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #eee;">
+                    <button class="exp-tab-btn active" onclick="switchExpTab(this, 'textbook')"
+                        style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #d35400; border-bottom: 2px solid #d35400; cursor: pointer;">기본서
+                        해설</button>
+                    <button class="exp-tab-btn" onclick="switchExpTab(this, 'general')"
+                        style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">일반
+                        해설</button>
+                </div>
+
+                <div class="exp-content-area">
+                    <div class="exp-content textbook-content" style="display: block;">
+                        <div class="exp-text markdown-content">
+                            {{ q.textbook_chat|markdown|safe }}
+                        </div>
+                        {% if not q.textbook_chat %}
+                        <p style="color: #999; font-style: italic;">기본서 해설이 없습니다.</p>
+                        {% endif %}
+                    </div>
+                    <div class="exp-content general-content" style="display: none;">
+                        <div class="exp-text markdown-content">
+                            {{ q.general_chat|markdown|safe }}
+                        </div>
+                        {% if not q.general_chat %}
+                        <p style="color: #999; font-style: italic;">일반 해설이 없습니다.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if q.infographic_image %}
+                <div class="infographic-container">
+                    <p style="text-align: center; font-weight: bold; color: #555; margin-bottom: 5px;">[비주얼 암기 카드]</p>
+                    <img src="{{ q.infographic_image.url }}" onclick="openModal(this.src)">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="imgModal" class="modal">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modalImg">
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 1. Collect Subjects
+        const cards = document.querySelectorAll('.question-card');
+        const subjects = new Set();
+        cards.forEach(card => {
+            const subj = card.getAttribute('data-subject');
+            if (subj) subjects.add(subj);
+        });
+
+        // 2. Build Tabs
+        // Define specific order
+        const orderedSubjects = ["수목병리학", "수목해충학", "수목생리학", "산림토양학", "수목관리학", "임업경영학"];
+        const sortedSubjects = Array.from(subjects).sort((a, b) => {
+            return orderedSubjects.indexOf(a) - orderedSubjects.indexOf(b);
+        });
+
+        const tabContainer = document.getElementById('subject-tabs');
+
+        // Icon Map
+        const iconMap = {
+            '수목병리학': 'pathology.png',
+            '수목해충학': 'entomology.png',
+            '수목생리학': 'physiology.png',
+            '산림토양학': 'soil.png',
+            '수목관리학': 'management.png',
+            '임업경영학': 'forestry.png'
+        };
+
+        sortedSubjects.forEach(subj => {
+            const btn = document.createElement('button');
+            btn.className = 'tab-btn';
+
+            // Icon
+            if (iconMap[subj]) {
+                const img = document.createElement('img');
+                img.src = `{% static 'img/icons/subject/' %}${iconMap[subj]}`;
+                btn.appendChild(img);
+            }
+
+            const span = document.createElement('span');
+            span.innerText = subj;
+            btn.appendChild(span);
+
+            btn.onclick = () => filterSubject(subj);
+            tabContainer.appendChild(btn);
+        });
+
+        // 3. Highlight Text Logic
+        const expTexts = document.querySelectorAll('.markdown-content');
+        expTexts.forEach(div => {
+            let html = div.innerHTML;
+            html = html.replace(/\(옳음\)/g, '<span class="text-blue">(옳음)</span>');
+            html = html.replace(/\(그름\)/g, '<span class="text-red">(그름)</span>');
+            div.innerHTML = html;
+        });
+
+        // 4. Initial Load - Check URL param or default
+        const urlParams = new URLSearchParams(window.location.search);
+        const subjectParam = urlParams.get('subject');
+
+        if (subjectParam && subjects.has(subjectParam)) {
+            filterSubject(subjectParam);
+        } else if (sortedSubjects.length > 0) {
+            filterSubject(sortedSubjects[0]); // Default to first available
+        }
+    });
+
+    function filterSubject(subject) {
+        // Update Tabs
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => {
+            if (btn.innerText.includes(subject)) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Filter Questions
+        const cards = document.querySelectorAll('.question-card');
+        cards.forEach(card => {
+            if (subject === 'all' || card.getAttribute('data-subject') === subject) {
+                card.classList.add('active');
+            } else {
+                card.classList.remove('active');
+            }
+        });
+
+        // Scroll to top
+        const contentArea = document.querySelector('.content-area');
+        if (contentArea) contentArea.scrollTop = 0;
+    }
+
+    // Modal Logic
+    function openModal(src) {
+        const modal = document.getElementById('imgModal');
+        const modalImg = document.getElementById('modalImg');
+        modal.style.display = "block";
+        modalImg.src = src;
+    }
+
+    function closeModal() {
+        document.getElementById('imgModal').style.display = "none";
+    }
+
+    // Close modal on outside click
+    window.onclick = function (event) {
+        const modal = document.getElementById('imgModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Explanation Tab Logic
+    function switchExpTab(btn, type) {
+        const section = btn.closest('.explanation-section');
+
+        // Buttons
+        const buttons = section.querySelectorAll('.exp-tab-btn');
+        buttons.forEach(b => {
+            b.classList.remove('active');
+            b.style.color = '#888';
+            b.style.borderBottom = 'none';
+        });
+
+        btn.classList.add('active');
+        btn.style.color = '#d35400';
+        btn.style.borderBottom = '2px solid #d35400';
+
+        // Content
+        const tContent = section.querySelector('.textbook-content');
+        const gContent = section.querySelector('.general-content');
+
+        if (type === 'textbook') {
+            tContent.style.display = 'block';
+            gContent.style.display = 'none';
+        } else {
+            tContent.style.display = 'none';
+            gContent.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

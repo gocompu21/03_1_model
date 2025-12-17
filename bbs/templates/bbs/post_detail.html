@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<style>
+    /* Header Styles from main/index.html */
+    .custom-header {
+        background-color: #2d6a4f;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-header .logo {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-header .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .custom-header .nav-links a:hover {
+        color: #b7e4c7;
+    }
+
+    .custom-header span {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+    }
+</style>
+<header class="custom-header">
+    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    <nav class="nav-links">
+
+        {% if user.is_authenticated %}
+        <span>{{ user.username }}님 환영합니다</span>
+        <a href="{% url 'user_profile' %}">마이페이지</a>
+        <form action="{% url 'user_logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit"
+                style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
+        </form>
+        {% else %}
+        <a href="{% url 'user_login' %}">로그인</a>
+        <a href="{% url 'user_signup' %}">회원가입</a>
+        {% endif %}
+    </nav>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="bbs-container" style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
+
+    <!-- Post Header -->
+    <div style="border-bottom: 2px solid #2d6a4f; padding-bottom: 20px; margin-bottom: 30px;">
+        <h1 style="font-size: 1.2rem; color: #333; margin-bottom: 15px;">{{ post.title }}</h1>
+        <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.95rem;">
+            <div>
+                <span style="font-weight: bold; color: #2d6a4f;">{{ post.author.username }}</span>
+                <span style="margin: 0 10px;">|</span>
+                <span>{{ post.created_at|date:"Y.m.d H:i" }}</span>
+            </div>
+            <div>
+                <span>조회 {{ post.hits }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Content (Wysiwyg Rendered) -->
+    <div class="post-content" style="min-height: 200px; line-height: 1.8; margin-bottom: 50px;">
+        {{ post.content|safe }}
+    </div>
+
+    <!-- Actions -->
+    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 40px;">
+
+        {% if user == post.author %}
+        <a href="{% url 'bbs:post_update' post.pk %}" class="btn-action btn-edit">수정</a>
+        <a href="{% url 'bbs:post_delete' post.pk %}" class="btn-action btn-delete"
+            onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+        {% endif %}
+    </div>
+
+    <!-- Comments Section -->
+    <div style="background: #fafdfb; padding: 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+
+
+        <!-- Comment List -->
+        <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
+            {% for comment in post.comments.all %}
+            <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <strong style="color: #333;">{{ comment.author.username }}</strong>
+                    <span style="color: #999; font-size: 0.9em;">{{ comment.created_at|date:"Y.m.d H:i" }}</span>
+                </div>
+                <div style="color: #555; white-space: pre-wrap;">{{ comment.content }}</div>
+                {% if user == comment.author %}
+                <div style="text-align: right; margin-top: 5px;">
+                    <a href="{% url 'bbs:comment_delete' comment.pk %}"
+                        style="color: #e63946; font-size: 0.8em; text-decoration: none;"
+                        onclick="return confirm('댓글을 삭제하시겠습니까?');">삭제</a>
+                </div>
+                {% endif %}
+            </li>
+
+            {% endfor %}
+        </ul>
+
+        <!-- Comment Form -->
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'bbs:comment_create' post.pk %}">
+            {% csrf_token %}
+            <div style="position: relative;">
+                <textarea name="content" class="form-control" rows="2" placeholder="댓글을 남겨주세요"
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; resize: vertical; box-sizing: border-box;"
+                    required></textarea>
+                <button type="submit"
+                    style="position: absolute; bottom: 10px; right: 10px; background: #2d6a4f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em;">등록</button>
+            </div>
+        </form>
+        {% else %}
+        <div style="text-align: center; padding: 20px; background: white; border-radius: 8px; border: 1px dashed #ccc;">
+            <a href="{% url 'user_login' %}?next={{ request.path }}"
+                style="color: #2d6a4f; font-weight: bold; text-decoration: none;">로그인</a> 후 댓글을 작성할 수 있습니다.
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- List Button (Bottom) -->
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{% url 'bbs:post_list' %}" class="btn-action btn-list" style="padding: 10px 40px;">목록</a>
+    </div>
+
+</div>
+
+<style>
+    .btn-action {
+        padding: 8px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.95rem;
+        transition: 0.3s;
+        border: 1px solid transparent;
+    }
+
+    .btn-list {
+        background: #f8f9fa;
+        color: #333;
+        border-color: #ddd;
+    }
+
+    .btn-list:hover {
+        background: #e2e6ea;
+    }
+
+    .btn-edit {
+        background: #52b788;
+        color: white;
+    }
+
+    .btn-edit:hover {
+        background: #40916c;
+    }
+
+    .btn-delete {
+        background: white;
+        color: #e63946;
+        border-color: #e63946;
+    }
+
+    .btn-delete:hover {
+        background: #e63946;
+        color: white;
+    }
+
+    .post-content img {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+{% endblock %}

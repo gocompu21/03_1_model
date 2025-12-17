@@ -1,0 +1,11 @@
+Target Store: 수목병리학
+Normalized Target: '\uc218\ubaa9\ubcd1\ub9ac\ud559'
+Listing files...
+Checking: '\uc218\ubaa9\uc0dd\ub9ac\ud559_\uae30\ubcf8\uc11c.txt' -> Norm: '\uc218\ubaa9\uc0dd\ub9ac\ud559_\uae30\ubcf8\uc11c.txt'
+  NO MATCH
+Checking: '\uc218\ubaa9\ubcd1\ub9ac\ud559_\uae30\ubcf8\uc11c.txt' -> Norm: '\uc218\ubaa9\ubcd1\ub9ac\ud559_\uae30\ubcf8\uc11c.txt'
+  MATCH!
+Checking: '\uc218\ubaa9\ud574\ucda9\ud559_\uae30\ubcf8\uc11c.txt' -> Norm: '\uc218\ubaa9\ud574\ucda9\ud559_\uae30\ubcf8\uc11c.txt'
+  NO MATCH
+Active Files Found: ['files/ui71j943xxhe']
+Current JSON content for 수목병리학: ['files/ui71j943xxhe']

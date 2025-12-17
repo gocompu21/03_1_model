@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 800px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-title {
+        text-align: center;
+        margin-bottom: 30px;
+        color: #333;
+        font-size: 24px;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        display: inline-block;
+    }
+
+    .title-wrapper {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    /* Flexbox Grouping */
+    .row-group {
+        display: flex;
+        gap: 20px;
+    }
+
+    .col {
+        flex: 1;
+        min-width: 0;
+        /* Prevents overflow */
+    }
+
+    /* Target Django default form render */
+    .form-group p {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select,
+    .form-group textarea,
+    .form-group input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    }
+
+    .btn-container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background 0.3s;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #545b62;
+    }
+
+    /* Helper text styling if needed */
+    .helptext {
+        font-size: 0.85em;
+        color: #888;
+        margin-top: 5px;
+        display: block;
+    }
+
+    @media (max-width: 600px) {
+        .row-group {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="form-container">
+    <div class="title-wrapper">
+        <h2 class="form-title">
+            {% if form.instance.pk %}
+            문제 수정
+            {% else %}
+            문제 등록
+            {% endif %}
+        </h2>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group row-group">
+            <div class="col">
+                <label for="{{ form.exam.id_for_label }}">{{ form.exam.label }}</label>
+                {{ form.exam }}
+                {% for error in form.exam.errors %}
+                <div style="color: red; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="col">
+                <label for="{{ form.subject.id_for_label }}">{{ form.subject.label }}</label>
+                {{ form.subject }}
+                {% for error in form.subject.errors %}
+                <div style="color: red; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="col">
+                <label for="{{ form.number.id_for_label }}">{{ form.number.label }}</label>
+                {{ form.number }}
+                {% for error in form.number.errors %}
+                <div style="color: red; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            {% for field in form %}
+            {% if field.name != 'exam' and field.name != 'subject' and field.name != 'number' %}
+            <div style="margin-bottom: 20px;">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <p class="helptext">{{ field.help_text }}</p>
+                {% endif %}
+                {% for error in field.errors %}
+                <div style="color: red; font-size: 0.9em; margin-top: 5px;">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="btn-container">
+            <a href="{% url 'exam:question_list' %}" class="btn btn-secondary">취소</a>
+            <button type="submit" class="btn btn-primary">
+                {% if form.instance.pk %}
+                수정하기
+                {% else %}
+                등록하기
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

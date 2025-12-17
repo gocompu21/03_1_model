@@ -1,0 +1,10 @@
+--- Checking Status for Store: '수목병리학' ---
+Local Store Status: Found. File count: 0
+Files in local store: Empty
+
+--- Triggering Force Sync ---
+Post-Sync Status: Found. File count: 0
+Files: Empty
+
+--- All Cloud Files ---
+No files found in Gemini Cloud.

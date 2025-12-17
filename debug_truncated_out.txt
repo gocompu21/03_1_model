@@ -1,0 +1,10 @@
+--- Checking Specific BBS Post: '토양의 종류' ---
+ID: 12
+Title: [기본서 질의] 토양의 종류
+Content Length: 656
+Content Last 200 chars:  A, E, B, C, R층)의 발달에 미치는 영향 및 다양한 토양생성작용(점토생성, 갈색화, 포드졸화, 염기용탈 등)에 대해 설명합니다.</p>
+</li>
+<li>
+<p><strong>토양물리</strong>: 토양의 3상(고상, 액상, 기상) 구성, 토성(모래, 미사, 점토)의 분류 기준(미국 농무성법)과 결정 방법(촉감법,</p>
+</li>
+</ol>

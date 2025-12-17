@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>나무의사 기출문제 시스템</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        main {
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+    </style>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    {% block header %}
+    <header>
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: bold; font-size: 1.2em;">나무의사 기출문제 System</div>
+            <nav>
+                <a href="{% url 'exam:index' %}">시험보기</a>
+
+                <a href="{% url 'exam:question_list' %}">문제관리</a>
+                <a href="/admin/">관리자</a>
+            </nav>
+        </div>
+    </header>
+    {% endblock %}
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>

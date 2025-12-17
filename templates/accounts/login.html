@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나무의사 로그인</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border-top: 5px solid #2d6a4f;
+        }
+
+        .login-header h1 {
+            color: #1b4332;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .login-header p {
+            color: #40916c;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d6a4f;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d8f3dc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #52b788;
+            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background-color: #1b4332;
+        }
+
+        .error-message {
+            color: #e63946;
+            background-color: #ffe5d9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .signup-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: transparent;
+            color: #2d6a4f;
+            border: 2px solid #2d6a4f;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            text-decoration: none;
+            box-sizing: border-box;
+        }
+
+        .signup-btn:hover {
+            background-color: #2d6a4f;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🌳 나무의사</h1>
+            <p>Green Care for Your Arbor</p>
+        </div>
+
+        <form action="" method="post">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.GET.next }}">
+            <div class="form-group">
+                <label for="username_id">아이디</label>
+                <input id="username_id" type="text" name="username" placeholder="아이디를 입력하세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password_id">비밀번호</label>
+                <input id="password_id" type="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+
+            <button type="submit" class="submit-btn">로그인</button>
+            <a href="{% url 'user_signup' %}" class="signup-btn">회원가입</a>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</body>
+
+</html>

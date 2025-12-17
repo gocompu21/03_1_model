@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Hide default global header (base.html) */
+    body>header {
+        display: none !important;
+    }
+
+    /* Custom Header from main/index.html */
+    .custom-main-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #2d6a4f;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        z-index: 1000;
+    }
+
+    .custom-main-header .logo {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-main-header .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .custom-main-header .nav-links a:hover {
+        color: #b7e4c7;
+    }
+
+    .custom-main-header .nav-links button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        margin-left: 15px;
+    }
+
+    .exam-list-container {
+        margin-top: 100px;
+        /* Spacer for fixed header */
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="custom-main-header">
+    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    <nav class="nav-links">
+
+        {% if user.is_authenticated %}
+        <span style="color: white; margin-right: 10px;">{{ user.username }}님 환영합니다</span>
+        <a href="{% url 'user_profile' %}">마이페이지</a>
+        <form action="{% url 'user_logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">로그아웃</button>
+        </form>
+        {% else %}
+        <a href="{% url 'user_login' %}">로그인</a>
+        <a href="{% url 'user_signup' %}">회원가입</a>
+        {% endif %}
+    </nav>
+</div>
+
+<div class="exam-list-container">
+    <h1>시험 선택</h1>
+</div>
+
+{% for exam in exams %}
+<div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
+    <h2>{{ exam.round_number }}회 기출문제</h2>
+    <form action="{% url 'exam:take' exam.id %}" method="get">
+        <div style="margin-top: 10px;">
+            <label><input type="checkbox" name="all_subjects" checked onchange="toggleSubjects(this)"> 전과목</label>
+            <div style="margin-left: 20px; margin-top: 5px;">
+                {% for subject in subjects %}
+                <label style="margin-right: 10px;">
+                    <input type="checkbox" name="subjects" value="{{ subject.code }}" checked>
+                    {{ subject.name }}
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+        <button type="submit"
+            style="margin-top: 15px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">응시하기</button>
+    </form>
+</div>
+{% endfor %}
+
+<script>
+    function toggleSubjects(totalCheckbox) {
+        const checkboxes = totalCheckbox.parentNode.nextElementSibling.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = totalCheckbox.checked);
+    }
+</script>
+{% endblock %}

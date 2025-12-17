@@ -1,0 +1,757 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>시험 응시</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        /* Layout: Question Flexible, OMR Fixed */
+        .question-panel {
+            flex: 1 1 auto;
+            width: auto;
+            padding: 0px 0px 0px 50px;
+            background: #f8f6e6;
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #questions-container {
+            flex: 1;
+            position: relative;
+            perspective: 2000px;
+            transform-style: preserve-3d;
+            margin-bottom: 0px;
+        }
+
+        .question-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #f8f6e6;
+            backface-visibility: hidden;
+            transform-origin: left center;
+            display: none;
+            padding-right: 50px;
+            box-sizing: border-box;
+        }
+
+        .question-page.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 110px;
+            row-gap: 20px;
+            z-index: 2;
+        }
+
+        .question-page.active::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 0.5px;
+            background-color: black;
+            transform: translateX(-50%);
+        }
+
+        /* Specific placement for 4 items */
+        .question-page .question-item:nth-child(1) {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .question-page .question-item:nth-child(2) {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .question-page .question-item:nth-child(3) {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .question-page .question-item:nth-child(4) {
+            grid-column: 2;
+            grid-row: 2;
+        }
+
+
+        /* Animations - Book Flip */
+        .page-flip-next-leave {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 40px;
+            row-gap: 20px;
+            z-index: 3;
+            animation: flipOutNext 0.8s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+        }
+
+        .page-flip-next-enter {
+            display: block;
+            z-index: 1;
+        }
+
+        .page-flip-prev-enter {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 40px;
+            row-gap: 20px;
+            z-index: 3;
+            animation: flipInPrev 0.8s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+        }
+
+        .page-flip-prev-leave {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            column-gap: 40px;
+            row-gap: 20px;
+            z-index: 1;
+        }
+
+        @keyframes flipOutNext {
+            0% {
+                transform: rotateY(0deg);
+                opacity: 1;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+            }
+
+            100% {
+                transform: rotateY(-120deg);
+                opacity: 0;
+                box-shadow: 20px 0 20px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        @keyframes flipInPrev {
+            0% {
+                transform: rotateY(-120deg);
+                opacity: 0;
+                box-shadow: 20px 0 20px rgba(0, 0, 0, 0.2);
+            }
+
+            100% {
+                transform: rotateY(0deg);
+                opacity: 1;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        .question-item {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .question-content {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            padding-left: 25px;
+            text-indent: -20px;
+        }
+
+        /* Choices styling */
+        .choices div.choice-item {
+            margin-bottom: 6px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            display: block;
+            font-size: 1.0em;
+        }
+
+        .q-mark {
+            display: inline-block;
+            width: auto;
+            height: auto;
+            border: none;
+            border-radius: 0;
+            text-align: center;
+            line-height: 1;
+            font-size: 1.1em;
+            margin-right: 4px;
+            background-color: transparent;
+            color: black;
+            font-weight: normal;
+            flex-shrink: 0;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+        }
+
+        .choice-item.selected-text .q-mark {
+            /* Keep original number style but allow positioning for the checkmark */
+            position: relative;
+            /* Ensure the text remains visible and unchanged */
+            color: black !important;
+            border-color: #333 !important;
+            background-color: transparent !important;
+        }
+
+        .choice-item.selected-text .q-mark::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-35%, -120%) scale(2.5);
+            /* Scale up the check mark */
+            width: 100%;
+            height: 100%;
+            background-image: url("{% static 'exam/images/check_mark_black.png' %}");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            mix-blend-mode: multiply;
+            filter: contrast(1.5) brightness(1.1);
+            /* Wash out gray background */
+            pointer-events: none;
+        }
+
+        /* OMR Styling */
+        .omr-panel h3 {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .omr-panel {
+            width: 200px;
+            min-width: 200px;
+            flex: 0 0 200px;
+            padding: 10px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            border-left: 1px solid #ccc;
+            overflow-y: auto;
+            /* Restore scroll */
+            height: 100%;
+        }
+
+        .omr-card {
+            width: 100%;
+            border: 2px solid #d4879c;
+            display: flex;
+            flex-direction: column;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .omr-header {
+            display: flex;
+            background-color: #f3e6e9;
+            border-bottom: 1px solid #d4879c;
+            font-weight: bold;
+            text-align: center;
+            height: 30px;
+            line-height: 30px;
+            color: #333;
+        }
+
+        .omr-header-num {
+            width: 35px;
+            border-right: 1px solid #d4879c;
+            color: #555;
+        }
+
+        .omr-header-ans {
+            flex: 1;
+            color: #555;
+        }
+
+        .omr-row {
+            display: flex;
+            align-items: stretch;
+            height: 34px;
+            cursor: pointer;
+            background: white;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        .omr-row:nth-child(5n+1) {
+            border-bottom: 1px solid #d4879c;
+        }
+
+        .omr-row:last-child {
+            border-bottom: none;
+        }
+
+        .omr-row:hover {
+            background-color: #fff0f5;
+        }
+
+        .omr-num {
+            width: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px solid #d4879c;
+            font-weight: bold;
+            height: auto;
+            font-size: 0.9em;
+            flex-shrink: 0;
+            background-color: #f3e6e9;
+        }
+
+        .omr-bubbles {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            align-items: center;
+            height: 100%;
+        }
+
+        .omr-bubble {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid #333;
+            text-align: center;
+            line-height: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            background: white;
+            color: #333;
+            margin: 0;
+        }
+
+        .omr-bubble:hover {
+            background: #eee;
+        }
+
+        .omr-bubble.selected {
+            background: black;
+            color: transparent;
+            border-color: black;
+
+            /* Make it look like a hand-drawn filled circle - More irregular */
+            border-radius: 53% 47% 58% 42% / 46% 56% 44% 54%;
+            transform: scale(0.9) rotate(-1deg);
+            box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+            /* Slight depth */
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-bottom: 50px;
+        }
+
+        .pagination-controls {
+            margin-top: auto;
+            padding-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+        }
+
+        .page-btn {
+            padding: 25px 30px;
+            background: transparent;
+            color: #333;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .page-btn:active {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .page-btn:disabled {
+            color: #ccc;
+            background: transparent;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            line-height: 35px;
+            font-weight: bold;
+        }
+
+        .exam-footer {
+            margin-top: auto;
+            padding-top: 10px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-bottom: 10px;
+        }
+    </style>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+
+<body>
+    <form method="post" action="{% url 'exam:submit' exam.id %}" style="display: flex; width: 100%; height: 100%;">
+        {% csrf_token %}
+
+        <!-- Question Panel (Left) -->
+        <div class="question-panel">
+            <h2
+                style="text-align: right; font-size: 1.0em; margin-top: 20px; margin-bottom: 22px; font-weight: normal;">
+                {{exam.round_number}}회 <span id="subject-title"></span></h2>
+            <div id="questions-container">
+                <!-- Javascript will group these into pages -->
+                {% for q in questions %}
+                <div class="question-item" id="q-{{ q.id }}" data-question-index="{{ forloop.counter0 }}"
+                    data-subject="{{ q.subject.name }}">
+                    <div class="question-content">{{ q.number }}. {{ q.content|linebreaksbr }}</div>
+                    {% if q.image %}
+                    <div style="text-align: center; margin-bottom: 20px;"><img src="{{ q.image.url }}"
+                            style="max-width: 100%; border: 1px solid black;"></div>
+                    {% endif %}
+                    <div class="choices">
+                        <div class="choice-item" onclick="selectAnswer('{{ q.id }}', '1')"><span class="q-mark">①</span>
+                            {{ q.choice1 }}</div>
+                        <div class="choice-item" onclick="selectAnswer('{{ q.id }}', '2')"><span class="q-mark">②</span>
+                            {{ q.choice2 }}</div>
+                        <div class="choice-item" onclick="selectAnswer('{{ q.id }}', '3')"><span class="q-mark">③</span>
+                            {{ q.choice3 }}</div>
+                        <div class="choice-item" onclick="selectAnswer('{{ q.id }}', '4')"><span class="q-mark">④</span>
+                            {{ q.choice4 }}</div>
+                        <div class="choice-item" onclick="selectAnswer('{{ q.id }}', '5')"><span class="q-mark">⑤</span>
+                            {{ q.choice5 }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="exam-footer">
+                <div id="footer-info"
+                    style="position: absolute; left: 50%; transform: translateX(-50%); font-weight: bold; font-family: sans-serif; font-size: 1.0em;">
+                </div>
+
+                <div style="margin-left: auto; display: flex; gap: 20px;">
+                    <button type="button" class="page-btn" id="prev-btn" onclick="changePage(-1)" title="이전 장">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <button type="button" class="page-btn" id="next-btn" onclick="changePage(1)" title="다음 장">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="omr-panel">
+            <div class="omr-card">
+                <!-- Sticky Header Area inside Card -->
+                <div
+                    style="position: sticky; top: 0; background: white; z-index: 10; border-bottom: 1px solid #d4879c;">
+                    <h3 style="margin: 10px 0 5px 0; text-align: center;">답안 제출 (OCR)</h3>
+                    <div style="padding: 0 10px 10px 10px;">
+                        <button type="submit" class="submit-btn" style="margin: 0;">제출하기</button>
+                    </div>
+
+                    <!-- Column Header -->
+                    <div class="omr-header" style="border-top: 1px solid #d4879c; border-bottom: none;">
+                        <div class="omr-header-num">문항</div>
+                        <div class="omr-header-ans">답 란</div>
+                    </div>
+                </div>
+
+                <!-- Rows -->
+                {% for q in questions %}
+                <div class="omr-row" id="omr-row-{{ q.id }}" onclick="jumpToQuestion('{{ forloop.counter0 }}')">
+                    <div class="omr-num">{{ q.number }}</div>
+                    <div class="omr-bubbles">
+                        {% for i in "12345" %}
+                        <label class="omr-bubble val-{{ i }}" onclick="event.stopPropagation(); selectBubble(this)">
+                            {{ i }}
+                            <input type="radio" name="question_{{ q.id }}" value="{{ i }}">
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </form>
+
+    <script>
+        const QUESTIONS_PER_PAGE = 4;
+        let currentPage = 1;
+        let totalPages = 1;
+        let questionToPageMap = {};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initPagination();
+        });
+
+        function initPagination() {
+            const container = document.getElementById('questions-container');
+            const items = Array.from(container.children);
+            const totalItems = items.length;
+            if (totalItems === 0) return;
+
+            // Clear container
+            container.innerHTML = '';
+            questionToPageMap = {};
+
+            let pages = [];
+            let currentPageItems = [];
+
+            // defined special question numbers
+            const specialNumbers = [25, 50, 75, 100, 125];
+
+            items.forEach((item, index) => {
+                const contentText = item.querySelector('.question-content').textContent.trim();
+                const match = contentText.match(/^(\d+)\./);
+                const qNum = match ? parseInt(match[1]) : (index + 1);
+
+                if (specialNumbers.includes(qNum)) {
+                    // If current page not empty, push it first
+                    if (currentPageItems.length > 0) {
+                        pages.push(currentPageItems);
+                        currentPageItems = [];
+                    }
+                    // Push special question as a single page
+                    pages.push([item]);
+                } else {
+                    currentPageItems.push(item);
+                    if (currentPageItems.length === QUESTIONS_PER_PAGE) {
+                        pages.push(currentPageItems);
+                        currentPageItems = [];
+                    }
+                }
+            });
+
+            // Add remaining items
+            if (currentPageItems.length > 0) {
+                pages.push(currentPageItems);
+            }
+
+            totalPages = pages.length;
+
+            // Render pages
+            pages.forEach((pageItems, pageIndex) => {
+                const pageNum = pageIndex + 1;
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'question-page';
+                pageDiv.id = 'page-' + pageNum;
+
+                pageItems.forEach(item => {
+                    pageDiv.appendChild(item);
+                    // Map question index to this page
+                    const qIndex = parseInt(item.getAttribute('data-question-index'));
+                    questionToPageMap[qIndex] = pageNum;
+                });
+
+                container.appendChild(pageDiv);
+            });
+
+            doShowPageImmediate(1);
+        }
+
+        let isAnimating = false;
+
+        function showPage(page) {
+            if (page < 1 || page > totalPages) return;
+            if (page === currentPage) return;
+            if (isAnimating) return; // Prevent spamming
+
+            const oldPage = currentPage;
+            const newPageNum = page;
+
+            const oldPageEl = document.getElementById('page-' + oldPage);
+            const newPageEl = document.getElementById('page-' + newPageNum);
+
+            if (!oldPageEl || !newPageEl) {
+                // Fallback for initial load
+                doShowPageImmediate(newPageNum);
+                return;
+            }
+
+            isAnimating = true;
+            const direction = newPageNum > oldPage ? 'next' : 'prev';
+
+            // remove active from all others just in case
+            document.querySelectorAll('.question-page').forEach(p => {
+                if (p !== oldPageEl && p !== newPageEl) p.classList.remove('active');
+            });
+
+            // Set up classes
+            if (direction === 'next') {
+                oldPageEl.classList.add('page-flip-next-leave');
+                oldPageEl.classList.remove('active'); // It is now leaving
+
+                newPageEl.classList.add('active'); // Make visible
+                newPageEl.classList.add('page-flip-next-enter');
+            } else {
+                oldPageEl.classList.add('page-flip-prev-leave');
+                oldPageEl.classList.remove('active');
+
+                newPageEl.classList.add('active');
+                newPageEl.classList.add('page-flip-prev-enter');
+            }
+
+            // Update state immediately for controls
+            currentPage = newPageNum;
+            updateControls();
+            updateSubjectTitle(newPageEl);
+
+            // Clean up after animation
+            setTimeout(() => {
+                oldPageEl.classList.remove('page-flip-next-leave', 'page-flip-prev-leave');
+                newPageEl.classList.remove('page-flip-next-enter', 'page-flip-prev-enter');
+                isAnimating = false;
+                // scroll top of new page
+                newPageEl.scrollTop = 0;
+            }, 800);
+        }
+
+        function doShowPageImmediate(page) {
+            document.querySelectorAll('.question-page').forEach(p => p.classList.remove('active'));
+            const newPage = document.getElementById('page-' + page);
+            if (newPage) {
+                newPage.classList.add('active');
+                updateSubjectTitle(newPage);
+            }
+            currentPage = page;
+            updateControls();
+        }
+
+        function updateSubjectTitle(pageEl) {
+            const firstQuestion = pageEl.querySelector('.question-item');
+            if (firstQuestion) {
+                const subjectName = firstQuestion.getAttribute('data-subject');
+                const titleSpan = document.getElementById('subject-title');
+                if (titleSpan && subjectName) {
+                    titleSpan.textContent = subjectName;
+                }
+            }
+        }
+
+
+        function changePage(delta) {
+            showPage(currentPage + delta);
+        }
+
+        function updateControls() {
+            const footerInfo = document.getElementById('footer-info');
+            if (footerInfo) {
+                // Display format: AType-Total-Current
+                footerInfo.textContent = `A형-${totalPages}-${currentPage}`;
+            }
+            document.getElementById('prev-btn').disabled = (currentPage === 1);
+            document.getElementById('next-btn').disabled = (currentPage === totalPages);
+        }
+
+        function jumpToQuestion(index) {
+            if (index === undefined || index === null) return;
+            const page = questionToPageMap[index];
+            if (page) showPage(page);
+        }
+
+        function highlightQuestionChoice(questionId, choiceVal) {
+            const questionDiv = document.getElementById('q-' + questionId);
+            if (questionDiv) {
+                const choices = questionDiv.querySelectorAll('.choice-item');
+                choices.forEach(c => c.classList.remove('selected-text'));
+                // 1-based index for choiceVal
+                if (choices[choiceVal - 1]) choices[choiceVal - 1].classList.add('selected-text');
+            }
+        }
+
+        function selectBubble(label) {
+            const parent = label.parentNode;
+            const bubbles = parent.querySelectorAll('.omr-bubble');
+            bubbles.forEach(b => b.classList.remove('selected'));
+            label.classList.add('selected');
+
+            // Find radio and check it
+            const radio = label.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+
+                // Sync to question paper
+                const name = radio.name; // question_{{ q.id }}
+                if (name && name.startsWith('question_')) {
+                    const qId = name.split('_')[1];
+                    highlightQuestionChoice(qId, radio.value);
+
+                    // Move to the page where this question is located
+                    const questionDiv = document.getElementById('q-' + qId);
+                    if (questionDiv) {
+                        const qIndex = parseInt(questionDiv.getAttribute('data-question-index'));
+                        jumpToQuestion(qIndex);
+                    }
+                }
+            }
+        }
+
+        function selectAnswer(questionId, choiceVal) {
+            const omrRow = document.getElementById('omr-row-' + questionId);
+            if (omrRow) {
+                const bubble = omrRow.querySelector('.val-' + choiceVal);
+                if (bubble) {
+                    selectBubble(bubble);
+                    // scroll into view
+                    omrRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

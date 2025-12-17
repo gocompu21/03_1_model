@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나무의사 프로필</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .profile-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            border-top: 5px solid #2d6a4f;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #d8f3dc;
+            padding-bottom: 20px;
+        }
+
+        .profile-header h1 {
+            color: #1b4332;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .profile-header p {
+            color: #40916c;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .profile-info {
+            display: grid;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #2d6a4f;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .logout-btn-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .logout-btn {
+            background-color: #e63946;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c1121f;
+        }
+
+        /* Boolean value styling */
+        .status-true {
+            color: #2d6a4f;
+            font-weight: bold;
+        }
+
+        .status-false {
+            color: #999;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="profile-container">
+        <div class="profile-header">
+            <h1>👨‍⚕️ 마이 페이지</h1>
+            <p>{{ user.username }}님의 회원 정보</p>
+        </div>
+
+        <div class="profile-info">
+            <div class="info-item">
+                <span class="info-label">아이디</span>
+                <span class="info-value">{{ user.username }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">이메일</span>
+                <span class="info-value">{{ user.email|default:"-" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">가입일</span>
+                <span class="info-value">{{ user.date_joined|date:"Y/m/d" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">마지막 로그인</span>
+                <span class="info-value">{{ user.last_login|date:"Y/m/d" }} ({{ days_since_login }}일 전)</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">관리자 여부</span>
+                <span class="info-value {% if user.is_staff %}status-true{% else %}status-false{% endif %}">
+                    {% if user.is_staff %}관리자{% else %}일반 사용자{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="logout-btn-container">
+            <form action="{% url 'user_logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">로그아웃</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
