@@ -37,9 +37,7 @@ class App(ctk.CTk):
         self.grid_rowconfigure(0, weight=1)
 
         # Initialize Logic
-        self.default_key = os.environ.get(
-            "GEMINI_API_KEY", "AIzaSyBpL20REVpryxnLIXNfBEnd866e2c41nDk"
-        )
+        self.default_key = os.environ.get("GEMINI_API_KEY", "")
         self.store_manager = GeminiStoreManager(api_key=self.default_key)
         self.current_stores = []
 

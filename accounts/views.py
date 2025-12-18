@@ -53,8 +53,17 @@ def user_profile(request):
 
     # --- Subject Analysis Logic ---
     from django.db.models import Count, Case, When, IntegerField
-    from exam.models import UserQuestionResult
+    from django.core.paginator import Paginator
+    from exam.models import UserQuestionResult, UserExamAttempt
     import json
+
+    # 0. Recent Exam History (Pagination: 15 items)
+    attempts_qs = UserExamAttempt.objects.filter(user=request.user).order_by(
+        "-start_time"
+    )
+    paginator = Paginator(attempts_qs, 15)
+    page_number = request.GET.get("page")
+    recent_attempts = paginator.get_page(page_number)
 
     # 1. Aggregate results by Subject
     # We need to join Question -> Subject
@@ -101,6 +110,45 @@ def user_profile(request):
         "radar_labels": json.dumps(labels),
         "radar_data": json.dumps(data),
         "weakest_subject": weakest_subject,
+        "recent_attempts": recent_attempts,
     }
 
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return render(request, "accounts/profile_history_partial.html", context)
+
     return render(request, "accounts/profile.html", context)
+
+
+@login_required
+def profile_edit(request):
+    if request.method == "POST":
+        # Check if password verification step
+        if "password_check" in request.POST:
+            password = request.POST.get("password")
+            if request.user.check_password(password):
+                # Verify success -> Show edit form
+                request.session["password_verified"] = True
+                return redirect("accounts:profile_edit")
+            else:
+                messages.error(request, "비밀번호가 일치하지 않습니다.")
+
+        # Check if actual profile update step
+        elif "profile_update" in request.POST:
+            if not request.session.get("password_verified"):
+                return redirect("accounts:profile_edit")
+
+            user = request.user
+            user.email = request.POST.get("email")
+            user.first_name = request.POST.get("first_name")
+            user.save()
+
+            messages.success(request, "회원정보가 수정되었습니다.")
+            # Clear verification status
+            del request.session["password_verified"]
+            return redirect("accounts:user_profile")
+
+    # GET Request
+    if request.session.get("password_verified"):
+        return render(request, "accounts/profile_edit.html", {"step": "edit"})
+    else:
+        return render(request, "accounts/profile_edit.html", {"step": "password"})

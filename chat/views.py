@@ -35,7 +35,7 @@ def index(request):
             try:
                 genai.configure(api_key=settings.GEMINI_API_KEY)
                 model = genai.GenerativeModel(
-                    "gemini-2.5-flash"
+                    "gemini-3-flash"
                 )  # Keeping the successful model
                 response = model.generate_content(user_input)
 
@@ -112,7 +112,7 @@ def chat_api(request):
 
         try:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-2.5-flash")
+            model = genai.GenerativeModel("gemini-3-flash-preview")
             response = model.generate_content(user_input)
 
             # Convert Markdown to HTML

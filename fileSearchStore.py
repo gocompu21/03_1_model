@@ -97,18 +97,27 @@ class GeminiStoreManager:
                 "수목병리학": ["수목병리학"],
                 "수목해충학": ["수목해충학"],
                 "산림토양학": ["산림토양학", "토양학"],
-                "수목관리학": ["수목관리학", "조경수", "식재관리"],
+                "수목관리학": ["수목관리학", "조경수", "식재관리", "농약학"],
             }
 
+            print(f"DEBUG: Found {len(cloud_files)} cloud files.")
             for subject, keywords in subject_mappings.items():
                 new_stores[subject] = []
 
                 for f in cloud_files:
                     if f["state"] == "ACTIVE":
                         norm_name = unicodedata.normalize("NFC", f["display_name"])
+
+                        # Special Debug for target subject
+                        if subject == "수목해충학":
+                            print(
+                                f"DEBUG: Checking '{norm_name}' against keywords {keywords}"
+                            )
+
                         # Check if ANY keyword matches
                         if any(k in norm_name for k in keywords):
                             new_stores[subject].append(f["name"])
+                            print(f"DEBUG: Mapped '{norm_name}' to '{subject}'")
 
             # Apply update
             self.stores = new_stores
@@ -220,41 +229,32 @@ class GeminiStoreManager:
             if not files:
                 return "No valid (ACTIVE) files found in this store."
 
+            # "gemini-2.5-flash","gemini-3-flash-preview" 이 모델이 정상적으로 된다.
+
+            # Switch to gemini-2.5-flash (Requested by user)
             model = genai.GenerativeModel(
-                "gemini-2.5-flash", system_instruction=SYSTEM_INSTRUCTION
+                "gemini-3-flash-preview", system_instruction=SYSTEM_INSTRUCTION
             )
 
-            # Explicitly structure the content parts for clarity
-            # Some model versions are strict about list structure [File, ..., Text]
-            content_parts = list(files)
+            # CRITICAL FIX: The large PDF has been deleted.
+            # We can now use all files in the store (should just be the text file now).
+
+            content_parts = []
+            for i, f in enumerate(files):
+                # Manually construct the part using the correct 'file_data' key
+                content_parts.append(
+                    {"file_data": {"mime_type": f.mime_type, "file_uri": f.uri}}
+                )
             content_parts.append(query_text)
 
-            # Disable safety settings to prevent false positives on quiz content
-            safety_settings = [
-                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-                {
-                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                    "threshold": "BLOCK_NONE",
-                },
-                {
-                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                    "threshold": "BLOCK_NONE",
-                },
-            ]
-
-            # Configure generation options
-            generation_config = genai.GenerationConfig(
-                max_output_tokens=8192,
-                temperature=0.7,
-            )
-
-            response = model.generate_content(
-                content_parts,
-                safety_settings=safety_settings,
-                generation_config=generation_config,
-            )
+            # Simplify request: Remove safety settings and config to isolate error
+            response = model.generate_content(content_parts)
             return response.text
         except Exception as e:
-            logging.error(f"Query Error: {e}")
+            logging.error(f"DEBUG: Query Error: {e}")
+            if hasattr(e, "response"):
+                logging.error(f"DEBUG: API Feedback: {e.response}")
+            import traceback
+
+            logging.error(traceback.format_exc())
             return f"Error querying: {e}"

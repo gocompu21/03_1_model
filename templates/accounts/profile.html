@@ -10,164 +10,426 @@
             margin: 0;
             padding: 0;
             font-family: 'Noto Sans KR', sans-serif;
-            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80');
-            background-size: cover;
-            background-position: center;
-            height: 100vh;
+            background-color: #f0f7f4;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
+            /* Changed to column for Header + Body */
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .profile-container {
-            background-color: rgba(255, 255, 255, 0.95);
+        /* --- Header Styles (Copied from index.html) --- */
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex: 0 0 auto;
+            /* Header doesn't shrink/grow */
+            z-index: 10;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #b7e4c7;
+        }
+
+        /* --- Layout Container for Sidebar + Content --- */
+        .app-container {
+            display: flex;
+            flex: 1;
+            /* Take remaining height */
+            overflow: hidden;
+            /* Prevent body scroll, handle inside vars */
+        }
+
+        /* --- Sidebar Styles --- */
+        .sidebar {
+            width: 250px;
+            background-color: #1b4332;
+            /* Slightly darker to distinguish from header */
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.2rem;
+            /* Adjusted size */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 20px;
+            margin-top: 0;
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 1rem;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background-color: #40916c;
+            color: white;
+            font-weight: bold;
+        }
+
+        .back-home {
+            margin-top: auto;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Main Content Styles --- */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .content-section {
+            display: none;
+            background: white;
             padding: 40px;
             border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 500px;
-            border-top: 5px solid #2d6a4f;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .profile-header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #d8f3dc;
-            padding-bottom: 20px;
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
-        .profile-header h1 {
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
             color: #1b4332;
-            margin: 0;
-            font-size: 1.8rem;
+            margin-bottom: 30px;
+            border-left: 5px solid #2d6a4f;
+            padding-left: 15px;
         }
 
-        .profile-header p {
-            color: #40916c;
-            margin-top: 5px;
-            font-size: 0.9rem;
+        /* Info Table Styles */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
         }
 
-        .profile-info {
-            display: grid;
-            gap: 15px;
+        .info-table th,
+        .info-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
             text-align: left;
         }
 
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .info-label {
-            font-weight: bold;
+        .info-table th {
+            width: 150px;
             color: #2d6a4f;
+            font-weight: bold;
+            background-color: #f8f9fa;
         }
 
-        .info-value {
-            color: #333;
+        /* History Table Styles */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
         }
 
-        .logout-btn-container {
-            margin-top: 30px;
+        .history-table th,
+        .history-table td {
+            padding: 8px 10px;
+            /* Compact Padding */
             text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95rem;
+            /* Slightly smaller text */
         }
 
-        .logout-btn {
+        .history-table th {
+            background-color: #f1f8f5;
+            color: #2d6a4f;
+            font-weight: bold;
+        }
+
+        .pass-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            /* Compact badge */
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            list-style: none;
+            padding: 0;
+            gap: 5px;
+        }
+
+        .pagination a {
+            text-decoration: none;
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            color: #333;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .pagination a.active {
+            background-color: #2d6a4f;
+            color: white;
+            border-color: #2d6a4f;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #eee;
+        }
+
+        .pass-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .pass {
+            background-color: #40916c;
+        }
+
+        .fail {
+            background-color: #e63946;
+        }
+
+
+        .btn {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #2d6a4f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b4332;
+        }
+
+        .btn-danger {
             background-color: #e63946;
             color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
         }
 
-        .logout-btn:hover {
+        .btn-danger:hover {
             background-color: #c1121f;
         }
 
-        /* Boolean value styling */
-        .status-true {
-            color: #2d6a4f;
-            font-weight: bold;
-        }
-
-        .status-false {
-            color: #999;
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
         }
     </style>
 </head>
 
 <body>
-    <div class="profile-container">
-        <div class="profile-header">
-            <h1>👨‍⚕️ 마이 페이지</h1>
-            <p>{{ user.username }}님의 회원 정보</p>
-        </div>
-
-        <div class="profile-info">
-            <div class="info-item">
-                <span class="info-label">아이디</span>
-                <span class="info-value">{{ user.username }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">이메일</span>
-                <span class="info-value">{{ user.email|default:"-" }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">가입일</span>
-                <span class="info-value">{{ user.date_joined|date:"Y/m/d" }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">마지막 로그인</span>
-                <span class="info-value">{{ user.last_login|date:"Y/m/d" }} ({{ days_since_login }}일 전)</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">관리자 여부</span>
-                <span class="info-value {% if user.is_staff %}status-true{% else %}status-false{% endif %}">
-                    {% if user.is_staff %}관리자{% else %}일반 사용자{% endif %}
-                </span>
-            </div>
-        </div>
-
-        <div class="logout-btn-container">
-            <form action="{% url 'user_logout' %}" method="post">
+    <!-- Header (Copied from index.html) -->
+    <header>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <nav class="nav-links">
+            {% if user.is_authenticated %}
+            <span>{{ user.username }}님 환영합니다</span>
+            <a href="{% url 'accounts:user_profile' %}">마이페이지</a>
+            <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="logout-btn">로그아웃</button>
+                <button type="submit"
+                    style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
             </form>
+            {% else %}
+            <a href="{% url 'accounts:user_login' %}">로그인</a>
+            <a href="{% url 'accounts:user_signup' %}">회원가입</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <!-- App Container (Sidebar + Content) -->
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 style="margin-top: 10px;">관리 메뉴</h2>
+
+            <div class="menu-item active" onclick="showSection('info')">
+                👤 회원 정보
+            </div>
+            <div class="menu-item" onclick="showSection('history')">
+                📝 모의고사 기록
+            </div>
+            <div class="menu-item" onclick="showSection('analysis')">
+                📊 과목별 실력분석
+            </div>
+
+            <a href="{% url 'main:index' %}" class="menu-item back-home">
+                🏠 홈으로
+            </a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- Section 1: Member Info -->
+            <div id="info-section" class="content-section active">
+                <h1>회원 정보</h1>
+                <table class="info-table">
+                    <tr>
+                        <th>아이디</th>
+                        <td>{{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>이메일</th>
+                        <td>{{ user.email|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th>이름</th>
+                        <td>{{ user.first_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <th>가입일</th>
+                        <td>{{ user.date_joined|date:"Y/m/d" }}</td>
+                    </tr>
+                    <tr>
+                        <th>마지막 로그인</th>
+                        <td>{{ user.last_login|date:"Y/m/d" }} ({{ days_since_login }}일 전)</td>
+                    </tr>
+                </table>
+
+                <div style="display: flex; justify-content: space-between;">
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-primary">비밀번호 확인 후 수정</a>
+                </div>
+            </div>
+
+            <!-- Section 2: Exam History (New) -->
+            <div id="history-section" class="content-section">
+                <h1>나의 모의고사 기록</h1>
+
+                <div id="history-list-container">
+                    {% include 'accounts/profile_history_partial.html' %}
+                </div>
+            </div>
+
+            <!-- Section 3: Analysis -->
+            <div id="analysis-section" class="content-section">
+                <h1>과목별 실력 분석</h1>
+
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+
+                {% if weakest_subject and weakest_subject != "아직 학습 데이터가 충분하지 않습니다." %}
+                <div
+                    style="margin-top: 30px; padding: 20px; background-color: #fff5f5; border-left: 5px solid #ff6b6b; border-radius: 8px;">
+                    <h3 style="margin: 0 0 10px 0; color: #c92a2a;">🔥 집중 케어 필요</h3>
+                    <p style="margin: 0; color: #495057;">
+                        현재 <strong>{{ weakest_subject }}</strong> 과목의 정답률이 가장 낮습니다.<br>
+                        해당 과목의 기출문제를 집중적으로 풀어보시는 것을 권장합니다.
+                    </p>
+                </div>
+                {% elif weakest_subject %}
+                <div style="margin-top: 50px; text-align: center; color: #868e96;">
+                    <p>{{ weakest_subject }}</p>
+                    <a href="{% url 'exam:index' %}" class="btn btn-primary" style="margin-top:10px;">기출문제 풀러가기</a>
+                </div>
+                {% endif %}
+            </div>
+
         </div>
     </div>
-    <!-- Analysis Section -->
-    <div class="profile-container" style="margin-top: 30px;">
-        <div class="profile-header">
-            <h3>📊 과목별 실력 분석</h3>
-        </div>
 
-        <div style="position: relative; height:300px; width:100%">
-            <canvas id="radarChart"></canvas>
-        </div>
-
-        {% if weakest_subject and weakest_subject != "아직 학습 데이터가 충분하지 않습니다." %}
-        <div
-            style="margin-top: 20px; padding: 15px; background-color: #ffe5e5; border-left: 5px solid #e03131; border-radius: 5px;">
-            <strong style="color: #c92a2a;">🔥 집중 케어 필요:</strong>
-            <span style="color: #333;">{{ weakest_subject }} 과목의 보충 학습이 권장됩니다.</span>
-        </div>
-        {% elif weakest_subject %}
-        <div style="margin-top: 20px; text-align: center; color: #666;">
-            {{ weakest_subject }}
-        </div>
-        {% endif %}
-    </div>
-
-    <!-- Chart.js CDN -->
+    <!-- Script for Tab Switching & Chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Tab Switching Logic
+        function showSection(sectionId) {
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+
+            if (sectionId === 'info') {
+                document.querySelectorAll('.menu-item')[0].classList.add('active');
+                document.getElementById('info-section').classList.add('active');
+            } else if (sectionId === 'history') {
+                document.querySelectorAll('.menu-item')[1].classList.add('active');
+                document.getElementById('history-section').classList.add('active');
+            } else {
+                document.querySelectorAll('.menu-item')[2].classList.add('active');
+                document.getElementById('analysis-section').classList.add('active');
+            }
+        }
+
+        // Initialize Chart & Tab Persistence
         document.addEventListener("DOMContentLoaded", function () {
+            // Check URL param for tab
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTab = urlParams.get('tab') || 'info'; // Default to info
+
+            showSection(activeTab);
+
             const ctx = document.getElementById('radarChart').getContext('2d');
             const labels = JSON.parse('{{ radar_labels|safe }}');
             const data = JSON.parse('{{ radar_data|safe }}');
@@ -180,8 +442,8 @@
                         label: '정답률 (%)',
                         data: data,
                         fill: true,
-                        backgroundColor: 'rgba(64, 145, 108, 0.2)',
-                        borderColor: 'rgba(64, 145, 108, 1)',
+                        backgroundColor: 'rgba(45, 106, 79, 0.2)',
+                        borderColor: 'rgba(45, 106, 79, 1)',
                         pointBackgroundColor: 'rgba(45, 106, 79, 1)',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
@@ -193,21 +455,37 @@
                     maintainAspectRatio: false,
                     scales: {
                         r: {
-                            angleLines: {
-                                display: true
-                            },
+                            angleLines: { display: true },
                             suggestedMin: 0,
                             suggestedMax: 100,
-                            ticks: {
-                                stepSize: 20
-                            }
+                            ticks: { stepSize: 20, backdropColor: 'transparent' }
                         }
                     },
                     plugins: {
-                        legend: {
-                            display: false
-                        }
+                        legend: { display: false }
                     }
+                }
+            });
+
+            // --- AJAX Pagination Logic ---
+            const historyContainer = document.getElementById('history-list-container');
+
+            historyContainer.addEventListener('click', function (e) {
+                if (e.target.tagName === 'A' && e.target.classList.contains('ajax-link')) {
+                    e.preventDefault();
+                    const url = e.target.href;
+
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.text())
+                        .then(html => {
+                            historyContainer.innerHTML = html;
+                            // Optional: Scroll to top of table if needed, or stay put (requested by user)
+                        })
+                        .catch(error => console.error('Error:', error));
                 }
             });
         });
