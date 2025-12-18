@@ -146,17 +146,20 @@ def api_ask(request):
 
             # Auto-create BBS Post
             try:
-                from bbs.models import Post
+                from bbs.models import Post, PostType
 
                 # Format content for Wysiwyg (Summernote)
                 bbs_content = f'<p><span style="font-weight: bold; font-size: 1.2em; color: #2d6a4f;">[기본서 내용]</span></p>{html_content}'
 
+                post_type, _ = PostType.objects.get_or_create(name="기본서")
+
                 Post.objects.create(
                     author=request.user,
-                    title=f"[기본서 질의] {user_input}"[
+                    title=f"[기본서] {user_input}"[
                         :200
-                    ],  # Prepend prefix and truncate
+                    ],  # Keep prefix for legacy consistent reading? Or remove? User didn't say to remove prefix.
                     content=bbs_content,  # Save formatted HTML
+                    type=post_type,
                 )
             except Exception as e:
                 print(f"DEBUG: Failed to auto-create BBS post: {e}")

@@ -67,7 +67,10 @@
         <h1 style="font-size: 1.2rem; color: #333; margin-bottom: 15px;">{{ post.title }}</h1>
         <div style="display: flex; justify-content: space-between; color: #666; font-size: 0.95rem;">
             <div>
-                <span style="font-weight: bold; color: #2d6a4f;">{{ post.author.username }}</span>
+                <span style="font-weight: bold; color: #2d6a4f;">
+                    {% if post.author.last_name %}{{ post.author.last_name }}{{ post.author.first_name }}{% else %}
+                    {{post.author.username }}{% endif %}
+                </span>
                 <span style="margin: 0 10px;">|</span>
                 <span>{{ post.created_at|date:"Y.m.d H:i" }}</span>
             </div>
@@ -101,7 +104,10 @@
             {% for comment in post.comments.all %}
             <li style="border-bottom: 1px solid #eee; padding: 10px 0;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                    <strong style="color: #333;">{{ comment.author.username }}</strong>
+                    <strong style="color: #333;">
+                        {% if comment.author.last_name %}{{ comment.author.last_name }}{{ comment.author.first_name }}{%
+                        else %}{{ comment.author.username }}{% endif %}
+                    </strong>
                     <span style="color: #999; font-size: 0.9em;">{{ comment.created_at|date:"Y.m.d H:i" }}</span>
                 </div>
                 <div style="color: #555; white-space: pre-wrap;">{{ comment.content }}</div>

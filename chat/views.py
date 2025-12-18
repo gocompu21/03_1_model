@@ -61,13 +61,16 @@ def index(request):
 
             # Auto-create BBS Post (Tree Doctor)
             try:
-                from bbs.models import Post
+                from bbs.models import Post, PostType
                 import os
+
+                post_type, _ = PostType.objects.get_or_create(name="주치의 질의")
 
                 p = Post.objects.create(
                     author=request.user,
                     title=f"[나무주치의] {user_input}"[:200],
                     content=str(response_text),
+                    type=post_type,
                 )
                 with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
                     f.write(f"Success (Index): Created Post {p.id}\n")
@@ -137,13 +140,16 @@ def chat_api(request):
 
         # Auto-create BBS Post (Tree Doctor)
         try:
-            from bbs.models import Post
+            from bbs.models import Post, PostType
             import os
+
+            post_type, _ = PostType.objects.get_or_create(name="주치의")
 
             p = Post.objects.create(
                 author=request.user,
-                title=f"[나무주치의] {user_input}"[:200],
+                title=f"[주치의] {user_input}"[:200],
                 content=str(response_text),
+                type=post_type,
             )
             with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
                 f.write(f"Success: Created Post {p.id}\n")

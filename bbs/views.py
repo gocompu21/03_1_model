@@ -9,8 +9,16 @@ from .forms import PostForm, CommentForm
 def post_list(request):
     query = request.GET.get("q", "")
     page_number = request.GET.get("page", 1)
+    category = request.GET.get("category", "ALL")
 
     posts = Post.objects.all().order_by("-created_at")
+
+    if category == "BOOK":
+        posts = posts.filter(type__name="기본서")
+    elif category == "DOCTOR":
+        posts = posts.filter(type__name="주치의")
+    elif category == "GENERAL":
+        posts = posts.filter(type__name="일반 질의")
 
     if query:
         posts = posts.filter(
@@ -22,7 +30,11 @@ def post_list(request):
     paginator = Paginator(posts, 15)
     page_obj = paginator.get_page(page_number)
 
-    return render(request, "bbs/post_list.html", {"page_obj": page_obj, "query": query})
+    return render(
+        request,
+        "bbs/post_list.html",
+        {"page_obj": page_obj, "query": query, "category": category},
+    )
 
 
 def post_detail(request, pk):

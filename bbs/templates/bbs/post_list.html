@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load bbs_extras %}
 
 {% block header %}
 <style>
@@ -57,89 +58,119 @@
         {% endif %}
     </nav>
 </header>
+
 {% endblock %}
 
 {% block content %}
-<div class="bbs-container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
+<div class="bbs-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 40px 10px; display: flex; gap: 15px;">
 
-
-
-    <!-- Search & Write Button -->
-    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-        <form method="get" action="" style="display: flex; gap: 5px;">
-            <input type="text" name="q" value="{{ query }}" placeholder="검색어를 입력하세요"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 250px;">
-            <button type="submit" class="btn-search">검색</button>
+    <!-- Sidebar -->
+    <aside class="sidebar" style="width: 140px; flex-shrink: 0;">
+        <!-- Search Form -->
+        <form method="get" action="" style="display: flex; gap: 5px; margin-bottom: 20px;">
+            <input type="text" name="q" value="{{ query }}" placeholder="검색"
+                style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; box-sizing: border-box; flex: 1;">
+            <button type="submit" class="btn-search"
+                style="padding: 0 15px; display: flex; align-items: center; justify-content: center;">🔍</button>
         </form>
+        <ul style="list-style: none; padding: 0;">
+            <li><a href="?category=ALL" class="sidebar-link {% if category == 'ALL' %}active{% endif %}">전체</a></li>
+            <li><a href="?category=BOOK" class="sidebar-link {% if category == 'BOOK' %}active{% endif %}">기본서</a>
+            </li>
+            <li><a href="?category=DOCTOR" class="sidebar-link {% if category == 'DOCTOR' %}active{% endif %}">주치의</a>
+            </li>
+            <li><a href="?category=GENERAL" class="sidebar-link {% if category == 'GENERAL' %}active{% endif %}">일반
+                    질의</a></li>
+        </ul>
+    </aside>
 
-        <div style="flex: 1; text-align: right;">
-            {% if user.is_authenticated %}
-            <a href="{% url 'bbs:post_create' %}" class="btn-write">✏️ 글쓰기</a>
-            {% endif %}
+    <!-- Main Content -->
+    <div class="bbs-content" style="flex: 1;">
+
+
+
+
+
+        <!-- List Table -->
+        <div class="table-container"
+            style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid #e0e0e0;">
+            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                <thead>
+                    <tr style="background-color: #f0f7f4; border-bottom: 2px solid #2d6a4f;">
+                        <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 50px;">번호</th>
+                        <th style="padding: 10px 2px; text-align: left; color: #2d6a4f;">제목</th>
+                        <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 80px;">작성자</th>
+                        <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 90px;">작성일</th>
+                        <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 50px;">조회</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in page_obj %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 6px 2px; text-align: center; color: #888;">{{ post.pk }}</td>
+                        <td style="padding: 6px 2px;">
+                            <a href="{% url 'bbs:post_detail' post.pk %}"
+                                style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ post.title|highlight_prefix }}
+                                {% if post.comments.count > 0 %}
+                                <span
+                                    style="color: #e63946; font-size: 0.9em; font-weight: normal;">[{{post.comments.count
+                                    }}]</span>
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td style="padding: 6px 2px; text-align: center; color: #555;">
+                            {% if post.author.first_name %}{{ post.author.first_name }}
+                            {% else%}{{ post.author.username }}{% endif %}
+                        </td>
+                        <td style="padding: 6px 2px; text-align: center; color: #888; font-size: 0.9em;">
+                            {{post.created_at|date:"Y/m/d" }}
+                        </td>
+
+                        <td style="padding: 6px 2px; text-align: center; color: #888;">{{ post.hits }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 40px; text-align: center; color: #888;">등록된 게시글이 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+
+        <!-- Pagination -->
+        <!-- Pagination & Write Button -->
+        <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
+            <div></div> <!-- Spacer -->
+
+            <div style="text-align: center;">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&category={{ category }}"
+                    class="pagination-link">&laquo; 이전</a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="pagination-link active">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                    href="?page={{ num }}&q={{ query }}&category={{ category }}" class="pagination-link">{{ num }}</a>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&category={{ category }}"
+                        class="pagination-link">다음 &raquo;</a>
+                    {% endif %}
+            </div>
+
+            <div style="text-align: right;">
+                {% if user.is_authenticated %}
+                <a href="{% url 'bbs:post_create' %}" class="btn-write">✏️ 글쓰기</a>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
-
-    <!-- List Table -->
-    <div class="table-container"
-        style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid #e0e0e0;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background-color: #f0f7f4; border-bottom: 2px solid #2d6a4f;">
-                    <th style="padding: 10px 4px; text-align: center; color: #2d6a4f; width: 60px;">번호</th>
-                    <th style="padding: 10px 4px; text-align: left; color: #2d6a4f;">제목</th>
-                    <th style="padding: 10px 4px; text-align: center; color: #2d6a4f; width: 100px;">작성자</th>
-                    <th style="padding: 10px 4px; text-align: center; color: #2d6a4f; width: 100px;">작성일</th>
-                    <th style="padding: 10px 4px; text-align: center; color: #2d6a4f; width: 60px;">조회</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for post in page_obj %}
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding: 6px 4px; text-align: center; color: #888;">{{ post.pk }}</td>
-                    <td style="padding: 6px 4px;">
-                        <a href="{% url 'bbs:post_detail' post.pk %}"
-                            style="text-decoration: none; color: #333; display: block;">
-                            {{ post.title }}
-                            {% if post.comments.count > 0 %}
-                            <span style="color: #e63946; font-size: 0.9em;">[{{ post.comments.count }}]</span>
-                            {% endif %}
-                        </a>
-                    </td>
-                    <td style="padding: 6px 4px; text-align: center; color: #555;">{{ post.author.username }}</td>
-                    <td style="padding: 6px 4px; text-align: center; color: #888; font-size: 0.9em;">
-                        {{post.created_at|date:"Y/m/d" }}
-                    </td>
-
-                    <td style="padding: 6px 4px; text-align: center; color: #888;">{{ post.hits }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="padding: 40px; text-align: center; color: #888;">등록된 게시글이 없습니다.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div style="margin-top: 30px; text-align: center;">
-        {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}" class="pagination-link">&laquo; 이전</a>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-        <span class="pagination-link active">{{ num }}</span>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
-            href="?page={{ num }}&q={{ query }}" class="pagination-link">{{ num }}</a>
-            {% endif %}
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&q={{ query }}" class="pagination-link">다음 &raquo;</a>
-            {% endif %}
-    </div>
-
 </div>
 
 <style>
@@ -198,6 +229,33 @@
     /* Rows hover */
     tbody tr:hover {
         background-color: #fafdfb;
+    }
+
+    /* Sidebar Styles */
+    .sidebar-link {
+        display: block;
+        padding: 8px 10px;
+        color: #555;
+        text-decoration: none;
+        border-radius: 6px;
+        margin-bottom: 2px;
+        transition: all 0.2s;
+        font-weight: 500;
+        border: 1px solid transparent;
+        /* Prevent layout shift */
+    }
+
+    .sidebar-link:hover {
+        background-color: #f0f7f4;
+        color: #2d6a4f;
+        border-color: #d8eadd;
+    }
+
+    .sidebar-link.active {
+        background-color: #2d6a4f;
+        color: white;
+        font-weight: bold;
+        box-shadow: 0 2px 5px rgba(45, 106, 79, 0.2);
     }
 </style>
 {% endblock %}
