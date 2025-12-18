@@ -67,12 +67,11 @@
     <nav class="nav-links">
 
         {% if user.is_authenticated %}
-        <span>{{ user.username }}님 환영합니다</span>
+        <span style="color: white; margin-right: 10px;">{{ user.username }}님 환영합니다</span>
         <a href="{% url 'accounts:user_profile' %}">마이페이지</a>
         <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
             {% csrf_token %}
-            <button type="submit"
-                style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
+            <button type="submit">로그아웃</button>
         </form>
         {% else %}
         <a href="{% url 'accounts:user_login' %}">로그인</a>
