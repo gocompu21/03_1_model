@@ -413,7 +413,7 @@
 
                 {% if response_text %}
                 <div class="message ai-message">
-                    <strong>나무주치의 답변:</strong><br>
+                    <strong>기본서 내용:</strong><br>
                     {{ response_text|safe }}
                 </div>
                 {% elif user_input and not selected_history %}
@@ -512,7 +512,7 @@
                     displayHtml = text.replace(/\n/g, '<br>');
                 }
 
-                msgDiv.innerHTML = `<strong>${role === 'user' ? '질문' : '나무주치의 답변'}:</strong><br>${displayHtml}`;
+                msgDiv.innerHTML = `<strong>${role === 'user' ? '질문' : '기본서 내용'}:</strong><br>${displayHtml}`;
                 chatBox.appendChild(msgDiv);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
