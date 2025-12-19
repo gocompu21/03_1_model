@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import render
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -140,9 +140,26 @@ def profile_edit(request):
             user = request.user
             user.email = request.POST.get("email")
             user.first_name = request.POST.get("first_name")
+
+            # Password Change Logic
+            current_password = request.POST.get("current_password")
+            new_password = request.POST.get("new_password")
+            new_password_confirm = request.POST.get("new_password_confirm")
+
+            if new_password:
+                if not user.check_password(current_password):
+                    messages.error(
+                        request,
+                        "현재 비밀번호가 일치하지 않아 비밀번호를 변경할 수 없습니다.",
+                    )
+                elif new_password != new_password_confirm:
+                    messages.error(request, "새 비밀번호가 일치하지 않습니다.")
+                else:
+                    user.set_password(new_password)
+                    update_session_auth_hash(request, user)  # Important! Keep logged in
+
             user.save()
 
-            messages.success(request, "회원정보가 수정되었습니다.")
             # Clear verification status
             del request.session["password_verified"]
             return redirect("accounts:user_profile")
@@ -152,3 +169,54 @@ def profile_edit(request):
         return render(request, "accounts/profile_edit.html", {"step": "edit"})
     else:
         return render(request, "accounts/profile_edit.html", {"step": "password"})
+
+
+def password_reset_request(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+
+        try:
+            user = User.objects.get(first_name=name, email=email)
+
+            # Generate random 8-char password
+            import random
+            import string
+
+            length = 8
+            chars = string.ascii_letters + string.digits
+            new_password = "".join(random.choice(chars) for _ in range(length))
+
+            # Set password
+            user.set_password(new_password)
+            user.save()
+
+            # Send Email
+            from django.core.mail import send_mail
+
+            subject = "[나무의사] 비밀번호가 초기화되었습니다."
+            message = (
+                f"안녕하세요, {user.first_name}님.\n\n"
+                f"요청하신 비밀번호 초기화가 완료되었습니다.\n"
+                f"--------------------------------\n"
+                f"아이디: {user.username}\n"
+                f"임시 비밀번호: {new_password}\n"
+                f"--------------------------------\n\n"
+                f"로그인 후 반드시 비밀번호를 변경해 주세요."
+            )
+
+            send_mail(
+                subject,
+                message,
+                "admin@namudoctor.com",  # From email
+                [user.email],
+                fail_silently=False,
+            )
+
+            messages.success(request, "입력하신 이메일로 임시 비밀번호를 전송했습니다.")
+            return redirect("accounts:user_login")
+
+        except User.DoesNotExist:
+            messages.error(request, "일치하는 회원 정보를 찾을 수 없습니다.")
+
+    return render(request, "accounts/password_reset.html")

@@ -115,6 +115,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
+# Email Backend (SMTP for Real Sending)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "gocompu21@gmail.com"
+EMAIL_HOST_PASSWORD = "mubv opng wibe mnan"
+
+
 LANGUAGE_CODE = "ko-kr"
 
 TIME_ZONE = "Asia/Seoul"

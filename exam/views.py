@@ -77,8 +77,21 @@ def exam_result(request, attempt_id):
     results = UserQuestionResult.objects.filter(attempt=attempt).select_related(
         "question"
     )
+    total_attempted = results.count()
+    if total_attempted > 0:
+        score_100 = (attempt.total_score / total_attempted) * 100
+    else:
+        score_100 = 0
+
     return render(
-        request, "exam/exam_result.html", {"attempt": attempt, "results": results}
+        request,
+        "exam/exam_result.html",
+        {
+            "attempt": attempt,
+            "results": results,
+            "score_100": score_100,
+            "total_attempted": total_attempted,
+        },
     )
 
 

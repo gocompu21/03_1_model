@@ -193,7 +193,7 @@
         <!-- Card 2: Community/Blog -->
         <div class="card">
             <div class="icon">📝</div>
-            <h3>기출 모의고사</h3>
+            <h3>기출 고사</h3>
             <p>최신 기출 경향을 반영한 문제로<br>실력을 점검해보세요.</p>
             <a href="{% url 'exam:index' %}" class="btn">문제 풀러 가기</a>
         </div>
@@ -220,19 +220,9 @@
             <div class="icon">👩‍👦</div>
             <h3>같이 공부해요</h3>
             <p>지식나눔과 소통의 공간</p>
-            <a href="{% url 'bbs:post_list' %}" class="btn">게시판 입장</a>
+            <a href="{% url 'bbs:post_list' %}" class="btn">참여하기</a>
         </div>
-        <!-- Card 6: Knowledge Repository (New) -->
-        <div class="card">
-            <div class="icon">📊</div>
-            <h3>나의 학습 현황</h3>
-            <p>지금까지의 학습 기록을 확인하고<br>취약점을 분석하세요.</p>
-            {% if user.is_authenticated %}
-            <a href="{% url 'accounts:user_profile' %}" class="btn btn-outline">내 정보 보기</a>
-            {% else %}
-            <a href="{% url 'accounts:user_login' %}" class="btn btn-outline">로그인 후 확인</a>
-            {% endif %}
-        </div>
+
     </div>
 </body>
 

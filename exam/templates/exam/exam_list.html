@@ -1,8 +1,16 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <style>
-    /* Hide default global header (base.html) */
+    /* Global matching exam styling */
+    body {
+        background-color: #f8f6e6;
+        /* Soft beige background */
+        font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    /* Hide default global header (base.html) relying on element selector */
     body>header {
         display: none !important;
     }
@@ -55,17 +63,145 @@
         margin-left: 15px;
     }
 
-    .exam-list-container {
-        margin-top: 100px;
-        /* Spacer for fixed header */
-        margin-bottom: 20px;
+    /* Layout Styles from Study Index */
+    .study-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 100px 20px 40px 20px;
+        min-height: 80vh;
+    }
+
+    .study-header {
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .study-header h1 {
+        font-size: 2.5rem;
+        color: #2c5f2d;
+        margin-bottom: 10px;
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    .study-header p {
+        color: #555;
+        font-size: 1.1rem;
+    }
+
+    .header-deco {
+        width: 60px;
+        height: 4px;
+        background: #97bc62;
+        margin: 20px auto;
+        border-radius: 2px;
+    }
+
+    /* Grid and Card Styles */
+    .round-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        /* Wider for form */
+        gap: 20px;
+    }
+
+    .round-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        color: #333;
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 250px;
+        /* Taller for form */
+        position: relative;
+        overflow: hidden;
+    }
+
+    .round-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        border-color: #97bc62;
+    }
+
+    .round-number {
+        font-size: 2.0em;
+        font-weight: 800;
+        color: #333;
+        line-height: 1;
+        margin-bottom: 15px;
+    }
+
+    .round-number span {
+        font-size: 0.4em;
+        color: #888;
+        font-weight: normal;
+        margin-left: 2px;
+    }
+
+    /* Form Styles */
+    .exam-form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .subject-options {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        background: #f9f9f9;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+    }
+
+    .subject-options label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .subject-options input[type="checkbox"] {
+        margin-right: 8px;
+        accent-color: #2c5f2d;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 12px;
+        background: #2c5f2d;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .submit-btn:hover {
+        background: #1b4332;
     }
 </style>
 
 <div class="custom-main-header">
     <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
     <nav class="nav-links">
-
         {% if user.is_authenticated %}
         <span style="color: white; margin-right: 10px;">{{ user.username }}님 환영합니다</span>
         <a href="{% url 'accounts:user_profile' %}">마이페이지</a>
@@ -80,34 +216,48 @@
     </nav>
 </div>
 
-<div class="exam-list-container">
-    <h1>시험 선택</h1>
-</div>
+<div class="study-layout">
+    <div class="study-header">
+        <h1>실전 기출 고사</h1>
+        <div class="header-deco"></div>
+        <p>원하는 과목을 선택하여 실전처럼 응시해보세요</p>
+    </div>
 
-{% for exam in exams %}
-<div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; border-radius: 8px;">
-    <h2>{{ exam.round_number }}회 기출문제</h2>
-    <form action="{% url 'exam:take' exam.id %}" method="get">
-        <div style="margin-top: 10px;">
-            <label><input type="checkbox" name="all_subjects" checked onchange="toggleSubjects(this)"> 전과목</label>
-            <div style="margin-left: 20px; margin-top: 5px;">
-                {% for subject in subjects %}
-                <label style="margin-right: 10px;">
-                    <input type="checkbox" name="subjects" value="{{ subject.code }}" checked>
-                    {{ subject.name }}
-                </label>
-                {% endfor %}
-            </div>
+    <div class="round-grid">
+        {% for exam in exams %}
+        <div class="round-card">
+            <div class="round-number">{{ exam.round_number }}<span>회</span></div>
+
+            <form action="{% url 'exam:take' exam.id %}" method="get" class="exam-form">
+                <div style="width: 100%; text-align: left; margin-bottom: 5px;">
+                    <label style="font-weight: bold; font-size: 0.95rem; cursor: pointer;">
+                        <input type="checkbox" name="all_subjects" checked onchange="toggleSubjects(this)"> 전과목 선택
+                    </label>
+                </div>
+
+                <div class="subject-options">
+                    {% for subject in subjects %}
+                    <label>
+                        <input type="checkbox" name="subjects" value="{{ subject.code }}" checked>
+                        {{ subject.name }}
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="submit-btn">시험 응시하기</button>
+            </form>
         </div>
-        <button type="submit"
-            style="margin-top: 15px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">응시하기</button>
-    </form>
+        {% empty %}
+        <div style="text-align: center; color: #888; grid-column: 1/-1;">등록된 기출문제가 없습니다.</div>
+        {% endfor %}
+    </div>
 </div>
-{% endfor %}
 
 <script>
     function toggleSubjects(totalCheckbox) {
-        const checkboxes = totalCheckbox.parentNode.nextElementSibling.querySelectorAll('input[type="checkbox"]');
+        // Find the specific container for THIS exam card
+        const form = totalCheckbox.closest('form');
+        const checkboxes = form.querySelectorAll('.subject-options input[type="checkbox"]');
         checkboxes.forEach(cb => cb.checked = totalCheckbox.checked);
     }
 </script>

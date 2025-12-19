@@ -35,8 +35,8 @@ def index(request):
             try:
                 genai.configure(api_key=settings.GEMINI_API_KEY)
                 model = genai.GenerativeModel(
-                    "gemini-3-flash"
-                )  # Keeping the successful model
+                    "gemini-3-flash-preview"
+                )  # Using validated model name from list
                 response = model.generate_content(user_input)
 
                 # Convert Markdown to HTML for display

@@ -272,6 +272,8 @@
             user-select: none;
             border-left: 1px solid #ccc;
             overflow-y: auto;
+            overflow-x: hidden;
+            /* Prevent horizontal scrollbar */
         }
 
         .omr-card {
@@ -383,7 +385,7 @@
             z-index: 10;
         }
 
-        /* RED CIRCLE SVG */
+        /* RED CIRCLE SVG - Changed to BLACK */
         .grade-circle {
             top: 15%;
             left: 50%;
@@ -391,7 +393,7 @@
             width: 250px;
             height: 250px;
             /* ViewBox 0 0 50 50 gives padding. */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cellipse cx='25' cy='25' rx='16' ry='12' stroke='rgba(255, 0, 0, 0.5)' stroke-width='1.5' fill='none' transform='rotate(-10 25 25)'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cellipse cx='25' cy='25' rx='16' ry='12' stroke='rgba(0, 0, 0, 0.8)' stroke-width='1.5' fill='none' transform='rotate(-10 25 25)'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
@@ -413,26 +415,50 @@
             background-color: transparent;
         }
 
+        /* RED X SVG - Natural Hand-drawn Style */
+        .grade-x {
+            top: 15%;
+            left: 50%;
+            transform: translate(-50%, -15%);
+            width: 250px;
+            height: 250px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M 12 12 Q 25 20 38 38 M 38 12 Q 25 30 12 38' stroke='rgba(255, 0, 0, 0.6)' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            border: none;
+            background-color: transparent;
+        }
+
         /* Positioning on OMR - Keep Small */
         /* Positioning on OMR - PERFECT CIRCLE */
         .omr-num .grade-circle {
+            width: 24px;
+            height: 24px;
+            background-image: none;
+            border: 3px solid rgba(0, 0, 0, 0.8);
+            border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .omr-num .grade-x {
             width: 30px;
             height: 30px;
-            background-image: none;
-            border: 3px solid rgba(255, 0, 0, 0.8);
-            border-radius: 50%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M 12 12 Q 25 20 38 38 M 38 12 Q 25 30 12 38' stroke='rgba(255, 0, 0, 0.8)' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
         }
 
         .omr-bubble .grade-circle {
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             background-image: none;
             background-size: initial;
-            border: 2px solid rgba(255, 0, 0, 0.8);
-            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.8);
+            border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -479,6 +505,7 @@
             width: 30px;
             height: 30px;
             border: 3px solid #d93025;
+            /* Revert to Red */
             border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
             /* Irregular hand-drawn look */
             transform: translate(-50%, -50%);
@@ -691,9 +718,20 @@
             <div class="omr-card">
                 <div
                     style="position: sticky; top: 0; background: white; z-index: 10; border-bottom: 1px solid #d4879c;">
-                    <h3 style="margin: 10px 0 5px 0; text-align: center;">채점 결과</h3>
+                    <!-- Branding Home Link -->
+                    <a href="{% url 'main:index' %}" title="초기화면으로 이동"
+                        style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%); color: white; text-decoration: none; padding: 12px; margin-bottom: 10px; font-weight: bold;">
+                        <span style="font-size: 1.4em; margin-right: 8px;">🌳</span>
+                        <span style="font-size: 1.1em;">나무의사 홈</span>
+                    </a>
+                    <h3 style="margin: 0 0 10px 0; text-align: center;">채점 결과</h3>
                     <div style="padding: 0 10px 10px 10px; text-align:center;">
-                        <div style="font-size:2em; font-weight:bold; color:red;">{{ attempt.total_score }}점</div>
+                        <div style="font-size:2em; font-weight:bold; color:red;">
+                            {{ score_100|floatformat:0 }}점
+                            <span style="font-size:0.5em; color:#666; font-weight:normal;">
+                                [ {{ attempt.total_score }}/{{ total_attempted }} 문제 ]
+                            </span>
+                        </div>
                     </div>
                     <div class="omr-header" style="border-top: 1px solid #d4879c; border-bottom: none;">
                         <div class="omr-header-num">문항</div>
@@ -710,6 +748,8 @@
                         <!-- Grading Mark on OMR Number (If correct) -->
                         {% if res.is_correct %}
                         <div class="grade-mark grade-circle"></div>
+                        {% else %}
+                        <div class="grade-mark grade-x"></div>
                         {% endif %}
                     </div>
                     <div class="omr-bubbles">

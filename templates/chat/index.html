@@ -5,6 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 나무의사 채팅</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -406,19 +418,7 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Link Handling
-            function processLinks() {
-                const aiMessages = document.querySelectorAll('.ai-message');
-                aiMessages.forEach(msg => {
-                    const links = msg.querySelectorAll('a');
-                    links.forEach(link => {
-                        link.setAttribute('target', '_blank');
-                        link.setAttribute('rel', 'noopener noreferrer');
-                    });
-                });
-            }
-            processLinks(); // Run initially
-
+            // 1. Element Initialization
             const chatForm = document.getElementById('chat-form');
             const userInput = document.getElementById('user-input');
             const sendBtn = document.getElementById('send-btn');
@@ -431,6 +431,18 @@
             let abortController = null;
             let timerInterval = null;
             let startTime = 0;
+
+            // 2. Helper Functions
+            function processLinks() {
+                const aiMessages = document.querySelectorAll('.ai-message');
+                aiMessages.forEach(msg => {
+                    const links = msg.querySelectorAll('a');
+                    links.forEach(link => {
+                        link.setAttribute('target', '_blank');
+                        link.setAttribute('rel', 'noopener noreferrer');
+                    });
+                });
+            }
 
             function startTimer() {
                 startTime = Date.now();
@@ -453,26 +465,25 @@
                 msgDiv.innerHTML = `<strong>${role === 'user' ? '질문' : '나무주치의 답변'}:</strong><br>${text}`;
                 chatBox.appendChild(msgDiv);
                 chatBox.scrollTop = chatBox.scrollHeight;
-                processLinks(); // Process links for new messages
+                processLinks();
+
+                // Safe MathJax TypeSet
+                if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                    window.MathJax.typesetPromise([msgDiv]).catch(function (err) {
+                        console.log('MathJax typeset failed: ' + err.message);
+                    });
+                }
             }
 
-            userInput.addEventListener('keydown', function (e) {
-                if (e.ctrlKey && e.key === 'Enter') {
-                    e.preventDefault();
-                    if (!userInput.disabled && userInput.value.trim() !== "") {
-                        chatForm.dispatchEvent(new Event('submit'));
-                    }
-                }
-            });
-
-            chatForm.onsubmit = async function (e) {
-                e.preventDefault();
+            async function handleChatSubmit() {
                 const question = userInput.value.trim();
                 if (!question) return;
 
                 // UI Reset
                 userInput.value = '';
                 userInput.disabled = true;
+
+                // Hide Send button, Show Stop button
                 sendBtn.style.display = 'none';
                 stopBtn.style.display = 'flex';
                 progressUi.style.display = 'block';
@@ -502,14 +513,11 @@
                     // Show AI Response
                     appendMessage('ai', data.response_text);
 
-                    // Update Sidebar History
+                    // Update Sidebar History (simplified for stability)
                     const historyList = document.querySelector('.history-list');
                     const noRecordMsg = historyList.querySelector('li[style*="text-align: center"]');
-                    if (noRecordMsg) {
-                        noRecordMsg.remove();
-                    }
+                    if (noRecordMsg) noRecordMsg.remove();
 
-                    // Remove active class from existing items
                     document.querySelectorAll('.history-link').forEach(link => link.classList.remove('active'));
 
                     const newItem = document.createElement('li');
@@ -520,7 +528,6 @@
                         </a>
                     `;
 
-                    // Prepend to list (insert after existing items if any, or first)
                     if (historyList.firstChild) {
                         historyList.insertBefore(newItem, historyList.firstChild);
                     } else {
@@ -538,19 +545,45 @@
                     stopTimer();
                     userInput.disabled = false;
                     userInput.focus();
-                    sendBtn.style.display = 'block';
-                    sendBtn.disabled = false;
+
+                    // Show Send button, Hide Stop button
+                    sendBtn.style.display = 'flex';
                     stopBtn.style.display = 'none';
+
                     progressUi.style.display = 'none';
                     abortController = null;
                 }
-            };
+            }
+
+            // 3. Event Listeners (Attached BEFORE optional logic)
+            userInput.addEventListener('keydown', function (e) {
+                // Support Ctrl+Enter
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+                    e.preventDefault();
+                    if (!userInput.disabled && userInput.value.trim() !== "") {
+                        handleChatSubmit();
+                    }
+                }
+            });
+
+            chatForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                handleChatSubmit();
+            });
 
             stopBtn.onclick = function () {
                 if (abortController) {
                     abortController.abort();
                 }
             };
+
+            // 4. Initial Run
+            processLinks();
+
+            // Safe initial MathJax typeset
+            if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+                window.MathJax.typesetPromise().catch(err => console.log(err));
+            }
         });
     </script>
 </body>
