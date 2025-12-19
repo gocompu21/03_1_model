@@ -10,7 +10,7 @@
             margin: 0;
             padding: 0;
             font-family: 'Noto Sans KR', sans-serif;
-            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80');
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80');
             background-size: cover;
             background-position: center;
             min-height: 100vh;
@@ -20,84 +20,143 @@
         }
 
         .signup-container {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            background-color: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
             width: 100%;
-            max-width: 450px;
-            text-align: center;
-            border-top: 5px solid #2d6a4f;
+            max-width: 900px;
+            overflow: hidden;
             margin: 20px;
+            position: relative;
         }
 
-        .signup-header h1 {
+        /* Left Panel - Branding */
+        .signup-intro {
+            flex: 0 0 40%;
+            background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: white;
+            text-align: left;
+        }
+
+        .signup-intro h1 {
+            font-size: 2.5rem;
+            margin: 0 0 20px 0;
+            line-height: 1.2;
+        }
+
+        .signup-intro p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .signup-intro .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        /* Right Panel - Form */
+        .signup-form {
+            flex: 1;
+            padding: 40px 50px;
+            position: relative;
+        }
+
+        .signup-form h2 {
             color: #1b4332;
-            margin-bottom: 10px;
-            font-size: 2rem;
-        }
-
-        .signup-header p {
-            color: #40916c;
             margin-top: 0;
             margin-bottom: 30px;
-            font-size: 1rem;
+            font-size: 1.8rem;
+            text-align: center;
         }
 
         .form-group {
-            margin-bottom: 15px;
-            text-align: left;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: #2d6a4f;
-            font-weight: bold;
-            font-size: 0.9rem;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 0.95rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #d8f3dc;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
-            box-sizing: border-box;
             font-size: 1rem;
-            transition: border-color 0.3s;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            background-color: #f8fafc;
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #52b788;
-            box-shadow: 0 0 0 3px rgba(82, 183, 136, 0.2);
+            border-color: #2d6a4f;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
         }
 
         .submit-btn {
             width: 100%;
-            padding: 12px;
-            background-color: #2d6a4f;
+            padding: 14px;
+            background: linear-gradient(to right, #2d6a4f, #1b4332);
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 1.1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: transform 0.2s, box-shadow 0.2s;
             margin-top: 20px;
         }
 
         .submit-btn:hover {
-            background-color: #1b4332;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(27, 67, 50, 0.3);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #e2e8f0;
+            color: #ef4444;
         }
 
         .footer-links {
-            margin-top: 20px;
-            font-size: 0.9rem;
+            margin-top: 25px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: #64748b;
         }
 
         .footer-links a {
-            color: #40916c;
+            color: #2d6a4f;
             text-decoration: none;
+            font-weight: 600;
         }
 
         .footer-links a:hover {
@@ -105,95 +164,104 @@
         }
 
         .error-list {
-            color: #e63946;
-            text-align: left;
+            color: #ef4444;
             font-size: 0.85rem;
             margin-top: 5px;
-            list-style-type: none;
-            padding: 0;
+            list-style: none;
+            padding-left: 0;
+            background-color: #fef2f2;
+            padding: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .signup-container {
+                flex-direction: column;
+                max-width: 90%;
+            }
+
+            .signup-intro {
+                padding: 30px;
+                text-align: center;
+            }
+
+            .signup-form {
+                padding: 30px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="signup-container">
-        <div class="signup-header">
-            <h1>🌱 회원가입</h1>
-            <p>미래의 나무의사, 첫 걸음을 환영합니다</p>
+        <!-- Left Panel -->
+        <div class="signup-intro">
+            <div class="icon">🌳</div>
+            <h1>나무의사<br>자격시험</h1>
+            <p>전문적인 학습 관리로<br>합격의 꿈을 이루세요.</p>
         </div>
 
-        <form action="" method="post">
-            {% csrf_token %}
+        <!-- Right Panel -->
+        <div class="signup-form">
+            <a href="/" class="close-btn" title="닫기">&times;</a>
 
-            <div class="form-group">
-                <label for="id_username">아이디</label>
-                <input type="text" name="username" id="id_username" placeholder="사용하실 아이디를 입력하세요"
-                    value="{{ form.username.value|default:'' }}" required>
-                {% if form.username.errors %}
-                <ul class="error-list">
-                    {% for error in form.username.errors %}
-                    <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
+            <h2>계정 생성</h2>
 
-            <div class="form-group">
-                <label for="id_first_name">이름</label>
-                <input type="text" name="first_name" id="id_first_name" placeholder="이름을 입력하세요"
-                    value="{{ form.first_name.value|default:'' }}" required>
-                {% if form.first_name.errors %}
-                <ul class="error-list">
-                    {% for error in form.first_name.errors %}
-                    <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
+            <form action="" method="post">
+                {% csrf_token %}
 
-            <div class="form-group">
-                <label for="id_email">이메일</label>
-                <input type="email" name="email" id="id_email" placeholder="이메일 주소를 입력하세요"
-                    value="{{ form.email.value|default:'' }}" required>
-                {% if form.email.errors %}
-                <ul class="error-list">
-                    {% for error in form.email.errors %}
-                    <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
+                <div class="form-group">
+                    <label for="id_username">아이디</label>
+                    <input type="text" name="username" id="id_username" placeholder="사용할 아이디"
+                        value="{{ form.username.value|default:'' }}" required>
+                    {% if form.username.errors %}
+                    <ul class="error-list">{% for error in form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
 
-            <div class="form-group">
-                <label for="id_password1">비밀번호</label>
-                <input type="password" name="password1" id="id_password1" placeholder="비밀번호를 입력하세요" required>
-                {% if form.password1.errors %}
-                <ul class="error-list">
-                    {% for error in form.password1.errors %}
-                    <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
+                <div class="form-group">
+                    <label for="id_first_name">이름 (실명)</label>
+                    <input type="text" name="first_name" id="id_first_name" placeholder="홍길동"
+                        value="{{ form.first_name.value|default:'' }}" required>
+                    {% if form.first_name.errors %}
+                    <ul class="error-list">{% for error in form.first_name.errors %}<li>{{ error }}</li>{% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
 
-            <div class="form-group">
-                <label for="id_password2">비밀번호 확인</label>
-                <input type="password" name="password2" id="id_password2" placeholder="비밀번호를 다시 한 번 입력하세요" required>
-                {% if form.password2.errors %}
-                <ul class="error-list">
-                    {% for error in form.password2.errors %}
-                    <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            </div>
+                <div class="form-group">
+                    <label for="id_email">이메일</label>
+                    <input type="email" name="email" id="id_email" placeholder="example@email.com"
+                        value="{{ form.email.value|default:'' }}" required>
+                    {% if form.email.errors %}
+                    <ul class="error-list">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
 
-            <button type="submit" class="submit-btn">가입하기</button>
+                <div class="form-group">
+                    <label for="id_password1">비밀번호</label>
+                    <input type="password" name="password1" id="id_password1" placeholder="안전한 비밀번호" required>
+                    {% if form.password1.errors %}
+                    <ul class="error-list">{% for error in form.password1.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
 
-            <div class="footer-links">
-                이미 계정이 있으신가요? <a href="{% url 'user_login' %}">로그인하기</a>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label for="id_password2">비밀번호 확인</label>
+                    <input type="password" name="password2" id="id_password2" placeholder="비밀번호 재입력" required>
+                    {% if form.password2.errors %}
+                    <ul class="error-list">{% for error in form.password2.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="submit-btn">회원가입 완료</button>
+
+                <div class="footer-links">
+                    이미 계정이 있으신가요? <a href="{% url 'accounts:user_login' %}">로그인</a>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 
