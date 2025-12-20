@@ -40,6 +40,29 @@ def post_list(request):
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
 
+    # Capture query params to persist sidebar state and list navigation
+    query = request.GET.get("q", "")
+    category = request.GET.get("category", "ALL")
+
+    # Filter posts for the list at the bottom (Same logic as post_list)
+    posts = Post.objects.all().order_by("-created_at")
+
+    if category == "BOOK":
+        posts = posts.filter(type__name="기본서")
+    elif category == "DOCTOR":
+        posts = posts.filter(type__name="주치의")
+    elif category == "GENERAL":
+        posts = posts.filter(type__name="일반 질의")
+
+    if query:
+        posts = posts.filter(
+            Q(title__icontains=query)
+            | Q(content__icontains=query)
+            | Q(author__username__icontains=query)
+        )
+
+    related_posts = posts.filter(pk__lt=post.pk)[:10]
+
     # Increment View Count (simple logic)
     # Using cookie to prevent refresh spam could be better, but keeping it simple for now
     post.hits += 1
@@ -48,7 +71,15 @@ def post_detail(request, pk):
     comment_form = CommentForm()
 
     return render(
-        request, "bbs/post_detail.html", {"post": post, "comment_form": comment_form}
+        request,
+        "bbs/post_detail.html",
+        {
+            "post": post,
+            "comment_form": comment_form,
+            "query": query,
+            "category": category,
+            "related_posts": related_posts,
+        },
     )
 
 

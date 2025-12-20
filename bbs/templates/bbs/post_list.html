@@ -109,13 +109,12 @@
                     <tr style="border-bottom: 1px solid #eee;">
                         <td style="padding: 6px 2px; text-align: center; color: #888;">{{ post.pk }}</td>
                         <td style="padding: 6px 2px;">
-                            <a href="{% url 'bbs:post_detail' post.pk %}"
+                            <a href="{% url 'bbs:post_detail' post.pk %}?category={{ category }}&q={{ query }}"
                                 style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 {{ post.title|highlight_prefix }}
                                 {% if post.comments.count > 0 %}
                                 <span
-                                    style="color: #e63946; font-size: 0.9em; font-weight: normal;">[{{post.comments.count
-                                    }}]</span>
+                                    style="color: #e63946; font-size: 0.9em; font-weight: normal;">[{{post.comments.count}}]</span>
                                 {% endif %}
                             </a>
                         </td>

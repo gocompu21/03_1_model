@@ -1,3 +1,4 @@
+{% load bbs_extras %}
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -5,6 +6,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>나무의사 프로필</title>
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <!-- Summernote/jQuery for Inline Editing -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/lang/summernote-ko-KR.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -113,14 +134,14 @@
         /* --- Main Content Styles --- */
         .main-content {
             flex: 1;
-            padding: 40px;
+            padding: 7px 40px;
             overflow-y: auto;
         }
 
         .content-section {
             display: none;
             background: white;
-            padding: 40px;
+            padding: 20px 40px;
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
             max-width: 800px;
@@ -176,7 +197,7 @@
         .history-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 0;
         }
 
         .history-table th,
@@ -288,6 +309,14 @@
             width: 100%;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .menu-item i {
+            margin-right: 10px;
+            width: 24px;
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
@@ -314,26 +343,73 @@
     <div class="app-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="menu-item active" onclick="showSection('info')">
-                👤 회원 정보
+            <div class="menu-item active" onclick="showSection('my_questions')">
+                <i class="fas fa-question-circle"></i> 내 질문
             </div>
             <div class="menu-item" onclick="showSection('history')">
-                📝 모의고사 기록
+                <i class="fas fa-clipboard-list"></i> 모의고사 기록
             </div>
             <div class="menu-item" onclick="showSection('analysis')">
-                📊 과목별 실력분석
+                <i class="fas fa-chart-pie"></i> 과목별 실력분석
+            </div>
+            <div class="menu-item" onclick="showSection('info')">
+                <i class="fas fa-user"></i> 회원 정보
             </div>
 
             <a href="{% url 'main:index' %}" class="menu-item back-home">
-                🏠 홈으로
+                <i class="fas fa-home"></i> 홈으로
             </a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
 
+            <div id="my-questions-section" class="content-section active">
+                <div id="question-list-view">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th style="padding-left:10px; text-align: left;">제목</th>
+                                <th style="width: 100px;">작성일시</th>
+                                <th style="width: 60px;">조회수</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for post in my_questions %}
+                            <tr>
+                                <td style="text-align: left;">
+                                    <a href="{% url 'bbs:post_detail' post.pk %}" class="post-link"
+                                        style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px;">
+                                        {{ post.title|highlight_prefix }}
+                                    </a>
+                                </td>
+
+                                <td style="text-align: center; color: #888; font-size: 0.9em;">
+                                    {{ post.created_at|compact_date }}
+                                </td>
+                                <td>{{ post.hits }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" style="padding: 30px; color: #888;">작성한 질문 내역이 없습니다.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div id="question-detail-view" style="display: none;">
+                    <!-- Detail content loaded via AJAX -->
+
+                    <div id="detail-content-area"></div>
+                    <div id="next-questions-list"
+                        style="margin-top: 0px; border-top: 1px solid #eee; padding-top: 10px;">
+                        <!-- Next 3 questions will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Section 1: Member Info -->
-            <div id="info-section" class="content-section active">
+            <div id="info-section" class="content-section">
                 <h1>회원 정보</h1>
                 <table class="info-table">
                     <tr>
@@ -397,10 +473,11 @@
                 {% endif %}
             </div>
 
-        </div>
-    </div>
 
-    <!-- Script for Tab Switching & Chart -->
+        </div>
+
+    </div>
+    </div> <!-- Script for Tab Switching & Chart -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Tab Switching Logic
@@ -408,15 +485,18 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
 
-            if (sectionId === 'info') {
+            if (sectionId === 'my_questions') {
                 document.querySelectorAll('.menu-item')[0].classList.add('active');
-                document.getElementById('info-section').classList.add('active');
+                document.getElementById('my-questions-section').classList.add('active');
             } else if (sectionId === 'history') {
                 document.querySelectorAll('.menu-item')[1].classList.add('active');
                 document.getElementById('history-section').classList.add('active');
-            } else {
+            } else if (sectionId === 'analysis') {
                 document.querySelectorAll('.menu-item')[2].classList.add('active');
                 document.getElementById('analysis-section').classList.add('active');
+            } else if (sectionId === 'info') {
+                document.querySelectorAll('.menu-item')[3].classList.add('active');
+                document.getElementById('info-section').classList.add('active');
             }
         }
 
@@ -424,7 +504,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             // Check URL param for tab
             const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab') || 'info'; // Default to info
+            const activeTab = urlParams.get('tab') || 'my_questions'; // Default to my_questions
 
             showSection(activeTab);
 
@@ -486,7 +566,265 @@
                         .catch(error => console.error('Error:', error));
                 }
             });
+
+            // --- AJAX Post Detail Logic ---
+            const myQuestionsSection = document.getElementById('my-questions-section');
+            if (myQuestionsSection) {
+                myQuestionsSection.addEventListener('click', function (e) {
+                    const link = e.target.closest('.post-link');
+                    if (link) {
+                        e.preventDefault();
+                        const url = link.href;
+
+                        // --- Render Next 3 Questions Logic ---
+                        // Always find the row in the MASTER list (`#question-list-view`) to ensure we get the correct next rows
+                        // even if the click came from the "Next Questions" sub-list.
+                        const targetHref = link.getAttribute('href');
+                        const masterLink = document.querySelector(`#question-list-view a[href="${targetHref}"]`);
+
+                        if (masterLink) {
+                            const masterRow = masterLink.closest('tr');
+                            const masterTbody = masterRow.closest('tbody');
+
+                            if (masterTbody) {
+                                const allRows = Array.from(masterTbody.children);
+                                const currentIndex = allRows.indexOf(masterRow);
+
+                                // Get next 10 rows from the master list
+                                const nextRows = allRows.slice(currentIndex + 1, currentIndex + 11);
+                                const nextListContainer = document.getElementById('next-questions-list');
+
+                                if (nextRows.length > 0) {
+                                    let tableHtml = '<table class="history-table" style="margin-top:0;">';
+                                    tableHtml += '<tbody>';
+                                    nextRows.forEach(row => {
+                                        tableHtml += row.outerHTML;
+                                    });
+                                    tableHtml += '</tbody></table>';
+                                    nextListContainer.innerHTML = tableHtml;
+                                    nextListContainer.style.display = 'block';
+                                } else {
+                                    nextListContainer.style.display = 'none';
+                                }
+                            }
+                        }
+
+                        fetch(url)
+                            .then(response => response.text())
+                            .then(html => {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const content = doc.querySelector('.bbs-container');
+
+                                if (content) {
+                                    // Move 'List' button to #post-actions next to Edit/Delete
+                                    const origListBtn = content.querySelector('.btn-list');
+                                    if (origListBtn && origListBtn.parentElement) {
+                                        origListBtn.parentElement.style.display = 'none';
+                                    }
+
+                                    const actionContainer = content.querySelector('#post-actions');
+                                    if (actionContainer) {
+                                        const newListBtn = document.createElement('a');
+                                        newListBtn.href = '#';
+                                        newListBtn.className = 'btn-action btn-list';
+                                        newListBtn.innerHTML = '<i class="fas fa-list"></i> 목록';
+                                        newListBtn.onclick = function (e) {
+                                            e.preventDefault();
+                                            showListView();
+                                        };
+                                        // Prepend to display as [List] [Edit] [Delete] (since justify-end, first child is left-most)
+                                        // User request: "List" after "Edit, Delete". So append.
+                                        // DOM: [Edit] [Delete] [List]
+                                        actionContainer.appendChild(newListBtn);
+                                    }
+
+                                    // Remove Comment Section (Box) entirely
+                                    const commentSection = content.querySelector('#comment-section');
+                                    if (commentSection) {
+                                        commentSection.remove();
+                                    } else {
+                                        // Fallback if ID not found (e.g. cached old HTML), try removing forms at least
+                                        const commentForms = content.querySelectorAll('form');
+                                        commentForms.forEach(form => form.remove());
+                                    }
+
+                                    // Override 'Delete' or other links if necessary, or let them work naturally (they might reload page)
+                                    // For now, just showing content is enough.
+
+                                    document.getElementById('detail-content-area').innerHTML = '';
+                                    document.getElementById('detail-content-area').appendChild(content);
+
+                                    document.getElementById('question-list-view').style.display = 'none';
+                                    const detailView = document.getElementById('question-detail-view');
+                                    detailView.style.display = 'block';
+
+                                    // Scroll to top of the detail view
+                                    // Using a small timeout to ensure DOM render before scroll if needed, but direct usually works.
+                                    // Also considering sticky headers, but 'start' attempts to align to top.
+                                    detailView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                                    // Trigger MathJax to render new content
+                                    if (window.MathJax) {
+                                        MathJax.typesetPromise([content]).catch((err) => console.log(err));
+                                    }
+                                }
+                            })
+                            .catch(err => console.error('Failed to load post:', err));
+                    }
+                });
+            }
+
+            // --- Inline Edit Logic ---
+            const detailArea = document.getElementById('detail-content-area');
+            if (detailArea) {
+                detailArea.addEventListener('click', function (e) {
+                    const editBtn = e.target.closest('.btn-edit');
+                    if (editBtn) {
+                        e.preventDefault();
+                        const url = editBtn.href;
+
+                        fetch(url)
+                            .then(response => response.text())
+                            .then(html => {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const content = doc.querySelector('.bbs-container');
+
+                                if (content) {
+                                    // Remove Header (User request)
+                                    // Remove Header (User request)
+                                    const header = content.querySelector('h2');
+                                    if (header) header.remove();
+
+                                    // Add Help Text (Re-adding as explanation)
+                                    const helpDiv = document.createElement('div');
+                                    helpDiv.style.cssText = 'color: #666; font-size: 0.85rem; margin-bottom: 10px; padding: 0 5px;';
+                                    helpDiv.innerHTML = '<i class="fas fa-info-circle"></i> 수식은 편집 모드에서 $...$ 형태의 코드로 표시됩니다.';
+                                    const formEl = content.querySelector('form');
+                                    if (formEl) content.insertBefore(helpDiv, formEl);
+
+                                    detailArea.innerHTML = '';
+                                    detailArea.appendChild(content);
+
+                                    // Make 'Cancel' button work inline (reload original detail)
+                                    const cancelBtn = content.querySelector('.btn-cancel');
+                                    if (cancelBtn) {
+                                        cancelBtn.onclick = function (ev) {
+                                            ev.preventDefault();
+                                            // How to go back? We need the original Detail URL.
+                                            // The edit URL format is /bbs/post/<pk>/update/
+                                            // Detail URL is /bbs/post/<pk>/
+                                            const detailUrl = url.replace('/update', ''); // Crude but likely works
+                                            // We could trigger a fetch for detailUrl here using the same logic.
+                                            // For now, just let it sit or implement reload.
+                                            // Ideally, we simulate a click on the list item?
+                                        }
+                                    }
+
+                                    // Initialize Summernote (if available) - requires jQuery
+                                    if (typeof $ !== 'undefined' && $.fn.summernote) {
+                                        $('#summernote').summernote({
+                                            placeholder: '내용을 입력해주세요.',
+                                            tabsize: 2,
+                                            height: 400,
+                                            lang: 'ko-KR',
+                                            toolbar: [
+                                                ['style', ['style']],
+                                                ['font', ['bold', 'underline', 'clear']],
+                                                ['color', ['color']],
+                                                ['para', ['ul', 'ol', 'paragraph']],
+                                                ['table', ['table']],
+                                            ]
+                                        });
+
+                                        // Intercept Form Submission
+                                        const form = detailArea.querySelector('form');
+                                        if (form) {
+                                            form.addEventListener('submit', function (ev) {
+                                                ev.preventDefault();
+
+                                                // Sync Summernote content to textarea
+                                                if (typeof $ !== 'undefined' && $('#summernote').summernote) {
+                                                    const summernoteContent = $('#summernote').summernote('code');
+                                                    const contentArea = form.querySelector('#summernote');
+                                                    if (contentArea) {
+                                                        contentArea.value = summernoteContent;
+                                                    }
+                                                }
+
+                                                const formData = new FormData(form);
+
+                                                fetch(url, {
+                                                    method: 'POST',
+                                                    body: formData,
+                                                    headers: {
+                                                        'X-Requested-With': 'XMLHttpRequest'
+                                                    }
+                                                })
+                                                    .then(response => {
+                                                        if (response.redirected || response.url !== url) {
+                                                            return fetch(response.url).then(res => res.text());
+                                                        }
+                                                        return response.text();
+                                                    })
+                                                    .then(newHtml => {
+                                                        const newDoc = new DOMParser().parseFromString(newHtml, 'text/html');
+                                                        const newContent = newDoc.querySelector('.bbs-container');
+
+                                                        if (newContent) {
+                                                            detailArea.innerHTML = '';
+                                                            detailArea.appendChild(newContent);
+
+                                                            if (!newContent.querySelector('form')) {
+                                                                // Success: Re-apply List button and cleanup
+                                                                const actionContainer = newContent.querySelector('#post-actions');
+                                                                if (actionContainer) {
+                                                                    const newListBtn = document.createElement('a');
+                                                                    newListBtn.href = '#';
+                                                                    newListBtn.className = 'btn-action btn-list';
+                                                                    newListBtn.innerHTML = '<i class="fas fa-list"></i> 목록';
+                                                                    newListBtn.onclick = function (e) {
+                                                                        e.preventDefault();
+                                                                        showListView();
+                                                                    };
+                                                                    actionContainer.appendChild(newListBtn);
+                                                                }
+                                                                const commentSection = newContent.querySelector('#comment-section');
+                                                                if (commentSection) commentSection.remove();
+
+                                                                document.getElementById('question-detail-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                                                                if (window.MathJax) {
+                                                                    setTimeout(() => {
+                                                                        const freshDetail = document.getElementById('detail-content-area');
+                                                                        if (freshDetail) {
+                                                                            if (MathJax.typesetClear) {
+                                                                                MathJax.typesetClear([freshDetail]);
+                                                                            }
+                                                                            MathJax.typesetPromise([freshDetail]).catch((err) => console.log('MathJax Error:', err));
+                                                                        }
+                                                                    }, 50);
+                                                                }
+                                                            }
+                                                        }
+                                                    })
+                                                    .catch(err => console.error('Save failed', err));
+                                            });
+                                        }
+                                    }
+                                }
+                            })
+                            .catch(err => console.error('Failed to load edit form:', err));
+                    }
+                });
+            }
         });
+
+        function showListView() {
+            document.getElementById('question-detail-view').style.display = 'none';
+            document.getElementById('question-list-view').style.display = 'block';
+        }
     </script>
 </body>
 

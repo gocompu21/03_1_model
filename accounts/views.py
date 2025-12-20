@@ -55,6 +55,9 @@ def user_profile(request):
     from django.db.models import Count, Case, When, IntegerField
     from django.core.paginator import Paginator
     from exam.models import UserQuestionResult, UserExamAttempt
+    from notebook.models import NotebookHistory
+    from chat.models import ChatHistory
+    from bbs.models import Post
     import json
 
     # 0. Recent Exam History (Pagination: 15 items)
@@ -64,6 +67,18 @@ def user_profile(request):
     paginator = Paginator(attempts_qs, 15)
     page_number = request.GET.get("page")
     recent_attempts = paginator.get_page(page_number)
+
+    # 0.1 My Questions (Notebook History)
+    my_notebook_questions = NotebookHistory.objects.filter(user=request.user).order_by(
+        "-created_at"
+    )
+
+    # 0.2 My Questions (BBS Posts: Basic Book & Tree Doctor)
+    # Filter for posts where type is "기본서" or "주치의" (or "주치의 질의" for compatibility)
+    target_types = ["기본서", "주치의", "주치의 질의"]
+    my_questions = Post.objects.filter(
+        author=request.user, type__name__in=target_types
+    ).order_by("-created_at")
 
     # 1. Aggregate results by Subject
     # We need to join Question -> Subject
@@ -111,6 +126,7 @@ def user_profile(request):
         "radar_data": json.dumps(data),
         "weakest_subject": weakest_subject,
         "recent_attempts": recent_attempts,
+        "my_questions": my_questions,
     }
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
