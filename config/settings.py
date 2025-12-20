@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "chat",
     "notebook",
     "bbs",
+    "mypage",
 ]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -145,7 +146,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_REDIRECT_URL = "/accounts/profile/"
+LOGIN_REDIRECT_URL = "/mypage/"
 LOGIN_URL = "/accounts/login/"
 
 # Increase max upload size to 10MB (default is 2.5MB)

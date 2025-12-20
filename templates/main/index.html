@@ -163,7 +163,7 @@
 
             {% if user.is_authenticated %}
             <span>{{ user.username }}님 환영합니다</span>
-            <a href="{% url 'accounts:user_profile' %}">마이페이지</a>
+            <a href="{% url 'mypage:index' %}">마이페이지</a>
             <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit"

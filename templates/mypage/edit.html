@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원정보 수정</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            border-top: 5px solid #2d6a4f;
+        }
+
+        h1 {
+            color: #1b4332;
+            margin-bottom: 30px;
+        }
+
+        input[type="password"],
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #40916c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2d6a4f;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #666;
+            text-decoration: none;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            color: #64748b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #e2e8f0;
+            color: #ef4444;
+        }
+
+        .container {
+            position: relative;
+            /* Ensure container is relative for absolute positioning */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="{% url 'mypage:index' %}" class="close-btn" title="닫기">&times;</a>
+
+        {% if step == 'password' %}
+        <h1>🔒 본인 확인</h1>
+        <p>회원정보 수정을 위해 비밀번호를 입력해주세요.</p>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="password_check" value="true">
+            <input type="password" name="password" placeholder="비밀번호" required autofocus>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div style="color:red; margin-bottom:15px;">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+
+            <button type="submit" class="btn">확인</button>
+        </form>
+
+        {% elif step == 'edit' %}
+        <h1>📝 정보 수정</h1>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="profile_update" value="true">
+
+            <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#2d6a4f;">아이디</div>
+            <input type="text" value="{{ user.username }}" disabled style="background:#f8f9fa;">
+
+            <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#2d6a4f;">이메일</div>
+            <input type="email" name="email" value="{{ user.email }}" required>
+
+            <div style="text-align:left; margin-bottom:5px; font-weight:bold; color:#2d6a4f;">이름</div>
+            <input type="text" name="first_name" value="{{ user.first_name }}" required>
+
+            <hr style="border: 0; border-top: 1px dashed #ccc; margin: 30px 0;">
+
+            <h3 style="color:#2d6a4f; text-align:left; font-size:1.1rem; margin-bottom:15px;">🔒 비밀번호 변경 (선택사항)</h3>
+
+            <input type="password" name="current_password" placeholder="현재 비밀번호 (변경시에만 입력)">
+            <input type="password" name="new_password" placeholder="새 비밀번호">
+            <input type="password" name="new_password_confirm" placeholder="새 비밀번호 확인">
+
+            <button type="submit" class="btn">수정 완료</button>
+        </form>
+        {% endif %}
+
+        <a href="{% url 'mypage:index' %}" class="back-link">취소하고 돌아가기</a>
+    </div>
+</body>
+
+</html>

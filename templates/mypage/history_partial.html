@@ -1,0 +1,58 @@
+{% if recent_attempts %}
+<table class="history-table">
+    <thead>
+        <tr>
+            <th>회차</th>
+            <th>응시일</th>
+            <th>점수</th>
+            <th>결과</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for attempt in recent_attempts %}
+        <tr>
+            <td>{{ attempt.exam.round_number }}회</td>
+            <td>{{ attempt.start_time|date:"Y.m.d H:i" }}</td>
+            <td style="font-weight:bold; color:#2d6a4f;">{{ attempt.total_score }}점</td>
+            <td>
+                {% if attempt.total_score >= 60 %}
+                <span class="pass-badge pass">합격</span>
+                {% else %}
+                <span class="pass-badge fail">불합격</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination Controls -->
+<div class="pagination">
+    {% if recent_attempts.has_previous %}
+    <a href="?page=1&tab=history" class="ajax-link" data-page="1">&laquo; 처음</a>
+    <a href="?page={{ recent_attempts.previous_page_number }}&tab=history" class="ajax-link"
+        data-page="{{ recent_attempts.previous_page_number }}">이전</a>
+    {% endif %}
+
+    {% for num in recent_attempts.paginator.page_range %}
+    {% if num == recent_attempts.number %}
+    <a href="#" class="active">{{ num }}</a>
+    {% elif num > recent_attempts.number|add:'-3' and num < recent_attempts.number|add:'3' %} <a
+        href="?page={{ num }}&tab=history" class="ajax-link" data-page="{{ num }}">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+
+        {% if recent_attempts.has_next %}
+        <a href="?page={{ recent_attempts.next_page_number }}&tab=history" class="ajax-link"
+            data-page="{{ recent_attempts.next_page_number }}">다음</a>
+        <a href="?page={{ recent_attempts.paginator.num_pages }}&tab=history" class="ajax-link"
+            data-page="{{ recent_attempts.paginator.num_pages }}">마지막 &raquo;</a>
+        {% endif %}
+</div>
+
+{% else %}
+<div style="text-align: center; padding: 50px; color: #888;">
+    <p style="font-size: 1.2rem;">아직 응시한 모의고사가 없습니다.</p>
+    <a href="{% url 'exam:index' %}" class="btn btn-primary" style="margin-top: 15px;">시험 보러 가기</a>
+</div>
+{% endif %}

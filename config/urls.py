@@ -30,6 +30,7 @@ urlpatterns = [
     path("chat/", include("chat.urls")),
     path("notebook/", include("notebook.urls")),
     path("bbs/", include("bbs.urls")),
+    path("mypage/", include("mypage.urls")),
 ]
 
 if settings.DEBUG:
