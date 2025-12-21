@@ -921,36 +921,8 @@
                 }
             });
 
-            // --- AJAX Post Detail Logic ---
-            const myQuestionsSection = document.getElementById('my-questions-section');
-            if (myQuestionsSection) {
-                // Handle Pagination AJAX
-                myQuestionsSection.addEventListener('click', function (e) {
-                    if (e.target.tagName === 'A' && e.target.classList.contains('q-ajax-link')) {
-                        e.preventDefault();
-                        const url = e.target.href;
-                        const listView = document.getElementById('question-list-view');
-
-                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                            .then(response => response.text())
-                            .then(html => {
-                                listView.innerHTML = html;
-                                // Scroll slightly if needed, but staying put is usually requested
-                            })
-                            .catch(error => console.error('Error:', error));
-                        return; // Done
-                    }
-
-                    const link = e.target.closest('.post-link');
-                    if (link) {
-                        e.preventDefault();
-                        const url = link.href;
-
-                        // --- Render Next Questions Logic Removed ---
-                        loadPostDetail(url);
-                    }
-                });
-            }
+            // --- AJAX Post Detail Logic (Moved to global delegation) ---
+            // Removed local listener to ensure robustness against DOM updates
 
             // --- Inline Edit Logic ---
             const detailArea = document.getElementById('detail-content-area');
@@ -970,11 +942,10 @@
 
                                 if (content) {
                                     // Remove Header (User request)
-                                    // Remove Header (User request)
                                     const header = content.querySelector('h2');
                                     if (header) header.remove();
 
-                                    // Add Help Text (Re-adding as explanation)
+                                    // Add Help Text
                                     const helpDiv = document.createElement('div');
                                     helpDiv.style.cssText = 'color: #666; font-size: 0.85rem; margin-bottom: 10px; padding: 0 5px;';
                                     helpDiv.innerHTML = '<i class="fas fa-info-circle"></i> 수식은 편집 모드에서 $...$ 형태의 코드로 표시됩니다.';
@@ -984,7 +955,7 @@
                                     detailArea.innerHTML = '';
                                     detailArea.appendChild(content);
 
-                                    // Make 'Cancel' button work inline (reload original detail)
+                                    // Make 'Cancel' button work inline
                                     const cancelBtn = content.querySelector('.btn-cancel');
                                     if (cancelBtn) {
                                         cancelBtn.onclick = function (ev) {
@@ -995,7 +966,7 @@
                                         }
                                     }
 
-                                    // Initialize Summernote (if available) - requires jQuery
+                                    // Initialize Summernote
                                     if (typeof $ !== 'undefined' && $.fn.summernote) {
                                         $('#summernote').summernote({
                                             placeholder: '내용을 입력해주세요.',
@@ -1017,64 +988,40 @@
                                             form.addEventListener('submit', function (ev) {
                                                 ev.preventDefault();
 
-                                                // Sync Summernote content to textarea
                                                 if (typeof $ !== 'undefined' && $('#summernote').summernote) {
                                                     const summernoteContent = $('#summernote').summernote('code');
                                                     const contentArea = form.querySelector('#summernote');
-                                                    if (contentArea) {
-                                                        contentArea.value = summernoteContent;
-                                                    }
+                                                    if (contentArea) contentArea.value = summernoteContent;
                                                 }
 
                                                 const formData = new FormData(form);
-
                                                 fetch(url, {
                                                     method: 'POST',
                                                     body: formData,
-                                                    headers: {
-                                                        'X-Requested-With': 'XMLHttpRequest'
-                                                    }
+                                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                                                 })
                                                     .then(response => {
-                                                        if (response.redirected || response.url !== url) {
-                                                            return fetch(response.url).then(res => res.text());
-                                                        }
+                                                        if (response.redirected) return fetch(response.url).then(res => res.text());
                                                         return response.text();
                                                     })
                                                     .then(newHtml => {
                                                         const newDoc = new DOMParser().parseFromString(newHtml, 'text/html');
                                                         const newContent = newDoc.querySelector('.bbs-container');
-
                                                         if (newContent) {
                                                             detailArea.innerHTML = '';
                                                             detailArea.appendChild(newContent);
+                                                            // Re-apply list button logic if needed or just trigger list view
+                                                            // For now, simplicity:
+                                                            const listBtn = document.createElement('a');
+                                                            listBtn.innerHTML = '<i class="fas fa-list"></i> 목록';
+                                                            listBtn.className = 'btn-action btn-list';
+                                                            listBtn.href = '#';
+                                                            listBtn.onclick = function (e) { e.preventDefault(); showListView(); };
+                                                            const actions = newContent.querySelector('#post-actions');
+                                                            if (actions) actions.appendChild(listBtn);
 
-                                                            if (!newContent.querySelector('form')) {
-                                                                // Success: Re-apply List button and cleanup
-                                                                const actionContainer = newContent.querySelector('#post-actions');
-                                                                if (actionContainer) {
-                                                                    const newListBtn = document.createElement('a');
-                                                                    newListBtn.href = '#';
-                                                                    newListBtn.className = 'btn-action btn-list';
-                                                                    newListBtn.innerHTML = '<i class="fas fa-list"></i> 목록';
-                                                                    newListBtn.onclick = function (e) {
-                                                                        e.preventDefault();
-                                                                        showListView();
-                                                                    };
-                                                                    actionContainer.appendChild(newListBtn);
-                                                                }
-                                                                const commentSection = newContent.querySelector('#comment-section');
-                                                                if (commentSection) commentSection.remove();
-
-                                                                document.getElementById('question-detail-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                                                                if (window.MathJax) {
-                                                                    setTimeout(() => {
-                                                                        const freshDetail = document.getElementById('detail-content-area');
-                                                                        MathJax.typesetPromise([freshDetail]);
-                                                                    }, 100);
-                                                                }
-                                                            }
+                                                            document.getElementById('question-detail-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                                            if (window.MathJax) MathJax.typesetPromise([detailArea]);
                                                         }
                                                     });
                                             });
@@ -1085,6 +1032,7 @@
                     }
                 });
             }
+
 
             // showListView moved to global scope
 
@@ -1131,10 +1079,80 @@
                         });
                 });
             }
-        });
+        }); // End DOMContentLoaded
 
+        // Global functions for My Questions AJAX
+        function showListView() {
+            document.getElementById('question-detail-view').style.display = 'none';
+            document.getElementById('question-list-view').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function loadPostDetail(url) {
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.querySelector('.bbs-container');
+
+                    if (newContent) {
+                        const detailArea = document.getElementById('detail-content-area');
+                        if (!detailArea) return;
+
+                        detailArea.innerHTML = '';
+                        detailArea.appendChild(newContent);
+
+                        // Ensure Back Button works
+                        const listBtn = newContent.querySelector('.btn-list');
+                        if (listBtn) {
+                            listBtn.removeAttribute('href'); // Prevent link
+                            listBtn.style.cursor = 'pointer';
+                            listBtn.onclick = function (e) { e.preventDefault(); showListView(); };
+                        } else {
+                            // If button uses onclick="showListView()" it works because showListView is now global
+                        }
+
+                        // Switch Views
+                        document.getElementById('question-list-view').style.display = 'none';
+                        document.getElementById('question-detail-view').style.display = 'block';
+                        window.scrollTo(0, 0);
+
+                        // MathJax
+                        if (window.MathJax) {
+                            MathJax.typesetPromise([detailArea]).catch((err) => console.log(err));
+                        }
+                    }
+                })
+                .catch(err => console.error('Error loading detail:', err));
+        }
         // Global Pagination Handler (Moved from nested scope)
         document.body.addEventListener('click', function (e) {
+            // 1. My Questions Detail Link
+            const postLink = e.target.closest('.post-link');
+            if (postLink) {
+                e.preventDefault();
+                loadPostDetail(postLink.href);
+                return;
+            }
+
+            // 2. My Questions Pagination Link
+            if (e.target.tagName === 'A' && e.target.classList.contains('q-ajax-link')) {
+                e.preventDefault();
+                const url = e.target.href;
+                const listView = document.getElementById('question-list-view');
+                if (listView) {
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(response => response.text())
+                        .then(html => {
+                            listView.innerHTML = html;
+                        })
+                        .catch(error => console.error('Error:', error));
+                }
+                return;
+            }
+
+            // 3. General History Pagination
             if (e.target.classList.contains('page-link')) {
                 e.preventDefault();
 

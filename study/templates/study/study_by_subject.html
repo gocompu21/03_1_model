@@ -310,13 +310,36 @@
                 </div>
             </div>
 
-            <div class="explanation-section">
+            <div class="explanation-section" id="exp-section-{{ q.pk }}">
                 <div class="exp-title">
                     <span>💡 정답 및 해설</span>
                 </div>
 
-                <div class="exp-text markdown-content">
-                    {{ q.textbook_chat|default:q.general_chat|markdown|safe }}
+                <!-- Explanation Tabs -->
+                <div class="exp-tabs"
+                    style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #ddd;">
+                    <button class="exp-tab-btn active" data-target="basic" data-qid="{{ q.pk }}"
+                        style="padding: 8px 15px; border: none; background: none; border-bottom: 3px solid #2d6a4f; font-weight: bold; color: #2d6a4f; cursor: pointer;">
+                        기본서 해설
+                    </button>
+                    <button class="exp-tab-btn" data-target="general" data-qid="{{ q.pk }}"
+                        style="padding: 8px 15px; border: none; background: none; border-bottom: 3px solid transparent; font-weight: normal; color: #888; cursor: pointer;">
+                        일반 해설
+                    </button>
+                </div>
+
+                <!-- Basic Book Explanation -->
+                <div id="exp-content-basic-{{ q.pk }}" class="exp-content markdown-content" style="display: block;">
+                    {% if q.textbook_chat %}
+                    {{ q.textbook_chat|markdown|safe }}
+                    {% else %}
+                    <p style="color: #999; font-style: italic;">등록된 기본서 해설이 없습니다.</p>
+                    {% endif %}
+                </div>
+
+                <!-- General Explanation -->
+                <div id="exp-content-general-{{ q.pk }}" class="exp-content markdown-content" style="display: none;">
+                    {{ q.general_chat|markdown|safe }}
                 </div>
 
                 {% if q.infographic_image %}
@@ -371,5 +394,48 @@
     function closeModal() {
         document.getElementById('imgModal').style.display = "none";
     }
+
+    // Tab Switching Logic
+    document.addEventListener("DOMContentLoaded", function () {
+        const tabBtns = document.querySelectorAll('.exp-tab-btn');
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const target = this.dataset.target; // 'basic' or 'general'
+                const qid = this.dataset.qid;
+                const section = document.getElementById(`exp-section-${qid}`);
+
+                // Update Buttons
+                const btns = section.querySelectorAll('.exp-tab-btn');
+                btns.forEach(b => {
+                    b.classList.remove('active');
+                    b.style.fontWeight = 'normal';
+                    b.style.color = '#888';
+                    b.style.borderBottomColor = 'transparent';
+                });
+
+                this.classList.add('active');
+                this.style.fontWeight = 'bold';
+                this.style.color = '#2d6a4f';
+                this.style.borderBottomColor = '#2d6a4f';
+
+                // Update Content
+                const basicContent = document.getElementById(`exp-content-basic-${qid}`);
+                const generalContent = document.getElementById(`exp-content-general-${qid}`);
+
+                if (target === 'basic') {
+                    if (basicContent) basicContent.style.display = 'block';
+                    if (generalContent) generalContent.style.display = 'none';
+                    // Re-trigger MathJax if needed
+                    if (window.MathJax) MathJax.typesetPromise([basicContent]);
+
+                } else {
+                    if (basicContent) basicContent.style.display = 'none';
+                    if (generalContent) generalContent.style.display = 'block';
+                    // Re-trigger MathJax if needed
+                    if (window.MathJax) MathJax.typesetPromise([generalContent]);
+                }
+            });
+        });
+    });
 </script>
 {% endblock %}

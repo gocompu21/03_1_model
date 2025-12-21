@@ -74,7 +74,7 @@
     <a href="?page=1&tab=history" class="ajax-link" data-page="1" style="margin: 0 5px; color: #2d6a4f;">&laquo; 처음</a>
     <a href="?page={{ recent_attempts.previous_page_number }}&tab=history" class="ajax-link"
         data-page="{{ recent_attempts.previous_page_number }}" style="margin: 0 5px; color: #2d6a4f;">이전</a>
-    {% endif %}
+    {% endif%}
 
     {% for num in recent_attempts.paginator.page_range %}
     {% if num == recent_attempts.number %}
