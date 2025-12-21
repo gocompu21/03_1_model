@@ -1,0 +1,52 @@
+{% load bbs_extras %}
+<table class="history-table">
+    <thead>
+        <tr>
+            <th style="padding-left:10px; text-align: left;">제목</th>
+            <th style="width: 100px;">작성일시</th>
+            <th style="width: 60px;">조회수</th>
+        </tr>
+    </thead>
+    <tbody id="question-list-tbody">
+        {% for post in my_questions %}
+        <tr>
+            <td style="text-align: left;">
+                <a href="{% url 'mypage:detail_answer' post.pk %}" class="post-link"
+                    style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px;">
+                    {{ post.title|highlight_prefix }}
+                </a>
+            </td>
+
+            <td style="text-align: center; color: #888; font-size: 0.9em;">
+                {{ post.created_at|compact_date }}
+            </td>
+            <td>{{ post.hits }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" style="padding: 30px; color: #888;">작성한 질문 내역이 없습니다.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination for My Questions -->
+{% if my_questions.has_other_pages %}
+<ul class="pagination">
+    {% if my_questions.has_previous %}
+    <li><a href="?tab=my_questions&q_page={{ my_questions.previous_page_number }}" class="q-ajax-link">&laquo;</a></li>
+    {% endif %}
+
+    {% for i in my_questions.paginator.page_range %}
+    {% if my_questions.number == i %}
+    <li><a href="#" class="active">{{ i }}</a></li>
+    {% else %}
+    <li><a href="?tab=my_questions&q_page={{ i }}" class="q-ajax-link">{{ i }}</a></li>
+    {% endif %}
+    {% endfor %}
+
+    {% if my_questions.has_next %}
+    <li><a href="?tab=my_questions&q_page={{ my_questions.next_page_number }}" class="q-ajax-link">&raquo;</a></li>
+    {% endif %}
+</ul>
+{% endif %}

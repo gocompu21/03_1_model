@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load bbs_extras %}
+
+{% block header %}
+<style>
+    /* Header Styles to match MyPage/Main */
+    .custom-header {
+        background-color: #2d6a4f;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-header .logo {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-header .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .custom-header .nav-links a:hover {
+        color: #b7e4c7;
+    }
+
+    .custom-header span {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+    }
+</style>
+<header class="custom-header">
+    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    <nav class="nav-links">
+
+        {% if user.is_authenticated %}
+        <span>{{ user.username }}님 환영합니다</span>
+        <a href="{% url 'mypage:index' %}">마이페이지</a>
+        <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit"
+                style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
+        </form>
+        {% else %}
+        <a href="{% url 'accounts:user_login' %}">로그인</a>
+        <a href="{% url 'accounts:user_signup' %}">회원가입</a>
+        {% endif %}
+    </nav>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="bbs-container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+    <!-- Post Header -->
+    <div style="border-bottom: 2px solid #2d6a4f; padding-bottom: 20px; margin-bottom: 30px;">
+        <h1 style="font-size: 1.2rem; color: #333; margin-bottom: 15px;">{{ post.title }}</h1>
+        <div
+            style="display: flex; justify-content: flex-end; align-items: center; color: #666; font-size: 0.95rem; gap: 15px;">
+            <span>{{ post.created_at|timesince }} 전</span>
+            <span>조회 {{ post.hits }}</span>
+            <span>
+                {% if post.author.first_name %}{{ post.author.first_name }}{% else %}{{ post.author.username }}
+                {% endif%}
+            </span>
+
+            {% if user == post.author %}
+            <div style="margin-left: 10px; display: flex; gap: 5px;" id="post-actions">
+                <a href="{% url 'bbs:post_update' post.pk %}" class="btn-action btn-edit"
+                    style="padding: 5px 10px; font-size: 0.85rem;"><i class="fas fa-edit"></i> 수정</a>
+                <a href="{% url 'bbs:post_delete' post.pk %}" class="btn-action btn-delete"
+                    style="padding: 5px 10px; font-size: 0.85rem;" onclick="return confirm('정말 삭제하시겠습니까?');"><i
+                        class="fas fa-trash-alt"></i> 삭제</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Post Content -->
+    <div class="post-content" style="min-height: 200px; line-height: 1.8; margin-bottom: 50px;">
+        {{ post.content|safe }}
+    </div>
+
+    <!-- Comments Section (Answers) -->
+    <div id="comment-section"
+        style="background: #fafdfb; padding: 5px 20px 20px 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
+        <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
+            {% for comment in post.comments.all %}
+            <li style="border-bottom: 1px solid #eee; padding: 4px 0 12px 0;">
+                <div style="color: #333; margin-bottom: 8px; font-size: 1rem;">
+                    {{ comment.content }}
+                </div>
+                <div
+                    style="display: flex; justify-content: flex-end; gap: 15px; align-items: center; font-size: 0.85em; color: #888;">
+                    <div>
+                        <strong style="margin-right: 10px; color: #555;">
+                            {{ comment.author.first_name }}
+                        </strong>
+                        <span>{{ comment.created_at|timesince }} 전</span>
+                    </div>
+                    {% if user == comment.author %}
+                    <div>
+                        <a href="{% url 'bbs:comment_delete' comment.pk %}"
+                            style="color: #e63946; text-decoration: none;"
+                            onclick="return confirm('댓글을 삭제하시겠습니까?');">삭제</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Comment Form -->
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'bbs:comment_create' post.pk %}">
+            {% csrf_token %}
+            <div style="position: relative;">
+                <textarea name="content" class="form-control" rows="2" placeholder="댓글을 남겨주세요"
+                    style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; resize: vertical; box-sizing: border-box;"
+                    required></textarea>
+                <button type="submit"
+                    style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: #2d6a4f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em;">등록</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+
+    <!-- Next Questions List -->
+    {% if next_posts %}
+    <div style="margin-top: 50px;">
+        <h4
+            style="font-size: 1.1rem; color: #2d6a4f; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
+            <i class="fas fa-chevron-circle-right"></i> 이어지는 질문
+        </h4>
+        <div id="next-questions-list">
+            {% load bbs_extras %}
+            <table class="history-table" style="margin-top:0;">
+                <tbody id="question-list-tbody">
+                    {% for p in next_posts %}
+                    <tr>
+                        <td style="text-align: left;">
+                            <a href="{% url 'mypage:detail_answer' p.pk %}" class="post-link"
+                                style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px;">
+                                {{ p.title|highlight_prefix }}
+                            </a>
+                        </td>
+                        <td style="text-align: center; color: #888; font-size: 0.9em; width: 100px;">
+                            {{ p.created_at|compact_date }}
+                        </td>
+                        <td style="width: 60px;">조회 {{ p.hits }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- List Button Removed -->
+</div>
+{% endblock %}

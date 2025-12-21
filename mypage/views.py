@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
@@ -21,24 +21,25 @@ def index(request):
     attempts_qs = UserExamAttempt.objects.filter(user=request.user).order_by(
         "-start_time"
     )
-    paginator = Paginator(attempts_qs, 15)
-    page_number = request.GET.get("page")
-    recent_attempts = paginator.get_page(page_number)
+    attempts_paginator = Paginator(attempts_qs, 15)
+    attempts_page = request.GET.get("page")
+    recent_attempts = attempts_paginator.get_page(attempts_page)
 
     # 0.1 My Questions (Notebook History)
-    my_notebook_questions = NotebookHistory.objects.filter(user=request.user).order_by(
-        "-created_at"
-    )
+    # (Removed NotebookHistory from index context if not used, or kept if needed)
 
     # 0.2 My Questions (BBS Posts: Basic Book & Tree Doctor)
-    # Filter for posts where type is "기본서" or "주치의" (or "주치의 질의" for compatibility)
     target_types = ["기본서", "주치의", "주치의 질의"]
-    my_questions = Post.objects.filter(
+    posts_qs = Post.objects.filter(
         author=request.user, type__name__in=target_types
     ).order_by("-created_at")
 
+    posts_paginator = Paginator(posts_qs, 15)
+    posts_page = request.GET.get("q_page")
+    my_questions = posts_paginator.get_page(posts_page)
+
     # 1. Aggregate results by Subject
-    # We need to join Question -> Subject
+    # ... (rest of stats logic stays same)
     subject_stats = (
         UserQuestionResult.objects.filter(attempt__user=request.user)
         .values("question__subject__name")
@@ -54,7 +55,7 @@ def index(request):
     labels = []
     data = []
     weakest_subject = None
-    min_accuracy = 101  # Start higher than 100
+    min_accuracy = 101
 
     for stat in subject_stats:
         subj_name = stat["question__subject__name"]
@@ -63,15 +64,12 @@ def index(request):
             if stat["total"] > 0
             else 0
         )
-
         labels.append(subj_name)
         data.append(accuracy)
-
         if accuracy < min_accuracy:
             min_accuracy = accuracy
             weakest_subject = f"{subj_name} ({accuracy}점)"
 
-    # Handle case with no data
     if not labels:
         labels = ["데이터 없음"]
         data = [0]
@@ -87,6 +85,9 @@ def index(request):
     }
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        # Check which part triggered AJAX
+        if "q_page" in request.GET:
+            return render(request, "mypage/my_questions_partial.html", context)
         return render(request, "mypage/history_partial.html", context)
 
     return render(request, "mypage/index.html", context)
@@ -142,3 +143,24 @@ def edit(request):
         return render(request, "mypage/edit.html", {"step": "edit"})
     else:
         return render(request, "mypage/edit.html", {"step": "password"})
+
+
+@login_required
+def detail_answer(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    # Increment hits (consistent with bbs/views.py)
+    post.hits += 1
+    post.save()
+
+    # Fetch 10 following (older) questions by the same author
+    target_types = ["기본서", "주치의", "주치의 질의"]
+    next_posts = Post.objects.filter(
+        author=post.author, type__name__in=target_types, created_at__lt=post.created_at
+    ).order_by("-created_at")[:10]
+
+    context = {
+        "post": post,
+        "next_posts": next_posts,
+    }
+    return render(request, "mypage/detail_answer.html", context)

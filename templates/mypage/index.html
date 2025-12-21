@@ -366,36 +366,7 @@
 
             <div id="my-questions-section" class="content-section active">
                 <div id="question-list-view">
-                    <table class="history-table">
-                        <thead>
-                            <tr>
-                                <th style="padding-left:10px; text-align: left;">제목</th>
-                                <th style="width: 100px;">작성일시</th>
-                                <th style="width: 60px;">조회수</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for post in my_questions %}
-                            <tr>
-                                <td style="text-align: left;">
-                                    <a href="{% url 'bbs:post_detail' post.pk %}" class="post-link"
-                                        style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px;">
-                                        {{ post.title|highlight_prefix }}
-                                    </a>
-                                </td>
-
-                                <td style="text-align: center; color: #888; font-size: 0.9em;">
-                                    {{ post.created_at|compact_date }}
-                                </td>
-                                <td>{{ post.hits }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="3" style="padding: 30px; color: #888;">작성한 질문 내역이 없습니다.</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    {% include 'mypage/my_questions_partial.html' %}
                 </div>
                 <div id="question-detail-view" style="display: none;">
                     <!-- Detail content loaded via AJAX -->
@@ -488,6 +459,8 @@
             if (sectionId === 'my_questions') {
                 document.querySelectorAll('.menu-item')[0].classList.add('active');
                 document.getElementById('my-questions-section').classList.add('active');
+                // Reset to list view if it was in detail
+                showListView();
             } else if (sectionId === 'history') {
                 document.querySelectorAll('.menu-item')[1].classList.add('active');
                 document.getElementById('history-section').classList.add('active');
@@ -497,6 +470,55 @@
             } else if (sectionId === 'info') {
                 document.querySelectorAll('.menu-item')[3].classList.add('active');
                 document.getElementById('info-section').classList.add('active');
+            }
+        }
+
+        function loadPostDetail(url) {
+            fetch(url)
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const content = doc.querySelector('.bbs-container');
+
+                    if (content) {
+                        // Remove Comment Section (Box) entirely
+                        const commentSection = content.querySelector('#comment-section');
+                        if (commentSection) {
+                            commentSection.remove();
+                        } else {
+                            const commentForms = content.querySelectorAll('form');
+                            commentForms.forEach(form => form.remove());
+                        }
+
+                        document.getElementById('detail-content-area').innerHTML = '';
+                        document.getElementById('detail-content-area').appendChild(content);
+
+                        document.getElementById('question-list-view').style.display = 'none';
+                        const detailView = document.getElementById('question-detail-view');
+                        detailView.style.display = 'block';
+
+                        detailView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                        if (window.MathJax) {
+                            MathJax.typesetPromise([content]).catch((err) => console.log(err));
+                        }
+                    }
+                })
+                .catch(err => console.error('Failed to load post:', err));
+        }
+
+        function showListView() {
+            const detailView = document.getElementById('question-detail-view');
+            const listView = document.getElementById('question-list-view');
+
+            if (detailView && listView) {
+                detailView.style.display = 'none';
+                listView.style.display = 'block';
+
+                // Clean up detail area
+                const detailArea = document.getElementById('detail-content-area');
+                if (detailArea) detailArea.innerHTML = '';
             }
         }
 
@@ -570,107 +592,30 @@
             // --- AJAX Post Detail Logic ---
             const myQuestionsSection = document.getElementById('my-questions-section');
             if (myQuestionsSection) {
+                // Handle Pagination AJAX
                 myQuestionsSection.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.classList.contains('q-ajax-link')) {
+                        e.preventDefault();
+                        const url = e.target.href;
+                        const listView = document.getElementById('question-list-view');
+
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(response => response.text())
+                            .then(html => {
+                                listView.innerHTML = html;
+                                // Scroll slightly if needed, but staying put is usually requested
+                            })
+                            .catch(error => console.error('Error:', error));
+                        return; // Done
+                    }
+
                     const link = e.target.closest('.post-link');
                     if (link) {
                         e.preventDefault();
                         const url = link.href;
 
-                        // --- Render Next 3 Questions Logic ---
-                        // Always find the row in the MASTER list (`#question-list-view`) to ensure we get the correct next rows
-                        // even if the click came from the "Next Questions" sub-list.
-                        const targetHref = link.getAttribute('href');
-                        const masterLink = document.querySelector(`#question-list-view a[href="${targetHref}"]`);
-
-                        if (masterLink) {
-                            const masterRow = masterLink.closest('tr');
-                            const masterTbody = masterRow.closest('tbody');
-
-                            if (masterTbody) {
-                                const allRows = Array.from(masterTbody.children);
-                                const currentIndex = allRows.indexOf(masterRow);
-
-                                // Get next 10 rows from the master list
-                                const nextRows = allRows.slice(currentIndex + 1, currentIndex + 11);
-                                const nextListContainer = document.getElementById('next-questions-list');
-
-                                if (nextRows.length > 0) {
-                                    let tableHtml = '<table class="history-table" style="margin-top:0;">';
-                                    tableHtml += '<tbody>';
-                                    nextRows.forEach(row => {
-                                        tableHtml += row.outerHTML;
-                                    });
-                                    tableHtml += '</tbody></table>';
-                                    nextListContainer.innerHTML = tableHtml;
-                                    nextListContainer.style.display = 'block';
-                                } else {
-                                    nextListContainer.style.display = 'none';
-                                }
-                            }
-                        }
-
-                        fetch(url)
-                            .then(response => response.text())
-                            .then(html => {
-                                const parser = new DOMParser();
-                                const doc = parser.parseFromString(html, 'text/html');
-                                const content = doc.querySelector('.bbs-container');
-
-                                if (content) {
-                                    // Move 'List' button to #post-actions next to Edit/Delete
-                                    const origListBtn = content.querySelector('.btn-list');
-                                    if (origListBtn && origListBtn.parentElement) {
-                                        origListBtn.parentElement.style.display = 'none';
-                                    }
-
-                                    const actionContainer = content.querySelector('#post-actions');
-                                    if (actionContainer) {
-                                        const newListBtn = document.createElement('a');
-                                        newListBtn.href = '#';
-                                        newListBtn.className = 'btn-action btn-list';
-                                        newListBtn.innerHTML = '<i class="fas fa-list"></i> 목록';
-                                        newListBtn.onclick = function (e) {
-                                            e.preventDefault();
-                                            showListView();
-                                        };
-                                        // Prepend to display as [List] [Edit] [Delete] (since justify-end, first child is left-most)
-                                        // User request: "List" after "Edit, Delete". So append.
-                                        // DOM: [Edit] [Delete] [List]
-                                        actionContainer.appendChild(newListBtn);
-                                    }
-
-                                    // Remove Comment Section (Box) entirely
-                                    const commentSection = content.querySelector('#comment-section');
-                                    if (commentSection) {
-                                        commentSection.remove();
-                                    } else {
-                                        // Fallback if ID not found (e.g. cached old HTML), try removing forms at least
-                                        const commentForms = content.querySelectorAll('form');
-                                        commentForms.forEach(form => form.remove());
-                                    }
-
-                                    // Override 'Delete' or other links if necessary, or let them work naturally (they might reload page)
-                                    // For now, just showing content is enough.
-
-                                    document.getElementById('detail-content-area').innerHTML = '';
-                                    document.getElementById('detail-content-area').appendChild(content);
-
-                                    document.getElementById('question-list-view').style.display = 'none';
-                                    const detailView = document.getElementById('question-detail-view');
-                                    detailView.style.display = 'block';
-
-                                    // Scroll to top of the detail view
-                                    // Using a small timeout to ensure DOM render before scroll if needed, but direct usually works.
-                                    // Also considering sticky headers, but 'start' attempts to align to top.
-                                    detailView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                                    // Trigger MathJax to render new content
-                                    if (window.MathJax) {
-                                        MathJax.typesetPromise([content]).catch((err) => console.log(err));
-                                    }
-                                }
-                            })
-                            .catch(err => console.error('Failed to load post:', err));
+                        // --- Render Next Questions Logic Removed ---
+                        loadPostDetail(url);
                     }
                 });
             }
@@ -712,13 +657,9 @@
                                     if (cancelBtn) {
                                         cancelBtn.onclick = function (ev) {
                                             ev.preventDefault();
-                                            // How to go back? We need the original Detail URL.
-                                            // The edit URL format is /bbs/post/<pk>/update/
-                                            // Detail URL is /bbs/post/<pk>/
-                                            const detailUrl = url.replace('/update', ''); // Crude but likely works
-                                            // We could trigger a fetch for detailUrl here using the same logic.
-                                            // For now, just let it sit or implement reload.
-                                            // Ideally, we simulate a click on the list item?
+                                            // Detail URL is the parent of update URL: /bbs/post/<pk>/
+                                            const detailUrl = url.split('/').slice(0, -2).join('/') + '/';
+                                            loadPostDetail(detailUrl);
                                         }
                                     }
 
@@ -813,22 +754,7 @@
                 });
             }
 
-            function showListView() {
-                const detailView = document.getElementById('question-detail-view');
-                const listView = document.getElementById('question-list-view');
-
-                if (detailView && listView) {
-                    detailView.style.display = 'none';
-                    listView.style.display = 'block';
-
-                    // Clean up detail area
-                    document.getElementById('detail-content-area').innerHTML = '';
-
-                    // Reload page to refresh list/context if needed? No, staying is better.
-                    // But if edit happened, list might be stale.
-                    // For now, simple toggle.
-                }
-            }
+            // showListView moved to global scope
         });
     </script>
 </body>
