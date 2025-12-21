@@ -212,6 +212,54 @@ h1 {
     }
 }
 
+.btn-wrong-note-view {
+    background-color: var(--card-bg);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-wrong-note-view:hover {
+    background-color: var(--primary-color);
+    color: var(--bg-color);
+}
+
+.btn-wrong-analysis {
+    background-color: var(--card-bg);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-wrong-analysis:hover {
+    background-color: var(--accent-color);
+    color: #000;
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-color);
+    color: var(--text-main);
+}
+
 @keyframes fadeInUp {
     from {
         opacity: 0;

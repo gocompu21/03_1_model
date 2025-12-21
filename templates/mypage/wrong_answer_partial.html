@@ -1,0 +1,67 @@
+{% load bbs_extras %}
+
+<table class="history-table">
+    <thead>
+        <tr>
+            <th style="width: 1%; white-space: nowrap;">응시 일시</th>
+            <th style="width: 1%; white-space: nowrap;">문제번호</th>
+            <th style="width: 1%; white-space: nowrap;">과목</th>
+            <th>문제</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for result in wrong_answers %}
+        <tr onclick="loadWrongAnswerDetail({{ result.id }});" style="cursor: pointer;" title="클릭하여 상세 해설 보기">
+            <td style="white-space: nowrap;">{{ result.attempt.start_time|date:"y/m/d H:i" }}</td>
+            <td style="font-weight: bold; color: #2d6a4f; white-space: nowrap;">
+                {{ result.question.exam.round_number }}/{{ result.question.number }}
+            </td>
+            <td style="white-space: nowrap;">{{ result.question.subject.name }}</td>
+            <td style="text-align: left; max-width: 300px;">
+                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{ result.question.content }}
+                </div>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" style="padding: 30px; color: #868e96;">틀린 문제가 없습니다. 훌륭합니다!</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+{% if wrong_answers.has_other_pages %}
+<ul class="pagination">
+    {% if wrong_answers.has_previous %}
+    <li><a href="#" class="page-link" data-page="{{ wrong_answers.previous_page_number }}" data-type="wrong">&laquo;</a>
+    </li>
+    {% endif %}
+
+    {% for i in wrong_answers|elided_page_range %}
+    {% if i == wrong_answers.paginator.ELLIPSIS %}
+    <li><span class="page-link disabled">...</span></li>
+    {% elif wrong_answers.number == i %}
+    <li><a href="#" class="active">{{ i }}</a></li>
+    {% else %}
+    {% if attempt_id %}
+    <li><a href="#" class="page-link" data-page="{{ i }}" data-type="wrong" data-attempt-id="{{ attempt_id }}">{{ i
+            }}</a></li>
+    {% else %}
+    <li><a href="#" class="page-link" data-page="{{ i }}" data-type="wrong">{{ i }}</a></li>
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+
+    {% if wrong_answers.has_next %}
+    {% if attempt_id %}
+    <li><a href="#" class="page-link" data-page="{{ wrong_answers.next_page_number }}" data-type="wrong"
+            data-attempt-id="{{ attempt_id }}">&raquo;</a></li>
+    {% else %}
+    <li><a href="#" class="page-link" data-page="{{ wrong_answers.next_page_number }}" data-type="wrong">&raquo;</a>
+    </li>
+    {% endif %}
+    {% endif %}
+</ul>
+{% endif %}

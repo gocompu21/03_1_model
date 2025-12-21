@@ -1,0 +1,203 @@
+{% load markdown_extras %}
+<style>
+    .wa-detail-container {
+        font-family: sans-serif;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        margin-bottom: 30px;
+        /* Spacing between questions */
+    }
+
+    .q-header {
+        border-bottom: 2px solid #2d6a4f;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .q-badge {
+        background: #2d6a4f;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        margin-right: 10px;
+    }
+
+    .q-content {
+        font-size: 1.15em;
+        font-weight: bold;
+        line-height: 1.6;
+        color: #333;
+        margin-top: 10px;
+    }
+
+    .q-choices {
+        margin-bottom: 30px;
+        padding-left: 10px;
+    }
+
+    .choice-item {
+        margin-bottom: 8px;
+        font-size: 1.05em;
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    .choice-item.correct {
+        background-color: #e6fffa;
+        border: 1px solid #b7e4c7;
+        color: #2d6a4f;
+        font-weight: bold;
+    }
+
+    .choice-item.wrong {
+        background-color: #fff5f5;
+        border: 1px solid #ffc9c9;
+        color: #c92a2a;
+        font-weight: bold;
+        text-decoration: line-through;
+    }
+
+    .explanation-section {
+        background-color: #f8f9fa;
+        border: 1px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .exp-title {
+        font-weight: bold;
+        color: #d35400;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .infographic-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .infographic-container img {
+        max-width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+</style>
+
+{% if attempt.ai_analysis %}
+<div class="wa-detail-container" style="background-color: #f1f8f5; border: 1px solid #c3e6cb;">
+    <h3
+        style="margin-top: 0; color: #155724; font-size: 1.1rem; border-bottom: 2px solid #2d6a4f; padding-bottom: 10px; margin-bottom: 15px;">
+        <i class="fas fa-robot"></i> AI 나무주치의 진단 리포트
+    </h3>
+    <div class="ai-analysis-content" style="line-height: 1.6; color: #333; font-size: 0.95rem;">
+        {{ attempt.ai_analysis|safe }}
+    </div>
+</div>
+{% endif %}
+
+{% for result in wrong_answers %}
+<div class="wa-detail-container">
+    <div class="q-header">
+        <div>
+            <span class="q-badge">{{ result.question.subject.name }}</span>
+            <span style="color: #666; font-size: 0.9em;">
+                {{ result.question.exam.round_number }}회 {{ result.question.number }}번
+                <span class="q_id_marker" style="display:none;">{{ result.question.id }}</span>
+            </span>
+        </div>
+        <div class="q-content">
+            {{ result.question.content|linebreaksbr }}
+        </div>
+    </div>
+
+    {% if result.question.image %}
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="{{ result.question.image.url }}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc;">
+    </div>
+    {% endif %}
+
+    <div class="q-choices">
+        {% with ans=result.question.answer selected=result.selected_choice %}
+        <div class="choice-item {% if ans == 1 %}correct{% elif selected == 1 %}wrong{% endif %}">
+            ① {{ result.question.choice1 }}
+            {% if selected == 1 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 2 %}correct{% elif selected == 2 %}wrong{% endif %}">
+            ② {{ result.question.choice2 }}
+            {% if selected == 2 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 3 %}correct{% elif selected == 3 %}wrong{% endif %}">
+            ③ {{ result.question.choice3 }}
+            {% if selected == 3 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 4 %}correct{% elif selected == 4 %}wrong{% endif %}">
+            ④ {{ result.question.choice4 }}
+            {% if selected == 4 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 5 %}correct{% elif selected == 5 %}wrong{% endif %}">
+            ⑤ {{ result.question.choice5 }}
+            {% if selected == 5 %}(내 답){% endif %}
+        </div>
+        {% endwith %}
+    </div>
+
+    <div class="explanation-section">
+        <div class="exp-title">💡 정답 및 해설</div>
+
+        <!-- Explanation Tabs -->
+        <div class="exp-tabs" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #eee;">
+            <button class="exp-tab-btn active" onclick="switchExpTab(this, 'textbook')"
+                style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #d35400; border-bottom: 2px solid #d35400; cursor: pointer;">기본서
+                해설</button>
+            <button class="exp-tab-btn" onclick="switchExpTab(this, 'general')"
+                style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">일반
+                해설</button>
+        </div>
+
+        <div class="exp-content-area">
+            <!-- Textbook Explanation -->
+            <div class="exp-content textbook-content" style="display: block;">
+                {% if result.question.textbook_chat %}
+                <div class="markdown-content">
+                    {{ result.question.textbook_chat|markdown|safe }}
+                </div>
+                {% else %}
+                <p style="color: #999; font-style: italic;">기본서 해설이 없습니다.</p>
+                {% endif %}
+            </div>
+
+            <!-- General Explanation -->
+            <div class="exp-content general-content" style="display: none;">
+                {% if result.question.general_chat %}
+                <div class="markdown-content">
+                    {{ result.question.general_chat|markdown|safe }}
+                </div>
+                {% else %}
+                <p style="color: #999; font-style: italic;">일반 해설이 없습니다.</p>
+                {% endif %}
+            </div>
+        </div>
+
+
+        {% if result.question.infographic_image %}
+        <div class="infographic-container">
+            <p style="text-align: center; font-weight: bold; color: #555; margin-bottom: 5px;">[비주얼 암기 카드]</p>
+            <img src="{{ result.question.infographic_image.url }}" onclick="window.open(this.src, '_blank')">
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% empty %}
+<div style="text-align: center; padding: 50px; color: #888;">
+    <p style="font-size: 1.2rem;">이 회차에는 오답이 없습니다. 완벽합니다!</p>
+</div>
+{% endfor %}

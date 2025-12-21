@@ -47,3 +47,18 @@ def compact_date(value):
         return value.strftime("%m/%d")
     else:
         return value.strftime("%Y/%m/%d")
+
+
+@register.filter
+def elided_page_range(page_obj):
+    """
+    Returns a list of pages to be displayed in pagination, including ellipsis.
+    Centered around the current page of the passed page_obj.
+    """
+    if not page_obj:
+        return []
+    paginator = page_obj.paginator
+    # on_each_side=3 ensures that for page 4, we see 1..7.
+    return paginator.get_elided_page_range(
+        number=page_obj.number, on_each_side=3, on_ends=1
+    )

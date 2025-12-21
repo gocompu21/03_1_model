@@ -138,10 +138,16 @@
     <!-- Next Questions List -->
     {% if next_posts %}
     <div style="margin-top: 50px;">
-        <h4
-            style="font-size: 1.1rem; color: #2d6a4f; margin-bottom: 15px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">
-            <i class="fas fa-chevron-circle-right"></i> 이어지는 질문
-        </h4>
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e9ecef; margin-bottom: 15px; padding-bottom: 10px;">
+            <h4 style="font-size: 1.1rem; color: #2d6a4f; margin: 0;">
+                <i class="fas fa-chevron-circle-right"></i> 이어지는 질문
+            </h4>
+            <button class="btn btn-sm btn-secondary" onclick="showListView()"
+                style="background-color: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; cursor: pointer;">
+                <i class="fas fa-arrow-left"></i> 목록으로
+            </button>
+        </div>
         <div id="next-questions-list">
             {% load bbs_extras %}
             <table class="history-table" style="margin-top:0;">

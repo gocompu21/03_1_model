@@ -1,58 +1,107 @@
 {% if recent_attempts %}
-<table class="history-table">
-    <thead>
-        <tr>
-            <th>회차</th>
-            <th>응시일</th>
-            <th>점수</th>
-            <th>결과</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for attempt in recent_attempts %}
-        <tr>
-            <td>{{ attempt.exam.round_number }}회</td>
-            <td>{{ attempt.start_time|date:"Y.m.d H:i" }}</td>
-            <td style="font-weight:bold; color:#2d6a4f;">{{ attempt.total_score }}점</td>
-            <td>
-                {% if attempt.total_score >= 60 %}
-                <span class="pass-badge pass">합격</span>
+<div class="history-grid"
+    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 10px 0;">
+    {% for attempt in recent_attempts %}
+    <div class="exam-card"
+        style="background: white; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #e9ecef; position: relative; transition: transform 0.2s;">
+        <!-- Card Header -->
+        <div
+            style="background-color: #2d6a4f; padding: 15px 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-size: 0.9rem; opacity: 0.9;"><i class="fas fa-tree"></i> 제
+                    {{ attempt.exam.round_number }}회</span>
+                <h3 style="margin: 5px 0 0 0; font-size: 1.2rem;">나무의사 기출시험</h3>
+            </div>
+            <div style="text-align: right;">
+                <span style="font-size: 0.85rem; opacity: 0.8;">{{ attempt.start_time|date:"Y.m.d" }}</span>
+            </div>
+        </div>
+
+        <!-- Card Body -->
+        <div style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div>
+                    <span style="display: block; color: #666; font-size: 0.85rem; margin-bottom: 5px;">최종 점수</span>
+                    <div style="font-size: 1.8rem; font-weight: bold; color: #2d6a4f;">
+                        {% widthratio attempt.correct_q attempt.total_q 100 %} <span
+                            style="font-size: 1rem; color: #888;">점</span>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <span style="display: block; color: #666; font-size: 0.85rem; margin-bottom: 5px;">정답률</span>
+                    <div style="font-size: 1.1rem; color: #495057;">
+                        {{ attempt.correct_q }} / {{ attempt.total_q }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div
+                style="background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
+                <div
+                    style="background-color: #2d6a4f; height: 100%; width: {% widthratio attempt.correct_q attempt.total_q 100 %}%;">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div style="display: flex; gap: 10px;">
+                {% if attempt.total_q > attempt.correct_q %}
+                <button onclick="loadWrongAnswersByAttempt({{ attempt.id }})" class="btn"
+                    style="flex: 1; padding: 10px; background-color: white; border: 1px solid #2d6a4f; color: #2d6a4f; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    <i class="fas fa-book-open"></i> 오답노트
+                </button>
                 {% else %}
-                <span class="pass-badge fail">불합격</span>
+                <div
+                    style="flex: 1; text-align: center; padding: 10px; background-color: #d8f3dc; color: #1b4332; border-radius: 6px; font-weight: bold;">
+                    <i class="fas fa-medal"></i> 만점 달성!
+                </div>
                 {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+
+                <button onclick="deleteAttempt({{ attempt.id }})" class="btn"
+                    style="padding: 10px 15px; background-color: #fff5f5; border: 1px solid #ffc9c9; color: #fa5252; border-radius: 6px; cursor: pointer;"
+                    title="기록 삭제">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
 <!-- Pagination Controls -->
-<div class="pagination">
+<div class="pagination" style="margin-top: 30px; text-align: center;">
     {% if recent_attempts.has_previous %}
-    <a href="?page=1&tab=history" class="ajax-link" data-page="1">&laquo; 처음</a>
+    <a href="?page=1&tab=history" class="ajax-link" data-page="1" style="margin: 0 5px; color: #2d6a4f;">&laquo; 처음</a>
     <a href="?page={{ recent_attempts.previous_page_number }}&tab=history" class="ajax-link"
-        data-page="{{ recent_attempts.previous_page_number }}">이전</a>
+        data-page="{{ recent_attempts.previous_page_number }}" style="margin: 0 5px; color: #2d6a4f;">이전</a>
     {% endif %}
 
     {% for num in recent_attempts.paginator.page_range %}
     {% if num == recent_attempts.number %}
-    <a href="#" class="active">{{ num }}</a>
+    <span class="active" style="margin: 0 5px; font-weight: bold; color: #2d6a4f; text-decoration: underline;">
+        {{ num}}</span>
     {% elif num > recent_attempts.number|add:'-3' and num < recent_attempts.number|add:'3' %} <a
-        href="?page={{ num }}&tab=history" class="ajax-link" data-page="{{ num }}">{{ num }}</a>
+        href="?page={{ num }}&tab=history" class="ajax-link" data-page="{{ num }}"
+        style="margin: 0 5px; color: #495057; text-decoration: none;">{{ num }}</a>
         {% endif %}
         {% endfor %}
 
         {% if recent_attempts.has_next %}
         <a href="?page={{ recent_attempts.next_page_number }}&tab=history" class="ajax-link"
-            data-page="{{ recent_attempts.next_page_number }}">다음</a>
+            data-page="{{ recent_attempts.next_page_number }}" style="margin: 0 5px; color: #2d6a4f;">다음</a>
         <a href="?page={{ recent_attempts.paginator.num_pages }}&tab=history" class="ajax-link"
-            data-page="{{ recent_attempts.paginator.num_pages }}">마지막 &raquo;</a>
+            data-page="{{ recent_attempts.paginator.num_pages }}" style="margin: 0 5px; color: #2d6a4f;">마지막 &raquo;</a>
         {% endif %}
 </div>
 
 {% else %}
-<div style="text-align: center; padding: 50px; color: #888;">
-    <p style="font-size: 1.2rem;">아직 응시한 모의고사가 없습니다.</p>
-    <a href="{% url 'exam:index' %}" class="btn btn-primary" style="margin-top: 15px;">시험 보러 가기</a>
+<div
+    style="text-align: center; padding: 60px 20px; color: #888; background: #f8f9fa; border-radius: 12px; margin-top: 20px;">
+    <i class="fas fa-seedling" style="font-size: 3rem; color: #dee2e6; margin-bottom: 20px;"></i>
+    <p style="font-size: 1.1rem; margin-bottom: 20px;">아직 응시한 기출시험 기록이 없습니다.<br>나무의사 합격을 위한 첫 걸음을 시작해보세요!</p>
+    <a href="{% url 'exam:index' %}" class="btn"
+        style="background-color: #2d6a4f; color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: opacity 0.2s;">
+        <i class="fas fa-play"></i> 시험 보러 가기
+    </a>
 </div>
 {% endif %}

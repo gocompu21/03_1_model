@@ -1,0 +1,228 @@
+{% load markdown_extras %}
+<style>
+    .wa-detail-container {
+        font-family: sans-serif;
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .q-header {
+        border-bottom: 2px solid #2d6a4f;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+
+    .q-badge {
+        background: #2d6a4f;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        margin-right: 10px;
+    }
+
+    .q-content {
+        font-size: 1.15em;
+        font-weight: bold;
+        line-height: 1.6;
+        color: #333;
+        margin-top: 10px;
+    }
+
+    .q-choices {
+        margin-bottom: 30px;
+        padding-left: 10px;
+    }
+
+    .choice-item {
+        margin-bottom: 8px;
+        font-size: 1.05em;
+        padding: 8px;
+        border-radius: 5px;
+    }
+
+    .choice-item.correct {
+        background-color: #e6fffa;
+        border: 1px solid #b7e4c7;
+        color: #2d6a4f;
+        font-weight: bold;
+    }
+
+    .choice-item.wrong {
+        background-color: #fff5f5;
+        border: 1px solid #ffc9c9;
+        color: #c92a2a;
+        font-weight: bold;
+        text-decoration: line-through;
+    }
+
+    .explanation-section {
+        background-color: #f8f9fa;
+        border: 1px dashed #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+
+    .exp-title {
+        font-weight: bold;
+        color: #d35400;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .infographic-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .infographic-container img {
+        max-width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+    }
+</style>
+
+<div class="wa-detail-container">
+    <div class="q-header">
+        <div>
+            <span class="q-badge">{{ result.question.subject.name }}</span>
+            <span style="color: #666; font-size: 0.9em;">
+                {{ result.question.exam.round_number }}회 {{ result.question.number }}번
+                ({{ result.attempt.start_time|date:"Y.m.d" }} 응시)
+            </span>
+        </div>
+        <div class="q-content">
+            {{ result.question.content|linebreaksbr }}
+        </div>
+    </div>
+
+    {% if result.question.image %}
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="{{ result.question.image.url }}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc;">
+    </div>
+    {% endif %}
+
+    <div class="q-choices">
+        {% with ans=result.question.answer selected=result.selected_choice %}
+        <div class="choice-item {% if ans == 1 %}correct{% elif selected == 1 %}wrong{% endif %}">
+            ① {{ result.question.choice1 }}
+            {% if selected == 1 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 2 %}correct{% elif selected == 2 %}wrong{% endif %}">
+            ② {{ result.question.choice2 }}
+            {% if selected == 2 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 3 %}correct{% elif selected == 3 %}wrong{% endif %}">
+            ③ {{ result.question.choice3 }}
+            {% if selected == 3 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 4 %}correct{% elif selected == 4 %}wrong{% endif %}">
+            ④ {{ result.question.choice4 }}
+            {% if selected == 4 %}(내 답){% endif %}
+        </div>
+        <div class="choice-item {% if ans == 5 %}correct{% elif selected == 5 %}wrong{% endif %}">
+            ⑤ {{ result.question.choice5 }}
+            {% if selected == 5 %}(내 답){% endif %}
+        </div>
+        {% endwith %}
+    </div>
+
+    <div class="explanation-section">
+        <div class="exp-title">💡 정답 및 해설</div>
+
+        <!-- Explanation Tabs -->
+        <div class="exp-tabs" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #eee;">
+            <button class="exp-tab-btn active" onclick="switchExpTab(this, 'textbook')"
+                style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #d35400; border-bottom: 2px solid #d35400; cursor: pointer;">기본서
+                해설</button>
+            <button class="exp-tab-btn" onclick="switchExpTab(this, 'general')"
+                style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">일반
+                해설</button>
+        </div>
+
+        <div class="exp-content-area">
+            <!-- Textbook Explanation -->
+            <div class="exp-content textbook-content" style="display: block;">
+                {% if result.question.textbook_chat %}
+                <div class="markdown-content">
+                    {{ result.question.textbook_chat|markdown|safe }}
+                </div>
+                {% else %}
+                <p style="color: #999; font-style: italic;">기본서 해설이 없습니다.</p>
+                {% endif %}
+            </div>
+
+            <!-- General Explanation -->
+            <div class="exp-content general-content" style="display: none;">
+                {% if result.question.general_chat %}
+                <div class="markdown-content">
+                    {{ result.question.general_chat|markdown|safe }}
+                </div>
+                {% else %}
+                <p style="color: #999; font-style: italic;">일반 해설이 없습니다.</p>
+                {% endif %}
+            </div>
+        </div>
+
+
+        {% if result.question.infographic_image %}
+        <div class="infographic-container">
+            <p style="text-align: center; font-weight: bold; color: #555; margin-bottom: 5px;">[비주얼 암기 카드]</p>
+            <img src="{{ result.question.infographic_image.url }}" onclick="window.open(this.src, '_blank')">
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Next Wrong Answers List -->
+    {% if next_results %}
+    <div style="margin-top: 50px;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e9ecef; margin-bottom: 15px; padding-bottom: 10px;">
+            <h4 style="font-size: 1.1rem; color: #2d6a4f; margin: 0;">
+                <i class="fas fa-history"></i> 이어지는 오답 노트
+            </h4>
+            <button class="btn btn-sm btn-secondary" onclick="showWrongAnswerList()"
+                style="background-color: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; cursor: pointer;">
+                <i class="fas fa-arrow-left"></i> 목록으로
+            </button>
+        </div>
+        <div style="background: #fff;">
+            <table class="history-table" style="margin-top:0; width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 1%; white-space: nowrap;">응시 일시</th>
+                        <th style="width: 1%; white-space: nowrap;">문제번호</th>
+                        <th style="width: 1%; white-space: nowrap;">과목</th>
+                        <th>문제</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for next_item in next_results %}
+                    <tr onclick="loadWrongAnswerDetail({{ next_item.id }})"
+                        style="cursor: pointer; border-bottom: 1px solid #f1f3f5;">
+                        <td style="white-space: nowrap;">{{ next_item.attempt.start_time|date:"y/m/d H:i" }}</td>
+                        <td style="font-weight: bold; color: #2d6a4f; white-space: nowrap;">
+                            {{ next_item.question.exam.round_number }}/{{ next_item.question.number }}
+                        </td>
+                        <td style="white-space: nowrap;">{{ next_item.question.subject.name }}</td>
+                        <td style="text-align: left; max-width: 300px;">
+                            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                {{ next_item.question.content }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>

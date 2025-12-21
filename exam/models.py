@@ -61,6 +61,7 @@ class UserExamAttempt(models.Model):
     start_time = models.DateTimeField(auto_now_add=True, verbose_name="시작 시간")
     end_time = models.DateTimeField(null=True, blank=True, verbose_name="종료 시간")
     total_score = models.IntegerField(null=True, blank=True, verbose_name="총점")
+    ai_analysis = models.TextField(null=True, blank=True, verbose_name="AI 분석 리포트")
 
     def __str__(self):
         return f"{self.user.username} - {self.exam.round_number}회 응시 ({self.start_time})"

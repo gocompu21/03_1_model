@@ -230,25 +230,42 @@
         .pagination {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
             list-style: none;
             padding: 0;
+            margin-top: 20px;
             gap: 5px;
         }
 
-        .pagination a {
-            text-decoration: none;
-            padding: 6px 12px;
-            border: 1px solid #ddd;
-            color: #333;
-            border-radius: 4px;
-            font-size: 0.9rem;
+        .pagination li {
+            margin: 0;
         }
 
-        .pagination a.active {
+        .pagination li a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 32px;
+            height: 32px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            color: #495057;
+            text-decoration: none;
+            font-size: 0.9rem;
+            background-color: #fff;
+            transition: all 0.2s;
+        }
+
+        .pagination li a:hover {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #212529;
+        }
+
+        .pagination li a.active {
             background-color: #2d6a4f;
-            color: white;
             border-color: #2d6a4f;
+            color: #fff;
+            font-weight: bold;
         }
 
         .pagination a:hover:not(.active) {
@@ -343,14 +360,20 @@
     <div class="app-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="menu-item active" onclick="showSection('my_questions')">
-                <i class="fas fa-question-circle"></i> 내 질문
+            <div class="menu-item active" onclick="showSection('wrong_answer')">
+                <i class="fas fa-times-circle"></i> 전체 오답 노트
+            </div>
+            <div class="menu-item" onclick="showSection('my_questions')">
+                <i class="fas fa-question-circle"></i> 나의 질의응답
             </div>
             <div class="menu-item" onclick="showSection('history')">
-                <i class="fas fa-clipboard-list"></i> 모의고사 기록
+                <i class="fas fa-clipboard-list"></i> 기출시험 테스트
             </div>
             <div class="menu-item" onclick="showSection('analysis')">
                 <i class="fas fa-chart-pie"></i> 과목별 실력분석
+            </div>
+            <div class="menu-item" onclick="showSection('ai_analysis')">
+                <i class="fas fa-robot"></i> 내 최근 질의 분석
             </div>
             <div class="menu-item" onclick="showSection('info')">
                 <i class="fas fa-user"></i> 회원 정보
@@ -364,8 +387,9 @@
         <!-- Main Content -->
         <div class="main-content">
 
-            <div id="my-questions-section" class="content-section active">
+            <div id="my-questions-section" class="content-section">
                 <div id="question-list-view">
+                    <h1>나의 질의응답</h1>
                     {% include 'mypage/my_questions_partial.html' %}
                 </div>
                 <div id="question-detail-view" style="display: none;">
@@ -412,12 +436,44 @@
 
             <!-- Section 2: Exam History (New) -->
             <div id="history-section" class="content-section">
-                <h1>나의 모의고사 기록</h1>
+                <h1>기출시험 테스트</h1>
 
                 <div id="history-list-container">
                     {% include 'mypage/history_partial.html' %}
                 </div>
+
+                <!-- Loading Indicator (Hidden by default) -->
+                <div id="history-loading-indicator" style="display: none; text-align: center; padding: 50px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #2d6a4f;"></i>
+                    <p style="margin-top: 15px; color: #666; font-size: 1.1rem;">
+                        <span style="font-weight: bold; color: #2d6a4f;">AI 나무주치의</span>가 오답을 분석 중입니다...<br>
+                        <span style="font-size: 0.9rem; color: #999;">(최초 분석 시 3~5초 정도 소요될 수 있습니다)</span>
+                    </p>
+                </div>
+
+                <!-- History Detail View (Hidden by default) -->
+                <div id="history-detail-container" style="display: none;">
+                    <div id="history-detail-content"></div>
+
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button onclick="closeHistoryDetail()" class="btn-secondary"
+                            style="padding: 10px 20px; font-size: 1rem; cursor: pointer; border: 1px solid #ccc; background: #fff; border-radius: 4px;">
+                            <i class="fas fa-arrow-left"></i> 목록으로 돌아가기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- History Question Detail View (Level 3 - Hidden by default) -->
+                <div id="history-question-detail-container" style="display: none;">
+                    <button class="btn btn-sm btn-secondary" onclick="showHistoryDetailFromQuestion()"
+                        style="background-color: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; cursor: pointer; margin-bottom: 10px;">
+                        <i class="fas fa-arrow-left"></i> 목록으로
+                    </button>
+                    <div id="history-question-detail-content"></div>
+                </div>
             </div>
+
+
 
             <!-- Section 3: Analysis -->
             <div id="analysis-section" class="content-section">
@@ -427,23 +483,80 @@
                     <canvas id="radarChart"></canvas>
                 </div>
 
-                {% if weakest_subject and weakest_subject != "아직 학습 데이터가 충분하지 않습니다." %}
-                <div
-                    style="margin-top: 30px; padding: 20px; background-color: #fff5f5; border-left: 5px solid #ff6b6b; border-radius: 8px;">
-                    <h3 style="margin: 0 0 10px 0; color: #c92a2a;">🔥 집중 케어 필요</h3>
-                    <p style="margin: 0; color: #495057;">
-                        현재 <strong>{{ weakest_subject }}</strong> 과목의 정답률이 가장 낮습니다.<br>
-                        해당 과목의 기출문제를 집중적으로 풀어보시는 것을 권장합니다.
-                    </p>
+                <div id="weak-subject-info">
+                    {% if weakest_subject and weakest_subject != "아직 학습 데이터가 충분하지 않습니다." %}
+                    <div
+                        style="margin-top: 30px; padding: 20px; background-color: #fff5f5; border-left: 5px solid #ff6b6b; border-radius: 8px;">
+                        <h3 style="margin: 0 0 10px 0; color: #c92a2a;">🔥 집중 케어 필요</h3>
+                        <p style="margin: 0; color: #495057;">
+                            현재 <strong>{{ weakest_subject }}</strong> 과목의 정답률이 가장 낮습니다.<br>
+                            해당 과목의 기출문제를 집중적으로 풀어보시는 것을 권장합니다.
+                        </p>
+                    </div>
+                    {% elif weakest_subject %}
+                    <div style="margin-top: 50px; text-align: center; color: #868e96;">
+                        <p>{{ weakest_subject }}</p>
+                        <a href="{% url 'exam:index' %}" class="btn btn-primary" style="margin-top:10px;">기출문제 풀러가기</a>
+                    </div>
+                    {% endif %}
                 </div>
-                {% elif weakest_subject %}
-                <div style="margin-top: 50px; text-align: center; color: #868e96;">
-                    <p>{{ weakest_subject }}</p>
-                    <a href="{% url 'exam:index' %}" class="btn btn-primary" style="margin-top:10px;">기출문제 풀러가기</a>
-                </div>
-                {% endif %}
             </div>
 
+            <!-- Section 3.5: Wrong Answer Note (New) -->
+            <div id="wrong-answer-section" class="content-section active">
+                <!-- Detail View -->
+                <div id="wrong-answer-detail-view" style="display: none;">
+                    <div id="wrong-answer-detail-content"></div>
+                </div>
+
+                <!-- List View -->
+                <div id="wrong-answer-list-view">
+                    <h1>전체 오답 노트</h1>
+                    <p style="color: #666; margin-bottom: 20px;">
+                        <i class="fas fa-info-circle"></i> 클릭하면 해당 문제의 상세 해설을 볼 수 있습니다.
+                    </p>
+                    <div id="wrong-answer-list-container">
+                        {% include 'mypage/wrong_answer_partial.html' %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: AI Analysis -->
+            <div id="ai-analysis-section" class="content-section">
+                <h1>내 최근 질의 분석</h1>
+
+                <div
+                    style="margin-top: 20px; padding: 25px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e9ecef;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0; font-size: 1.25rem; color: #2d6a4f;">
+                            <i class="fas fa-user-md"></i> 나무주치의 학습 진단
+                        </h2>
+                        <button id="btn-analyze" class="btn btn-primary"
+                            style="padding: 10px 20px; font-size: 0.95rem;">
+                            <i class="fas fa-magic"></i> AI 진단 요청
+                        </button>
+                    </div>
+
+                    <p style="color: #666; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.6;">
+                        <i class="fas fa-info-circle" style="color: #2d6a4f; margin-right: 5px;"></i>
+                        <strong>나무주치의 AI 진단이란?</strong><br>
+                        회원님이 최근에 작성하신 질문들을 바탕으로 <span style="color: #2d6a4f; font-weight: bold;">학습 상태, 취약한 과목, 관심
+                            분야</span>를
+                        AI가 심층 분석해 드립니다.<br>
+                        개인 맞춤형 학습 조언과 격려 메시지를 통해 합격으로 가는 길을 확인해 보세요!
+                    </p>
+
+                    <div id="analysis-loading" style="display: none; text-align: center; padding: 30px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #adb5bd;"></i>
+                        <p style="margin-top: 15px; color: #868e96;">나무주치의가 질문 내역을 분석하고 있습니다...</p>
+                    </div>
+
+                    <div id="analysis-result" style="display: none; line-height: 1.7; color: #343a40;">
+                        <!-- Analysis result will be injected here -->
+                    </div>
+                </div>
+            </div>
 
         </div>
 
@@ -456,77 +569,296 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
 
-            if (sectionId === 'my_questions') {
+            if (sectionId === 'wrong_answer') {
                 document.querySelectorAll('.menu-item')[0].classList.add('active');
+                document.getElementById('wrong-answer-section').classList.add('active');
+                showWrongAnswerList();
+            } else if (sectionId === 'my_questions') {
+                document.querySelectorAll('.menu-item')[1].classList.add('active');
                 document.getElementById('my-questions-section').classList.add('active');
                 // Reset to list view if it was in detail
                 showListView();
             } else if (sectionId === 'history') {
-                document.querySelectorAll('.menu-item')[1].classList.add('active');
-                document.getElementById('history-section').classList.add('active');
-            } else if (sectionId === 'analysis') {
                 document.querySelectorAll('.menu-item')[2].classList.add('active');
-                document.getElementById('analysis-section').classList.add('active');
-            } else if (sectionId === 'info') {
+                document.getElementById('history-section').classList.add('active');
+
+                // Reset to List View
+                const list = document.getElementById('history-list-container');
+                const detail = document.getElementById('history-detail-container');
+                const qDetail = document.getElementById('history-question-detail-container');
+
+                if (list) list.style.display = 'block';
+                if (detail) detail.style.display = 'none';
+                if (qDetail) qDetail.style.display = 'none';
+
+                // Always reload history list
+                fetch('{% url "mypage:index" %}', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(response => response.text())
+                    .then(html => {
+                        if (list) list.innerHTML = html;
+                    })
+                    .catch(err => console.error('Failed to reload history:', err));
+            } else if (sectionId === 'analysis') {
                 document.querySelectorAll('.menu-item')[3].classList.add('active');
+                document.getElementById('analysis-section').classList.add('active');
+                updateChartData();
+            } else if (sectionId === 'ai_analysis') {
+                document.querySelectorAll('.menu-item')[4].classList.add('active');
+                document.getElementById('ai-analysis-section').classList.add('active');
+                resetAIAnalysis();
+            } else if (sectionId === 'edit_profile' || sectionId === 'info') {
+                document.querySelectorAll('.menu-item')[5].classList.add('active');
                 document.getElementById('info-section').classList.add('active');
             }
         }
 
-        function loadPostDetail(url) {
-            fetch(url)
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const content = doc.querySelector('.bbs-container');
+        function updateChartData() {
+            fetch('{% url "mypage:index" %}?mode=analysis_data', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Update Chart
+                    if (window.myRadarChart) {
+                        window.myRadarChart.data.labels = data.labels;
+                        window.myRadarChart.data.datasets[0].data = data.data;
+                        window.myRadarChart.update();
+                    }
 
-                    if (content) {
-                        // Remove Comment Section (Box) entirely
-                        const commentSection = content.querySelector('#comment-section');
-                        if (commentSection) {
-                            commentSection.remove();
+                    // Update Weakest Subject Text
+                    const container = document.getElementById('weak-subject-info');
+                    if (container && data.weakest_subject) {
+                        let html = '';
+                        if (data.weakest_subject !== "아직 학습 데이터가 충분하지 않습니다.") {
+                            html = `
+                        <div style="margin-top: 30px; padding: 20px; background-color: #fff5f5; border-left: 5px solid #ff6b6b; border-radius: 8px;">
+                            <h3 style="margin: 0 0 10px 0; color: #c92a2a;">🔥 집중 케어 필요</h3>
+                            <p style="margin: 0; color: #495057;">
+                                현재 <strong>${data.weakest_subject}</strong> 과목의 정답률이 가장 낮습니다.<br>
+                                해당 과목의 기출문제를 집중적으로 풀어보시는 것을 권장합니다.
+                            </p>
+                        </div>`;
                         } else {
-                            const commentForms = content.querySelectorAll('form');
-                            commentForms.forEach(form => form.remove());
+                            html = `
+                        <div style="margin-top: 50px; text-align: center; color: #868e96;">
+                            <p>${data.weakest_subject}</p>
+                            <a href="{% url 'exam:index' %}" class="btn btn-primary" style="margin-top:10px;">기출문제 풀러가기</a>
+                        </div>`;
                         }
-
-                        document.getElementById('detail-content-area').innerHTML = '';
-                        document.getElementById('detail-content-area').appendChild(content);
-
-                        document.getElementById('question-list-view').style.display = 'none';
-                        const detailView = document.getElementById('question-detail-view');
-                        detailView.style.display = 'block';
-
-                        detailView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                        if (window.MathJax) {
-                            MathJax.typesetPromise([content]).catch((err) => console.log(err));
-                        }
+                        container.innerHTML = html;
                     }
                 })
-                .catch(err => console.error('Failed to load post:', err));
+                .catch(err => console.error('Error updating chart:', err));
         }
 
-        function showListView() {
-            const detailView = document.getElementById('question-detail-view');
-            const listView = document.getElementById('question-list-view');
+        // ... existing functions ...
 
-            if (detailView && listView) {
+
+
+        // Show Wrong Answer List (Normal Tab)
+        function showWrongAnswerList(params = '') {
+            const detailView = document.getElementById('wrong-answer-detail-view');
+            const listView = document.getElementById('wrong-answer-list-view');
+
+            if (listView && detailView) {
                 detailView.style.display = 'none';
                 listView.style.display = 'block';
 
-                // Clean up detail area
-                const detailArea = document.getElementById('detail-content-area');
-                if (detailArea) detailArea.innerHTML = '';
+                if (params) {
+                    const url = `{% url 'mypage:index' %}?w_page=1` + params;
+                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(response => response.text())
+                        .then(html => {
+                            document.getElementById('wrong-answer-list-container').innerHTML = html;
+                        });
+                }
             }
+        }
+
+        // Show History Detail (In-Place)
+        function showHistoryDetail(attemptId) {
+            const listContainer = document.getElementById('history-list-container');
+            const detailContainer = document.getElementById('history-detail-container');
+            const detailContent = document.getElementById('history-detail-content');
+
+            if (listContainer && detailContainer) {
+                const loadingIndicator = document.getElementById('history-loading-indicator');
+
+                // Show Loading, Hide List
+                listContainer.style.display = 'none';
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+
+                // Fetch filtered wrong answers with FULL DETAILS
+                const url = `{% url 'mypage:index' %}?mode=full_details&attempt_id=${attemptId}`;
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(response => response.text())
+                    .then(html => {
+                        if (loadingIndicator) loadingIndicator.style.display = 'none';
+                        detailContent.innerHTML = html;
+                        // Hide list, show detail
+                        // listContainer.style.display = 'none'; // Already hidden
+                        detailContainer.style.display = 'block';
+
+                        // Scroll to top of section
+                        document.getElementById('history-section').scrollIntoView({ behavior: 'smooth' });
+
+                        // Trigger MathJax for the new content
+                        if (window.MathJax) {
+                            MathJax.typesetPromise([detailContent]).catch((err) => console.log('MathJax Error:', err));
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error loading history detail:", err);
+                        if (loadingIndicator) loadingIndicator.style.display = 'none';
+                        listContainer.style.display = 'block'; // Revert to list on error
+                        alert("내용을 불러오는 중 오류가 발생했습니다.");
+                    });
+            }
+        }
+
+        function closeHistoryDetail() {
+            const listContainer = document.getElementById('history-list-container');
+            const detailContainer = document.getElementById('history-detail-container');
+
+            if (listContainer && detailContainer) {
+                detailContainer.style.display = 'none';
+                listContainer.style.display = 'block';
+                document.getElementById('history-detail-content').innerHTML = ''; // Clear content
+            }
+        }
+
+        function loadWrongAnswersByAttempt(attemptId) {
+            // Deprecated: Switching tabs. Now using showHistoryDetail
+            showHistoryDetail(attemptId);
+        }
+
+        // History Detail Pagination Listener
+        document.addEventListener('DOMContentLoaded', function () {
+            const historyDetailContent = document.getElementById('history-detail-content');
+            if (historyDetailContent) {
+                historyDetailContent.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.classList.contains('page-link') && e.target.dataset.type === 'wrong') {
+                        e.preventDefault();
+                        const page = e.target.dataset.page;
+                        const attemptId = e.target.dataset.attemptId;
+
+                        let params = `&w_page=${page}`;
+                        if (attemptId) {
+                            params += `&attempt_id=${attemptId}`;
+                        }
+
+                        const url = `{% url 'mypage:index' %}?` + params.substring(1);
+
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(response => response.text())
+                            .then(html => {
+                                historyDetailContent.innerHTML = html;
+                                document.getElementById('history-section').scrollIntoView({ behavior: 'smooth' });
+                            });
+                    }
+                });
+            }
+        });
+
+        // Wrong Answer Pagination Listener
+        document.addEventListener('DOMContentLoaded', function () {
+            const waListContainer = document.getElementById('wrong-answer-list-view');
+            if (waListContainer) {
+                waListContainer.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.classList.contains('page-link') && e.target.dataset.type === 'wrong') {
+                        e.preventDefault();
+                        const page = e.target.dataset.page;
+                        const attemptId = e.target.dataset.attemptId;
+
+                        let params = `&w_page=${page}`;
+                        if (attemptId) {
+                            params += `&attempt_id=${attemptId}`;
+                        }
+
+                        const url = `{% url 'mypage:index' %}?` + params.substring(1); // remove first &
+
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(response => response.text())
+                            .then(html => {
+                                document.getElementById('wrong-answer-list-container').innerHTML = html;
+                            });
+                    }
+                });
+            }
+        });
+
+        function loadWrongAnswerDetail(id) {
+            // Context Aware Loading
+            const historySection = document.getElementById('history-section');
+            if (historySection && historySection.classList.contains('active')) {
+                // Load into History Question Detail (L3)
+                const listContainer = document.getElementById('history-detail-container');
+                const qDetailContainer = document.getElementById('history-question-detail-container');
+                const qDetailContent = document.getElementById('history-question-detail-content');
+
+                if (qDetailContainer && listContainer) {
+                    const url = `/mypage/wrong_answer/${id}/`;
+                    fetch(url)
+                        .then(response => response.text())
+                        .then(html => {
+                            qDetailContent.innerHTML = html;
+                            listContainer.style.display = 'none';
+                            qDetailContainer.style.display = 'block';
+                            setTimeout(() => {
+                                qDetailContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                if (window.MathJax) {
+                                    MathJax.typesetPromise([qDetailContent]).catch((err) => console.log(err));
+                                }
+                            }, 100);
+                        });
+                }
+                return;
+            }
+
+            // Normal Wrong Answer Tab Logic
+            const listArea = document.getElementById('wrong-answer-list-view');
+            const detailArea = document.getElementById('wrong-answer-detail-view');
+            const detailContent = document.getElementById('wrong-answer-detail-content');
+
+            if (listArea && detailArea) {
+                const url = `/mypage/wrong_answer/${id}/`;
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        if (detailContent) detailContent.innerHTML = html;
+                        listArea.style.display = 'none';
+                        detailArea.style.display = 'block';
+
+                        setTimeout(() => {
+                            detailArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            if (window.MathJax) {
+                                MathJax.typesetPromise([detailContent]).catch((err) => console.log(err));
+                            }
+                        }, 100);
+                    });
+            }
+        }
+
+        function resetAIAnalysis() {
+            const result = document.getElementById('analysis-result');
+            const loading = document.getElementById('analysis-loading');
+            const btn = document.getElementById('btn-analyze');
+
+            if (result) {
+                result.style.display = 'none';
+                result.innerHTML = ''; // Clear content to ensure fresh state
+            }
+            if (loading) loading.style.display = 'none';
+            if (btn) btn.disabled = false;
         }
 
         // Initialize Chart & Tab Persistence
         document.addEventListener("DOMContentLoaded", function () {
             // Check URL param for tab
             const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab') || 'my_questions'; // Default to my_questions
+            const activeTab = urlParams.get('tab') || 'wrong_answer'; // Default to wrong_answer
 
             showSection(activeTab);
 
@@ -534,7 +866,7 @@
             const labels = JSON.parse('{{ radar_labels|safe }}');
             const data = JSON.parse('{{ radar_data|safe }}');
 
-            new Chart(ctx, {
+            window.myRadarChart = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: labels,
@@ -755,8 +1087,193 @@
             }
 
             // showListView moved to global scope
+
+            // --- Tree Doctor Analysis Logic ---
+            const analyzeBtn = document.getElementById('btn-analyze');
+            if (analyzeBtn) {
+                analyzeBtn.addEventListener('click', function () {
+                    const loading = document.getElementById('analysis-loading');
+                    const result = document.getElementById('analysis-result');
+
+                    analyzeBtn.disabled = true;
+                    loading.style.display = 'block';
+                    result.style.display = 'none';
+
+                    fetch("{% url 'mypage:analyze_questions' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            loading.style.display = 'none';
+                            analyzeBtn.disabled = false;
+
+                            if (data.status === 'success') {
+                                result.innerHTML = data.analysis;
+                                result.style.display = 'block';
+
+                                // Trigger MathJax for the new content
+                                if (window.MathJax) {
+                                    MathJax.typesetPromise([result]).catch((err) => console.log('MathJax Error:', err));
+                                }
+                            } else {
+                                alert(data.message || '분석 중 오류가 발생했습니다.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            loading.style.display = 'none';
+                            analyzeBtn.disabled = false;
+                            alert('서버 통신 중 오류가 발생했습니다.');
+                        });
+                });
+            }
         });
+
+        // Global Pagination Handler (Moved from nested scope)
+        document.body.addEventListener('click', function (e) {
+            if (e.target.classList.contains('page-link')) {
+                e.preventDefault();
+
+                const page = e.target.getAttribute('data-page');
+                const type = e.target.getAttribute('data-type');
+
+                let url = `?page=${page}`; // default for history
+                let containerId = 'history-list-container';
+
+                if (type === 'wrong') {
+                    url = `?w_page=${page}`;
+                    containerId = 'wrong-answer-list-container';
+                }
+
+                // Check if it's the question list pagination
+                if (e.target.closest('#question-list-view')) {
+                    url = `?q_page=${page}`;
+                    containerId = 'question-list-view';
+                }
+
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(response => response.text())
+                    .then(html => {
+                        const container = document.getElementById(containerId);
+                        if (container) {
+                            container.innerHTML = html;
+                        }
+                    })
+                    .catch(err => console.error('Pagination Error:', err));
+            }
+        });
+
+        function switchExpTab(btn, type) {
+            const section = btn.closest('.explanation-section');
+            if (!section) return;
+
+            // Reset Buttons
+            section.querySelectorAll('.exp-tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.color = '#888';
+                b.style.borderBottom = 'none';
+            });
+
+            // Activate Clicked Button
+            btn.classList.add('active');
+            btn.style.color = '#d35400';
+            btn.style.borderBottom = '2px solid #d35400';
+
+            // Toggle Content
+            const tContent = section.querySelector('.textbook-content');
+            const gContent = section.querySelector('.general-content');
+
+            if (type === 'textbook') {
+                if (tContent) tContent.style.display = 'block';
+                if (gContent) gContent.style.display = 'none';
+            } else {
+                if (tContent) tContent.style.display = 'none';
+                if (gContent) gContent.style.display = 'block';
+            }
+        }
+
+        // My Questions Detail Handler
+        document.addEventListener('click', function (e) {
+            const link = e.target.closest('.post-link');
+            // Ensure we are in the My Questions section to avoid conflict
+            if (link && document.getElementById('my-questions-section') && document.getElementById('my-questions-section').contains(link)) {
+                e.preventDefault();
+                const url = link.getAttribute('href');
+                loadMyQuestionDetail(url);
+            }
+        });
+
+        function loadMyQuestionDetail(url) {
+            const listSection = document.getElementById('question-list-view');
+            const detailSection = document.getElementById('question-detail-view');
+            const detailContent = document.getElementById('detail-content-area');
+
+            if (listSection && detailSection) {
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        detailContent.innerHTML = html;
+                        listSection.style.display = 'none';
+                        detailSection.style.display = 'block';
+
+                        // Trigger styles/MathJax if needed
+                        if (window.MathJax) {
+                            MathJax.typesetPromise([detailContent]).catch((err) => console.log(err));
+                        }
+                    })
+                    .catch(err => console.error("Error loading question detail:", err));
+            }
+        }
+
+        function showListView() {
+            const listSection = document.getElementById('question-list-view');
+            const detailSection = document.getElementById('question-detail-view');
+            const detailContent = document.getElementById('detail-content-area');
+
+            if (listSection && detailSection) {
+                detailSection.style.display = 'none';
+                listSection.style.display = 'block';
+                detailContent.innerHTML = '';
+            }
+        }
+
+        function deleteAttempt(attemptId) {
+            if (!confirm('정말 이 시험 이력을 삭제하시겠습니까?\\n삭제된 데이터는 복구할 수 없습니다.')) {
+                return;
+            }
+
+            const baseUrl = "{% url 'mypage:delete_attempt' 0 %}";
+            const url = baseUrl.replace('0', attemptId);
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Reload history list - use the same AJAX logic as clicking the tab
+                        document.querySelector('.menu-item[onclick="showSection(\'history\')"]').click();
+                    } else {
+                        alert(data.message || '삭제 실패');
+                    }
+                })
+                .catch(err => {
+                    console.error('Delete Error:', err);
+                    alert('서버 통신 중 오류가 발생했습니다.');
+                });
+        }
     </script>
 </body>
 
 </html>
+```
