@@ -26,7 +26,7 @@
 
         <div style="display: flex; justify-content: flex-end; gap: 10px;">
             <a href="{% url 'bbs:post_list' %}" class="btn-cancel">취소</a>
-            <button type="submit" class="btn-submit">저장하기</button>
+            <button type="submit" class="btn-submit">{{ btn_text|default:"저장하기" }}</button>
         </div>
     </form>
 

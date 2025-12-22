@@ -8,7 +8,7 @@ def index(request):
     """
     List all available exam rounds and subjects.
     """
-    exams = Exam.objects.all().order_by("round_number")
+    exams = Exam.objects.exclude(round_number=0).order_by("round_number")
     subjects = Subject.objects.all().order_by("code")
     return render(request, "study/index.html", {"exams": exams, "subjects": subjects})
 
@@ -42,7 +42,7 @@ def subject_detail(request, subject_name):
     Default to first available round if not specified.
     """
     # 1. Get All Exams for Tabs
-    exams = Exam.objects.all().order_by("round_number")
+    exams = Exam.objects.exclude(round_number=0).order_by("round_number")
 
     # 2. Determine Round Number
     round_param = request.GET.get("round")

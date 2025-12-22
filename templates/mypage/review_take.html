@@ -1,0 +1,269 @@
+{% load static %}
+{% load markdown_extras %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>복습 세션 - 나무의사</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+        }
+
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .header-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .header-section h1 {
+            color: #1b4332;
+            margin: 0 0 10px 0;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #2d6a4f;
+        }
+
+        .question-meta {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .question-content {
+            font-weight: 500;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .choice-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .choice-item:hover {
+            border-color: #2d6a4f;
+            background-color: #f8f9fa;
+        }
+
+        .choice-item input {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .choice-item input:checked+label {
+            font-weight: bold;
+            color: #2d6a4f;
+        }
+
+        .choice-item:has(input:checked) {
+            border-color: #2d6a4f;
+            background-color: #d8f3dc;
+        }
+
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            background-color: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #1b4332;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #2d6a4f;
+            margin-bottom: 20px;
+        }
+
+        .q-number {
+            width: 28px;
+            height: 28px;
+            background-color: #2d6a4f;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <a href="{% url 'mypage:index' %}" style="color: white; text-decoration: none;">
+            <i class="fas fa-arrow-left"></i> 마이페이지로
+        </a>
+    </header>
+
+    <div class="container">
+        <div class="header-section">
+            <h1><i class="fas fa-brain" style="color: #2d6a4f;"></i> 오늘의 복습</h1>
+            <p style="color: #666; margin: 0 0 15px 0;">총 <strong>{{ total_count }}</strong>개의 문제를 복습합니다.</p>
+        </div>
+
+        <div
+            style="background: linear-gradient(135deg, #d8f3dc, #b7e4c7); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+            <h3 style="color: #1b4332; margin: 0 0 12px 0; text-align: left;"><i class="fas fa-lightbulb"></i> 왜 복습이
+                중요할까요?</h3>
+            <p style="color: #333; line-height: 1.7; margin: 0 0 12px 0; text-align: left;">
+                <strong>에빙하우스 망각곡선</strong>에 따르면, 학습 후 24시간 내에 약 70%의 내용을 잊어버립니다.<br>
+                하지만 적절한 간격으로 복습하면 기억을 장기 기억으로 전환할 수 있습니다!
+            </p>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px;">
+                <span
+                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>1일</strong>
+                    → 첫 복습</span>
+                <span
+                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>3일</strong>
+                    → 2차 복습</span>
+                <span
+                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>7일</strong>
+                    → 3차 복습</span>
+                <span
+                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>14일</strong>
+                    → 4차 복습</span>
+                <span
+                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>30일</strong>
+                    → 완전 학습</span>
+            </div>
+        </div>
+
+        {% if review_items %}
+        <form method="POST" action="{% url 'mypage:review_submit' %}">
+            {% csrf_token %}
+            {% for item in review_items %}
+            <div class="question-card">
+                <div class="question-meta">
+                    <span class="q-number">{{ forloop.counter }}</span>
+                    {{ item.question.subject.name }} · 제{{ item.question.exam.round_number }}회
+                    {{item.question.number}}번
+                    <span style="float: right; color: #aaa;">복습 {{ item.review_count }}회차</span>
+                </div>
+                <div class="question-content">
+                    {{ item.question.content }}
+                </div>
+                {% if item.question.image %}
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <img src="{{ item.question.image.url }}"
+                        style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                </div>
+                {% endif %}
+                <div class="choices">
+                    <label class="choice-item">
+                        <input type="radio" name="schedule_{{ item.id }}" value="1">
+                        <span>① {{ item.question.choice1 }}</span>
+                    </label>
+                    <label class="choice-item">
+                        <input type="radio" name="schedule_{{ item.id }}" value="2">
+                        <span>② {{ item.question.choice2 }}</span>
+                    </label>
+                    <label class="choice-item">
+                        <input type="radio" name="schedule_{{ item.id }}" value="3">
+                        <span>③ {{ item.question.choice3 }}</span>
+                    </label>
+                    <label class="choice-item">
+                        <input type="radio" name="schedule_{{ item.id }}" value="4">
+                        <span>④ {{ item.question.choice4 }}</span>
+                    </label>
+                    <label class="choice-item">
+                        <input type="radio" name="schedule_{{ item.id }}" value="5">
+                        <span>⑤ {{ item.question.choice5 }}</span>
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-check-circle"></i> 복습 완료하기
+            </button>
+        </form>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <h2 style="color: #1b4332;">오늘 복습할 문제가 없습니다!</h2>
+            <p style="color: #666;">잘하고 있어요. 다음 복습 알림까지 쉬어가세요. 🎉</p>
+            <a href="{% url 'mypage:index' %}"
+                style="display: inline-block; margin-top: 20px; padding: 12px 30px; background-color: #2d6a4f; color: white; text-decoration: none; border-radius: 25px;">
+                마이페이지로 돌아가기
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

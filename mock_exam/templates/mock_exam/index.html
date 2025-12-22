@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실전 모의고사 - 나무의사</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+            color: #333;
+        }
+
+        /* Navbar */
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #b7e4c7;
+        }
+
+        .nav-links span {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        .jumbotron {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .jumbotron h1 {
+            color: #1b4332;
+            margin-bottom: 15px;
+        }
+
+        .jumbotron .lead {
+            color: #555;
+            font-size: 1.2rem;
+        }
+
+        .jumbotron hr {
+            border: none;
+            border-top: 1px solid #e0e0e0;
+            margin: 25px 0;
+        }
+
+        .btn-start {
+            display: inline-block;
+            padding: 15px 40px;
+            background-color: #40916c;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn-start:hover {
+            background-color: #2d6a4f;
+            transform: translateY(-2px);
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        /* Recent Exams Table */
+        .recent-exams {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .recent-exams h3 {
+            color: #1b4332;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #d8f3dc;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background-color: #f0f7f4;
+            color: #1b4332;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-sm {
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #40916c;
+            color: white;
+        }
+
+        .btn-sm:hover {
+            opacity: 0.9;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <nav class="nav-links">
+            {% if user.is_authenticated %}
+            <span>{{ user.username }}님 환영합니다</span>
+            <a href="{% url 'mypage:index' %}">마이페이지</a>
+            <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit"
+                    style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
+            </form>
+            {% else %}
+            <a href="{% url 'accounts:user_login' %}">로그인</a>
+            <a href="{% url 'accounts:user_signup' %}">회원가입</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="jumbotron">
+            <h1>🌲 나무의사 실전 모의고사</h1>
+            <p class="lead">실전처럼 모의고사를 풀어보세요.</p>
+            <hr>
+            <p>전체 과목에서 무작위로 선정된 125문제로 실력을 테스트합니다.</p>
+            {% if error %}
+            <div class="alert-danger">{{ error }}</div>
+            {% endif %}
+            <a class="btn-start" href="{% url 'mock_exam:generate' %}">모의고사 시작하기</a>
+        </div>
+
+        <div class="recent-exams">
+            <h3>📋 최근 응시 내역</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>점수</th>
+                        <th>상태</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in recent_exams %}
+                    <tr>
+                        <td>{{ exam.start_time|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if exam.score is not None %}
+                            {{ exam.score }}점
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if exam.is_completed %}
+                            <span class="badge badge-success">완료</span>
+                            {% else %}
+                            <span class="badge badge-warning">진행 중</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if exam.is_completed %}
+                            <a href="{% url 'mock_exam:result' exam.id %}" class="btn-sm btn-info">결과 보기</a>
+                            {% else %}
+                            <a href="{% url 'mock_exam:take' exam.id %}" class="btn-sm btn-primary">계속하기</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">응시 내역이 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

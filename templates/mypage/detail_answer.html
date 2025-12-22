@@ -2,78 +2,6 @@
 {% load bbs_extras %}
 
 {% block header %}
-<style>
-    /* Header Styles to match MyPage/Main */
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
-
-    body {
-        font-family: 'Noto Sans KR', sans-serif;
-        background-color: #f0f7f4;
-        /* Match MyPage bg */
-    }
-
-    /* Force header to match index.html styles exactly, overriding base.html defaults */
-    header {
-        background-color: #2d6a4f !important;
-        padding: 15px 40px !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-        font-family: 'Noto Sans KR', sans-serif !important;
-        height: auto !important;
-    }
-
-    /* Override base.html link styles if necessary */
-    header a.logo {
-        color: white !important;
-        font-size: 1.5rem !important;
-        font-weight: bold !important;
-        text-decoration: none !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        margin-right: 0 !important;
-        /* Reset base.html margin */
-    }
-
-    .nav-links a {
-        color: white !important;
-        text-decoration: none !important;
-        margin-left: 20px !important;
-        margin-right: 0 !important;
-        /* Reset base.html margin */
-        font-weight: 500 !important;
-        transition: color 0.3s !important;
-        font-size: 1rem !important;
-    }
-
-    .nav-links a:hover {
-        color: #b7e4c7 !important;
-    }
-
-    .nav-links span {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 0.95rem;
-    }
-</style>
-<header>
-    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-    <nav class="nav-links">
-        {% if user.is_authenticated %}
-        <span>{{ user.username }}님 환영합니다</span>
-        <a href="{% url 'mypage:index' %}">마이페이지</a>
-        <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit"
-                style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
-        </form>
-        {% else %}
-        <a href="{% url 'accounts:user_login' %}">로그인</a>
-        <a href="{% url 'accounts:user_signup' %}">회원가입</a>
-        {% endif %}
-    </nav>
-</header>
 {% endblock %}
 
 {% block content %}
@@ -91,13 +19,13 @@
             </span>
 
             {% if user == post.author %}
-            <div style="margin-left: 10px; display: flex; gap: 8px;" id="post-actions">
-                <a href="{% url 'bbs:post_update' post.pk %}" class="btn-action btn-edit"
-                    style="padding: 6px 16px; font-size: 0.9rem; background-color: #42b883; color: white; border: 1px solid #42b883; border-radius: 6px; font-weight: 600; text-decoration: none; transition: all 0.2s;">
+            <div style="margin-left: 10px; display: flex; gap: 5px;" id="post-actions">
+                <a href="{% url 'mypage:update_my_question' post.pk %}" class="btn-action btn-edit"
+                    style="background-color: #50b585; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; text-decoration: none; transition: background 0.3s;">
                     수정
                 </a>
-                <a href="{% url 'bbs:post_delete' post.pk %}" class="btn-action btn-delete"
-                    style="padding: 6px 16px; font-size: 0.9rem; background-color: white; color: #ff6b6b; border: 1px solid #ff6b6b; border-radius: 6px; font-weight: 600; text-decoration: none; transition: all 0.2s;"
+                <a href="{% url 'mypage:delete_my_question' post.pk %}" class="btn-action btn-delete"
+                    style="background-color: white; color: #e63946; border: 1px solid #e63946; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; text-decoration: none; transition: all 0.3s;"
                     onclick="return confirm('정말 삭제하시겠습니까?');">
                     삭제
                 </a>

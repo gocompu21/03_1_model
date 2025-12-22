@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
@@ -11,6 +12,7 @@ from exam.models import UserQuestionResult, UserExamAttempt
 from notebook.models import NotebookHistory
 from chat.models import ChatHistory
 from bbs.models import Post
+from .models import ReviewSchedule
 
 
 @login_required
@@ -113,6 +115,15 @@ def index(request):
         data = [0]
         weakest_subject = "아직 학습 데이터가 충분하지 않습니다."
 
+    # --- Smart Review Recommendations ---
+    today = timezone.now().date()
+    review_recommendations = ReviewSchedule.objects.filter(
+        user=request.user, next_review_date__lte=today, is_mastered=False
+    ).select_related("question", "question__subject", "question__exam")[:10]
+    review_count = ReviewSchedule.objects.filter(
+        user=request.user, next_review_date__lte=today, is_mastered=False
+    ).count()
+
     context = {
         "days_since_login": days_since_login,
         "radar_labels": json.dumps(labels),
@@ -123,6 +134,8 @@ def index(request):
         "wrong_answers": wrong_answers,
         "attempt_id": attempt_id,
         "attempt": attempt,
+        "review_recommendations": review_recommendations,
+        "review_count": review_count,
     }
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
@@ -411,3 +424,126 @@ def delete_attempt(request, attempt_id):
         return JsonResponse(
             {"status": "error", "message": "삭제 중 오류가 발생했습니다."}, status=500
         )
+
+
+from bbs.forms import PostForm
+
+
+@login_required
+def update_my_question(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if post.author != request.user:
+        return redirect("mypage:detail_answer", pk=post.pk)
+
+    if request.method == "POST":
+        form = PostForm(request.POST, instance=post)
+        if form.is_valid():
+            form.save()
+            # Calculate page number
+            target_types = ["기본서", "주치의", "주치의 질의"]
+            newer_count = Post.objects.filter(
+                author=request.user,
+                type__name__in=target_types,
+                created_at__gt=post.created_at,
+            ).count()
+            page_number = (newer_count // 15) + 1
+
+            return redirect(
+                reverse("mypage:index") + f"?tab=my_questions&q_page={page_number}"
+            )
+    else:
+        form = PostForm(instance=post)
+
+    return render(
+        request,
+        "bbs/post_form.html",
+        {"form": form, "title": "나의 질문 수정", "btn_text": "수정"},
+    )
+
+
+@login_required
+def delete_my_question(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if post.author == request.user:
+        # Calculate page number before deletion
+        target_types = ["기본서", "주치의", "주치의 질의"]
+        newer_count = Post.objects.filter(
+            author=request.user,
+            type__name__in=target_types,
+            created_at__gt=post.created_at,
+        ).count()
+        page_number = (newer_count // 15) + 1
+
+        post.delete()
+
+        return redirect(
+            reverse("mypage:index") + f"?tab=my_questions&q_page={page_number}"
+        )
+    return redirect(reverse("mypage:index") + "?tab=my_questions")
+
+
+# --- Smart Review Session Views ---
+
+
+@login_required
+def review_start(request):
+    """
+    Start a review session with all questions due for review today.
+    """
+    today = timezone.now().date()
+    review_items = ReviewSchedule.objects.filter(
+        user=request.user, next_review_date__lte=today, is_mastered=False
+    ).select_related("question", "question__subject", "question__exam")
+
+    return render(
+        request,
+        "mypage/review_take.html",
+        {
+            "review_items": review_items,
+            "total_count": review_items.count(),
+        },
+    )
+
+
+@login_required
+def review_submit(request):
+    """
+    Submit review answers and update review schedules.
+    """
+    if request.method == "POST":
+        correct_count = 0
+        total_count = 0
+
+        # Get all schedule IDs from form
+        for key, value in request.POST.items():
+            if key.startswith("schedule_"):
+                schedule_id = key.replace("schedule_", "")
+                try:
+                    schedule = ReviewSchedule.objects.get(
+                        id=schedule_id, user=request.user
+                    )
+                    selected_choice = int(value) if value else None
+
+                    if selected_choice:
+                        is_correct = selected_choice == schedule.question.answer
+                        schedule.mark_reviewed(is_correct)
+                        total_count += 1
+                        if is_correct:
+                            correct_count += 1
+                except (ReviewSchedule.DoesNotExist, ValueError):
+                    continue
+
+        # Return result
+        return render(
+            request,
+            "mypage/review_result.html",
+            {
+                "correct_count": correct_count,
+                "total_count": total_count,
+                "score": (
+                    int((correct_count / total_count * 100)) if total_count > 0 else 0
+                ),
+            },
+        )
+
+    return redirect("mypage:index")

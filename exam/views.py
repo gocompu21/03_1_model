@@ -6,7 +6,7 @@ from .forms import QuestionForm
 
 @login_required
 def exam_list(request):
-    exams = Exam.objects.all().order_by("round_number")
+    exams = Exam.objects.exclude(round_number=0).order_by("round_number")
     subjects = Subject.objects.all().order_by("code")
     return render(
         request, "exam/exam_list.html", {"exams": exams, "subjects": subjects}

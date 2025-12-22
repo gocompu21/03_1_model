@@ -1,71 +1,139 @@
 {% if recent_attempts %}
-<div class="history-grid"
-    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 10px 0;">
-    {% for attempt in recent_attempts %}
-    <div class="exam-card"
-        style="background: white; border-radius: 12px; box-shadow: 0 3px 10px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid #e9ecef; position: relative; transition: transform 0.2s;">
-        <!-- Card Header -->
-        <div
-            style="background-color: #2d6a4f; padding: 15px 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <span style="font-size: 0.9rem; opacity: 0.9;"><i class="fas fa-tree"></i> 제
-                    {{ attempt.exam.round_number }}회</span>
-                <h3 style="margin: 5px 0 0 0; font-size: 1.2rem;">나무의사 기출시험</h3>
-            </div>
-            <div style="text-align: right;">
-                <span style="font-size: 0.85rem; opacity: 0.8;">{{ attempt.start_time|date:"Y.m.d" }}</span>
-            </div>
-        </div>
+<style>
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
 
-        <!-- Card Body -->
-        <div style="padding: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <div>
-                    <span style="display: block; color: #666; font-size: 0.85rem; margin-bottom: 5px;">최종 점수</span>
-                    <div style="font-size: 1.8rem; font-weight: bold; color: #2d6a4f;">
-                        {% widthratio attempt.correct_q attempt.total_q 100 %} <span
-                            style="font-size: 1rem; color: #888;">점</span>
+    .history-table th {
+        background-color: #2d6a4f;
+        color: white;
+        padding: 12px 15px;
+        font-weight: 600;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .history-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #e9ecef;
+        color: #333;
+        vertical-align: middle;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+
+    .history-table tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    .score-badge {
+        font-weight: bold;
+        color: #2d6a4f;
+        background-color: #d8f3dc;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        display: inline-block;
+        min-width: 60px;
+    }
+
+    .btn-icon {
+        border: none;
+        background: none;
+        cursor: pointer;
+        padding: 5px;
+        font-size: 1.1rem;
+        transition: transform 0.2s;
+    }
+
+    .btn-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .btn-note {
+        color: #2d6a4f;
+    }
+
+    .btn-del {
+        color: #fa5252;
+    }
+</style>
+
+<div style="text-align: right; margin-bottom: 10px; font-size: 0.85rem; color: #666;">
+    <span style="margin-right: 15px;">
+        <i class="fas fa-book-open" style="color: #2d6a4f;"></i> 오답노트
+    </span>
+    <span>
+        <i class="fas fa-trash-alt" style="color: #fa5252;"></i> 삭제
+    </span>
+</div>
+<div style="overflow-x: auto;">
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th style="width: 15%;">시험 회차</th>
+                <th style="width: 20%;">응시 일시</th>
+                <th style="width: 15%;">점수</th>
+                <th style="width: 30%;">정답률</th>
+                <th style="width: 20%;">관리</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attempt in recent_attempts %}
+            <tr>
+                <td>
+                    <span style="font-weight: bold; color: #2d6a4f;">{% if attempt.exam.round_number == 0 %}모의고사
+                        {% else%}제{{ attempt.exam.round_number }}회{% endif %}</span>
+                </td>
+                <td style="color: #666;">
+                    {{ attempt.start_time|date:"Y.m.d" }}
+                </td>
+                <td>
+                    <span class="score-badge">{% widthratio attempt.correct_q attempt.total_q 100 %}점</span>
+                </td>
+                <td>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div
+                            style="flex-grow: 1; background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div
+                                style="background-color: #2d6a4f; height: 100%; width: {% widthratio attempt.correct_q attempt.total_q 100 %}%;">
+                            </div>
+                        </div>
+                        <span style="font-size: 0.8rem; color: #666; width: 60px; text-align: right;">
+                            {{ attempt.correct_q }}/{{ attempt.total_q }}
+                        </span>
                     </div>
-                </div>
-                <div style="text-align: right;">
-                    <span style="display: block; color: #666; font-size: 0.85rem; margin-bottom: 5px;">정답률</span>
-                    <div style="font-size: 1.1rem; color: #495057;">
-                        {{ attempt.correct_q }} / {{ attempt.total_q }}
+                </td>
+                <td>
+                    <div style="display: flex; justify-content: center; gap: 0;">
+                        <div style="width: 40px; text-align: center;">
+                            {% if attempt.total_q > attempt.correct_q %}
+                            <button onclick="loadWrongAnswersByAttempt({{ attempt.id }})" class="btn-icon btn-note"
+                                title="오답노트 보기">
+                                <i class="fas fa-book-open"></i>
+                            </button>
+                            {% else %}
+                            <span style="color: #2d6a4f; font-size: 1.2rem;" title="만점"><i
+                                    class="fas fa-medal"></i></span>
+                            {% endif %}
+                        </div>
+                        <div style="width: 40px; text-align: center;">
+                            <button onclick="deleteAttempt({{ attempt.id }})" class="btn-icon btn-del" title="기록 삭제">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Progress Bar -->
-            <div
-                style="background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 20px;">
-                <div
-                    style="background-color: #2d6a4f; height: 100%; width: {% widthratio attempt.correct_q attempt.total_q 100 %}%;">
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <div style="display: flex; gap: 10px;">
-                {% if attempt.total_q > attempt.correct_q %}
-                <button onclick="loadWrongAnswersByAttempt({{ attempt.id }})" class="btn"
-                    style="flex: 1; padding: 10px; background-color: white; border: 1px solid #2d6a4f; color: #2d6a4f; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                    <i class="fas fa-book-open"></i> 오답노트
-                </button>
-                {% else %}
-                <div
-                    style="flex: 1; text-align: center; padding: 10px; background-color: #d8f3dc; color: #1b4332; border-radius: 6px; font-weight: bold;">
-                    <i class="fas fa-medal"></i> 만점 달성!
-                </div>
-                {% endif %}
-
-                <button onclick="deleteAttempt({{ attempt.id }})" class="btn"
-                    style="padding: 10px 15px; background-color: #fff5f5; border: 1px solid #ffc9c9; color: #fa5252; border-radius: 6px; cursor: pointer;"
-                    title="기록 삭제">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-    {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 <!-- Pagination Controls -->

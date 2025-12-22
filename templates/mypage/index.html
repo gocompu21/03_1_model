@@ -360,18 +360,27 @@
     <div class="app-container">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="menu-item active" onclick="showSection('wrong_answer')">
+            <div class="menu-item{% if review_count > 0 %} active{% endif %}" onclick="showSection('review')">
+                <i class="fas fa-brain"></i> 오늘의 복습
+                {% if review_count > 0 %}
+                <span
+                    style="background-color: #e63946; color: white; border-radius: 50%; padding: 2px 8px; font-size: 0.75rem; margin-left: 5px;">
+                    {{ review_count }}</span>
+                {% endif %}
+            </div>
+            <div class="menu-item{% if review_count == 0 %} active{% endif %}" onclick="showSection('wrong_answer')">
                 <i class="fas fa-times-circle"></i> 전체 오답 노트
             </div>
             <div class="menu-item" onclick="showSection('my_questions')">
                 <i class="fas fa-question-circle"></i> 나의 질의응답
             </div>
             <div class="menu-item" onclick="showSection('history')">
-                <i class="fas fa-clipboard-list"></i> 기출시험 테스트
+                <i class="fas fa-clipboard-list"></i> 기출시험 결과
             </div>
             <div class="menu-item" onclick="showSection('analysis')">
                 <i class="fas fa-chart-pie"></i> 과목별 실력분석
             </div>
+
             <div class="menu-item" onclick="showSection('ai_analysis')">
                 <i class="fas fa-robot"></i> 내 최근 질의 분석
             </div>
@@ -386,6 +395,54 @@
 
         <!-- Main Content -->
         <div class="main-content">
+
+            <!-- Section: Smart Review Recommendations -->
+            <div id="review-section" class="content-section{% if review_count > 0 %} active{% endif %}">
+                <h1><i class="fas fa-brain" style="color: #2d6a4f;"></i> 오늘의 복습 추천</h1>
+                {% if review_recommendations %}
+                <p style="color: #666; margin-bottom: 20px;">
+                    에빙하우스 망각곡선에 기반하여 오늘 복습해야 할 문제들입니다.<br>
+                    <strong>총 {{ review_count }}개</strong>의 문제가 복습을 기다리고 있습니다.
+                </p>
+                <div style="display: grid; gap: 15px;">
+                    {% for schedule in review_recommendations %}
+                    <div
+                        style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #2d6a4f;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <div style="color: #888; font-size: 0.85rem; margin-bottom: 5px;">
+                                    {{ schedule.question.subject.name }} · 제{{ schedule.question.exam.round_number }}회
+                                    {{ schedule.question.number }}번
+                                </div>
+                                <div style="font-weight: 500; line-height: 1.5;">
+                                    {{ schedule.question.content|truncatechars:80 }}
+                                </div>
+                                <div style="margin-top: 10px; font-size: 0.8rem; color: #888;">
+                                    <i class="fas fa-calendar-alt"></i> 마지막 오답:
+                                    {{schedule.last_wrong_date|date:"Y.m.d"}}
+                                    <span style="margin-left: 10px;"><i class="fas fa-redo"></i> 복습
+                                        {{schedule.review_count }}회차</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <a href="{% url 'mypage:review_start' %}"
+                        style="display: inline-block; padding: 15px 40px; background-color: #2d6a4f; color: white; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 1.1rem; transition: background-color 0.3s;">
+                        <i class="fas fa-play-circle"></i> 복습 시작하기
+                    </a>
+                </div>
+                {% else %}
+                <div
+                    style="text-align: center; padding: 60px 20px; color: #888; background: #f8f9fa; border-radius: 12px;">
+                    <i class="fas fa-check-circle" style="font-size: 3rem; color: #2d6a4f; margin-bottom: 20px;"></i>
+                    <p style="font-size: 1.1rem;">오늘 복습할 문제가 없습니다.<br>잘하고 있어요! 🎉</p>
+                </div>
+                {% endif %}
+            </div>
+
 
             <div id="my-questions-section" class="content-section">
                 <div id="question-list-view">
@@ -436,7 +493,7 @@
 
             <!-- Section 2: Exam History (New) -->
             <div id="history-section" class="content-section">
-                <h1>기출시험 테스트</h1>
+                <h1>기출시험 결과</h1>
 
                 <div id="history-list-container">
                     {% include 'mypage/history_partial.html' %}
@@ -569,17 +626,20 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
 
-            if (sectionId === 'wrong_answer') {
+            if (sectionId === 'review') {
                 document.querySelectorAll('.menu-item')[0].classList.add('active');
+                document.getElementById('review-section').classList.add('active');
+            } else if (sectionId === 'wrong_answer') {
+                document.querySelectorAll('.menu-item')[1].classList.add('active');
                 document.getElementById('wrong-answer-section').classList.add('active');
                 showWrongAnswerList();
             } else if (sectionId === 'my_questions') {
-                document.querySelectorAll('.menu-item')[1].classList.add('active');
+                document.querySelectorAll('.menu-item')[2].classList.add('active');
                 document.getElementById('my-questions-section').classList.add('active');
                 // Reset to list view if it was in detail
                 showListView();
             } else if (sectionId === 'history') {
-                document.querySelectorAll('.menu-item')[2].classList.add('active');
+                document.querySelectorAll('.menu-item')[3].classList.add('active');
                 document.getElementById('history-section').classList.add('active');
 
                 // Reset to List View
@@ -601,15 +661,15 @@
                     })
                     .catch(err => console.error('Failed to reload history:', err));
             } else if (sectionId === 'analysis') {
-                document.querySelectorAll('.menu-item')[3].classList.add('active');
+                document.querySelectorAll('.menu-item')[4].classList.add('active');
                 document.getElementById('analysis-section').classList.add('active');
                 updateChartData();
             } else if (sectionId === 'ai_analysis') {
-                document.querySelectorAll('.menu-item')[4].classList.add('active');
+                document.querySelectorAll('.menu-item')[5].classList.add('active');
                 document.getElementById('ai-analysis-section').classList.add('active');
                 resetAIAnalysis();
             } else if (sectionId === 'edit_profile' || sectionId === 'info') {
-                document.querySelectorAll('.menu-item')[5].classList.add('active');
+                document.querySelectorAll('.menu-item')[6].classList.add('active');
                 document.getElementById('info-section').classList.add('active');
             }
         }
@@ -921,8 +981,36 @@
                 }
             });
 
-            // --- AJAX Post Detail Logic (Moved to global delegation) ---
-            // Removed local listener to ensure robustness against DOM updates
+            // --- AJAX Post Detail Logic ---
+            const myQuestionsSection = document.getElementById('my-questions-section');
+            if (myQuestionsSection) {
+                // Handle Pagination AJAX
+                myQuestionsSection.addEventListener('click', function (e) {
+                    if (e.target.tagName === 'A' && e.target.classList.contains('q-ajax-link')) {
+                        e.preventDefault();
+                        const url = e.target.href;
+                        const listView = document.getElementById('question-list-view');
+
+                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                            .then(response => response.text())
+                            .then(html => {
+                                listView.innerHTML = html;
+                                // Scroll slightly if needed, but staying put is usually requested
+                            })
+                            .catch(error => console.error('Error:', error));
+                        return; // Done
+                    }
+
+                    const link = e.target.closest('.post-link');
+                    if (link) {
+                        e.preventDefault();
+                        const url = link.href;
+
+                        // --- Render Next Questions Logic Removed ---
+                        loadPostDetail(url);
+                    }
+                });
+            }
 
             // --- Inline Edit Logic ---
             const detailArea = document.getElementById('detail-content-area');
@@ -942,10 +1030,11 @@
 
                                 if (content) {
                                     // Remove Header (User request)
+                                    // Remove Header (User request)
                                     const header = content.querySelector('h2');
                                     if (header) header.remove();
 
-                                    // Add Help Text
+                                    // Add Help Text (Re-adding as explanation)
                                     const helpDiv = document.createElement('div');
                                     helpDiv.style.cssText = 'color: #666; font-size: 0.85rem; margin-bottom: 10px; padding: 0 5px;';
                                     helpDiv.innerHTML = '<i class="fas fa-info-circle"></i> 수식은 편집 모드에서 $...$ 형태의 코드로 표시됩니다.';
@@ -955,18 +1044,27 @@
                                     detailArea.innerHTML = '';
                                     detailArea.appendChild(content);
 
-                                    // Make 'Cancel' button work inline
+                                    // Make 'Cancel' button work inline (reload original detail)
                                     const cancelBtn = content.querySelector('.btn-cancel');
                                     if (cancelBtn) {
                                         cancelBtn.onclick = function (ev) {
                                             ev.preventDefault();
-                                            // Detail URL is the parent of update URL: /bbs/post/<pk>/
-                                            const detailUrl = url.split('/').slice(0, -2).join('/') + '/';
-                                            loadPostDetail(detailUrl);
+                                            // Fix logic for different URL structures
+                                            let detailUrl = url.replace('update_my_question', 'detail_answer').replace('bbs/post', 'detail_answer');
+                                            // Handle potential mismatch if still using bbs update
+                                            if (url.includes('bbs/post/update')) {
+                                                detailUrl = url.replace('update/', '');
+                                            }
+
+                                            if (typeof loadMyQuestionDetail === 'function') {
+                                                loadMyQuestionDetail(detailUrl);
+                                            } else {
+                                                loadPostDetail(detailUrl);
+                                            }
                                         }
                                     }
 
-                                    // Initialize Summernote
+                                    // Initialize Summernote (if available) - requires jQuery
                                     if (typeof $ !== 'undefined' && $.fn.summernote) {
                                         $('#summernote').summernote({
                                             placeholder: '내용을 입력해주세요.',
@@ -988,40 +1086,66 @@
                                             form.addEventListener('submit', function (ev) {
                                                 ev.preventDefault();
 
+                                                // Sync Summernote content to textarea
                                                 if (typeof $ !== 'undefined' && $('#summernote').summernote) {
                                                     const summernoteContent = $('#summernote').summernote('code');
                                                     const contentArea = form.querySelector('#summernote');
-                                                    if (contentArea) contentArea.value = summernoteContent;
+                                                    if (contentArea) {
+                                                        contentArea.value = summernoteContent;
+                                                    }
                                                 }
 
                                                 const formData = new FormData(form);
+
                                                 fetch(url, {
                                                     method: 'POST',
                                                     body: formData,
-                                                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                                                    headers: {
+                                                        'X-Requested-With': 'XMLHttpRequest'
+                                                    }
                                                 })
                                                     .then(response => {
-                                                        if (response.redirected) return fetch(response.url).then(res => res.text());
+                                                        if (response.redirected || response.url !== url) {
+                                                            // Check if redirected to index (list view)
+                                                            if (response.url.includes('mypage') && !response.url.includes('detail') && !response.url.includes('update')) {
+                                                                window.location.href = response.url;
+                                                                return null; // Stop processing
+                                                            }
+                                                            return fetch(response.url).then(res => res.text());
+                                                        }
                                                         return response.text();
                                                     })
                                                     .then(newHtml => {
+                                                        if (!newHtml) return; // Stoped due to redirect
+
                                                         const newDoc = new DOMParser().parseFromString(newHtml, 'text/html');
                                                         const newContent = newDoc.querySelector('.bbs-container');
+
                                                         if (newContent) {
                                                             detailArea.innerHTML = '';
                                                             detailArea.appendChild(newContent);
-                                                            // Re-apply list button logic if needed or just trigger list view
-                                                            // For now, simplicity:
-                                                            const listBtn = document.createElement('a');
-                                                            listBtn.innerHTML = '<i class="fas fa-list"></i> 목록';
-                                                            listBtn.className = 'btn-action btn-list';
-                                                            listBtn.href = '#';
-                                                            listBtn.onclick = function (e) { e.preventDefault(); showListView(); };
-                                                            const actions = newContent.querySelector('#post-actions');
-                                                            if (actions) actions.appendChild(listBtn);
 
-                                                            document.getElementById('question-detail-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                                            if (window.MathJax) MathJax.typesetPromise([detailArea]);
+                                                            if (!newContent.querySelector('form')) {
+                                                                // Success: Re-apply List button and cleanup
+                                                                const actionContainer = newContent.querySelector('#post-actions');
+                                                                if (actionContainer) {
+                                                                    // List button logic omitted as per previous code, but ensure scroll
+                                                                }
+                                                                const commentSection = newContent.querySelector('#comment-section');
+                                                                // Removing comment section is debatable, user might want to see it, but keeping existing behavior
+                                                                if (commentSection) commentSection.remove();
+
+                                                                document.getElementById('question-detail-view').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                                                                // Force typeset on the new content with delay
+                                                                setTimeout(() => {
+                                                                    if (window.MathJax && window.MathJax.typesetPromise) {
+                                                                        MathJax.typesetPromise()
+                                                                            .then(() => console.log('MathJax global typeset complete'))
+                                                                            .catch((err) => console.error('MathJax global typeset failed:', err));
+                                                                    }
+                                                                }, 100);
+                                                            }
                                                         }
                                                     });
                                             });
@@ -1032,7 +1156,6 @@
                     }
                 });
             }
-
 
             // showListView moved to global scope
 
@@ -1079,80 +1202,10 @@
                         });
                 });
             }
-        }); // End DOMContentLoaded
+        });
 
-        // Global functions for My Questions AJAX
-        function showListView() {
-            document.getElementById('question-detail-view').style.display = 'none';
-            document.getElementById('question-list-view').style.display = 'block';
-            window.scrollTo(0, 0);
-        }
-
-        function loadPostDetail(url) {
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newContent = doc.querySelector('.bbs-container');
-
-                    if (newContent) {
-                        const detailArea = document.getElementById('detail-content-area');
-                        if (!detailArea) return;
-
-                        detailArea.innerHTML = '';
-                        detailArea.appendChild(newContent);
-
-                        // Ensure Back Button works
-                        const listBtn = newContent.querySelector('.btn-list');
-                        if (listBtn) {
-                            listBtn.removeAttribute('href'); // Prevent link
-                            listBtn.style.cursor = 'pointer';
-                            listBtn.onclick = function (e) { e.preventDefault(); showListView(); };
-                        } else {
-                            // If button uses onclick="showListView()" it works because showListView is now global
-                        }
-
-                        // Switch Views
-                        document.getElementById('question-list-view').style.display = 'none';
-                        document.getElementById('question-detail-view').style.display = 'block';
-                        window.scrollTo(0, 0);
-
-                        // MathJax
-                        if (window.MathJax) {
-                            MathJax.typesetPromise([detailArea]).catch((err) => console.log(err));
-                        }
-                    }
-                })
-                .catch(err => console.error('Error loading detail:', err));
-        }
         // Global Pagination Handler (Moved from nested scope)
         document.body.addEventListener('click', function (e) {
-            // 1. My Questions Detail Link
-            const postLink = e.target.closest('.post-link');
-            if (postLink) {
-                e.preventDefault();
-                loadPostDetail(postLink.href);
-                return;
-            }
-
-            // 2. My Questions Pagination Link
-            if (e.target.tagName === 'A' && e.target.classList.contains('q-ajax-link')) {
-                e.preventDefault();
-                const url = e.target.href;
-                const listView = document.getElementById('question-list-view');
-                if (listView) {
-                    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                        .then(response => response.text())
-                        .then(html => {
-                            listView.innerHTML = html;
-                        })
-                        .catch(error => console.error('Error:', error));
-                }
-                return;
-            }
-
-            // 3. General History Pagination
             if (e.target.classList.contains('page-link')) {
                 e.preventDefault();
 
@@ -1236,14 +1289,36 @@
                 fetch(url)
                     .then(response => response.text())
                     .then(html => {
-                        detailContent.innerHTML = html;
+                        // Use DOMParser to ensure scripts/styles are handled cleaner if possible
+                        // But mainly to be consistent with the edit-return logic
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        // detail_answer.html content is usually inside base.html's block content
+                        // We try to find .bbs-container first
+                        let newContent = doc.querySelector('.bbs-container');
+
+                        // Fallback if full page structure is different
+                        if (!newContent) {
+                            newContent = doc.body;
+                        }
+
+                        detailContent.innerHTML = '';
+                        detailContent.appendChild(newContent);
+
                         listSection.style.display = 'none';
                         detailSection.style.display = 'block';
 
-                        // Trigger styles/MathJax if needed
-                        if (window.MathJax) {
-                            MathJax.typesetPromise([detailContent]).catch((err) => console.log(err));
-                        }
+                        // Scroll to top of detail view
+                        detailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                        // Trigger styles/MathJax with a delay
+                        setTimeout(() => {
+                            if (window.MathJax && window.MathJax.typesetPromise) {
+                                MathJax.typesetPromise() // Global scan
+                                    .then(() => console.log('MathJax global typeset complete'))
+                                    .catch((err) => console.error('MathJax global typeset failed:', err));
+                            }
+                        }, 100);
                     })
                     .catch(err => console.error("Error loading question detail:", err));
             }
