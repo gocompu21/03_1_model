@@ -65,6 +65,32 @@ def exam_submit(request, exam_id):
                     is_correct=is_correct,
                 )
 
+                # --- Smart Review Schedule Integration ---
+                if not is_correct and request.user.is_authenticated:
+                    from django.utils import timezone
+                    from mypage.models import ReviewSchedule
+
+                    review_schedule, created = ReviewSchedule.objects.get_or_create(
+                        user=user,
+                        question=q,
+                        defaults={
+                            "last_wrong_date": timezone.now(),
+                            "review_count": 0,
+                            "next_review_date": timezone.localdate(),
+                            "is_mastered": False,
+                        },
+                    )
+                    if not created:
+                        # Reset review count if answered wrong again
+                        review_schedule.review_count = 0
+                        review_schedule.last_wrong_date = timezone.now()
+                        review_schedule.is_mastered = False
+                        review_schedule.next_review_date = (
+                            review_schedule.calculate_next_review_date()
+                        )
+                        review_schedule.save()
+                # --- End Smart Review ---
+
         attempt.total_score = correct_count
         attempt.save()
 

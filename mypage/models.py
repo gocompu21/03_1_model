@@ -40,20 +40,28 @@ class ReviewSchedule(models.Model):
     def mark_reviewed(self, is_correct):
         """
         Update schedule after a review session.
-        If correct: advance to next interval
+        If correct: advance to next interval (from TODAY)
         If wrong: reset to first interval
         """
         from django.utils import timezone
+
+        today = timezone.localdate()
 
         if is_correct:
             self.review_count += 1
             if self.review_count >= len(self.REVIEW_INTERVALS):
                 self.is_mastered = True
+                self.next_review_date = today  # Keep current date
+            else:
+                # Calculate next review from TODAY (Anki/SuperMemo style)
+                interval = self.REVIEW_INTERVALS[self.review_count]
+                self.next_review_date = today + timedelta(days=interval)
         else:
             # Reset if answered wrong again
             self.review_count = 0
             self.last_wrong_date = timezone.now()
             self.is_mastered = False
+            # Next review tomorrow
+            self.next_review_date = today + timedelta(days=self.REVIEW_INTERVALS[0])
 
-        self.next_review_date = self.calculate_next_review_date()
         self.save()

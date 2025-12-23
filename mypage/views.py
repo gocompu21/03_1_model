@@ -116,7 +116,7 @@ def index(request):
         weakest_subject = "아직 학습 데이터가 충분하지 않습니다."
 
     # --- Smart Review Recommendations ---
-    today = timezone.now().date()
+    today = timezone.localdate()  # Use local timezone (Asia/Seoul) instead of UTC
     review_recommendations = ReviewSchedule.objects.filter(
         user=request.user, next_review_date__lte=today, is_mastered=False
     ).select_related("question", "question__subject", "question__exam")[:10]
@@ -490,7 +490,7 @@ def review_start(request):
     """
     Start a review session with all questions due for review today.
     """
-    today = timezone.now().date()
+    today = timezone.localdate()  # Use local timezone (Asia/Seoul)
     review_items = ReviewSchedule.objects.filter(
         user=request.user, next_review_date__lte=today, is_mastered=False
     ).select_related("question", "question__subject", "question__exam")
