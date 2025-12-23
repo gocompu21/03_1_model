@@ -34,4 +34,7 @@ urlpatterns = [
     # Smart Review Session
     path("review/start/", views.review_start, name="review_start"),
     path("review/submit/", views.review_submit, name="review_submit"),
+    # Admin Prompt Generator
+    path("admin/prompt-generator/", views.prompt_generator, name="prompt_generator"),
+    path("admin/query-ai/", views.query_ai_api, name="query_ai_api"),
 ]

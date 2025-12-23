@@ -547,3 +547,141 @@ def review_submit(request):
         )
 
     return redirect("mypage:index")
+
+
+# --- Admin Prompt Generator ---
+
+from django.contrib.admin.views.decorators import staff_member_required
+from exam.models import Exam, Question
+from django.http import JsonResponse
+from django.conf import settings
+import google.generativeai as genai
+
+
+@staff_member_required
+def prompt_generator(request):
+    """
+    Admin-only page to generate prompts for question explanations.
+    Step 1: Generate prompt only
+    Step 2: Query AI APIs via AJAX (separate endpoint)
+    """
+    exams = Exam.objects.exclude(round_number=0).order_by("round_number")
+
+    generated_prompt = None
+    selected_question = None
+
+    if request.method == "POST":
+        action = request.POST.get("action", "generate")
+        round_number = request.POST.get("round_number")
+        question_number = request.POST.get("question_number")
+
+        # Handle DB update (AJAX)
+        if action == "save_explanation":
+            question_id = request.POST.get("question_id")
+            explanation_text = request.POST.get("explanation_text")
+            explanation_source = request.POST.get(
+                "explanation_source"
+            )  # 'basic_book' or 'tree_doctor'
+
+            if question_id and explanation_text:
+                try:
+                    question = Question.objects.get(id=question_id)
+                    # Save to appropriate field based on source
+                    if explanation_source == "basic_book":
+                        question.textbook_chat = explanation_text
+                    else:  # tree_doctor
+                        question.general_chat = explanation_text
+                    question.save()
+                    field_name = (
+                        "기본서 해설"
+                        if explanation_source == "basic_book"
+                        else "일반 해설"
+                    )
+                    return JsonResponse(
+                        {"success": True, "message": f"{field_name}이 저장되었습니다."}
+                    )
+                except Question.DoesNotExist:
+                    return JsonResponse(
+                        {"success": False, "message": "문제를 찾을 수 없습니다."}
+                    )
+
+        # Generate prompt only (Step 1)
+        if round_number and question_number:
+            try:
+                question = Question.objects.get(
+                    exam__round_number=round_number, number=question_number
+                )
+                selected_question = question
+
+                answer_map = {1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤"}
+                correct_answer = answer_map.get(question.answer, str(question.answer))
+
+                generated_prompt = f"""다음은 나무의사 시험 제{round_number}회 {question.subject.name} 문제입니다.
+
+문제: {question.content}
+①번. {question.choice1}
+②번. {question.choice2}
+③번. {question.choice3}
+④번. {question.choice4}
+⑤번. {question.choice5}
+
+정답: {correct_answer}
+
+위 문제에 대해 다음 형식으로 자세하고 전문적인 해설을 작성해주세요:
+
+1. **정답 해설**: 왜 {correct_answer}이 정답인지 전체적으로 설명
+
+2. **선지별 분석**:
+   - ①번 {question.choice1}: (옳음/그름) 이유 설명
+   - ②번 {question.choice2}: (옳음/그름) 이유 설명
+   - ③번 {question.choice3}: (옳음/그름) 이유 설명
+   - ④번 {question.choice4}: (옳음/그름) 이유 설명
+   - ⑤번 {question.choice5}: (옳음/그름) 이유 설명
+
+전문적이고 교육적인 해설을 작성해주세요."""
+
+            except Question.DoesNotExist:
+                generated_prompt = "해당 문제를 찾을 수 없습니다."
+
+    return render(
+        request,
+        "mypage/prompt_generator.html",
+        {
+            "exams": exams,
+            "generated_prompt": generated_prompt,
+            "selected_question": selected_question,
+        },
+    )
+
+
+@staff_member_required
+def query_ai_api(request):
+    """
+    AJAX endpoint to query AI APIs (basic book or tree doctor).
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    api_type = request.POST.get("api_type")  # 'basic_book' or 'tree_doctor'
+    prompt = request.POST.get("prompt")
+    subject_name = request.POST.get("subject_name", "")
+
+    if not prompt:
+        return JsonResponse({"error": "No prompt provided"}, status=400)
+
+    try:
+        if api_type == "basic_book":
+            from fileSearchStore import GeminiStoreManager
+
+            manager = GeminiStoreManager(api_key=settings.GEMINI_API_KEY)
+            response_text = manager.query_store(subject_name, prompt)
+        else:  # tree_doctor
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel("gemini-3-flash-preview")
+            response = model.generate_content(prompt)
+            response_text = response.text
+
+        return JsonResponse({"success": True, "response": response_text})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})

@@ -238,9 +238,11 @@ class GeminiStoreManager:
 
             # CRITICAL FIX: The large PDF has been deleted.
             # We can now use all files in the store (should just be the text file now).
+            # Limit to max 2 files to avoid token limit (1048576 tokens)
 
             content_parts = []
-            for i, f in enumerate(files):
+            files_to_use = files[:2]  # Use at most 2 files
+            for i, f in enumerate(files_to_use):
                 # Manually construct the part using the correct 'file_data' key
                 content_parts.append(
                     {"file_data": {"mime_type": f.mime_type, "file_uri": f.uri}}

@@ -388,6 +388,12 @@
                 <i class="fas fa-user"></i> 회원 정보
             </div>
 
+            {% if user.is_superuser %}
+            <a href="{% url 'mypage:prompt_generator' %}" class="menu-item" style="color: #ff9800;">
+                <i class="fas fa-cog"></i> 문제 관리
+            </a>
+            {% endif %}
+
             <a href="{% url 'main:index' %}" class="menu-item back-home">
                 <i class="fas fa-home"></i> 홈으로
             </a>
