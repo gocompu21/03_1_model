@@ -5,64 +5,80 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>복습 세션 - 나무의사</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' }
-        };
-    </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f0f7f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: sans-serif;
+            font-size: 16px;
+            overflow: hidden;
         }
 
-        header {
+        /* Top Header */
+        .top-header {
             background-color: #2d6a4f;
-            padding: 15px 40px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            color: white;
+            flex-shrink: 0;
         }
 
-        .logo {
+        .top-header a {
             color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
             text-decoration: none;
         }
 
-        .container {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 0 20px;
+        .top-header .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
-        .header-section {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Question Panel (Left) */
+        .question-panel {
+            flex: 1;
+            padding: 20px 30px;
+            background: #f8f6e6;
+            border-right: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .question-header {
             text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d8f3dc;
         }
 
-        .header-section h1 {
+        .question-header h2 {
+            margin: 0;
             color: #1b4332;
-            margin: 0 0 10px 0;
         }
 
-        .question-card {
+        #questions-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .question-item {
             background: white;
             border-radius: 12px;
-            padding: 25px;
+            padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             border-left: 4px solid #2d6a4f;
@@ -74,71 +90,206 @@
             margin-bottom: 10px;
         }
 
+        .q-number {
+            display: inline-block;
+            width: 26px;
+            height: 26px;
+            background-color: #2d6a4f;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 26px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
         .question-content {
-            font-weight: 500;
+            font-weight: bold;
+            font-size: 1.1em;
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .choices {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 6px;
         }
 
         .choice-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            display: block;
+            padding: 6px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 1.0em;
         }
 
         .choice-item:hover {
-            border-color: #2d6a4f;
-            background-color: #f8f9fa;
+            background-color: #f0f7f4;
         }
 
-        .choice-item input {
-            margin-right: 12px;
-            transform: scale(1.2);
-        }
-
-        .choice-item input:checked+label {
-            font-weight: bold;
-            color: #2d6a4f;
-        }
-
-        .choice-item:has(input:checked) {
-            border-color: #2d6a4f;
+        .choice-item.selected {
             background-color: #d8f3dc;
         }
 
-        .btn-submit {
-            display: block;
+        .choice-item .choice-num {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 1.25em;
+            position: relative;
+        }
+
+        .choice-item.selected .choice-num::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-35%, -100%) scale(2.5);
             width: 100%;
-            padding: 18px;
-            background-color: #2d6a4f;
+            height: 100%;
+            background-image: url("{% static 'exam/images/check_mark_black.png' %}");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            mix-blend-mode: multiply;
+            filter: contrast(1.5) brightness(1.1);
+            pointer-events: none;
+        }
+
+        /* OMR Panel (Right) */
+        .omr-panel {
+            width: 220px;
+            min-width: 220px;
+            padding: 15px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        .omr-title {
+            text-align: center;
+            font-weight: bold;
+            color: #1b4332;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d8f3dc;
+        }
+
+        .omr-card {
+            border: 2px solid #2d6a4f;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .omr-header {
+            display: flex;
+            background-color: #d8f3dc;
+            border-bottom: 1px solid #2d6a4f;
+            font-weight: bold;
+            text-align: center;
+            height: 30px;
+            line-height: 30px;
+            color: #1b4332;
+            font-size: 0.85rem;
+        }
+
+        .omr-header-num {
+            width: 40px;
+            border-right: 1px solid #2d6a4f;
+        }
+
+        .omr-header-ans {
+            flex: 1;
+        }
+
+        .omr-row {
+            display: flex;
+            align-items: stretch;
+            min-height: 32px;
+            cursor: pointer;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .omr-row:last-child {
+            border-bottom: none;
+        }
+
+        .omr-row:hover {
+            background-color: #f0f7f4;
+        }
+
+        .omr-num {
+            width: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px solid #e0e0e0;
+            font-weight: bold;
+            font-size: 0.85rem;
+            background-color: #f8f9fa;
+            color: #1b4332;
+        }
+
+        .omr-bubbles {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .omr-bubble {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #333;
+            text-align: center;
+            line-height: 18px;
+            font-size: 11px;
+            cursor: pointer;
+            background: white;
+            color: #333;
+        }
+
+        .omr-bubble:hover {
+            background: #e0e0e0;
+        }
+
+        .omr-bubble.selected {
+            background: #2d6a4f;
+            color: white;
+            border-color: #2d6a4f;
+        }
+
+        input[type="radio"] {
+            display: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2d6a4f;
             color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 8px;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color 0.3s;
+            margin-top: auto;
         }
 
-        .btn-submit:hover {
-            background-color: #1b4332;
+        .submit-btn:hover {
+            background: #1b4332;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
         }
 
         .empty-state i {
@@ -147,123 +298,188 @@
             margin-bottom: 20px;
         }
 
-        .q-number {
-            width: 28px;
-            height: 28px;
-            background-color: #2d6a4f;
-            color: white;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 10px;
+        .review-info {
+            background: linear-gradient(135deg, #d8f3dc, #b7e4c7);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .review-info strong {
+            color: #1b4332;
         }
     </style>
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
-    <header>
+    <div class="top-header">
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-        <a href="{% url 'mypage:index' %}" style="color: white; text-decoration: none;">
-            <i class="fas fa-arrow-left"></i> 마이페이지로
-        </a>
-    </header>
+        <span><i class="fas fa-brain"></i> 복습 세션 - {{ total_count }}문제</span>
+        <a href="{% url 'mypage:index' %}"><i class="fas fa-arrow-left"></i> 마이페이지</a>
+    </div>
 
-    <div class="container">
-        <div class="header-section">
-            <h1><i class="fas fa-brain" style="color: #2d6a4f;"></i> 오늘의 복습</h1>
-            <p style="color: #666; margin: 0 0 15px 0;">총 <strong>{{ total_count }}</strong>개의 문제를 복습합니다.</p>
-        </div>
+    {% if review_items %}
+    <form method="POST" action="{% url 'mypage:review_submit' %}" class="main-container">
+        {% csrf_token %}
 
-        <div
-            style="background: linear-gradient(135deg, #d8f3dc, #b7e4c7); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-            <h3 style="color: #1b4332; margin: 0 0 12px 0; text-align: left;"><i class="fas fa-lightbulb"></i> 왜 복습이
-                중요할까요?</h3>
-            <p style="color: #333; line-height: 1.7; margin: 0 0 12px 0; text-align: left;">
-                <strong>에빙하우스 망각곡선</strong>에 따르면, 학습 후 24시간 내에 약 70%의 내용을 잊어버립니다.<br>
-                하지만 적절한 간격으로 복습하면 기억을 장기 기억으로 전환할 수 있습니다!
-            </p>
-            <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px;">
-                <span
-                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>1일</strong>
-                    → 첫 복습</span>
-                <span
-                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>3일</strong>
-                    → 2차 복습</span>
-                <span
-                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>7일</strong>
-                    → 3차 복습</span>
-                <span
-                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>14일</strong>
-                    → 4차 복습</span>
-                <span
-                    style="background: white; padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; color: #2d6a4f;"><strong>30일</strong>
-                    → 완전 학습</span>
+        <!-- Question Panel (Left) -->
+        <div class="question-panel">
+            <div class="question-header">
+                <h2><i class="fas fa-brain" style="color: #2d6a4f;"></i> 오늘의 복습</h2>
+            </div>
+
+            <div class="review-info">
+                <i class="fas fa-lightbulb"></i> <strong>에빙하우스 망각곡선</strong>: 적절한 간격의 복습으로 장기 기억을 형성하세요!
+            </div>
+
+            <div id="questions-container">
+                {% for item in review_items %}
+                <div class="question-item" id="q-{{ item.id }}" data-index="{{ forloop.counter0 }}">
+                    <div class="question-meta">
+                        <span class="q-number">{{ forloop.counter }}</span>
+                        {{ item.question.subject.name }} · 제{{ item.question.exam.round_number }}회 {{ item.question.number }}번
+                        <span style="float: right; color: #2d6a4f; font-weight: bold;">복습 {{ item.review_count }}회차</span>
+                    </div>
+                    <div class="question-content">
+                        {{ item.question.content }}
+                    </div>
+                    {% if item.question.image %}
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <img src="{{ item.question.image.url }}" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    {% endif %}
+                    <div class="choices">
+                        <div class="choice-item" onclick="selectAnswer('{{ item.id }}', 1)">
+                            <span class="choice-num">①</span> {{ item.question.choice1 }}
+                        </div>
+                        <div class="choice-item" onclick="selectAnswer('{{ item.id }}', 2)">
+                            <span class="choice-num">②</span> {{ item.question.choice2 }}
+                        </div>
+                        <div class="choice-item" onclick="selectAnswer('{{ item.id }}', 3)">
+                            <span class="choice-num">③</span> {{ item.question.choice3 }}
+                        </div>
+                        <div class="choice-item" onclick="selectAnswer('{{ item.id }}', 4)">
+                            <span class="choice-num">④</span> {{ item.question.choice4 }}
+                        </div>
+                        <div class="choice-item" onclick="selectAnswer('{{ item.id }}', 5)">
+                            <span class="choice-num">⑤</span> {{ item.question.choice5 }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
 
-        {% if review_items %}
-        <form method="POST" action="{% url 'mypage:review_submit' %}">
-            {% csrf_token %}
-            {% for item in review_items %}
-            <div class="question-card">
-                <div class="question-meta">
-                    <span class="q-number">{{ forloop.counter }}</span>
-                    {{ item.question.subject.name }} · 제{{ item.question.exam.round_number }}회
-                    {{item.question.number}}번
-                    <span style="float: right; color: #aaa;">복습 {{ item.review_count }}회차</span>
-                </div>
-                <div class="question-content">
-                    {{ item.question.content }}
-                </div>
-                {% if item.question.image %}
-                <div style="text-align: center; margin-bottom: 15px;">
-                    <img src="{{ item.question.image.url }}"
-                        style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
-                </div>
-                {% endif %}
-                <div class="choices">
-                    <label class="choice-item">
-                        <input type="radio" name="schedule_{{ item.id }}" value="1">
-                        <span>① {{ item.question.choice1 }}</span>
-                    </label>
-                    <label class="choice-item">
-                        <input type="radio" name="schedule_{{ item.id }}" value="2">
-                        <span>② {{ item.question.choice2 }}</span>
-                    </label>
-                    <label class="choice-item">
-                        <input type="radio" name="schedule_{{ item.id }}" value="3">
-                        <span>③ {{ item.question.choice3 }}</span>
-                    </label>
-                    <label class="choice-item">
-                        <input type="radio" name="schedule_{{ item.id }}" value="4">
-                        <span>④ {{ item.question.choice4 }}</span>
-                    </label>
-                    <label class="choice-item">
-                        <input type="radio" name="schedule_{{ item.id }}" value="5">
-                        <span>⑤ {{ item.question.choice5 }}</span>
-                    </label>
-                </div>
-            </div>
-            {% endfor %}
+        <!-- OMR Panel (Right) -->
+        <div class="omr-panel">
+            <div class="omr-title"><i class="fas fa-check-square"></i> 답안지 (OMR)</div>
 
-            <button type="submit" class="btn-submit">
+            <div class="omr-card">
+                <div class="omr-header">
+                    <div class="omr-header-num">번호</div>
+                    <div class="omr-header-ans">답 란</div>
+                </div>
+
+                {% for item in review_items %}
+                <div class="omr-row" id="omr-row-{{ item.id }}" onclick="scrollToQuestion('{{ item.id }}')">
+                    <div class="omr-num">{{ forloop.counter }}</div>
+                    <div class="omr-bubbles">
+                        {% for i in "12345" %}
+                        <label class="omr-bubble val-{{ i }}" onclick="event.stopPropagation(); selectBubble(this, '{{ item.id }}', '{{ i }}')">
+                            {{ i }}
+                            <input type="radio" name="schedule_{{ item.id }}" value="{{ i }}">
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="submit-btn">
                 <i class="fas fa-check-circle"></i> 복습 완료하기
             </button>
-        </form>
-        {% else %}
+        </div>
+    </form>
+    {% else %}
+    <div class="main-container" style="justify-content: center; align-items: center;">
         <div class="empty-state">
             <i class="fas fa-check-circle"></i>
             <h2 style="color: #1b4332;">오늘 복습할 문제가 없습니다!</h2>
             <p style="color: #666;">잘하고 있어요. 다음 복습 알림까지 쉬어가세요. 🎉</p>
-            <a href="{% url 'mypage:index' %}"
-                style="display: inline-block; margin-top: 20px; padding: 12px 30px; background-color: #2d6a4f; color: white; text-decoration: none; border-radius: 25px;">
+            <a href="{% url 'mypage:index' %}" style="display: inline-block; margin-top: 20px; padding: 12px 30px; background-color: #2d6a4f; color: white; text-decoration: none; border-radius: 25px;">
                 마이페이지로 돌아가기
             </a>
         </div>
-        {% endif %}
     </div>
+    {% endif %}
+
+    <script>
+        function selectAnswer(itemId, choiceVal) {
+            // Update question panel selection
+            const questionDiv = document.getElementById('q-' + itemId);
+            if (questionDiv) {
+                const choices = questionDiv.querySelectorAll('.choice-item');
+                choices.forEach((c, idx) => {
+                    c.classList.remove('selected');
+                    if (idx + 1 == choiceVal) {
+                        c.classList.add('selected');
+                    }
+                });
+            }
+
+            // Update OMR panel
+            const omrRow = document.getElementById('omr-row-' + itemId);
+            if (omrRow) {
+                const bubble = omrRow.querySelector('.val-' + choiceVal);
+                if (bubble) {
+                    const bubbles = omrRow.querySelectorAll('.omr-bubble');
+                    bubbles.forEach(b => b.classList.remove('selected'));
+                    bubble.classList.add('selected');
+                    const radio = bubble.querySelector('input[type="radio"]');
+                    if (radio) radio.checked = true;
+                }
+            }
+        }
+
+        function selectBubble(label, itemId, choiceVal) {
+            // Update OMR bubbles
+            const omrRow = label.closest('.omr-row');
+            const bubbles = omrRow.querySelectorAll('.omr-bubble');
+            bubbles.forEach(b => b.classList.remove('selected'));
+            label.classList.add('selected');
+
+            // Check radio
+            const radio = label.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+
+            // Update question panel
+            const questionDiv = document.getElementById('q-' + itemId);
+            if (questionDiv) {
+                const choices = questionDiv.querySelectorAll('.choice-item');
+                choices.forEach((c, idx) => {
+                    c.classList.remove('selected');
+                    if (idx + 1 == choiceVal) {
+                        c.classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        function scrollToQuestion(itemId) {
+            const questionDiv = document.getElementById('q-' + itemId);
+            if (questionDiv) {
+                questionDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    </script>
 </body>
 
 </html>

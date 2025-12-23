@@ -513,15 +513,16 @@ def review_submit(request):
     if request.method == "POST":
         correct_count = 0
         total_count = 0
+        results = []  # Collect detailed results
 
         # Get all schedule IDs from form
         for key, value in request.POST.items():
             if key.startswith("schedule_"):
                 schedule_id = key.replace("schedule_", "")
                 try:
-                    schedule = ReviewSchedule.objects.get(
-                        id=schedule_id, user=request.user
-                    )
+                    schedule = ReviewSchedule.objects.select_related(
+                        "question", "question__subject", "question__exam"
+                    ).get(id=schedule_id, user=request.user)
                     selected_choice = int(value) if value else None
 
                     if selected_choice:
@@ -530,14 +531,29 @@ def review_submit(request):
                         total_count += 1
                         if is_correct:
                             correct_count += 1
+
+                        # Add to results
+                        results.append(
+                            {
+                                "schedule_id": schedule.id,
+                                "question": schedule.question,
+                                "selected_choice": selected_choice,
+                                "is_correct": is_correct,
+                                "review_count": schedule.review_count,
+                            }
+                        )
                 except (ReviewSchedule.DoesNotExist, ValueError):
                     continue
+
+        # Sort results by question number
+        results.sort(key=lambda x: x["question"].number)
 
         # Return result
         return render(
             request,
             "mypage/review_result.html",
             {
+                "results": results,
                 "correct_count": correct_count,
                 "total_count": total_count,
                 "score": (

@@ -1,138 +1,507 @@
 {% load static %}
+{% load markdown_extras %}
 <!DOCTYPE html>
 <html lang="ko">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>복습 결과 - 나무의사</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         body {
             margin: 0;
-            padding: 0;
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f0f7f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            font-family: sans-serif;
+            font-size: 16px;
+            overflow: hidden;
         }
 
-        header {
+        /* Top Header */
+        .top-header {
             background-color: #2d6a4f;
-            padding: 15px 40px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            color: white;
+            flex-shrink: 0;
         }
 
-        .logo {
+        .top-header a {
             color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
             text-decoration: none;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 60px auto;
-            padding: 0 20px;
+        .top-header .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
-        .result-card {
-            background: white;
-            border-radius: 16px;
-            padding: 50px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
         }
 
-        .score-circle {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #2d6a4f, #40916c);
+        /* Question Panel (Left) */
+        .question-panel {
+            flex: 1;
+            padding: 20px 30px;
+            background: #f8f6e6;
+            border-right: 1px solid #ccc;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 30px;
-            color: white;
+            overflow: hidden;
         }
 
-        .score-number {
-            font-size: 4rem;
-            font-weight: bold;
-            line-height: 1;
+        .question-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d8f3dc;
         }
 
-        .score-unit {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .result-text {
+        .question-header h2 {
+            margin: 0;
             color: #1b4332;
-            font-size: 1.5rem;
+        }
+
+        #questions-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .question-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #2d6a4f;
+            position: relative;
+        }
+
+        .question-item.incorrect {
+            border-left-color: #d93025;
+        }
+
+        .question-meta {
+            color: #888;
+            font-size: 0.85rem;
             margin-bottom: 10px;
         }
 
-        .result-detail {
-            color: #666;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
+        .q-number {
+            display: inline-block;
+            width: 26px;
+            height: 26px;
+            background-color: #2d6a4f;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 26px;
+            font-weight: bold;
+            margin-right: 8px;
         }
 
-        .result-message {
+        .q-number.incorrect {
+            background-color: #d93025;
+        }
+
+        .question-content {
+            font-weight: bold;
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .choices {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .choice-item {
+            display: block;
+            padding: 6px;
+            border-radius: 5px;
+            font-size: 1.0em;
+        }
+
+        .choice-item .choice-num {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 1.25em;
+            position: relative;
+        }
+
+        .choice-item.selected .choice-num::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-35%, -100%) scale(2.5);
+            width: 100%;
+            height: 100%;
+            background-image: url("{% static 'exam/images/check_mark_black.png' %}");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            mix-blend-mode: multiply;
+            filter: contrast(1.5) brightness(1.1);
+            pointer-events: none;
+        }
+
+        .choice-item.correct-answer {
+            background-color: rgba(46, 125, 50, 0.1);
+        }
+
+        .choice-item.correct-answer .choice-num {
+            position: relative;
+        }
+
+        .choice-item.correct-answer .choice-num::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #d93025;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        /* Explanation Section */
+        .explanation-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #2d6a4f;
+            display: none;
+        }
+
+        .explanation-section.show {
+            display: block;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* OMR Panel (Right) */
+        .omr-panel {
+            width: 220px;
+            min-width: 220px;
+            padding: 15px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .score-display .score-number {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .score-display .score-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .omr-card {
+            border: 2px solid #2d6a4f;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .omr-header {
+            display: flex;
             background-color: #d8f3dc;
+            border-bottom: 1px solid #2d6a4f;
+            font-weight: bold;
+            text-align: center;
+            height: 30px;
+            line-height: 30px;
             color: #1b4332;
-            padding: 15px 25px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            font-size: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .omr-header-num {
+            width: 40px;
+            border-right: 1px solid #2d6a4f;
+        }
+
+        .omr-header-ans {
+            flex: 1;
+        }
+
+        .omr-row {
+            display: flex;
+            align-items: stretch;
+            min-height: 32px;
+            cursor: pointer;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .omr-row:last-child {
+            border-bottom: none;
+        }
+
+        .omr-row:hover {
+            background-color: #f0f7f4;
+        }
+
+        .omr-num {
+            width: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-right: 1px solid #e0e0e0;
+            font-weight: bold;
+            font-size: 0.85rem;
+            background-color: #f8f9fa;
+            color: #1b4332;
+            position: relative;
+        }
+
+        .omr-bubbles {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .omr-bubble {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #333;
+            text-align: center;
+            line-height: 18px;
+            font-size: 11px;
+            background: white;
+            color: #333;
+        }
+
+        .omr-bubble.selected {
+            background: #333;
+            color: white;
+            border-color: #333;
+        }
+
+        .omr-bubble.correct-answer {
+            background-color: #ff4d4d;
+            color: white;
+            border-color: #ff4d4d;
+        }
+
+        /* Grade marks */
+        .grade-mark {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+            width: 24px;
+            height: 24px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .grade-circle {
+            border: 3px solid rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+        }
+
+        .grade-x {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M 12 12 Q 25 20 38 38 M 38 12 Q 25 30 12 38' stroke='rgba(255, 0, 0, 0.8)' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+            background-size: contain;
         }
 
         .btn-home {
-            display: inline-block;
-            padding: 15px 40px;
-            background-color: #2d6a4f;
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #2d6a4f;
             color: white;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: bold;
+            border: none;
+            border-radius: 8px;
             font-size: 1.1rem;
-            transition: background-color 0.3s;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            margin-top: auto;
         }
 
         .btn-home:hover {
-            background-color: #1b4332;
+            background: #1b4332;
         }
     </style>
 </head>
 
 <body>
-    <header>
+    <div class="top-header">
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-    </header>
+        <span><i class="fas fa-check-circle"></i> 복습 결과 - {{ correct_count }}/{{ total_count }} 정답</span>
+        <a href="{% url 'mypage:index' %}"><i class="fas fa-arrow-left"></i> 마이페이지</a>
+    </div>
 
-    <div class="container">
-        <div class="result-card">
-            <div class="score-circle">
-                <div class="score-number">{{ score }}</div>
-                <div class="score-unit">점</div>
+    <div class="main-container">
+        <!-- Question Panel (Left) -->
+        <div class="question-panel">
+            <div class="question-header">
+                <h2><i class="fas fa-clipboard-check" style="color: #2d6a4f;"></i> 복습 결과</h2>
             </div>
 
-            <h2 class="result-text">복습 완료!</h2>
-            <p class="result-detail">
-                <strong>{{ total_count }}</strong>문제 중 <strong>{{ correct_count }}</strong>문제 정답
-            </p>
+            <div id="questions-container">
+                {% for res in results %}
+                <div class="question-item {% if not res.is_correct %}incorrect{% endif %}" id="q-{{ res.schedule_id }}">
+                    <div class="question-meta">
+                        <span class="q-number {% if not res.is_correct %}incorrect{% endif %}">{{ forloop.counter }}</span>
+                        {{ res.question.subject.name }} · 제{{ res.question.exam.round_number }}회 {{ res.question.number }}번
+                        <span style="float: right;">
+                            {% if res.is_correct %}
+                            <span style="color: #2d6a4f;"><i class="fas fa-check-circle"></i> 정답</span>
+                            {% else %}
+                            <span style="color: #d93025;"><i class="fas fa-times-circle"></i> 오답</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="question-content">
+                        {{ res.question.content }}
+                    </div>
+                    {% if res.question.image %}
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <img src="{{ res.question.image.url }}" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                    </div>
+                    {% endif %}
+                    <div class="choices">
+                        <div class="choice-item {% if res.selected_choice == 1 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 1 %}correct-answer{% endif %}">
+                            <span class="choice-num">①</span> {{ res.question.choice1 }}
+                        </div>
+                        <div class="choice-item {% if res.selected_choice == 2 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 2 %}correct-answer{% endif %}">
+                            <span class="choice-num">②</span> {{ res.question.choice2 }}
+                        </div>
+                        <div class="choice-item {% if res.selected_choice == 3 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 3 %}correct-answer{% endif %}">
+                            <span class="choice-num">③</span> {{ res.question.choice3 }}
+                        </div>
+                        <div class="choice-item {% if res.selected_choice == 4 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 4 %}correct-answer{% endif %}">
+                            <span class="choice-num">④</span> {{ res.question.choice4 }}
+                        </div>
+                        <div class="choice-item {% if res.selected_choice == 5 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 5 %}correct-answer{% endif %}">
+                            <span class="choice-num">⑤</span> {{ res.question.choice5 }}
+                        </div>
+                    </div>
 
-            <div class="result-message">
-                {% if score >= 80 %}
-                <i class="fas fa-star" style="color: gold;"></i> 훌륭해요! 복습 효과가 확실히 나타나고 있어요!
-                {% elif score >= 60 %}
-                <i class="fas fa-thumbs-up"></i> 잘하고 있어요! 조금만 더 복습하면 완벽해질 거예요.
-                {% else %}
-                <i class="fas fa-heart"></i> 괜찮아요! 틀린 문제는 다시 복습 스케줄에 추가되었어요.
-                {% endif %}
+                    <!-- Toggle Button for Explanation -->
+                    <div style="text-align: right;">
+                        <button type="button" class="toggle-btn" onclick="toggleExplanation('exp-{{ res.schedule_id }}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                <line x1="11" y1="8" x2="11" y2="14"></line>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                            해설 보기
+                        </button>
+                    </div>
+
+                    <!-- Explanation Section -->
+                    <div id="exp-{{ res.schedule_id }}" class="explanation-section">
+                        <div><strong>정답:</strong> {{ res.question.answer|circle_number }}</div>
+                        <div style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
+                            {% if res.question.textbook_chat %}
+                            {{ res.question.textbook_chat|markdown|safe }}
+                            {% else %}
+                            <span style="color: #888;">해설이 없습니다.</span>
+                            {% endif %}
+                        </div>
+                        {% if res.question.infographic_image %}
+                        <div style="margin-top: 10px; text-align: center;">
+                            <img src="{{ res.question.infographic_image.url }}" style="border: 2px solid #000; width: 100%;">
+                        </div>
+                        {% endif %}
+                        <div style="text-align: center; margin-top: 10px; cursor: pointer;" onclick="toggleExplanation('exp-{{ res.schedule_id }}')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="18 15 12 9 6 15"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- OMR Panel (Right) -->
+        <div class="omr-panel">
+            <div class="score-display">
+                <div class="score-number">{{ score }}점</div>
+                <div class="score-label">{{ correct_count }}/{{ total_count }} 정답</div>
+            </div>
+
+            <div class="omr-card">
+                <div class="omr-header">
+                    <div class="omr-header-num">번호</div>
+                    <div class="omr-header-ans">답 란</div>
+                </div>
+
+                {% for res in results %}
+                <div class="omr-row" onclick="scrollToQuestion('{{ res.schedule_id }}')">
+                    <div class="omr-num">
+                        {{ forloop.counter }}
+                        {% if res.is_correct %}
+                        <div class="grade-mark grade-circle"></div>
+                        {% else %}
+                        <div class="grade-mark grade-x"></div>
+                        {% endif %}
+                    </div>
+                    <div class="omr-bubbles">
+                        {% for i in "12345" %}
+                        <div class="omr-bubble {% if res.selected_choice|stringformat:'s' == i %}selected{% endif %} {% if not res.is_correct and res.question.answer|stringformat:'s' == i %}correct-answer{% endif %}">
+                            {{ i }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
             </div>
 
             <a href="{% url 'mypage:index' %}" class="btn-home">
@@ -140,6 +509,22 @@
             </a>
         </div>
     </div>
+
+    <script>
+        function toggleExplanation(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('show');
+            }
+        }
+
+        function scrollToQuestion(scheduleId) {
+            const el = document.getElementById('q-' + scheduleId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    </script>
 </body>
 
 </html>
