@@ -3,17 +3,20 @@
 - 정답(answer)은 업로드하지 않음 (기본값 0으로 설정)
 """
 import os
+import sys
 import django
 
-os.chdir(r'c:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model')
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(SCRIPT_DIR)
 os.environ['DJANGO_SETTINGS_MODULE'] = 'config.settings'
 django.setup()
 
 import openpyxl
 from exam.models import Exam, Subject, Question
 
-# Load Excel file
-excel_path = r'c:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data\11회_기출문제.xlsx'
+# Load Excel file (relative path)
+excel_path = os.path.join(SCRIPT_DIR, 'data', '11회_기출문제.xlsx')
 wb = openpyxl.load_workbook(excel_path)
 ws = wb.active
 
