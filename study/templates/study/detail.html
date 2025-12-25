@@ -374,7 +374,27 @@
             </div>
 
             <!-- Toggle Button for Explanation -->
-            <div style="margin-top: 10px; text-align: right;">
+            <div style="margin-top: 10px; text-align: right; display: flex; justify-content: flex-end; gap: 15px;">
+                <!-- Listen to Explanation Button -->
+                <button type="button" class="tts-btn" data-question-id="{{ q.id }}" onclick="toggleTTS(this, '{{ q.id }}')"
+                    style="background:none; border:none; cursor:pointer; color:#2196F3; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="tts-icon-play">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="tts-icon-stop" style="display:none;">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                    </svg>
+                    <span class="tts-text">해설 듣기</span>
+                </button>
+                
+                <!-- View Explanation Button -->
                 <button type="button" onclick="toggleExplanation('exp-{{ q.id }}')"
                     style="background:none; border:none; cursor:pointer; color:#555; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
@@ -666,5 +686,153 @@
             gContent.style.display = 'block';
         }
     }
+
+    // TTS (Text-to-Speech) Logic using Gemini TTS API
+    let currentAudio = null;
+    let currentTTSButton = null;
+    let isLoading = false;
+    
+    function toggleTTS(btn, questionId) {
+        // If currently loading, ignore click
+        if (isLoading && currentTTSButton === btn) {
+            return;
+        }
+        
+        // If already playing, stop
+        if (currentAudio && currentTTSButton === btn) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+            resetTTSButton(btn);
+            currentTTSButton = null;
+            return;
+        }
+        
+        // Stop any other audio first
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+        }
+        if (currentTTSButton && currentTTSButton !== btn) {
+            resetTTSButton(currentTTSButton);
+        }
+        
+        // Determine which tab is active
+        const expSection = document.getElementById('exp-' + questionId);
+        let tab = 'textbook';
+        if (expSection) {
+            const generalContent = expSection.querySelector('.general-content');
+            if (generalContent && generalContent.style.display !== 'none') {
+                tab = 'general';
+            }
+        }
+        
+        // Show loading state
+        setTTSButtonLoading(btn);
+        currentTTSButton = btn;
+        isLoading = true;
+        
+        // Call TTS API
+        fetch('{% url "study:tts_generate" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify({
+                question_id: questionId,
+                tab: tab
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'TTS generation failed');
+                });
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            isLoading = false;
+            
+            // Create audio from blob
+            const audioUrl = URL.createObjectURL(blob);
+            currentAudio = new Audio(audioUrl);
+            
+            // Update button to playing state
+            setTTSButtonActive(btn);
+            
+            // Event handlers
+            currentAudio.onended = function() {
+                URL.revokeObjectURL(audioUrl);
+                resetTTSButton(btn);
+                currentTTSButton = null;
+                currentAudio = null;
+            };
+            
+            currentAudio.onerror = function() {
+                URL.revokeObjectURL(audioUrl);
+                resetTTSButton(btn);
+                currentTTSButton = null;
+                currentAudio = null;
+                alert('오디오 재생 중 오류가 발생했습니다.');
+            };
+            
+            // Play audio
+            currentAudio.play();
+        })
+        .catch(error => {
+            isLoading = false;
+            resetTTSButton(btn);
+            currentTTSButton = null;
+            alert(error.message || '해설 듣기 중 오류가 발생했습니다.');
+        });
+    }
+    
+    function setTTSButtonLoading(btn) {
+        btn.querySelector('.tts-icon-play').style.display = 'none';
+        btn.querySelector('.tts-icon-stop').style.display = 'none';
+        btn.querySelector('.tts-text').textContent = '로딩 중...';
+        btn.style.color = '#ff9800';
+    }
+    
+    function setTTSButtonActive(btn) {
+        btn.querySelector('.tts-icon-play').style.display = 'none';
+        btn.querySelector('.tts-icon-stop').style.display = 'inline';
+        btn.querySelector('.tts-text').textContent = '듣기 중지';
+        btn.style.color = '#f44336';
+    }
+    
+    function resetTTSButton(btn) {
+        btn.querySelector('.tts-icon-play').style.display = 'inline';
+        btn.querySelector('.tts-icon-stop').style.display = 'none';
+        btn.querySelector('.tts-text').textContent = '해설 듣기';
+        btn.style.color = '#2196F3';
+    }
+    
+    // CSRF token helper
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Stop TTS when leaving page
+    window.addEventListener('beforeunload', function() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+    });
 </script>
 {% endblock %}
