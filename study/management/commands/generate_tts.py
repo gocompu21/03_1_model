@@ -85,9 +85,9 @@ class Command(BaseCommand):
                 if not text:
                     continue
 
-                # Generate cache filename (WAV format)
+                # Generate cache filename (MP3 format)
                 text_hash = hashlib.md5(text.encode()).hexdigest()[:8]
-                cache_filename = f"q{question.id}_{tab}_{text_hash}.wav"
+                cache_filename = f"q{question.id}_{tab}_{text_hash}.mp3"
                 cache_filepath = tts_cache_dir / cache_filename
 
                 # Skip if already cached
@@ -153,10 +153,31 @@ class Command(BaseCommand):
                     # Combine audio chunks
                     combined_audio = b"".join(audio_chunks)
 
-                    # Convert to WAV and save
+                    # Convert to WAV first
                     wav_data = self.convert_to_wav(combined_audio, mime_type or "audio/L16;rate=24000")
-                    with open(cache_filepath, "wb") as f:
-                        f.write(wav_data)
+                    
+                    # Save WAV temporarily, then convert to MP3 using ffmpeg
+                    import subprocess
+                    import tempfile
+                    
+                    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                        tmp_wav.write(wav_data)
+                        tmp_wav_path = tmp_wav.name
+                    
+                    try:
+                        # Convert WAV to MP3 using ffmpeg
+                        result = subprocess.run(
+                            ["ffmpeg", "-y", "-i", tmp_wav_path, "-codec:a", "libmp3lame", "-b:a", "128k", str(cache_filepath)],
+                            capture_output=True,
+                            text=True
+                        )
+                        if result.returncode != 0:
+                            raise Exception(f"ffmpeg error: {result.stderr}")
+                    finally:
+                        # Clean up temp WAV file
+                        import os
+                        if os.path.exists(tmp_wav_path):
+                            os.remove(tmp_wav_path)
 
                     self.stdout.write(self.style.SUCCESS(f"  [{tab}] Saved: {cache_filename}"))
                     generated += 1

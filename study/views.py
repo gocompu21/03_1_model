@@ -261,19 +261,35 @@ def tts_generate(request):
         # Convert to WAV
         wav_data = convert_to_wav(combined_audio, mime_type or "audio/L16;rate=24000")
 
-        # Convert to MP3 and save
+        # Convert to MP3 using ffmpeg
         try:
-            from pydub import AudioSegment
-            audio_segment = AudioSegment.from_wav(io.BytesIO(wav_data))
-            audio_segment.export(str(mp3_filepath), format="mp3", bitrate="128k")
+            import subprocess
+            import tempfile
+            import os as os_module
             
-            with open(mp3_filepath, "rb") as f:
-                mp3_data = f.read()
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp_wav:
+                tmp_wav.write(wav_data)
+                tmp_wav_path = tmp_wav.name
             
-            response = HttpResponse(mp3_data, content_type="audio/mpeg")
-            response["Content-Disposition"] = f'inline; filename="{mp3_filename}"'
-            response["X-TTS-Cache"] = "MISS"
-            return response
+            try:
+                result = subprocess.run(
+                    ["ffmpeg", "-y", "-i", tmp_wav_path, "-codec:a", "libmp3lame", "-b:a", "128k", str(mp3_filepath)],
+                    capture_output=True,
+                    text=True
+                )
+                if result.returncode != 0:
+                    raise Exception(f"ffmpeg error: {result.stderr}")
+                
+                with open(mp3_filepath, "rb") as f:
+                    mp3_data = f.read()
+                
+                response = HttpResponse(mp3_data, content_type="audio/mpeg")
+                response["Content-Disposition"] = f'inline; filename="{mp3_filename}"'
+                response["X-TTS-Cache"] = "MISS"
+                return response
+            finally:
+                if os_module.path.exists(tmp_wav_path):
+                    os_module.remove(tmp_wav_path)
         except Exception:
             # Fallback to WAV if MP3 conversion fails
             with open(wav_filepath, "wb") as f:
