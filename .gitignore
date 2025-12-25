@@ -3,3 +3,4 @@ venv/
 db.sqlite3
 *.log
 debug_chat_log.txt
+media/tts/
