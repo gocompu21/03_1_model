@@ -528,19 +528,19 @@
                         <div class="choices">
                             <div class="choice-item {% if mq.selected_choice == 1 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not mq.is_correct and 1 in mq.question.answer %}correct-answer-circle{% endif %}">①</span>
-                                {{ mq.question.choice1 }}</div>
+                                {{ mq.question.choice1|safe }}</div>
                             <div class="choice-item {% if mq.selected_choice == 2 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not mq.is_correct and 2 in mq.question.answer %}correct-answer-circle{% endif %}">②</span>
-                                {{ mq.question.choice2 }}</div>
+                                {{ mq.question.choice2|safe }}</div>
                             <div class="choice-item {% if mq.selected_choice == 3 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not mq.is_correct and 3 in mq.question.answer %}correct-answer-circle{% endif %}">③</span>
-                                {{ mq.question.choice3 }}</div>
+                                {{ mq.question.choice3|safe }}</div>
                             <div class="choice-item {% if mq.selected_choice == 4 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not mq.is_correct and 4 in mq.question.answer %}correct-answer-circle{% endif %}">④</span>
-                                {{ mq.question.choice4 }}</div>
+                                {{ mq.question.choice4|safe }}</div>
                             <div class="choice-item {% if mq.selected_choice == 5 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not mq.is_correct and 5 in mq.question.answer %}correct-answer-circle{% endif %}">⑤</span>
-                                {{ mq.question.choice5 }}</div>
+                                {{ mq.question.choice5|safe }}</div>
                         </div>
                     </div>
 

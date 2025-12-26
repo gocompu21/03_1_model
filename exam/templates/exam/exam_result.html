@@ -633,19 +633,19 @@
                         <div class="choices">
                             <div class="choice-item {% if res.selected_choice == 1 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not res.is_correct and 1 in res.question.answer %}correct-answer-circle{% endif %}">①</span>
-                                {{ res.question.choice1 }}</div>
+                                {{ res.question.choice1|safe }}</div>
                             <div class="choice-item {% if res.selected_choice == 2 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not res.is_correct and 2 in res.question.answer %}correct-answer-circle{% endif %}">②</span>
-                                {{ res.question.choice2 }}</div>
+                                {{ res.question.choice2|safe }}</div>
                             <div class="choice-item {% if res.selected_choice == 3 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not res.is_correct and 3 in res.question.answer %}correct-answer-circle{% endif %}">③</span>
-                                {{ res.question.choice3 }}</div>
+                                {{ res.question.choice3|safe }}</div>
                             <div class="choice-item {% if res.selected_choice == 4 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not res.is_correct and 4 in res.question.answer %}correct-answer-circle{% endif %}">④</span>
-                                {{ res.question.choice4 }}</div>
+                                {{ res.question.choice4|safe }}</div>
                             <div class="choice-item {% if res.selected_choice == 5 %}selected-text{% endif %}"><span
                                     class="q-mark {% if not res.is_correct and 5 in res.question.answer %}correct-answer-circle{% endif %}">⑤</span>
-                                {{ res.question.choice5 }}</div>
+                                {{ res.question.choice5|safe }}</div>
                         </div>
                     </div>
 

@@ -406,7 +406,7 @@
                         </span>
                     </div>
                     <div class="question-content">
-                        {{ res.question.content }}
+                        {{ res.question.content|safe }}
                     </div>
                     {% if res.question.image %}
                     <div style="text-align: center; margin-bottom: 15px;">
@@ -415,19 +415,19 @@
                     {% endif %}
                     <div class="choices">
                         <div class="choice-item {% if res.selected_choice == 1 %}selected{% endif %} {% if not res.is_correct and 1 in res.question.answer %}correct-answer{% endif %}">
-                            <span class="choice-num">①</span> {{ res.question.choice1 }}
+                            <span class="choice-num">①</span> {{ res.question.choice1|safe }}
                         </div>
                         <div class="choice-item {% if res.selected_choice == 2 %}selected{% endif %} {% if not res.is_correct and 2 in res.question.answer %}correct-answer{% endif %}">
-                            <span class="choice-num">②</span> {{ res.question.choice2 }}
+                            <span class="choice-num">②</span> {{ res.question.choice2|safe }}
                         </div>
                         <div class="choice-item {% if res.selected_choice == 3 %}selected{% endif %} {% if not res.is_correct and 3 in res.question.answer %}correct-answer{% endif %}">
-                            <span class="choice-num">③</span> {{ res.question.choice3 }}
+                            <span class="choice-num">③</span> {{ res.question.choice3|safe }}
                         </div>
                         <div class="choice-item {% if res.selected_choice == 4 %}selected{% endif %} {% if not res.is_correct and 4 in res.question.answer %}correct-answer{% endif %}">
-                            <span class="choice-num">④</span> {{ res.question.choice4 }}
+                            <span class="choice-num">④</span> {{ res.question.choice4|safe }}
                         </div>
                         <div class="choice-item {% if res.selected_choice == 5 %}selected{% endif %} {% if not res.is_correct and 5 in res.question.answer %}correct-answer{% endif %}">
-                            <span class="choice-num">⑤</span> {{ res.question.choice5 }}
+                            <span class="choice-num">⑤</span> {{ res.question.choice5|safe }}
                         </div>
                     </div>
 

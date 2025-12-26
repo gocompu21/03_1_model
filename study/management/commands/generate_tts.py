@@ -84,6 +84,19 @@ class Command(BaseCommand):
                 if not text:
                     continue
 
+                # Remove markdown formatting for TTS (must match web generation)
+                import re
+                # Remove bold: **text** or __text__
+                text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+                text = re.sub(r'__(.+?)__', r'\1', text)
+                # Remove italic: *text* or _text_
+                text = re.sub(r'\*(.+?)\*', r'\1', text)
+                text = re.sub(r'_(.+?)_', r'\1', text)
+                # Remove headers: # text
+                text = re.sub(r'^#+\s+', '', text, flags=re.MULTILINE)
+                # Remove list markers: - text or * text
+                text = re.sub(r'^[\*\-]\s+', '', text, flags=re.MULTILINE)
+
                 # Generate cache filename (MP3 format)
                 text_hash = hashlib.md5(text.encode()).hexdigest()[:8]
                 round_num = question.exam.round_number

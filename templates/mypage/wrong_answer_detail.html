@@ -100,7 +100,7 @@
             </span>
         </div>
         <div class="q-content">
-            {{ result.question.content|linebreaksbr }}
+            {{ result.question.content|linebreaksbr|safe }}
         </div>
     </div>
 
@@ -113,23 +113,23 @@
     <div class="q-choices">
         {% with ans=result.question.answer selected=result.selected_choice %}
         <div class="choice-item {% if 1 in ans %}correct{% elif selected == 1 %}wrong{% endif %}">
-            ① {{ result.question.choice1 }}
+            ① {{ result.question.choice1|safe }}
             {% if selected == 1 %}(내 답){% endif %}
         </div>
         <div class="choice-item {% if 2 in ans %}correct{% elif selected == 2 %}wrong{% endif %}">
-            ② {{ result.question.choice2 }}
+            ② {{ result.question.choice2|safe }}
             {% if selected == 2 %}(내 답){% endif %}
         </div>
         <div class="choice-item {% if 3 in ans %}correct{% elif selected == 3 %}wrong{% endif %}">
-            ③ {{ result.question.choice3 }}
+            ③ {{ result.question.choice3|safe }}
             {% if selected == 3 %}(내 답){% endif %}
         </div>
         <div class="choice-item {% if 4 in ans %}correct{% elif selected == 4 %}wrong{% endif %}">
-            ④ {{ result.question.choice4 }}
+            ④ {{ result.question.choice4|safe }}
             {% if selected == 4 %}(내 답){% endif %}
         </div>
         <div class="choice-item {% if 5 in ans %}correct{% elif selected == 5 %}wrong{% endif %}">
-            ⑤ {{ result.question.choice5 }}
+            ⑤ {{ result.question.choice5|safe }}
             {% if selected == 5 %}(내 답){% endif %}
         </div>
         {% endwith %}

@@ -329,7 +329,7 @@
                     <span class="q-badge" style="float: right;">{{ q.subject.name }}</span>
                 </div>
                 <div class="q-content">
-                    {{ q.number }}. {{ q.content|linebreaksbr }}
+                    {{ q.number }}. {{ q.content|linebreaksbr|safe }}
                 </div>
             </div>
 
@@ -341,19 +341,19 @@
 
             <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                 <div class="choice-item" onclick="selectChoice(this, 1)">
-                    <span class="choice-num" data-choice="1">①</span> {{ q.choice1 }}
+                    <span class="choice-num" data-choice="1">①</span> {{ q.choice1|safe }}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 2)">
-                    <span class="choice-num" data-choice="2">②</span> {{ q.choice2 }}
+                    <span class="choice-num" data-choice="2">②</span> {{ q.choice2|safe }}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 3)">
-                    <span class="choice-num" data-choice="3">③</span> {{ q.choice3 }}
+                    <span class="choice-num" data-choice="3">③</span> {{ q.choice3|safe }}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 4)">
-                    <span class="choice-num" data-choice="4">④</span> {{ q.choice4 }}
+                    <span class="choice-num" data-choice="4">④</span> {{ q.choice4|safe }}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 5)">
-                    <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5 }}
+                    <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5|safe }}
                 </div>
             </div>
 
