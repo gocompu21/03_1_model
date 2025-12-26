@@ -231,7 +231,7 @@ class GeminiStoreManager:
 
             # "gemini-2.5-flash","gemini-3-flash-preview" 이 모델이 정상적으로 된다.
 
-            # Switch to gemini-2.5-flash (Requested by user)
+            # Switch to gemini-3-flash-preview (Requested by user)
             model = genai.GenerativeModel(
                 "gemini-3-flash-preview", system_instruction=SYSTEM_INSTRUCTION
             )

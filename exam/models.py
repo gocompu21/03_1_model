@@ -43,6 +43,7 @@ class Question(models.Model):
         null=True,
         verbose_name="인포그래픽 이미지",
     )
+    narration = models.TextField(verbose_name="나레이션", blank=True, null=True)
 
     class Meta:
         ordering = ["exam", "number"]

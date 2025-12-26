@@ -155,26 +155,38 @@ def tts_generate(request):
     except Question.DoesNotExist:
         return JsonResponse({"error": "Question not found"}, status=404)
 
-    # Get explanation text based on tab
-    if tab == "general":
-        text = question.general_chat or ""
-    else:
-        text = question.textbook_chat or ""
+    # Always use narration for TTS (ignoring tab parameter)
+    text = question.narration or ""
 
     text = text.strip()
     if not text:
-        return JsonResponse({"error": "No explanation available"}, status=404)
+        return JsonResponse({"error": "나레이션이 없습니다."}, status=404)
+    
+    # Remove markdown formatting for TTS (clean text for speech)
+    import re
+    # Remove bold: **text** or __text__
+    text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+    text = re.sub(r'__(.+?)__', r'\1', text)
+    # Remove italic: *text* or _text_
+    text = re.sub(r'\*(.+?)\*', r'\1', text)
+    text = re.sub(r'_(.+?)_', r'\1', text)
+    # Remove headers: # text
+    text = re.sub(r'^#+\s+', '', text, flags=re.MULTILINE)
+    # Remove list markers: - text or * text
+    text = re.sub(r'^[\*\-]\s+', '', text, flags=re.MULTILINE)
 
     # Create cache directory
     tts_cache_dir = Path(settings.MEDIA_ROOT) / "tts"
     tts_cache_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generate cache filename based on question_id, tab, and text hash
+    # Generate cache filename based on round, question number, and text hash
     # Hash ensures regeneration if explanation text changes
     text_hash = hashlib.md5(text.encode()).hexdigest()[:8]
+    round_num = question.exam.round_number
+    q_num = question.number
     
     # Check for MP3 cache first (preferred)
-    mp3_filename = f"q{question_id}_{tab}_{text_hash}.mp3"
+    mp3_filename = f"round{round_num}_q{q_num}_narration_{text_hash}.mp3"
     mp3_filepath = tts_cache_dir / mp3_filename
     
     if mp3_filepath.exists():
@@ -186,7 +198,7 @@ def tts_generate(request):
         return response
     
     # Fallback to WAV cache
-    wav_filename = f"q{question_id}_{tab}_{text_hash}.wav"
+    wav_filename = f"round{round_num}_q{q_num}_narration_{text_hash}.wav"
     wav_filepath = tts_cache_dir / wav_filename
     
     if wav_filepath.exists():
@@ -224,7 +236,7 @@ def tts_generate(request):
             speech_config=types.SpeechConfig(
                 voice_config=types.VoiceConfig(
                     prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                        voice_name="Kore"  # Korean voice
+                        voice_name="Orus"  # Mature, deep male voice
                     )
                 )
             ),

@@ -422,6 +422,8 @@
                     <button class="exp-tab-btn" onclick="switchExpTab(this, 'general')"
                         style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">일반
                         해설</button>
+                    <button class="exp-tab-btn" onclick="switchExpTab(this, 'narration')"
+                        style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">🎙️ 나레이션</button>
                 </div>
 
                 <div class="exp-content-area">
@@ -431,6 +433,14 @@
                         </div>
                         {% if not q.textbook_chat %}
                         <p style="color: #999; font-style: italic;">기본서 해설이 없습니다.</p>
+                        {% endif %}
+                    </div>
+                    <div class="exp-content narration-content" style="display: none;">
+                        <div class="exp-text markdown-content" style="line-height: 1.8; font-size: 1.05em;">
+                            {{ q.narration|markdown|safe }}
+                        </div>
+                        {% if not q.narration %}
+                        <p style="color: #999; font-style: italic;">나레이션이 없습니다.</p>
                         {% endif %}
                     </div>
                     <div class="exp-content general-content" style="display: none;">
@@ -677,13 +687,20 @@
         // Content
         const tContent = section.querySelector('.textbook-content');
         const gContent = section.querySelector('.general-content');
+        const nContent = section.querySelector('.narration-content');
 
+        // Hide all content first
+        tContent.style.display = 'none';
+        gContent.style.display = 'none';
+        nContent.style.display = 'none';
+
+        // Show selected content
         if (type === 'textbook') {
             tContent.style.display = 'block';
-            gContent.style.display = 'none';
-        } else {
-            tContent.style.display = 'none';
+        } else if (type === 'general') {
             gContent.style.display = 'block';
+        } else if (type === 'narration') {
+            nContent.style.display = 'block';
         }
     }
 
@@ -691,6 +708,7 @@
     let currentAudio = null;
     let currentTTSButton = null;
     let isLoading = false;
+    let isPaused = false;
     
     function toggleTTS(btn, questionId) {
         // If currently loading, ignore click
@@ -698,13 +716,19 @@
             return;
         }
         
-        // If already playing, stop
-        if (currentAudio && currentTTSButton === btn) {
+        // If paused, resume playback
+        if (isPaused && currentAudio && currentTTSButton === btn) {
+            currentAudio.play();
+            isPaused = false;
+            setTTSButtonActive(btn);
+            return;
+        }
+        
+        // If already playing, pause (not stop)
+        if (currentAudio && currentTTSButton === btn && !currentAudio.paused) {
             currentAudio.pause();
-            currentAudio.currentTime = 0;
-            currentAudio = null;
-            resetTTSButton(btn);
-            currentTTSButton = null;
+            isPaused = true;
+            setTTSButtonPaused(btn);
             return;
         }
         
@@ -769,6 +793,7 @@
                 resetTTSButton(btn);
                 currentTTSButton = null;
                 currentAudio = null;
+                isPaused = false;
             };
             
             currentAudio.onerror = function() {
@@ -776,6 +801,7 @@
                 resetTTSButton(btn);
                 currentTTSButton = null;
                 currentAudio = null;
+                isPaused = false;
                 alert('오디오 재생 중 오류가 발생했습니다.');
             };
             
@@ -802,6 +828,13 @@
         btn.querySelector('.tts-icon-stop').style.display = 'inline';
         btn.querySelector('.tts-text').textContent = '듣기 중지';
         btn.style.color = '#f44336';
+    }
+    
+    function setTTSButtonPaused(btn) {
+        btn.querySelector('.tts-icon-play').style.display = 'inline';
+        btn.querySelector('.tts-icon-stop').style.display = 'none';
+        btn.querySelector('.tts-text').textContent = '이어듣기';
+        btn.style.color = '#ff9800';
     }
     
     function resetTTSButton(btn) {

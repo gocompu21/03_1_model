@@ -75,10 +75,9 @@ class Command(BaseCommand):
             self.stdout.write(f"\n[{i+1}/{total}] Question {question.id} ({question.exam.round_number}회 {question.number}번)")
 
             tabs_to_process = []
-            if options['tab'] in ['textbook', 'both'] and question.textbook_chat:
-                tabs_to_process.append(('textbook', question.textbook_chat))
-            if options['tab'] in ['general', 'both'] and question.general_chat:
-                tabs_to_process.append(('general', question.general_chat))
+            # Always use narration only for TTS
+            if question.narration:
+                tabs_to_process.append(('textbook', question.narration))
 
             for tab, text in tabs_to_process:
                 text = text.strip()
@@ -87,7 +86,9 @@ class Command(BaseCommand):
 
                 # Generate cache filename (MP3 format)
                 text_hash = hashlib.md5(text.encode()).hexdigest()[:8]
-                cache_filename = f"q{question.id}_{tab}_{text_hash}.mp3"
+                round_num = question.exam.round_number
+                q_num = question.number
+                cache_filename = f"round{round_num}_q{q_num}_narration_{text_hash}.mp3"
                 cache_filepath = tts_cache_dir / cache_filename
 
                 # Skip if already cached
@@ -117,7 +118,7 @@ class Command(BaseCommand):
                         speech_config=types.SpeechConfig(
                             voice_config=types.VoiceConfig(
                                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                    voice_name="Kore"
+                                    voice_name="Orus"  # Mature, deep male voice
                                 )
                             )
                         ),
