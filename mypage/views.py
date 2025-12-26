@@ -142,10 +142,12 @@ def index(request):
         users_with_attempts = UserExamAttempt.objects.values('user').distinct().count()
         
         # User performance data with basic stats
+        from study.models import StudyViewLog
         user_qs = User.objects.annotate(
             exam_count=Count('exam_attempts'),
             avg_score=Avg('exam_attempts__total_score'),
             review_count=Count('review_schedules'),
+            study_count=Count('study_view_logs'),
         ).filter(is_active=True).order_by('-exam_count')[:20]
         
         # Calculate last activity for each user
@@ -205,6 +207,7 @@ def index(request):
                 'exam_count': u.exam_count,
                 'avg_score': u.avg_score,
                 'review_count': u.review_count,
+                'study_count': u.study_count,
                 'last_activity_type': last_activity_type,
                 'last_activity_time': last_activity_time,
             })

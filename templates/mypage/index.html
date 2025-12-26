@@ -588,6 +588,7 @@
                             <tr>
                                 <th>사용자</th>
                                 <th>시험 응시</th>
+                                <th>기출학습</th>
                                 <th>평균 점수</th>
                                 <th>복습 문제</th>
                                 <th>로그인</th>
@@ -599,6 +600,7 @@
                             <tr>
                                 <td>{{ user.first_name|default:user.username }}</td>
                                 <td>{{ user.exam_count }}회</td>
+                                <td>{{ user.study_count }}회</td>
                                 <td>{{ user.avg_score|floatformat:1|default:"-" }}점</td>
                                 <td>{{ user.review_count }}</td>
                                 <td>{% if user.last_login %}{{ user.last_login|timesince }} 전{% else %}-{% endif %}</td>
