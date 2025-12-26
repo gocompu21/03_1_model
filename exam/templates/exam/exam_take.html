@@ -451,7 +451,7 @@
                 {% for q in questions %}
                 <div class="question-item" id="q-{{ q.id }}" data-question-index="{{ forloop.counter0 }}"
                     data-subject="{{ q.subject.name }}">
-                    <div class="question-content">{{ q.number }}. {{ q.content|linebreaksbr|safe }}</div>
+                    <div class="question-content">{{ q.number }}. {{ q.content|safe|linebreaksbr }}</div>
                     {% if q.image %}
                     <div style="text-align: center; margin-bottom: 20px;"><img src="{{ q.image.url }}"
                             style="max-width: 100%; border: 1px solid black;"></div>

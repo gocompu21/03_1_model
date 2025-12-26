@@ -329,7 +329,7 @@
                     <span class="q-badge" style="float: right;">{{ q.subject.name }}</span>
                 </div>
                 <div class="q-content">
-                    {{ q.number }}. {{ q.content|linebreaksbr|safe }}
+                    {{ q.number }}. {{ q.content|safe|linebreaksbr }}
                 </div>
             </div>
 

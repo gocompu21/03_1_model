@@ -436,7 +436,7 @@
                 {% for mq in questions %}
                 <div class="question-item" id="q-{{ mq.id }}" data-question-index="{{ forloop.counter0 }}"
                     data-subject="{{ mq.question.subject.name }}">
-                    <div class="question-content">{{ forloop.counter }}. {{ mq.question.content|linebreaksbr|safe }}</div>
+                    <div class="question-content">{{ forloop.counter }}. {{ mq.question.content|safe|linebreaksbr }}</div>
                     {% if mq.question.image %}
                     <div style="text-align: center; margin-bottom: 20px;">
                         <img src="{{ mq.question.image.url }}" style="max-width: 100%; border: 1px solid black;">
