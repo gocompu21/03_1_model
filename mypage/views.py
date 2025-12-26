@@ -124,6 +124,57 @@ def index(request):
         user=request.user, next_review_date__lte=today, is_mastered=False
     ).count()
 
+    # --- Admin Dashboard Statistics ---
+    admin_dashboard = None
+    if request.user.is_staff or request.user.is_superuser:
+        from django.contrib.auth.models import User
+        from django.db.models import Avg, Max, FloatField
+        from django.db.models.functions import Cast
+        from exam.models import Subject
+        
+        # User Statistics
+        total_users = User.objects.count()
+        active_users = User.objects.filter(is_active=True).count()
+        recent_users = User.objects.filter(is_active=True).order_by('-date_joined')[:10]
+        
+        # Users with exam attempts
+        users_with_attempts = UserExamAttempt.objects.values('user').distinct().count()
+        
+        # User performance data
+        user_stats = User.objects.annotate(
+            exam_count=Count('exam_attempts'),
+            avg_score=Avg('exam_attempts__total_score'),
+            last_attempt=Max('exam_attempts__end_time'),
+            review_count=Count('review_schedules'),
+            mastered_count=Count('review_schedules', filter=Q(review_schedules__is_mastered=True))
+        ).filter(exam_count__gt=0).order_by('-exam_count')[:20]  # Top 20 active users
+        
+        # Subject statistics - overall correct rate by subject
+        subject_stats = []
+        for subject in Subject.objects.all().order_by('code'):
+            results = UserQuestionResult.objects.filter(question__subject=subject)
+            total = results.count()
+            if total > 0:
+                correct = results.filter(is_correct=True).count()
+                avg_correct_rate = round((correct / total) * 100, 1)
+                subject_stats.append({
+                    'name': subject.name,
+                    'avg_correct_rate': avg_correct_rate,
+                    'total_attempts': total
+                })
+        
+        # Sort by correct rate (ascending - worst first)
+        subject_stats.sort(key=lambda x: x['avg_correct_rate'])
+        
+        admin_dashboard = {
+            'total_users': total_users,
+            'active_users': active_users,
+            'users_with_attempts': users_with_attempts,
+            'recent_users': recent_users,
+            'user_stats': user_stats,
+            'subject_stats': subject_stats
+        }
+
     context = {
         "days_since_login": days_since_login,
         "radar_labels": json.dumps(labels),
@@ -136,6 +187,7 @@ def index(request):
         "attempt": attempt,
         "review_recommendations": review_recommendations,
         "review_count": review_count,
+        "admin_dashboard": admin_dashboard,
     }
 
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
