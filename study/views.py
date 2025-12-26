@@ -37,6 +37,11 @@ def detail(request, round_number):
         "number"
     )
 
+    # Log study page view for authenticated users
+    if request.user.is_authenticated:
+        from .models import StudyViewLog
+        StudyViewLog.objects.create(user=request.user, exam_round=round_number)
+
     context = {"round_number": round_number, "exam": exam, "questions": questions}
     return render(request, "study/detail.html", context)
 

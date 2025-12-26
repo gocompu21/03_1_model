@@ -46,3 +46,20 @@ class StudyQnA(models.Model):
 
     def __str__(self):
         return f"[{self.get_q_type_display()}] {self.question[:30]}..."
+
+
+class StudyViewLog(models.Model):
+    """Track when users view study pages"""
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="study_view_logs", verbose_name="사용자"
+    )
+    exam_round = models.IntegerField(verbose_name="회차")
+    viewed_at = models.DateTimeField(auto_now_add=True, verbose_name="열람 시간")
+
+    class Meta:
+        ordering = ["-viewed_at"]
+        verbose_name = "학습 열람 기록"
+        verbose_name_plural = "학습 열람 기록"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.exam_round}회 학습 ({self.viewed_at})"

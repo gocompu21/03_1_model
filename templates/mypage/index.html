@@ -591,7 +591,7 @@
                                 <th>평균 점수</th>
                                 <th>복습 문제</th>
                                 <th>마지막 로그인</th>
-                                <th>마지막 응시</th>
+                                <th>마지막 활동</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -602,7 +602,12 @@
                                 <td>{{ user.avg_score|floatformat:1|default:"-" }}점</td>
                                 <td>{{ user.review_count }}</td>
                                 <td>{{ user.last_login|date:"Y-m-d H:i"|default:"-" }}</td>
-                                <td>{{ user.last_attempt|date:"Y-m-d H:i"|default:"-" }}</td>
+                                <td>
+                                    {% if user.last_activity_time %}
+                                    <span style="background: #e8f5e9; color: #2d6a4f; padding: 2px 8px; border-radius: 10px; font-size: 0.85rem;">{{ user.last_activity_type }}</span>
+                                    <br><span style="color: #888; font-size: 0.8rem;">{{ user.last_activity_time|date:"Y-m-d H:i" }}</span>
+                                    {% else %}-{% endif %}
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>

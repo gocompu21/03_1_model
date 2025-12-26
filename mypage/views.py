@@ -131,6 +131,7 @@ def index(request):
         from django.db.models import Avg, Max, FloatField
         from django.db.models.functions import Cast
         from exam.models import Subject
+        from mock_exam.models import MockExam
         
         # User Statistics
         total_users = User.objects.count()
@@ -140,14 +141,73 @@ def index(request):
         # Users with exam attempts
         users_with_attempts = UserExamAttempt.objects.values('user').distinct().count()
         
-        # User performance data
-        user_stats = User.objects.annotate(
+        # User performance data with basic stats
+        user_qs = User.objects.annotate(
             exam_count=Count('exam_attempts'),
             avg_score=Avg('exam_attempts__total_score'),
-            last_attempt=Max('exam_attempts__end_time'),
             review_count=Count('review_schedules'),
-            mastered_count=Count('review_schedules', filter=Q(review_schedules__is_mastered=True))
-        ).filter(exam_count__gt=0).order_by('-exam_count')[:20]  # Top 20 active users
+        ).filter(is_active=True).order_by('-exam_count')[:20]
+        
+        # Calculate last activity for each user
+        user_stats = []
+        for u in user_qs:
+            # Get last activity times from different sources
+            activities = []
+            
+            # Exam attempts
+            last_exam = UserExamAttempt.objects.filter(user=u).order_by('-end_time').first()
+            if last_exam and last_exam.end_time:
+                activities.append(('기출시험', last_exam.end_time))
+            
+            # Mock exams
+            last_mock = MockExam.objects.filter(user=u).order_by('-end_time').first()
+            if last_mock and last_mock.end_time:
+                activities.append(('모의고사', last_mock.end_time))
+            
+            # Chat history
+            last_chat = ChatHistory.objects.filter(user=u).order_by('-created_at').first()
+            if last_chat and last_chat.created_at:
+                activities.append(('채팅', last_chat.created_at))
+            
+            # Notebook history
+            last_notebook = NotebookHistory.objects.filter(user=u).order_by('-created_at').first()
+            if last_notebook and last_notebook.created_at:
+                activities.append(('노트북', last_notebook.created_at))
+            
+            # Study view log
+            from study.models import StudyViewLog
+            last_study = StudyViewLog.objects.filter(user=u).order_by('-viewed_at').first()
+            if last_study and last_study.viewed_at:
+                activities.append(('학습', last_study.viewed_at))
+            
+            # Review - use next_review_date as indicator of recent review activity
+            last_review = ReviewSchedule.objects.filter(user=u, is_mastered=True).order_by('-next_review_date').first()
+            if last_review and last_review.next_review_date:
+                from datetime import datetime
+                activities.append(('복습완료', timezone.make_aware(datetime.combine(last_review.next_review_date, datetime.min.time()))))
+            
+            # BBS Post
+            last_post = Post.objects.filter(author=u).order_by('-created_at').first()
+            if last_post and last_post.created_at:
+                activities.append(('게시글', last_post.created_at))
+            
+            # Find most recent activity
+            if activities:
+                activities.sort(key=lambda x: x[1], reverse=True)
+                last_activity_type, last_activity_time = activities[0]
+            else:
+                last_activity_type, last_activity_time = None, None
+            
+            user_stats.append({
+                'username': u.username,
+                'first_name': u.first_name,
+                'last_login': u.last_login,
+                'exam_count': u.exam_count,
+                'avg_score': u.avg_score,
+                'review_count': u.review_count,
+                'last_activity_type': last_activity_type,
+                'last_activity_time': last_activity_time,
+            })
         
         # Subject statistics - overall correct rate by subject
         subject_stats = []
