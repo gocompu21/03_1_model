@@ -526,7 +526,8 @@ def review_submit(request):
                     selected_choice = int(value) if value else None
 
                     if selected_choice:
-                        is_correct = selected_choice == schedule.question.answer
+                        # Support list-based answers
+                        is_correct = selected_choice in schedule.question.answer
                         schedule.mark_reviewed(is_correct)
                         total_count += 1
                         if is_correct:
@@ -630,7 +631,11 @@ def prompt_generator(request):
                 selected_question = question
 
                 answer_map = {1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤"}
-                correct_answer = answer_map.get(question.answer, str(question.answer))
+                # Handle list-based answers
+                if isinstance(question.answer, list):
+                    correct_answer = ", ".join([answer_map.get(a, str(a)) for a in question.answer])
+                else:
+                    correct_answer = answer_map.get(question.answer, str(question.answer))
 
                 generated_prompt = f"""다음은 나무의사 시험 제{round_number}회 {question.subject.name} 문제입니다.
 

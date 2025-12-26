@@ -34,7 +34,7 @@ class Question(models.Model):
     choice4 = models.CharField(max_length=200, verbose_name="보기 4")
     choice5 = models.CharField(max_length=200, verbose_name="보기 5")
 
-    answer = models.IntegerField(verbose_name="정답 (1-5)")
+    answer = models.JSONField(default=list, verbose_name="정답 (1-5, 복수 가능)")
     general_chat = models.TextField(verbose_name="해설")
     textbook_chat = models.TextField(verbose_name="기본서 해설", blank=True, null=True)
     infographic_image = models.ImageField(

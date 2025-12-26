@@ -632,19 +632,19 @@
                     <div class="choices">
                         <div class="choices">
                             <div class="choice-item {% if res.selected_choice == 1 %}selected-text{% endif %}"><span
-                                    class="q-mark {% if not res.is_correct and res.question.answer == 1 %}correct-answer-circle{% endif %}">①</span>
+                                    class="q-mark {% if not res.is_correct and 1 in res.question.answer %}correct-answer-circle{% endif %}">①</span>
                                 {{ res.question.choice1 }}</div>
                             <div class="choice-item {% if res.selected_choice == 2 %}selected-text{% endif %}"><span
-                                    class="q-mark {% if not res.is_correct and res.question.answer == 2 %}correct-answer-circle{% endif %}">②</span>
+                                    class="q-mark {% if not res.is_correct and 2 in res.question.answer %}correct-answer-circle{% endif %}">②</span>
                                 {{ res.question.choice2 }}</div>
                             <div class="choice-item {% if res.selected_choice == 3 %}selected-text{% endif %}"><span
-                                    class="q-mark {% if not res.is_correct and res.question.answer == 3 %}correct-answer-circle{% endif %}">③</span>
+                                    class="q-mark {% if not res.is_correct and 3 in res.question.answer %}correct-answer-circle{% endif %}">③</span>
                                 {{ res.question.choice3 }}</div>
                             <div class="choice-item {% if res.selected_choice == 4 %}selected-text{% endif %}"><span
-                                    class="q-mark {% if not res.is_correct and res.question.answer == 4 %}correct-answer-circle{% endif %}">④</span>
+                                    class="q-mark {% if not res.is_correct and 4 in res.question.answer %}correct-answer-circle{% endif %}">④</span>
                                 {{ res.question.choice4 }}</div>
                             <div class="choice-item {% if res.selected_choice == 5 %}selected-text{% endif %}"><span
-                                    class="q-mark {% if not res.is_correct and res.question.answer == 5 %}correct-answer-circle{% endif %}">⑤</span>
+                                    class="q-mark {% if not res.is_correct and 5 in res.question.answer %}correct-answer-circle{% endif %}">⑤</span>
                                 {{ res.question.choice5 }}</div>
                         </div>
                     </div>
@@ -755,7 +755,7 @@
                     <div class="omr-bubbles">
                         {% for i in "12345" %}
                         <div
-                            class="omr-bubble {% if res.selected_choice|stringformat:'s' == i %}selected{% endif %} {% if not res.is_correct and res.question.answer|stringformat:'s' == i %}correct-answer{% endif %}">
+                            class="omr-bubble {% if res.selected_choice|stringformat:'s' == i %}selected{% endif %} {% if not res.is_correct and i|add:0 in res.question.answer %}correct-answer{% endif %}">
                             {{ i }}
                         </div>
                         {% endfor %}

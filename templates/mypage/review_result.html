@@ -178,7 +178,7 @@
             left: 50%;
             width: 24px;
             height: 24px;
-            border: 2px solid #d93025;
+            border: 3px solid #d93025;
             border-radius: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
@@ -381,7 +381,7 @@
     <div class="top-header">
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
         <span><i class="fas fa-check-circle"></i> 복습 결과 - {{ correct_count }}/{{ total_count }} 정답</span>
-        <a href="{% url 'mypage:index' %}"><i class="fas fa-arrow-left"></i> 마이페이지</a>
+        <a href="{% url 'mypage:index' %}"><i class="fas fa-home"></i> 마이페이지</a>
     </div>
 
     <div class="main-container">
@@ -414,19 +414,19 @@
                     </div>
                     {% endif %}
                     <div class="choices">
-                        <div class="choice-item {% if res.selected_choice == 1 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 1 %}correct-answer{% endif %}">
+                        <div class="choice-item {% if res.selected_choice == 1 %}selected{% endif %} {% if not res.is_correct and 1 in res.question.answer %}correct-answer{% endif %}">
                             <span class="choice-num">①</span> {{ res.question.choice1 }}
                         </div>
-                        <div class="choice-item {% if res.selected_choice == 2 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 2 %}correct-answer{% endif %}">
+                        <div class="choice-item {% if res.selected_choice == 2 %}selected{% endif %} {% if not res.is_correct and 2 in res.question.answer %}correct-answer{% endif %}">
                             <span class="choice-num">②</span> {{ res.question.choice2 }}
                         </div>
-                        <div class="choice-item {% if res.selected_choice == 3 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 3 %}correct-answer{% endif %}">
+                        <div class="choice-item {% if res.selected_choice == 3 %}selected{% endif %} {% if not res.is_correct and 3 in res.question.answer %}correct-answer{% endif %}">
                             <span class="choice-num">③</span> {{ res.question.choice3 }}
                         </div>
-                        <div class="choice-item {% if res.selected_choice == 4 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 4 %}correct-answer{% endif %}">
+                        <div class="choice-item {% if res.selected_choice == 4 %}selected{% endif %} {% if not res.is_correct and 4 in res.question.answer %}correct-answer{% endif %}">
                             <span class="choice-num">④</span> {{ res.question.choice4 }}
                         </div>
-                        <div class="choice-item {% if res.selected_choice == 5 %}selected{% endif %} {% if not res.is_correct and res.question.answer == 5 %}correct-answer{% endif %}">
+                        <div class="choice-item {% if res.selected_choice == 5 %}selected{% endif %} {% if not res.is_correct and 5 in res.question.answer %}correct-answer{% endif %}">
                             <span class="choice-num">⑤</span> {{ res.question.choice5 }}
                         </div>
                     </div>
@@ -495,7 +495,7 @@
                     </div>
                     <div class="omr-bubbles">
                         {% for i in "12345" %}
-                        <div class="omr-bubble {% if res.selected_choice|stringformat:'s' == i %}selected{% endif %} {% if not res.is_correct and res.question.answer|stringformat:'s' == i %}correct-answer{% endif %}">
+                        <div class="omr-bubble {% if res.selected_choice|stringformat:'s' == i %}selected{% endif %} {% if not res.is_correct and i|add:0 in res.question.answer %}correct-answer{% endif %}">
                             {{ i }}
                         </div>
                         {% endfor %}
@@ -503,10 +503,6 @@
                 </div>
                 {% endfor %}
             </div>
-
-            <a href="{% url 'mypage:index' %}" class="btn-home">
-                <i class="fas fa-home"></i> 마이페이지로 돌아가기
-            </a>
         </div>
     </div>
 

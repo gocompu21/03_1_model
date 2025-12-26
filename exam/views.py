@@ -54,7 +54,8 @@ def exam_submit(request, exam_id):
             selected_choice = request.POST.get(f"question_{q.id}")
             if selected_choice:
                 selected_choice = int(selected_choice)
-                is_correct = selected_choice == q.answer
+                # Support list-based answers
+                is_correct = selected_choice in q.answer
                 if is_correct:
                     correct_count += 1
 

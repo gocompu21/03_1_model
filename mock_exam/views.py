@@ -144,7 +144,8 @@ def submit_exam(request, pk):
 
             if user_choice:
                 mq.selected_choice = int(user_choice)
-                if mq.selected_choice == mq.question.answer:
+                # Support both single answer [3] and multiple answers [1,3,5]
+                if mq.selected_choice in mq.question.answer:
                     mq.is_correct = True
                     correct_count += 1
                 else:

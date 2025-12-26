@@ -595,10 +595,13 @@
             if (card && isHidden) {
                 // Show correct answer circle
                 const qChoices = card.querySelector('.q-choices');
-                const correctAnswer = qChoices.getAttribute('data-answer');
+                const correctAnswerStr = qChoices.getAttribute('data-answer');
+                // Parse JSON array (e.g., "[3]" or "[1, 3, 5]")
+                const correctAnswers = JSON.parse(correctAnswerStr);
                 qChoices.querySelectorAll('.choice-num').forEach(cn => {
                     cn.classList.remove('correct');
-                    if (cn.getAttribute('data-choice') === correctAnswer) {
+                    const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                    if (correctAnswers.includes(choiceNum)) {
                         cn.classList.add('correct');
                     }
                 });
@@ -627,9 +630,12 @@
         
         // Show/hide correct answers on all questions
         document.querySelectorAll('.q-choices').forEach(qChoices => {
-            const correctAnswer = qChoices.getAttribute('data-answer');
+            const correctAnswerStr = qChoices.getAttribute('data-answer');
+            // Parse JSON array
+            const correctAnswers = JSON.parse(correctAnswerStr);
             qChoices.querySelectorAll('.choice-num').forEach(cn => {
-                if (allExpanded && cn.getAttribute('data-choice') === correctAnswer) {
+                const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                if (allExpanded && correctAnswers.includes(choiceNum)) {
                     cn.classList.add('correct');
                 } else {
                     cn.classList.remove('correct');
