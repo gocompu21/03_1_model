@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django import forms
 from .models import Exam, Subject, Question, UserExamAttempt, UserQuestionResult
 
 
@@ -18,6 +19,17 @@ class QuestionAdmin(admin.ModelAdmin):
     list_filter = ("exam", "subject")
     search_fields = ("content", "general_chat")
     ordering = ("exam", "subject", "number")
+    
+    formfield_overrides = {
+        # CharField 필드를 120자 너비로 변경
+        forms.CharField: {'widget': forms.TextInput(attrs={'size': '120'})},
+    }
+    
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        # content, choice1~5 필드의 너비 확대
+        if db_field.name in ['content', 'choice1', 'choice2', 'choice3', 'choice4', 'choice5']:
+            kwargs['widget'] = forms.TextInput(attrs={'style': 'width: 800px;'})
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
 @admin.register(UserExamAttempt)
