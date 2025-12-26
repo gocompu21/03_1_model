@@ -26,9 +26,9 @@ class QuestionAdmin(admin.ModelAdmin):
     }
     
     def formfield_for_dbfield(self, db_field, request, **kwargs):
-        # content, choice1~5 필드의 너비 확대
+        # content, choice1~5 필드를 Textarea로 변경
         if db_field.name in ['content', 'choice1', 'choice2', 'choice3', 'choice4', 'choice5']:
-            kwargs['widget'] = forms.TextInput(attrs={'style': 'width: 800px;'})
+            kwargs['widget'] = forms.Textarea(attrs={'rows': 3, 'cols': 100})
         return super().formfield_for_dbfield(db_field, request, **kwargs)
 
 
