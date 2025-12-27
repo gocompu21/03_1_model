@@ -13,7 +13,10 @@ from exam.models import Question, Exam, Subject
 
 
 def update_questions():
-    file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_5회_20251225_194854.xlsx"
+    # file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_5회_20251225_194854.xlsx"
+    # file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_6회_20251226_143031.xlsx"
+    file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_9회_20251227_182616.xlsx"
+
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
         return

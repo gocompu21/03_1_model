@@ -148,7 +148,7 @@ def index(request):
             avg_score=Avg('exam_attempts__total_score'),
             review_count=Count('review_schedules'),
             study_count=Count('study_view_logs'),
-        ).filter(is_active=True).order_by('-exam_count')[:20]
+        ).filter(is_active=True).order_by('-exam_count')
         
         # Calculate last activity for each user
         user_stats = []

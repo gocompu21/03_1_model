@@ -37,6 +37,16 @@ class Command(BaseCommand):
             choices=['textbook', 'general', 'both'],
             help='Which explanation tab to generate (default: both)',
         )
+        parser.add_argument(
+            '--start',
+            type=int,
+            help='Start question number (requires --round)',
+        )
+        parser.add_argument(
+            '--end',
+            type=int,
+            help='End question number (requires --round)',
+        )
 
     def handle(self, *args, **options):
         # Lazy imports to avoid startup issues
@@ -56,6 +66,11 @@ class Command(BaseCommand):
             questions = Question.objects.filter(id=options['question_id'])
         elif options['round']:
             questions = Question.objects.filter(exam__round_number=options['round'])
+            # Apply number range filter if specified
+            if options['start']:
+                questions = questions.filter(number__gte=options['start'])
+            if options['end']:
+                questions = questions.filter(number__lte=options['end'])
         elif options['all']:
             questions = Question.objects.all()
         else:

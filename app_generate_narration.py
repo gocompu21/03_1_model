@@ -121,5 +121,9 @@ def generate_narration_for_round(round_number):
 
 
 if __name__ == "__main__":
-    # Generate narration for Exam Round 5
-    generate_narration_for_round(5)
+    # Generate narration for Exam Rounds 7-11
+    for round_num in [7, 8, 9, 10, 11]:
+        print(f"\n{'='*60}")
+        print(f"Starting Round {round_num}")
+        print(f"{'='*60}")
+        generate_narration_for_round(round_num)
