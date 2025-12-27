@@ -5,4 +5,4 @@ db.sqlite3
 debug_chat_log.txt
 media/tts/
 db.sqlite3.bak
-
+local_stores.json
