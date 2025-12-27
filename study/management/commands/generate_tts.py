@@ -157,7 +157,7 @@ class Command(BaseCommand):
                     mime_type = None
 
                     for chunk in client.models.generate_content_stream(
-                        model="gemini-2.5-flash-preview-tts",
+                        model="gemini-2.5-pro-preview-tts",
                         contents=contents,
                         config=generate_content_config,
                     ):
