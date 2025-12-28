@@ -1,9 +1,11 @@
+"""
+특정 문제들의 나레이션을 재생성하는 스크립트
+"""
 import os
 import sys
 import time
 import django
 
-# Setup Django Environment
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
@@ -44,8 +46,8 @@ NARRATION_PROMPT = """당신은 나무의사 자격 시험을 준비하는 수�
 위 내용을 바탕으로 전문적이고 명확한 나레이션을 마크다운 형식으로 작성해주세요."""
 
 
-def generate_narration_for_round(round_number):
-    """Generate narration for all questions in a specific exam round."""
+def regenerate_narration(round_number, question_numbers):
+    """특정 문제들의 나레이션 재생성"""
     
     if not settings.GEMINI_API_KEY:
         print("Error: GEMINI_API_KEY is not set")
@@ -60,25 +62,15 @@ def generate_narration_for_round(round_number):
         print(f"Exam round {round_number} not found")
         return
     
-    questions = Question.objects.filter(exam=exam).order_by("number")
-    total = questions.count()
-    
-    print(f"Processing {total} questions for Exam {round_number}회...")
-    
-    generated = 0
-    skipped = 0
-    errors = 0
-    
-    for i, q in enumerate(questions):
-        print(f"\n[{i+1}/{total}] Question {q.number}번")
-        
-        # Skip if no textbook_chat
-        if not q.textbook_chat or not q.textbook_chat.strip():
-            print("  Skipped (no textbook_chat)")
-            skipped += 1
+    for num in question_numbers:
+        try:
+            q = Question.objects.get(exam=exam, number=num)
+        except Question.DoesNotExist:
+            print(f"{num}번 문제 없음")
             continue
+            
+        print(f"{num}번 재생성 중...")
         
-        # Build prompt
         prompt = NARRATION_PROMPT.format(
             question_content=q.content,
             choice1=q.choice1,
@@ -92,38 +84,17 @@ def generate_narration_for_round(round_number):
         
         try:
             response = model.generate_content(prompt)
-            narration_text = response.text
-            
-            # Save to database
-            q.narration = narration_text
+            old_len = len(q.narration) if q.narration else 0
+            q.narration = response.text
             q.save()
-            
-            print(f"  Generated: {len(narration_text)} chars")
-            generated += 1
-            
-            # Rate limiting
+            print(f"  완료: {old_len}자 -> {len(response.text)}자")
             time.sleep(2)
-            
         except Exception as e:
-            print(f"  Error: {str(e)}")
-            errors += 1
-            
-            # If rate limited, wait longer
-            if "429" in str(e) or "quota" in str(e).lower():
-                print("  Rate limited. Waiting 60 seconds...")
-                time.sleep(60)
+            print(f"  에러: {e}")
     
-    print(f"\n{'='*50}")
-    print("Completed!")
-    print(f"  Generated: {generated}")
-    print(f"  Skipped: {skipped}")
-    print(f"  Errors: {errors}")
+    print("완료!")
 
 
 if __name__ == "__main__":
-    # Generate narration for Exam Round 10
-    for round_num in [10]:
-        print(f"\n{'='*60}")
-        print(f"Starting Round {round_num}")
-        print(f"{'='*60}")
-        generate_narration_for_round(round_num)
+    # 10회 91, 46, 53, 117번 재생성
+    regenerate_narration(10, [91, 46, 53, 117])

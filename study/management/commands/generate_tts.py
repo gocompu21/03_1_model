@@ -128,6 +128,9 @@ class Command(BaseCommand):
                 # Limit text length
                 if len(text) > 5000:
                     text = text[:5000] + "... 이하 생략"
+                
+                # Add speed instruction for slower speech
+                text = "천천히 또박또박 읽어주세요. " + text
 
                 try:
                     # Generate TTS
