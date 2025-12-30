@@ -7,3 +7,4 @@ media/tts/
 db.sqlite3.bak
 local_stores.json
 data/FileStore/
+media/questions/explanations/
