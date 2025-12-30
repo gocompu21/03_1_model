@@ -611,14 +611,42 @@
             choice5: `{{ selected_question.choice5|default:""|escapejs }}`
         };
 
+        // Clean HTML for prompt (convert HTML to readable text)
+        function cleanHtmlForPrompt(html) {
+            if (!html) return '';
+            return html
+                .replace(/<br\s*\/?>/gi, '\n')           // <br> → 줄바꿈
+                .replace(/<div[^>]*>/gi, '')              // <div ...> 제거
+                .replace(/<\/div>/gi, '\n')               // </div> → 줄바꿈
+                .replace(/<i[^>]*>(.*?)<\/i>/gi, '$1')    // <i>text</i> → text (이탤릭)
+                .replace(/<em[^>]*>(.*?)<\/em>/gi, '$1')  // <em>text</em> → text
+                .replace(/<b[^>]*>(.*?)<\/b>/gi, '$1')    // <b>text</b> → text (볼드)
+                .replace(/<strong[^>]*>(.*?)<\/strong>/gi, '$1')  // <strong>text</strong> → text
+                .replace(/<[^>]+>/g, '')                  // 나머지 태그 제거
+                .replace(/&nbsp;/g, ' ')                  // &nbsp; → 공백
+                .replace(/&lt;/g, '<')                    // HTML entities
+                .replace(/&gt;/g, '>')
+                .replace(/&amp;/g, '&')
+                .replace(/\n\s*\n/g, '\n')               // 중복 줄바꿈 제거
+                .trim();
+        }
+
         function updateInfographicPrompt(explanation) {
             const q = questionData;
-            const prompt = `(${q.subject}) ${q.round}-${q.number}. ${q.content}
-① ${q.choice1}
-② ${q.choice2}
-③ ${q.choice3}
-④ ${q.choice4}
-⑤ ${q.choice5}
+            // Clean HTML from content and choices
+            const cleanContent = cleanHtmlForPrompt(q.content);
+            const cleanChoice1 = cleanHtmlForPrompt(q.choice1);
+            const cleanChoice2 = cleanHtmlForPrompt(q.choice2);
+            const cleanChoice3 = cleanHtmlForPrompt(q.choice3);
+            const cleanChoice4 = cleanHtmlForPrompt(q.choice4);
+            const cleanChoice5 = cleanHtmlForPrompt(q.choice5);
+            
+            const prompt = `(${q.subject}) ${q.round}-${q.number}. ${cleanContent}
+① ${cleanChoice1}
+② ${cleanChoice2}
+③ ${cleanChoice3}
+④ ${cleanChoice4}
+⑤ ${cleanChoice5}
 
 ${explanation}
 
@@ -628,7 +656,7 @@ ${explanation}
 ２） 한국어 텍스트 포함
 ３） 전문적이고 교육적인 스타일
 ４） 나무 병해 관련 시각 요소
-５） 최상단칸은 "(${q.subject}) ${q.round}-${q.number}. ${q.content}" 왼쪽 정렬해`;
+５） 최상단칸은 "(${q.subject}) ${q.round}-${q.number}. ${cleanContent}" 왼쪽 정렬해`;
 
             document.getElementById('infographic-prompt').innerText = prompt;
         }
