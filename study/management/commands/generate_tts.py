@@ -128,6 +128,8 @@ class Command(BaseCommand):
                 # Limit text length
                 if len(text) > 5000:
                     text = text[:5000] + "... 이하 생략"
+                
+
 
                 try:
                     # Generate TTS
@@ -157,7 +159,7 @@ class Command(BaseCommand):
                     mime_type = None
 
                     for chunk in client.models.generate_content_stream(
-                        model="gemini-2.5-pro-preview-tts",
+                        model="gemini-2.5-flash-preview-tts",
                         contents=contents,
                         config=generate_content_config,
                     ):
@@ -225,48 +227,7 @@ class Command(BaseCommand):
         self.stdout.write(f"  Errors: {errors}")
 
     def convert_to_wav(self, audio_data: bytes, mime_type: str) -> bytes:
-        """Convert raw audio data to WAV format."""
-        import struct
-        
-        # Parse MIME type
-        bits_per_sample = 16
-        sample_rate = 24000
+        """Convert raw audio data to WAV format. Uses shared utility."""
+        from utils.tts_generator import convert_to_wav
+        return convert_to_wav(audio_data, mime_type)
 
-        parts = mime_type.split(";")
-        for param in parts:
-            param = param.strip()
-            if param.lower().startswith("rate="):
-                try:
-                    sample_rate = int(param.split("=", 1)[1])
-                except (ValueError, IndexError):
-                    pass
-            elif param.startswith("audio/L"):
-                try:
-                    bits_per_sample = int(param.split("L", 1)[1])
-                except (ValueError, IndexError):
-                    pass
-
-        num_channels = 1
-        data_size = len(audio_data)
-        bytes_per_sample = bits_per_sample // 8
-        block_align = num_channels * bytes_per_sample
-        byte_rate = sample_rate * block_align
-        chunk_size = 36 + data_size
-
-        header = struct.pack(
-            "<4sI4s4sIHHIIHH4sI",
-            b"RIFF",
-            chunk_size,
-            b"WAVE",
-            b"fmt ",
-            16,
-            1,
-            num_channels,
-            sample_rate,
-            byte_rate,
-            block_align,
-            bits_per_sample,
-            b"data",
-            data_size
-        )
-        return header + audio_data

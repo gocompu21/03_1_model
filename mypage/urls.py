@@ -37,4 +37,9 @@ urlpatterns = [
     # Admin Prompt Generator
     path("admin/prompt-generator/", views.prompt_generator, name="prompt_generator"),
     path("admin/query-ai/", views.query_ai_api, name="query_ai_api"),
+    path("admin/generate-narration/", views.generate_narration_api, name="generate_narration_api"),
+    path("admin/save-narration/", views.save_narration_api, name="save_narration_api"),
+    path("admin/generate-tts/", views.generate_tts_api, name="generate_tts_api"),
+    path("admin/get-existing-tts/", views.get_existing_tts_api, name="get_existing_tts_api"),
+    path("admin/generate-infographic/", views.generate_infographic_api, name="generate_infographic_api"),
 ]

@@ -184,7 +184,7 @@
             max-height: 500px;
             overflow-y: auto;
             line-height: 1.7;
-            white-space: pre-wrap;
+            white-space: pre-line;
         }
 
         .loading-state {
@@ -350,7 +350,7 @@
             </div>
 
             <div style="display: flex; gap: 20px; align-items: flex-start;">
-                <div class="prompt-output" id="prompt-text" style="flex: 1;">{{ generated_prompt }}</div>
+                <div class="prompt-output" id="prompt-text" contenteditable="true" style="flex: 1; outline: none; cursor: text;">{{ generated_prompt }}</div>
                 <div class="action-buttons" style="display: flex; flex-direction: column; gap: 10px; min-width: 200px;">
                     <button type="button" id="btn-ask-all" onclick="queryAll()" style="width: 100%; text-align: center; padding: 12px 20px; background: linear-gradient(135deg, #2d6a4f, #9c27b0); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                         <i class="fas fa-bolt"></i> 모두 질문
@@ -368,58 +368,172 @@
             </div>
         </div>
 
-        <div class="response-grid">
-            <div class="response-card basic-book">
-                <h3><i class="fas fa-book"></i> 기본서 AI 답변</h3>
-                <div class="response-content" id="basic-book-text">
-                    <div class="loading-state" id="loading-basic-book" style="display: none;">
-                        <div class="spinner"></div>
-                        <span>기본서에서 답변을 생성 중입니다...</span>
-                    </div>
-                    <div id="content-basic-book">버튼을 클릭하여 기본서에 질문하세요.</div>
-                </div>
-                <button type="button" class="btn-copy" onclick="copyText('content-basic-book')" style="display: none;"
-                    id="copy-basic-book">
-                    <i class="fas fa-copy"></i> 복사
+        <!-- 탭 네비게이션 -->
+        <div class="card" style="padding: 0; overflow: hidden;">
+            <div class="tab-nav" style="display: flex; border-bottom: 2px solid #e0e0e0;">
+                <button type="button" class="tab-btn active" onclick="switchTab('basic-book')" id="tab-basic-book" style="flex: 1; padding: 15px 20px; border: none; background: #0077b6; color: white; font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-book"></i> 기본서
                 </button>
-                <button type="button" class="btn-save basic-book" onclick="saveExplanation('basic_book')"
-                    style="display: none;" id="save-basic-book">
-                    <i class="fas fa-database"></i> DB에 저장
+                <button type="button" class="tab-btn" onclick="switchTab('tree-doctor')" id="tab-tree-doctor" style="flex: 1; padding: 15px 20px; border: none; background: #f5f5f5; color: #666; font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-tree"></i> 나무주치의
                 </button>
-                <div class="success-msg" id="msg-basic-book"></div>
+                <button type="button" class="tab-btn" onclick="switchTab('narration')" id="tab-narration" style="flex: 1; padding: 15px 20px; border: none; background: #f5f5f5; color: #666; font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-microphone"></i> 나레이션
+                </button>
+                <button type="button" class="tab-btn" onclick="switchTab('infographic')" id="tab-infographic" style="flex: 1; padding: 15px 20px; border: none; background: #f5f5f5; color: #666; font-weight: bold; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-image"></i> 인포그래픽
+                </button>
             </div>
 
-            <div class="response-card tree-doctor">
-                <h3><i class="fas fa-tree"></i> 나무주치의 AI 답변</h3>
-                <div class="response-content" id="tree-doctor-text">
-                    <div class="loading-state" id="loading-tree-doctor" style="display: none;">
-                        <div class="spinner"></div>
-                        <span>나무주치의가 답변을 생성 중입니다...</span>
+            <!-- 탭 콘텐츠 컨테이너 -->
+            <div style="padding: 25px;">
+                <!-- 기본서 탭 -->
+                <div class="tab-content" id="panel-basic-book" style="display: block;">
+                    <div style="display: flex; gap: 15px; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div class="response-content" id="basic-book-text" style="border-color: #caf0f8;">
+                                <div class="loading-state" id="loading-basic-book" style="display: none;">
+                                    <div class="spinner"></div>
+                                    <span>기본서에서 답변을 생성 중입니다...</span>
+                                </div>
+                                <div id="content-basic-book" contenteditable="true" style="min-height: 200px; outline: none; cursor: text;">버튼을 클릭하여 기본서에 질문하세요.</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px; min-width: 160px;">
+                            <button type="button" class="btn-query basic-book" id="btn-basic-book" onclick="queryAI('basic_book')" style="width: 100%; text-align: center; padding: 12px 20px;">
+                                <i class="fas fa-search"></i> 질문하기
+                            </button>
+                            <button type="button" class="btn-copy" onclick="copyText('content-basic-book')" style="display: none;" id="copy-basic-book">
+                                <i class="fas fa-copy"></i> 복사
+                            </button>
+                            <button type="button" class="btn-save basic-book" onclick="saveExplanation('basic_book')" style="display: none;" id="save-basic-book">
+                                <i class="fas fa-database"></i> DB에 저장
+                            </button>
+                        </div>
                     </div>
-                    <div id="content-tree-doctor">버튼을 클릭하여 나무주치의에게 질문하세요.</div>
+                    <div class="success-msg" id="msg-basic-book"></div>
                 </div>
-                <button type="button" class="btn-copy" onclick="copyText('content-tree-doctor')" style="display: none;"
-                    id="copy-tree-doctor">
-                    <i class="fas fa-copy"></i> 복사
-                </button>
-                <button type="button" class="btn-save tree-doctor" onclick="saveExplanation('tree_doctor')"
-                    style="display: none;" id="save-tree-doctor">
-                    <i class="fas fa-database"></i> DB에 저장
-                </button>
-                <div class="success-msg" id="msg-tree-doctor"></div>
-            </div>
-        </div>
 
-        <!-- AI Studio 인포그래픽 프롬프트 -->
-        <div class="card" style="margin-top: 25px;">
-            <h2><i class="fas fa-image" style="color: #e91e63;"></i> AI Studio 인포그래픽 프롬프트</h2>
-            <p style="color: #666; margin-bottom: 15px;">아래 프롬프트를 AI Studio에 복사하여 인포그래픽을 생성하세요. (AI 답변 생성 후 자동 갱신)</p>
-            <div class="prompt-output" id="infographic-prompt" style="background: #fff3e0;">대기 중... 먼저 AI 답변을 생성하세요.
+                <!-- 나무주치의 탭 -->
+                <div class="tab-content" id="panel-tree-doctor" style="display: none;">
+                    <div style="display: flex; gap: 15px; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div class="response-content" id="tree-doctor-text" style="border-color: #f3e5f5;">
+                                <div class="loading-state" id="loading-tree-doctor" style="display: none;">
+                                    <div class="spinner"></div>
+                                    <span>나무주치의가 답변을 생성 중입니다...</span>
+                                </div>
+                                <div id="content-tree-doctor" contenteditable="true" style="min-height: 200px; outline: none; cursor: text;">버튼을 클릭하여 나무주치의에게 질문하세요.</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px; min-width: 160px;">
+                            <button type="button" class="btn-query tree-doctor" id="btn-tree-doctor" onclick="queryAI('tree_doctor')" style="width: 100%; text-align: center; padding: 12px 20px;">
+                                <i class="fas fa-search"></i> 질문하기
+                            </button>
+                            <button type="button" class="btn-copy" onclick="copyText('content-tree-doctor')" style="display: none;" id="copy-tree-doctor">
+                                <i class="fas fa-copy"></i> 복사
+                            </button>
+                            <button type="button" class="btn-save tree-doctor" onclick="saveExplanation('tree_doctor')" style="display: none;" id="save-tree-doctor">
+                                <i class="fas fa-database"></i> DB에 저장
+                            </button>
+                        </div>
+                    </div>
+                    <div class="success-msg" id="msg-tree-doctor"></div>
+                </div>
+
+                <!-- 나레이션 탭 -->
+                <div class="tab-content" id="panel-narration" style="display: none;">
+                    {% if selected_question.narration %}
+                    <div style="background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 5px; margin-bottom: 15px; display: inline-block;">
+                        <i class="fas fa-check"></i> 기존 나레이션 있음
+                    </div>
+                    {% endif %}
+                    <div style="display: flex; gap: 15px; align-items: flex-start;">
+                        <div style="flex: 1;">
+                            <div class="response-content" id="narration-text" style="background: #fce4ec; border-color: #f8bbd9;">
+                                <div class="loading-state" id="loading-narration" style="display: none;">
+                                    <div class="spinner"></div>
+                                    <span>나레이션을 생성 중입니다...</span>
+                                </div>
+                                <div id="content-narration" contenteditable="true" style="min-height: 200px; outline: none; cursor: text;">{% if selected_question.narration %}{{ selected_question.narration }}{% else %}기본서 해설을 생성한 후 나레이션 생성 버튼을 클릭하세요.{% endif %}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px; min-width: 160px;">
+                            <button type="button" id="btn-listen-tts" onclick="listenExistingTTS()" style="width: 100%; padding: 12px 20px; background: #4caf50; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                <i class="fas fa-headphones"></i> 해설듣기
+                            </button>
+                            <button type="button" id="btn-generate-narration" onclick="generateNarration()" style="width: 100%; padding: 12px 20px; background: #e91e63; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                <i class="fas fa-magic"></i> 나레이션 생성
+                            </button>
+                            <button type="button" id="btn-save-narration" onclick="saveNarration()" style="width: 100%; padding: 12px 20px; background: #ad1457; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: none;">
+                                <i class="fas fa-database"></i> DB에 저장
+                            </button>
+                            <button type="button" id="btn-generate-tts" onclick="generateTTS()" style="width: 100%; padding: 12px 20px; background: #673ab7; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                <i class="fas fa-volume-up"></i> TTS 음성 생성
+                            </button>
+                            <button type="button" class="btn-copy" onclick="copyText('content-narration')" style="width: 100%; text-align: center; padding: 12px 20px; margin-left: 0;">
+                                <i class="fas fa-copy"></i> 복사
+                            </button>
+                        </div>
+                    </div>
+                    <!-- TTS Audio Player -->
+                    <div id="tts-player-container" style="display: none; margin-top: 15px; padding: 15px; background: #ede7f6; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <audio id="tts-audio-player" controls style="flex: 1;"></audio>
+                            <span id="tts-filename" style="color: #512da8; font-weight: bold;"></span>
+                        </div>
+                    </div>
+                    <div class="success-msg" id="msg-narration"></div>
+                    <div class="success-msg" id="msg-tts" style="background: #ede7f6; color: #512da8;"></div>
+                </div>
+
+                <!-- 인포그래픽 탭 -->
+                <div class="tab-content" id="panel-infographic" style="display: none;">
+                    {% if selected_question.infographic_image %}
+                    <!-- 기존 인포그래픽 이미지 -->
+                    <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.2em;"></i>
+                            <strong style="color: #2e7d32;">인포그래픽 이미지</strong>
+                        </div>
+                        <a href="{{ selected_question.infographic_image.url }}" target="_blank" style="display: block;">
+                            <img src="{{ selected_question.infographic_image.url }}" alt="인포그래픽" 
+                                 style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: zoom-in;">
+                        </a>
+                    </div>
+                    {% else %}
+                    <div style="margin-bottom: 20px; padding: 15px; background: #fff3e0; border-radius: 8px;">
+                        <i class="fas fa-info-circle" style="color: #ff9800;"></i>
+                        <span style="color: #e65100;">인포그래픽 이미지가 없습니다.</span>
+                    </div>
+                    {% endif %}
+                    
+                    <p style="color: #666; margin-bottom: 15px;">아래 프롬프트를 기반으로 인포그래픽을 생성합니다. (기본서 답변 기준)</p>
+                    <div class="prompt-output" id="infographic-prompt" contenteditable="true" style="background: #fff3e0; outline: none; cursor: text; min-height: 200px;">대기 중... 먼저 AI 답변을 생성하세요.</div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                        <button type="button" id="btn-generate-infographic" onclick="generateInfographic()" style="padding: 12px 24px; background: linear-gradient(135deg, #ff9800, #f44336); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                            <i class="fas fa-magic"></i> 인포그래픽 이미지 생성
+                        </button>
+                        <button type="button" class="btn-copy" onclick="copyText('infographic-prompt')" style="background: #e91e63;">
+                            <i class="fas fa-copy"></i> 프롬프트 복사
+                        </button>
+                    </div>
+                    
+                    <!-- 생성된 이미지 표시 영역 -->
+                    <div id="generated-infographic-container" style="display: none; margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.2em;"></i>
+                            <strong style="color: #2e7d32;" id="generated-infographic-message">생성 완료!</strong>
+                        </div>
+                        <a id="generated-infographic-link" href="#" target="_blank" style="display: block;">
+                            <img id="generated-infographic-img" src="" alt="생성된 인포그래픽" 
+                                 style="max-width: 100%; max-height: 400px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); cursor: zoom-in;">
+                        </a>
+                    </div>
+                    <div class="success-msg" id="msg-infographic" style="background: #fff3e0; color: #e65100;"></div>
+                </div>
             </div>
-            <button type="button" class="btn-copy" onclick="copyText('infographic-prompt')"
-                style="background: #e91e63;">
-                <i class="fas fa-copy"></i> 인포그래픽 프롬프트 복사
-            </button>
         </div>
         {% endif %}
     </div>
@@ -442,12 +556,47 @@
                 document.getElementById('question_number').value = selectedNumber;
             }
             
-            // Auto query all when prompt is generated
-            const promptText = document.getElementById('prompt-text');
-            if (promptText && promptText.innerText.trim() !== '') {
-                setTimeout(() => queryAll(), 500);
-            }
+            // Auto query all when prompt is generated (removed to avoid auto-loading)
+            // const promptText = document.getElementById('prompt-text');
+            // if (promptText && promptText.innerText.trim() !== '') {
+            //     setTimeout(() => queryAll(), 500);
+            // }
         });
+
+        // Tab colors configuration
+        const tabColors = {
+            'basic-book': '#0077b6',
+            'tree-doctor': '#9c27b0',
+            'narration': '#e91e63',
+            'infographic': '#ff9800'
+        };
+
+        // Tab switching function
+        function switchTab(tabId) {
+            // Hide all panels
+            document.querySelectorAll('.tab-content').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            
+            // Reset all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.style.background = '#f5f5f5';
+                btn.style.color = '#666';
+            });
+            
+            // Show selected panel
+            const panel = document.getElementById('panel-' + tabId);
+            if (panel) {
+                panel.style.display = 'block';
+            }
+            
+            // Highlight selected tab
+            const tab = document.getElementById('tab-' + tabId);
+            if (tab) {
+                tab.style.background = tabColors[tabId] || '#2d6a4f';
+                tab.style.color = 'white';
+            }
+        }
 
         // Question data for infographic prompt
         const questionData = {
@@ -544,8 +693,10 @@ ${explanation}
                         document.getElementById(contentId).innerText = data.response;
                         document.getElementById(copyBtnId).style.display = 'inline-block';
                         document.getElementById(saveBtnId).style.display = 'inline-block';
-                        // Update infographic prompt with the AI response
-                        updateInfographicPrompt(data.response);
+                        // Update infographic prompt only with basic book response
+                        if (apiType === 'basic_book') {
+                            updateInfographicPrompt(data.response);
+                        }
                     } else {
                         document.getElementById(contentId).innerText = '오류: ' + (data.error || 'Unknown error');
                     }
@@ -594,6 +745,246 @@ ${explanation}
                 })
                 .catch(err => {
                     alert('저장 중 오류 발생: ' + err);
+                });
+        }
+
+        // Narration API URLs
+        const generateNarrationUrl = '{% url "mypage:generate_narration_api" %}';
+        const saveNarrationUrl = '{% url "mypage:save_narration_api" %}';
+
+        function generateNarration() {
+            if (!questionId) {
+                alert('문제가 선택되지 않았습니다.');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading-narration').style.display = 'flex';
+            document.getElementById('content-narration').style.display = 'none';
+            document.getElementById('btn-generate-narration').disabled = true;
+
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch(generateNarrationUrl, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading-narration').style.display = 'none';
+                    document.getElementById('content-narration').style.display = 'block';
+                    document.getElementById('btn-generate-narration').disabled = false;
+
+                    if (data.success) {
+                        document.getElementById('content-narration').innerText = data.response;
+                        document.getElementById('btn-save-narration').style.display = 'block';
+                    } else {
+                        document.getElementById('content-narration').innerText = '오류: ' + (data.error || 'Unknown error');
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('loading-narration').style.display = 'none';
+                    document.getElementById('content-narration').style.display = 'block';
+                    document.getElementById('content-narration').innerText = '오류: ' + err;
+                    document.getElementById('btn-generate-narration').disabled = false;
+                });
+        }
+
+        function saveNarration() {
+            if (!questionId) {
+                alert('문제가 선택되지 않았습니다.');
+                return;
+            }
+
+            const narrationText = document.getElementById('content-narration').innerText;
+
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('narration_text', narrationText);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch(saveNarrationUrl, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const msgElement = document.getElementById('msg-narration');
+                    msgElement.style.display = 'block';
+                    msgElement.innerText = data.message || data.error;
+                    if (data.success) {
+                        msgElement.style.background = '#d4edda';
+                        msgElement.style.color = '#155724';
+                    } else {
+                        msgElement.style.background = '#f8d7da';
+                        msgElement.style.color = '#721c24';
+                    }
+                })
+                .catch(err => {
+                    alert('저장 중 오류 발생: ' + err);
+                });
+        }
+
+        // TTS Generation
+        const generateTtsUrl = '{% url "mypage:generate_tts_api" %}';
+
+        function generateTTS() {
+            if (!questionId) {
+                alert('문제가 선택되지 않았습니다.');
+                return;
+            }
+
+            const narrationText = document.getElementById('content-narration').innerText;
+            if (!narrationText || narrationText.includes('기본서 해설을 생성한 후')) {
+                alert('먼저 나레이션을 생성해주세요.');
+                return;
+            }
+
+            // Show loading state
+            const btn = document.getElementById('btn-generate-tts');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> TTS 생성 중...';
+            document.getElementById('msg-tts').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('narration_text', narrationText);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch(generateTtsUrl, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-volume-up"></i> TTS 음성 생성';
+
+                    const msgElement = document.getElementById('msg-tts');
+                    msgElement.style.display = 'block';
+
+                    if (data.success) {
+                        msgElement.innerText = data.message;
+                        msgElement.style.background = '#d4edda';
+                        msgElement.style.color = '#155724';
+
+                        // Show audio player
+                        document.getElementById('tts-player-container').style.display = 'block';
+                        document.getElementById('tts-audio-player').src = data.file_url;
+                        document.getElementById('tts-filename').innerText = data.filename;
+                    } else {
+                        msgElement.innerText = '오류: ' + (data.error || 'Unknown error');
+                        msgElement.style.background = '#f8d7da';
+                        msgElement.style.color = '#721c24';
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-volume-up"></i> TTS 음성 생성';
+                    alert('TTS 생성 중 오류 발생: ' + err);
+                });
+        }
+
+        // Listen to existing TTS
+        const getExistingTtsUrl = '{% url "mypage:get_existing_tts_api" %}';
+
+        function listenExistingTTS() {
+            if (!questionId) {
+                alert('문제가 선택되지 않았습니다.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-listen-tts');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 로딩...';
+
+            fetch(getExistingTtsUrl + '?question_id=' + questionId)
+                .then(response => response.json())
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-headphones"></i> 해설듣기';
+
+                    if (data.success && data.exists) {
+                        // Show audio player and play
+                        document.getElementById('tts-player-container').style.display = 'block';
+                        const audioPlayer = document.getElementById('tts-audio-player');
+                        audioPlayer.src = data.file_url;
+                        audioPlayer.play();
+                        document.getElementById('tts-filename').innerText = data.filename;
+                    } else if (data.success && !data.exists) {
+                        alert(data.message || 'TTS 파일이 없습니다. 먼저 TTS 음성을 생성하세요.');
+                    } else {
+                        alert('오류: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-headphones"></i> 해설듣기';
+                    alert('오류 발생: ' + err);
+                });
+        }
+
+        // Infographic Generation
+        const generateInfographicUrl = '{% url "mypage:generate_infographic_api" %}';
+
+        function generateInfographic() {
+            if (!questionId) {
+                alert('문제가 선택되지 않았습니다.');
+                return;
+            }
+
+            const promptText = document.getElementById('infographic-prompt').innerText;
+            if (!promptText || promptText.includes('대기 중')) {
+                alert('먼저 기본서에 질문하여 프롬프트를 생성해주세요.');
+                return;
+            }
+
+            // Show loading state
+            const btn = document.getElementById('btn-generate-infographic');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 이미지 생성 중... (약 30초 소요)';
+            document.getElementById('msg-infographic').style.display = 'none';
+            document.getElementById('generated-infographic-container').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('prompt', promptText);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch(generateInfographicUrl, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
+
+                    const msgElement = document.getElementById('msg-infographic');
+                    msgElement.style.display = 'block';
+
+                    if (data.success) {
+                        msgElement.innerText = data.message;
+                        msgElement.style.background = '#d4edda';
+                        msgElement.style.color = '#155724';
+
+                        // Show generated image
+                        document.getElementById('generated-infographic-container').style.display = 'block';
+                        document.getElementById('generated-infographic-message').innerText = data.message;
+                        document.getElementById('generated-infographic-img').src = data.image_url;
+                        document.getElementById('generated-infographic-link').href = data.image_url;
+                    } else {
+                        msgElement.innerText = '오류: ' + (data.error || 'Unknown error');
+                        msgElement.style.background = '#f8d7da';
+                        msgElement.style.color = '#721c24';
+                    }
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
+                    alert('인포그래픽 생성 중 오류 발생: ' + err);
                 });
         }
     </script>

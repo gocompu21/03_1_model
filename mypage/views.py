@@ -821,3 +821,320 @@ def query_ai_api(request):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})
+
+
+NARRATION_PROMPT = """당신은 나무의사 자격 시험을 준비하는 수험생을 위한 전문 강사입니다.
+
+다음 문제와 해설을 바탕으로, 음성으로 들려줄 전문적이고 명확한 나레이션을 작성해주세요.
+
+[요구사항]
+1. 맨 앞에 인사나 다른 말을 하지 말고, 문제를 읽지 말고 바로 정답 해설로 시작하세요.
+2. 마지막에 "수험생 여러분" 등의 감사 인사를 하지 말고 깔끔하게 설명으로 끝내세요.
+3. 전문 용어는 쉽게 풀어서 설명해주세요.
+4. 중요한 포인트는 **굵게** 표시하여 강조해주세요.
+5. 자연스럽게 읽을 수 있는 문장으로 작성해주세요.
+6. LaTeX 수식이나 특수 기호는 읽을 수 있는 텍스트로 변환해주세요.
+7. 마크다운 형식(**, *, - 등)을 활용하여 가독성을 높여주세요.
+
+[문제]
+{question_content}
+
+[보기]
+① {choice1}
+② {choice2}
+③ {choice3}
+④ {choice4}
+⑤ {choice5}
+
+[정답]
+{answer}번
+
+[기본서 해설]
+{textbook_chat}
+
+위 내용을 바탕으로 전문적이고 명확한 나레이션을 마크다운 형식으로 작성해주세요."""
+
+
+@staff_member_required
+def generate_narration_api(request):
+    """
+    AJAX endpoint to generate narration for a question.
+    Requires question_id in POST data.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    question_id = request.POST.get("question_id")
+    if not question_id:
+        return JsonResponse({"error": "No question_id provided"}, status=400)
+
+    try:
+        question = Question.objects.get(id=question_id)
+        
+        # Check if textbook_chat exists
+        if not question.textbook_chat:
+            return JsonResponse({
+                "success": False, 
+                "error": "기본서 해설이 없습니다. 먼저 기본서에 질문하여 해설을 생성하세요."
+            })
+        
+        # Build narration prompt
+        prompt = NARRATION_PROMPT.format(
+            question_content=question.content,
+            choice1=question.choice1,
+            choice2=question.choice2,
+            choice3=question.choice3,
+            choice4=question.choice4,
+            choice5=question.choice5,
+            answer=question.answer[0] if isinstance(question.answer, list) else question.answer,
+            textbook_chat=question.textbook_chat
+        )
+        
+        # Call Gemini API
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        model = genai.GenerativeModel("gemini-3-flash-preview")
+        response = model.generate_content(prompt)
+        narration_text = response.text
+        
+        return JsonResponse({"success": True, "response": narration_text})
+
+    except Question.DoesNotExist:
+        return JsonResponse({"success": False, "error": "문제를 찾을 수 없습니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@staff_member_required
+def save_narration_api(request):
+    """
+    AJAX endpoint to save narration to database.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    question_id = request.POST.get("question_id")
+    narration_text = request.POST.get("narration_text")
+    
+    if not question_id or not narration_text:
+        return JsonResponse({"error": "Missing question_id or narration_text"}, status=400)
+
+    try:
+        question = Question.objects.get(id=question_id)
+        question.narration = narration_text
+        question.save()
+        return JsonResponse({"success": True, "message": "나레이션이 저장되었습니다."})
+    except Question.DoesNotExist:
+        return JsonResponse({"success": False, "error": "문제를 찾을 수 없습니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@staff_member_required
+def generate_tts_api(request):
+    """
+    AJAX endpoint to generate TTS audio from narration text.
+    Uses shared TTS generator utility module.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    question_id = request.POST.get("question_id")
+    narration_text = request.POST.get("narration_text")
+    
+    if not question_id or not narration_text:
+        return JsonResponse({"error": "Missing question_id or narration_text"}, status=400)
+
+    try:
+        question = Question.objects.get(id=question_id)
+        round_num = question.exam.round_number
+        q_num = question.number
+        
+        # Use shared TTS generator
+        from utils.tts_generator import generate_tts_audio
+        import os
+        import uuid
+        
+        # Generate filename and path
+        tts_dir = os.path.join(settings.MEDIA_ROOT, "tts")
+        unique_id = uuid.uuid4().hex[:6]
+        filename = f"round{round_num}_q{q_num}_narration_{unique_id}.mp3"
+        filepath = os.path.join(tts_dir, filename)
+        
+        # Generate TTS using shared module
+        result = generate_tts_audio(narration_text, filepath)
+        
+        if result["success"]:
+            file_url = f"{settings.MEDIA_URL}tts/{filename}"
+            return JsonResponse({
+                "success": True, 
+                "message": f"TTS 생성 완료: {filename}",
+                "file_url": file_url,
+                "filename": filename
+            })
+        else:
+            return JsonResponse({"success": False, "error": result["message"]})
+        
+    except Question.DoesNotExist:
+        return JsonResponse({"success": False, "error": "문제를 찾을 수 없습니다."})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@staff_member_required
+def get_existing_tts_api(request):
+    """
+    AJAX endpoint to get existing TTS audio file for a question.
+    Returns the URL of the most recent TTS file if it exists.
+    """
+    question_id = request.GET.get("question_id")
+    if not question_id:
+        return JsonResponse({"success": False, "error": "Missing question_id"})
+
+    try:
+        import os
+        import glob
+        
+        question = Question.objects.get(id=question_id)
+        round_num = question.exam.round_number
+        q_num = question.number
+        
+        # Search for existing TTS files
+        tts_dir = os.path.join(settings.MEDIA_ROOT, "tts")
+        pattern = os.path.join(tts_dir, f"round{round_num}_q{q_num}_*narration*.mp3")
+        files = glob.glob(pattern)
+        
+        if files:
+            # Get the most recent file
+            latest_file = max(files, key=os.path.getmtime)
+            filename = os.path.basename(latest_file)
+            file_url = f"{settings.MEDIA_URL}tts/{filename}"
+            return JsonResponse({
+                "success": True,
+                "exists": True,
+                "file_url": file_url,
+                "filename": filename
+            })
+        else:
+            return JsonResponse({
+                "success": True,
+                "exists": False,
+                "message": "TTS 파일이 없습니다. 먼저 TTS 음성을 생성하세요."
+            })
+        
+    except Question.DoesNotExist:
+        return JsonResponse({"success": False, "error": "문제를 찾을 수 없습니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@staff_member_required
+def generate_infographic_api(request):
+    """
+    AJAX endpoint to generate infographic image using Gemini API.
+    Uses gemini-3-pro-image-preview model for image generation.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    question_id = request.POST.get("question_id")
+    prompt = request.POST.get("prompt")
+    
+    if not question_id or not prompt:
+        return JsonResponse({"error": "Missing question_id or prompt"}, status=400)
+
+    try:
+        import os
+        import mimetypes
+        from google import genai
+        from google.genai import types
+        from django.core.files.base import ContentFile
+        
+        question = Question.objects.get(id=question_id)
+        round_num = question.exam.round_number
+        q_num = question.number
+        
+        # Configure Gemini client
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        model = "gemini-3-pro-image-preview"
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=prompt),
+                ],
+            ),
+        ]
+        generate_content_config = types.GenerateContentConfig(
+            response_modalities=[
+                "IMAGE",
+                "TEXT",
+            ],
+            image_config=types.ImageConfig(
+                image_size="1K",
+            ),
+        )
+        
+        # Generate image
+        image_data = None
+        mime_type = None
+        
+        for chunk in client.models.generate_content_stream(
+            model=model,
+            contents=contents,
+            config=generate_content_config,
+        ):
+            if (
+                chunk.candidates is None
+                or chunk.candidates[0].content is None
+                or chunk.candidates[0].content.parts is None
+            ):
+                continue
+            
+            part = chunk.candidates[0].content.parts[0]
+            if part.inline_data and part.inline_data.data:
+                image_data = part.inline_data.data
+                mime_type = part.inline_data.mime_type
+                break  # Got the image, stop
+        
+        if not image_data:
+            return JsonResponse({
+                "success": False, 
+                "error": "이미지 생성에 실패했습니다. 다시 시도해주세요."
+            })
+        
+        # Determine file extension
+        file_extension = mimetypes.guess_extension(mime_type) or ".png"
+        filename = f"infographic_{round_num}_{q_num}{file_extension}"
+        
+        # Delete existing infographic image if exists
+        if question.infographic_image:
+            question.infographic_image.delete(save=False)
+        
+        # Save to Question.infographic_image field
+        question.infographic_image.save(
+            filename,
+            ContentFile(image_data),
+            save=True
+        )
+        
+        return JsonResponse({
+            "success": True,
+            "message": f"인포그래픽 이미지 생성 완료: {filename}",
+            "image_url": question.infographic_image.url,
+            "filename": filename
+        })
+        
+    except Question.DoesNotExist:
+        return JsonResponse({"success": False, "error": "문제를 찾을 수 없습니다."})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+
+
+
