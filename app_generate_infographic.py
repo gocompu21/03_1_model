@@ -133,8 +133,8 @@ def generate_infographic(question, client):
 
 def main():
     # Configuration - Change these values as needed
-    round_number = 6           # 회차 번호
-    start_number = 140         # 시작 문제 번호
+    round_number = 7           # 회차 번호
+    start_number = 4         # 시작 문제 번호
     end_number = 140           # 끝 문제 번호 (포함)
     
     print(f"=== 인포그래픽 이미지 배치 생성 ===")
