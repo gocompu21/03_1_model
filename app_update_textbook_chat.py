@@ -17,7 +17,9 @@ def update_questions():
     # file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_6회_20251226_143031.xlsx"
     # file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_9회_20251227_182616.xlsx"
     # file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_10회_20251228_231636.xlsx"
-    file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_7회_20251229_200651.xlsx"
+    # file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_7회_20251229_200651.xlsx"
+    file_path = r"C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\data_8회_20251230_213034.xlsx"
+
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
         return

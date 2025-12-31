@@ -140,15 +140,8 @@ class TextbookGeneratorApp:
                 if not self.is_running:
                     break
 
-                # Subject 번호를 스토어 이름으로 매핑
-                SUBJECT_MAP = {
-                    1: "수목생리학",
-                    2: "수목병리학",
-                    3: "수목해충학",
-                    4: "산림토양학",
-                    5: "수목관리학"
-                }
-                store_name = SUBJECT_MAP.get(q.subject, "수목관리학")
+                # Subject 이름을 스토어 이름으로 직접 사용 (공백 제거)
+                store_name = q.subject.name.strip() if hasattr(q.subject, 'name') else "수목관리학"
                 # Construct Prompt
                 prompt_content = (
                     f"{q.number}. {q.content}\n"

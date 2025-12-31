@@ -122,7 +122,7 @@ def generate_narration_for_round(round_number):
 
 if __name__ == "__main__":
     # Generate narration for Exam Round 7
-    for round_num in [7]:
+    for round_num in [8]:
         print(f"\n{'='*60}")
         print(f"Starting Round {round_num}")
         print(f"{'='*60}")
