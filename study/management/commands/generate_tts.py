@@ -150,7 +150,8 @@ class Command(BaseCommand):
                                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
                                     voice_name="Orus"  # Mature, deep male voice
                                 )
-                            )
+                            ),
+                            speaking_rate=0.85  # Slower, clearer speech
                         ),
                     )
 
@@ -159,7 +160,7 @@ class Command(BaseCommand):
                     mime_type = None
 
                     for chunk in client.models.generate_content_stream(
-                        model="gemini-2.5-flash-preview-tts",
+                        model="gemini-2.5-pro-preview-tts",
                         contents=contents,
                         config=generate_content_config,
                     ):
