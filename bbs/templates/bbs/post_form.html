@@ -83,8 +83,7 @@
 </div>
 
 <!-- Summernote JS -->
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
     crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/lang/summernote-ko-KR.min.js"></script>
@@ -103,8 +102,39 @@
             ['table', ['table']],
             ['insert', ['link', 'picture', 'video']],
             ['view', ['fullscreen', 'codeview', 'help']]
-        ]
+        ],
+        callbacks: {
+            onImageUpload: function(files) {
+                for (var i = 0; i < files.length; i++) {
+                    uploadImage(files[i]);
+                }
+            }
+        }
     });
+
+    function uploadImage(file) {
+        var formData = new FormData();
+        formData.append('file', file);
+        
+        $.ajax({
+            url: '{% url "bbs:image_upload" %}',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.url) {
+                    $('#summernote').summernote('insertImage', response.url);
+                }
+            },
+            error: function(xhr) {
+                alert('이미지 업로드 실패: ' + (xhr.responseJSON?.error || '알 수 없는 오류'));
+            }
+        });
+    }
 </script>
 
 {% endblock %}

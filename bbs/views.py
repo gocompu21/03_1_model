@@ -1,9 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.conf import settings
 from .models import Post, Comment
 from .forms import PostForm, CommentForm
+import os
+import uuid
+from datetime import datetime
 
 
 def post_list(request):
@@ -144,3 +150,43 @@ def comment_delete(request, pk):
         comment.delete()
         return redirect("bbs:post_detail", pk=post_pk)
     return redirect("bbs:post_detail", pk=comment.post.pk)
+
+
+@login_required
+def image_upload(request):
+    """Handle image upload from Summernote editor."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST method required"}, status=405)
+    
+    if not request.FILES.get("file"):
+        return JsonResponse({"error": "No file uploaded"}, status=400)
+    
+    uploaded_file = request.FILES["file"]
+    
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+    if uploaded_file.content_type not in allowed_types:
+        return JsonResponse({"error": "Invalid file type"}, status=400)
+    
+    # Create upload directory
+    upload_dir = os.path.join(settings.MEDIA_ROOT, "bbs", "images")
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    # Generate unique filename
+    ext = os.path.splitext(uploaded_file.name)[1].lower()
+    if ext not in [".jpg", ".jpeg", ".png", ".gif", ".webp"]:
+        ext = ".jpg"
+    
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    unique_id = uuid.uuid4().hex[:8]
+    filename = f"bbs_{timestamp}_{unique_id}{ext}"
+    filepath = os.path.join(upload_dir, filename)
+    
+    # Save file
+    with open(filepath, "wb+") as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    
+    # Return URL
+    image_url = f"{settings.MEDIA_URL}bbs/images/{filename}"
+    return JsonResponse({"url": image_url})
