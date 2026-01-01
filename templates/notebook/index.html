@@ -502,7 +502,7 @@
                 </div>
                 {% elif not user_input %}
                 <div class="message ai-message" id="welcome-msg">
-                    <strong>수목생리학</strong> 기본서 지문으로 정확하게 답변합니다. 무엇을 도와드릴까요?
+                    <strong>수목생리학</strong> 기본서를 분석하여 답변드리겠습니다.
                 </div>
                 {% endif %}
             </div>
@@ -724,7 +724,7 @@
             if (currentSubject) {
                 if (storeInput) storeInput.value = currentSubject;
                 if (welcomeMsg) {
-                    welcomeMsg.innerHTML = `<strong>${currentSubject}</strong> 지식저장소에 오신 것을 환영합니다. 무엇을 도와드릴까요?`;
+                    welcomeMsg.innerHTML = `<strong>${currentSubject}</strong> 기본서를 분석하여 답변드리겠습니다.`;
                 }
             }
         });
