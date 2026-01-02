@@ -62,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "accounts.middleware.SessionTrackingMiddleware",  # 세션 추적 미들웨어
 ]
 
 ROOT_URLCONF = "config.urls"

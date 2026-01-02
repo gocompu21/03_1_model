@@ -591,7 +591,9 @@
                                 <th>기출학습</th>
                                 <th>평균 점수</th>
                                 <th>복습 문제</th>
-                                <th>로그인</th>
+                                <th>오늘 체류</th>
+                                <th>누적 체류</th>
+                                <th>로그아웃</th>
                                 <th>마지막 활동</th>
                             </tr>
                         </thead>
@@ -603,17 +605,19 @@
                                 <td>{{ user.study_count }}회</td>
                                 <td>{{ user.avg_score|floatformat:1|default:"-" }}점</td>
                                 <td>{{ user.review_count }}</td>
-                                <td>{% if user.last_login %}{{ user.last_login|timesince }} 전{% else %}-{% endif %}</td>
+                                <td><span style="color: #2d6a4f; font-weight: 500;">{{ user.today_duration }}</span></td>
+                                <td>{{ user.total_duration }}</td>
+                                <td>{% if user.last_logout_time %}{{ user.last_logout_time|date:"m/d H:i" }}{% else %}-{% endif %}</td>
                                 <td>
                                     {% if user.last_activity_time %}
                                     <span style="background: #e8f5e9; color: #2d6a4f; padding: 2px 8px; border-radius: 10px; font-size: 0.85rem;">{{ user.last_activity_type }}</span>
-                                    <br><span style="color: #888; font-size: 0.8rem;">{{ user.last_activity_time|date:"Y-m-d H:i" }}</span>
+                                    <br><span style="color: #888; font-size: 0.8rem;">{{ user.last_activity_time|date:"m/d H:i" }}</span>
                                     {% else %}-{% endif %}
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="6" style="text-align: center; color: #999;">데이터가 없습니다.</td>
+                                <td colspan="9" style="text-align: center; color: #999;">데이터가 없습니다.</td>
                             </tr>
                             {% endfor %}
                         </tbody>

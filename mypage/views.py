@@ -200,6 +200,20 @@ def index(request):
             else:
                 last_activity_type, last_activity_time = None, None
             
+            # Get session duration data
+            from accounts.models import UserSession
+            today_duration = UserSession.get_user_today_duration(u)
+            total_duration = UserSession.get_user_total_duration(u)
+            
+            # Get last logout time
+            last_session = UserSession.objects.filter(user=u).order_by('-last_activity').first()
+            last_logout_time = None
+            if last_session:
+                if last_session.logout_time:
+                    last_logout_time = last_session.logout_time
+                else:
+                    last_logout_time = last_session.last_activity  # Still active or no logout
+            
             user_stats.append({
                 'username': u.username,
                 'first_name': u.first_name,
@@ -210,6 +224,9 @@ def index(request):
                 'study_count': u.study_count,
                 'last_activity_type': last_activity_type,
                 'last_activity_time': last_activity_time,
+                'today_duration': UserSession.format_duration(today_duration),
+                'total_duration': UserSession.format_duration(total_duration),
+                'last_logout_time': last_logout_time,
             })
         
         # Subject statistics - overall correct rate by subject

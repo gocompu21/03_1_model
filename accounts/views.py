@@ -7,6 +7,17 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from .forms import SignUpForm, LoginForm
+from .models import UserSession
+
+
+def get_client_ip(request):
+    """클라이언트 IP 주소 추출"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 def user_signup(request):
@@ -15,6 +26,16 @@ def user_signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            
+            # 세션 기록 생성
+            if request.session.session_key:
+                UserSession.objects.create(
+                    user=user,
+                    session_key=request.session.session_key,
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:500]
+                )
+            
             return redirect("main:index")
     else:
         form = SignUpForm()
@@ -28,6 +49,15 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            
+            # 세션 기록 생성
+            if request.session.session_key:
+                UserSession.objects.create(
+                    user=user,
+                    session_key=request.session.session_key,
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:500]
+                )
 
             # Check for 'next' parameter
             next_url = request.POST.get("next")
@@ -43,6 +73,14 @@ def user_login(request):
 
 
 def user_logout(request):
+    # 세션 기록 종료
+    if request.user.is_authenticated and request.session.session_key:
+        UserSession.objects.filter(
+            user=request.user,
+            session_key=request.session.session_key,
+            logout_time__isnull=True
+        ).update(logout_time=timezone.now())
+    
     logout(request)
     return redirect("main:index")
 
