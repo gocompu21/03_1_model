@@ -135,10 +135,13 @@ class Command(BaseCommand):
                     # Generate TTS
                     self.stdout.write(f"  [{tab}] Generating TTS...")
                     
+                    # Add slow speech instruction
+                    tts_text = "천천히, 또박또박 명확하게 읽어주세요:\n\n" + text
+                    
                     contents = [
                         types.Content(
                             role="user",
-                            parts=[types.Part.from_text(text=text)],
+                            parts=[types.Part.from_text(text=tts_text)],
                         ),
                     ]
 
@@ -151,7 +154,6 @@ class Command(BaseCommand):
                                     voice_name="Orus"  # Mature, deep male voice
                                 )
                             ),
-                            speaking_rate=0.85  # Slower, clearer speech
                         ),
                     )
 
@@ -160,7 +162,7 @@ class Command(BaseCommand):
                     mime_type = None
 
                     for chunk in client.models.generate_content_stream(
-                        model="gemini-2.5-pro-preview-tts",
+                        model="gemini-2.5-flash-preview-tts",
                         contents=contents,
                         config=generate_content_config,
                     ):

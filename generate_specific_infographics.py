@@ -91,7 +91,7 @@ def generate_infographic(question, client):
 def main():
     # Specific questions to generate
     questions_to_generate = [
-        (9, 125),
+        (10, 73), (10, 102),
     ]
     
     print(f"=== 인포그래픽 생성 ===")
