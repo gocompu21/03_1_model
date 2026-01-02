@@ -27,13 +27,16 @@ def user_signup(request):
             user = form.save()
             login(request, user)
             
-            # 세션 기록 생성
+            # 세션 기록 생성 (기존 세션이 있으면 업데이트)
             if request.session.session_key:
-                UserSession.objects.create(
-                    user=user,
+                UserSession.objects.update_or_create(
                     session_key=request.session.session_key,
-                    ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:500]
+                    defaults={
+                        'user': user,
+                        'ip_address': get_client_ip(request),
+                        'user_agent': request.META.get('HTTP_USER_AGENT', '')[:500],
+                        'logout_time': None,
+                    }
                 )
             
             return redirect("main:index")
@@ -50,13 +53,16 @@ def user_login(request):
             user = form.get_user()
             login(request, user)
             
-            # 세션 기록 생성
+            # 세션 기록 생성 (기존 세션이 있으면 업데이트)
             if request.session.session_key:
-                UserSession.objects.create(
-                    user=user,
+                UserSession.objects.update_or_create(
                     session_key=request.session.session_key,
-                    ip_address=get_client_ip(request),
-                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:500]
+                    defaults={
+                        'user': user,
+                        'ip_address': get_client_ip(request),
+                        'user_agent': request.META.get('HTTP_USER_AGENT', '')[:500],
+                        'logout_time': None,  # 새 로그인이므로 logout_time 초기화
+                    }
                 )
 
             # Check for 'next' parameter
