@@ -226,8 +226,12 @@ def index(request):
                 'last_activity_time': last_activity_time,
                 'today_duration': UserSession.format_duration(today_duration),
                 'total_duration': UserSession.format_duration(total_duration),
+                'total_duration_raw': total_duration,  # For sorting
                 'last_logout_time': last_logout_time,
             })
+        
+        # Sort user_stats by total duration (descending - most time first)
+        user_stats.sort(key=lambda x: x.get('total_duration_raw', 0), reverse=True)
         
         # Subject statistics - overall correct rate by subject
         subject_stats = []

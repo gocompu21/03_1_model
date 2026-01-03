@@ -151,6 +151,7 @@ class Command(BaseCommand):
                         '1번 선지': '1번', '2번 선지': '2번', '3번 선지': '3번', '4번 선지': '4번', '5번 선지': '5번',
                         # 영어 약어
                         'ANSI': '안시',
+                        'CODIT': '코디트',
                     }
                     
                     for old, new in replacements.items():
