@@ -374,7 +374,7 @@
             </div>
 
             <!-- Toggle Button for Explanation -->
-            <div style="margin-top: 10px; text-align: right; display: flex; justify-content: flex-end; gap: 15px;">
+            <div style="margin-top: 10px; text-align: right; display: flex; justify-content: flex-end; gap: 15px; align-items: center;">
                 <!-- Listen to Explanation Button -->
                 <button type="button" class="tts-btn" data-question-id="{{ q.id }}" onclick="toggleTTS(this, '{{ q.id }}')"
                     style="background:none; border:none; cursor:pointer; color:#2196F3; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
@@ -393,6 +393,15 @@
                     </svg>
                     <span class="tts-text">해설 듣기</span>
                 </button>
+                
+                <!-- TTS Speed Selector -->
+                <select class="tts-speed-selector" onchange="setTTSSpeed(this.value)"
+                    style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85em; color: #555; cursor: pointer; background: #f9f9f9;">
+                    <option value="0.8">0.8x</option>
+                    <option value="1" selected>1.0x</option>
+                    <option value="1.2">1.2x</option>
+                    <option value="1.5">1.5x</option>
+                </select>
                 
                 <!-- View Explanation Button -->
                 <button type="button" onclick="toggleExplanation('exp-{{ q.id }}')"
@@ -715,6 +724,18 @@
     let currentTTSButton = null;
     let isLoading = false;
     let isPaused = false;
+    let currentPlaybackRate = 1.0;  // Default playback speed
+    
+    function setTTSSpeed(speed) {
+        currentPlaybackRate = parseFloat(speed);
+        if (currentAudio) {
+            currentAudio.playbackRate = currentPlaybackRate;
+        }
+        // Sync all speed selectors
+        document.querySelectorAll('.tts-speed-selector').forEach(sel => {
+            sel.value = speed;
+        });
+    }
     
     function toggleTTS(btn, questionId) {
         // If currently loading, ignore click
@@ -811,7 +832,8 @@
                 alert('오디오 재생 중 오류가 발생했습니다.');
             };
             
-            // Play audio
+            // Play audio with current playback rate
+            currentAudio.playbackRate = currentPlaybackRate;
             currentAudio.play();
         })
         .catch(error => {

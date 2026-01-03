@@ -135,8 +135,29 @@ class Command(BaseCommand):
                     # Generate TTS
                     self.stdout.write(f"  [{tab}] Generating TTS...")
                     
-                    # Add slow speech instruction
-                    tts_text = "천천히, 또박또박 명확하게 읽어주세요:\n\n" + text
+                    # Preprocess text - replace special characters before TTS
+                    tts_text = text
+                    
+                    # 한글 자음 발음 변환
+                    replacements = {
+                        '㉠': '기역', '㉡': '니은', '㉢': '디귿', '㉣': '리을',
+                        '㉤': '미음', '㉥': '비읍', '㉦': '시옷', '㉧': '이응',
+                        '㉨': '지읒', '㉩': '치읓', '㉪': '키읔', '㉫': '티읕', '㉬': '피읖',
+                        'ㄱ': '기역', 'ㄴ': '니은', 'ㄷ': '디귿', 'ㄹ': '리을',
+                        'ㅁ': '미음', 'ㅂ': '비읍', 'ㅅ': '시옷', 'ㅇ': '이응',
+                        'ㅈ': '지읒', 'ㅊ': '치읓', 'ㅋ': '키읔', 'ㅌ': '티읕', 'ㅍ': '피읖',
+                        # 선지 읽기
+                        '선지 1번': '1번', '선지 2번': '2번', '선지 3번': '3번', '선지 4번': '4번', '선지 5번': '5번',
+                        '1번 선지': '1번', '2번 선지': '2번', '3번 선지': '3번', '4번 선지': '4번', '5번 선지': '5번',
+                        # 영어 약어
+                        'ANSI': '안시',
+                    }
+                    
+                    for old, new in replacements.items():
+                        tts_text = tts_text.replace(old, new)
+                    
+                    # Add simple slow speech instruction
+                    tts_text = "천천히, 또박또박 명확하게 읽어주세요:\n\n" + tts_text
                     
                     contents = [
                         types.Content(

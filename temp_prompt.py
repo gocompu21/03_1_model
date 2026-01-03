@@ -11,7 +11,7 @@ def clean_html(html):
     text = text.replace('&nbsp;', ' ').strip()
     return text
 
-q = Question.objects.filter(exam__round_number=5, number=27).first()
+q = Question.objects.filter(exam__round_number=5, number=34).first()
 if q:
     subject = q.subject.name
     content = clean_html(q.content)
