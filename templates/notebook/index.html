@@ -704,6 +704,14 @@
 
                     // Show AI Response
                     const aiMsgDiv = await appendMessage('ai', data.response_text);
+                    
+                    // Render MathJax for LaTeX formulas
+                    if (window.MathJax && window.MathJax.typesetPromise) {
+                        MathJax.typesetPromise([aiMsgDiv]).catch(function (err) {
+                            console.log('MathJax typeset error:', err);
+                        });
+                    }
+                    
                     aiMsgDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                     // Append to History Sidebar
