@@ -257,6 +257,28 @@
             border-color: #40916c;
         }
 
+        textarea.expanded {
+            height: 160px;
+        }
+
+        .expand-btn {
+            background: #f0f7f4;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #555;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .expand-btn:hover {
+            background: #e0e0e0;
+        }
+
         .send-btn {
             background-color: #2d6a4f;
             color: white;
@@ -511,6 +533,7 @@
                 {% csrf_token %}
                 <input type="hidden" id="selected-store" name="store_name" value="수목생리학">
                 <textarea id="user-input" name="user_input" placeholder="질문을 입력하세요..." required></textarea>
+                <button type="button" id="expand-btn" class="expand-btn" onclick="toggleExpandInput()" title="입력창 확대/축소">⬇</button>
                 <!-- ... rest of form ... -->
 
                 <button type="submit" id="send-btn" class="send-btn">
@@ -548,6 +571,22 @@
     <!-- Note: JavaScript is removed or needs adjustment because there is no backend API for this yet -->
     <!-- I will leave visual scripts but comments out API logic to prevent errors for now until requested -->
     <script>
+        // Toggle expand/collapse input field
+        function toggleExpandInput() {
+            const textarea = document.getElementById('user-input');
+            const btn = document.getElementById('expand-btn');
+            
+            if (textarea.classList.contains('expanded')) {
+                textarea.classList.remove('expanded');
+                btn.innerHTML = '⬇';
+                btn.title = '입력창 확대';
+            } else {
+                textarea.classList.add('expanded');
+                btn.innerHTML = '⬆';
+                btn.title = '입력창 축소';
+            }
+        }
+        
         document.addEventListener("DOMContentLoaded", function () {
             const chatForm = document.getElementById('chat-form');
             const userInput = document.getElementById('user-input');
