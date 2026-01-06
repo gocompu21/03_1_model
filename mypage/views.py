@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+from django.db import models
 from django.db.models import Count, Case, When, IntegerField, Q
 from django.core.paginator import Paginator
 import json
@@ -1156,6 +1158,594 @@ def generate_infographic_api(request):
         return JsonResponse({"success": False, "error": str(e)})
 
 
+# --- Practice Question Input Views (CSV Upload) ---
+from practice.models import Book, Chapter, PracticeQuestion
+import csv
+from io import StringIO
 
 
+@login_required
+def practice_input_get_books(request):
+    """AJAX endpoint to get list of books with their chapters."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    books = Book.objects.all().prefetch_related('chapters')
+    books_data = []
+    
+    def natural_sort_key(chapter):
+        """Sort chapters naturally by code (1.1 < 1.2 < 1.10 < 2.1)"""
+        # Handle None or empty strings
+        if not chapter.code:
+            return []
+            
+        parts = chapter.code.split('.')
+        # Use tuple comparison (type_priority, value) to safely compare int vs str
+        # 0 for int, 1 for str -> Numbers come first
+        return [
+            (0, int(p)) if p.isdigit() else (1, p) 
+            for p in parts
+        ]
+    
+    for book in books:
+        chapters = list(book.chapters.all())
+        chapters.sort(key=natural_sort_key)
+        chapters_data = [
+            {
+                "id": c.id,
+                "code": c.code,
+                "title": c.title,
+                "level": c.level,
+                "full_path": c.get_full_path()
+            }
+            for c in chapters
+        ]
+        books_data.append({
+            "id": book.id,
+            "name": book.name,
+            "subject": book.subject,
+            "chapters": chapters_data
+        })
+    
+    return JsonResponse({"success": True, "books": books_data})
 
+
+@login_required
+@require_POST
+def practice_input_parse_csv(request):
+    """Parse CSV text and return structured question data."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    csv_text = request.POST.get("csv_text", "")
+    
+    if not csv_text.strip():
+        return JsonResponse({"success": False, "error": "CSV 내용이 비어있습니다."})
+    
+    try:
+        questions = []
+        reader = csv.reader(StringIO(csv_text), delimiter='\t')
+        
+        for row_idx, row in enumerate(reader, start=1):
+            # Skip empty rows
+            if not row or not any(row):
+                continue
+            
+            # Skip header row if detected
+            if row_idx == 1 and row[0].strip().lower() in ['번호', '문제번호', 'number', '#', '문제', '문제내용', 'content', 'question']:
+                continue
+            
+            # Ensure minimum columns (number + content + 5 choices + answer = 8)
+            if len(row) < 8:
+                questions.append({
+                    "row": row_idx,
+                    "error": f"열이 부족합니다 (최소 8개 필요, {len(row)}개 제공)",
+                    "content": row[1] if len(row) > 1 else row[0] if row else ""
+                })
+                continue
+            
+            try:
+                number = int(row[0].strip()) if row[0] and row[0].strip() else 0
+            except ValueError:
+                number = 0
+            
+            content = row[1].strip() if len(row) > 1 and row[1] else ""
+            choice1 = row[2].strip() if len(row) > 2 and row[2] else ""
+            choice2 = row[3].strip() if len(row) > 3 and row[3] else ""
+            choice3 = row[4].strip() if len(row) > 4 and row[4] else ""
+            choice4 = row[5].strip() if len(row) > 5 and row[5] else ""
+            choice5 = row[6].strip() if len(row) > 6 and row[6] else ""
+            
+            try:
+                answer = int(row[7].strip()) if len(row) > 7 and row[7].strip() else 0
+            except ValueError:
+                answer = 0
+            
+            explanation = row[8].strip() if len(row) > 8 and row[8] else ""
+            
+            questions.append({
+                "row": row_idx,
+                "number": number,
+                "content": content,
+                "choice1": choice1,
+                "choice2": choice2,
+                "choice3": choice3,
+                "choice4": choice4,
+                "choice5": choice5,
+                "answer": answer,
+                "explanation": explanation,
+                "error": None
+            })
+        
+        if not questions:
+            return JsonResponse({"success": False, "error": "파싱된 문제가 없습니다."})
+        
+        return JsonResponse({"success": True, "questions": questions})
+    
+    except Exception as e:
+        return JsonResponse({"success": False, "error": f"CSV 파싱 오류: {str(e)}"})
+
+
+@login_required
+@require_POST
+def practice_input_save(request):
+    """Save parsed questions to database."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get("chapter_id")
+        questions = data.get("questions", [])
+        
+        # Debug logging
+        print(f"[DEBUG] practice_input_save called")
+        print(f"[DEBUG] chapter_id: {chapter_id}, type: {type(chapter_id)}")
+        print(f"[DEBUG] questions count: {len(questions)}")
+        if questions:
+            print(f"[DEBUG] first question: {questions[0]}")
+        
+        if not chapter_id:
+            return JsonResponse({"success": False, "error": "목차를 선택해주세요."})
+        
+        if not questions:
+            return JsonResponse({"success": False, "error": "저장할 문제가 없습니다."})
+        
+        chapter = get_object_or_404(Chapter, id=chapter_id)
+        
+        # Get current max question number for this chapter
+        last_q = PracticeQuestion.objects.filter(chapter=chapter).order_by('-number').first()
+        next_number = (last_q.number + 1) if last_q else 1
+        
+        created_count = 0
+        errors = []
+        
+        for q in questions:
+            if q.get("error"):
+                continue
+            
+            content = q.get("content", "").strip()
+            if not content:
+                errors.append(f"문제 {q.get('row', '?')}: 문제 내용이 비어있습니다.")
+                continue
+            
+            answer = q.get("answer", 0)
+            try:
+                answer = int(answer) if answer else 0
+            except (ValueError, TypeError):
+                errors.append(f"문제 {q.get('row', '?')}: 정답이 올바르지 않습니다.")
+                continue
+            
+            if not (1 <= answer <= 5):
+                errors.append(f"문제 {q.get('row', '?')}: 정답은 1-5 사이여야 합니다.")
+                continue
+            
+            # Use number from CSV if provided and valid, otherwise auto-increment
+            q_number = q.get("number", 0)
+            if q_number and q_number > 0:
+                # Check if this number already exists for the chapter
+                if PracticeQuestion.objects.filter(chapter=chapter, number=q_number).exists():
+                    # Auto-assign next available number instead of erroring
+                    use_number = next_number
+                    next_number += 1
+                else:
+                    use_number = q_number
+            else:
+                use_number = next_number
+                next_number += 1
+            
+            PracticeQuestion.objects.create(
+                chapter=chapter,
+                number=use_number,
+                content=content,
+                choice1=q.get("choice1", ""),
+                choice2=q.get("choice2", ""),
+                choice3=q.get("choice3", ""),
+                choice4=q.get("choice4", ""),
+                choice5=q.get("choice5", ""),
+                answer=answer,
+                explanation=q.get("explanation", ""),
+            )
+            created_count += 1
+        
+        if errors:
+            return JsonResponse({
+                "success": True,
+                "message": f"{created_count}개 문제 추가됨. 오류: {'; '.join(errors[:5])}",
+                "created_count": created_count,
+                "errors": errors
+            })
+        
+        return JsonResponse({
+            "success": True,
+            "message": f"{created_count}개 문제가 성공적으로 추가되었습니다.",
+            "created_count": created_count
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": f"저장 중 오류: {str(e)}"})
+
+
+from difflib import SequenceMatcher
+
+def similarity_ratio(a: str, b: str) -> float:
+    """Returns a similarity ratio between 0.0 and 1.0"""
+    if not a or not b:
+        return 0.0
+    return SequenceMatcher(None, a.lower().strip(), b.lower().strip()).ratio()
+
+
+@login_required
+@require_POST
+def practice_input_check_similarity(request):
+    """Check similarity of parsed questions against existing questions in the chapter."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get("chapter_id")
+        questions = data.get("questions", [])
+        
+        if not chapter_id:
+            return JsonResponse({"success": False, "error": "챕터를 선택해주세요."})
+        
+        # Get existing questions in the chapter
+        existing_questions = PracticeQuestion.objects.filter(chapter_id=chapter_id)
+        
+        similarities = []
+        
+        for q in questions:
+            content = q.get("content", "").strip()
+            choices = [
+                q.get("choice1", "").strip(),
+                q.get("choice2", "").strip(),
+                q.get("choice3", "").strip(),
+                q.get("choice4", "").strip(),
+                q.get("choice5", "").strip(),
+            ]
+            
+            max_content_sim = 0.0
+            max_choices_sim = 0.0
+            
+            for existing in existing_questions:
+                # Calculate content similarity
+                content_sim = similarity_ratio(content, existing.content)
+                
+                if content_sim > max_content_sim:
+                    max_content_sim = content_sim
+                    # Calculate choices similarity for the most similar content
+                    existing_choices = [
+                        existing.choice1, existing.choice2, existing.choice3,
+                        existing.choice4, existing.choice5
+                    ]
+                    choice_sims = [
+                        similarity_ratio(c, ec) for c, ec in zip(choices, existing_choices)
+                    ]
+                    max_choices_sim = sum(choice_sims) / 5 if choice_sims else 0.0
+            
+            similarities.append({
+                "content_sim": round(max_content_sim * 100, 1),
+                "choices_sim": round(max_choices_sim * 100, 1)
+            })
+        
+        return JsonResponse({"success": True, "similarities": similarities})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": f"유사도 검사 오류: {str(e)}"})
+
+
+from fileSearchStore import GeminiStoreManager, SYSTEM_INSTRUCTION as TEXTBOOK_INSTRUCTION
+
+@login_required
+@require_POST
+def practice_input_get_textbook_explanation(request):
+    """Get explanation from textbook using GeminiStoreManager."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        content = data.get("content", "").strip()
+        choices = [
+            data.get("choice1", ""),
+            data.get("choice2", ""),
+            data.get("choice3", ""),
+            data.get("choice4", ""),
+            data.get("choice5", ""),
+        ]
+        
+        if not content:
+            return JsonResponse({"success": False, "error": "문제 내용이 없습니다."})
+        
+        # Get API key from settings
+        from django.conf import settings
+        api_key = getattr(settings, "GEMINI_API_KEY", "")
+        
+        if not api_key:
+            return JsonResponse({"success": False, "error": "API 키가 설정되지 않았습니다."})
+        
+        # Initialize manager
+        manager = GeminiStoreManager(api_key=api_key)
+        
+        # Build prompt similar to app_getTextbook.py
+        prompt_content = (
+            f"{content}\n"
+            f"① {choices[0]}\n"
+            f"② {choices[1]}\n"
+            f"③ {choices[2]}\n"
+            f"④ {choices[3]}\n"
+            f"⑤ {choices[4]}"
+        )
+        
+        prompt = f"{TEXTBOOK_INSTRUCTION}\n\n[문제]\n{prompt_content}"
+        
+        # Query the store (default to 수목관리학 or try to infer)
+        # For now, use 수목관리학 as default store
+        store_name = "수목관리학"
+        response_text = manager.query_store(store_name, prompt)
+        
+        if "Error" in response_text or "not found" in response_text.lower():
+            # Try other stores
+            for fallback in ["수목병리학", "수목생리학", "수목해충학", "산림토양학"]:
+                response_text = manager.query_store(fallback, prompt)
+                if "Error" not in response_text and "not found" not in response_text.lower():
+                    break
+        
+        return JsonResponse({"success": True, "explanation": response_text})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "error": f"기본서 조회 오류: {str(e)}"})
+
+
+# --- Chapter Tree Management Views ---
+
+@login_required
+def chapter_list_api(request):
+    """Return chapter tree data for a given book as JSON."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    book_id = request.GET.get("book_id")
+    if not book_id:
+        return JsonResponse({"success": False, "error": "교재를 선택해주세요."})
+    
+    try:
+        chapters = Chapter.objects.filter(book_id=book_id).order_by('order', 'code')
+        
+        def build_tree(parent_id=None):
+            """Recursively build chapter tree."""
+            result = []
+            for ch in chapters:
+                if ch.parent_id == parent_id:
+                    children = build_tree(ch.id)
+                    result.append({
+                        "id": ch.id,
+                        "code": ch.code,
+                        "title": ch.title,
+                        "level": ch.level,
+                        "order": ch.order,
+                        "parent_id": ch.parent_id,
+                        "has_children": len(children) > 0,
+                        "children": children
+                    })
+            return result
+        
+        tree = build_tree(None)
+        return JsonResponse({"success": True, "chapters": tree})
+    
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@login_required
+@require_POST
+def chapter_create(request):
+    """Create a new chapter (sibling or child)."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        book_id = data.get("book_id")
+        parent_id = data.get("parent_id")  # None for root level
+        reference_id = data.get("reference_id")  # Chapter to add sibling/child to
+        add_type = data.get("add_type", "sibling")  # "sibling" or "child"
+        code = data.get("code", "").strip()
+        title = data.get("title", "").strip()
+        
+        if not book_id:
+            return JsonResponse({"success": False, "error": "교재를 선택해주세요."})
+        if not code or not title:
+            return JsonResponse({"success": False, "error": "코드와 제목을 입력해주세요."})
+        
+        book = get_object_or_404(Book, id=book_id)
+        
+        if add_type == "child" and reference_id:
+            # Add as child of reference chapter
+            parent_chapter = get_object_or_404(Chapter, id=reference_id)
+            parent_id = parent_chapter.id
+            level = parent_chapter.level + 1
+            # Get max order among siblings
+            siblings = Chapter.objects.filter(book=book, parent_id=parent_id)
+            max_order = siblings.aggregate(models.Max('order'))['order__max'] or 0
+            new_order = max_order + 1
+        else:
+            # Add as sibling
+            if reference_id:
+                ref_chapter = get_object_or_404(Chapter, id=reference_id)
+                parent_id = ref_chapter.parent_id
+                level = ref_chapter.level
+                # Insert after reference chapter
+                new_order = ref_chapter.order + 1
+                # Shift orders of following siblings
+                Chapter.objects.filter(
+                    book=book, 
+                    parent_id=parent_id, 
+                    order__gte=new_order
+                ).update(order=models.F('order') + 1)
+            else:
+                # Add at root level
+                parent_id = None
+                level = 1
+                max_order = Chapter.objects.filter(book=book, parent_id=None).aggregate(models.Max('order'))['order__max'] or 0
+                new_order = max_order + 1
+        
+        new_chapter = Chapter.objects.create(
+            book=book,
+            parent_id=parent_id,
+            code=code,
+            title=title,
+            level=level,
+            order=new_order
+        )
+        
+        return JsonResponse({
+            "success": True, 
+            "message": "목차가 추가되었습니다.",
+            "chapter": {
+                "id": new_chapter.id,
+                "code": new_chapter.code,
+                "title": new_chapter.title,
+                "level": new_chapter.level,
+                "order": new_chapter.order
+            }
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@login_required
+@require_POST
+def chapter_update(request, chapter_id):
+    """Update chapter code and title."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        code = data.get("code", "").strip()
+        title = data.get("title", "").strip()
+        
+        if not code or not title:
+            return JsonResponse({"success": False, "error": "코드와 제목을 입력해주세요."})
+        
+        chapter = get_object_or_404(Chapter, id=chapter_id)
+        chapter.code = code
+        chapter.title = title
+        chapter.save()
+        
+        return JsonResponse({"success": True, "message": "목차가 수정되었습니다."})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@login_required
+@require_POST
+def chapter_delete(request, chapter_id):
+    """Delete a chapter (only if no children)."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        chapter = get_object_or_404(Chapter, id=chapter_id)
+        
+        # Check for children
+        if Chapter.objects.filter(parent_id=chapter_id).exists():
+            return JsonResponse({
+                "success": False, 
+                "error": "자식 목차가 있어 삭제할 수 없습니다. 먼저 자식 목차를 삭제해주세요."
+            })
+        
+        # Check for questions
+        if chapter.questions.exists():
+            return JsonResponse({
+                "success": False,
+                "error": f"이 목차에 {chapter.questions.count()}개의 문제가 있어 삭제할 수 없습니다."
+            })
+        
+        chapter.delete()
+        return JsonResponse({"success": True, "message": "목차가 삭제되었습니다."})
+    
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@login_required
+@require_POST
+def chapter_move(request, chapter_id):
+    """Move chapter up or down among siblings."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        direction = data.get("direction", "up")  # "up" or "down"
+        
+        chapter = get_object_or_404(Chapter, id=chapter_id)
+        siblings = Chapter.objects.filter(
+            book=chapter.book, 
+            parent_id=chapter.parent_id
+        ).order_by('order')
+        
+        siblings_list = list(siblings)
+        current_index = next((i for i, ch in enumerate(siblings_list) if ch.id == chapter.id), None)
+        
+        if current_index is None:
+            return JsonResponse({"success": False, "error": "목차를 찾을 수 없습니다."})
+        
+        if direction == "up" and current_index > 0:
+            # Swap with previous sibling
+            swap_target = siblings_list[current_index - 1]
+            chapter.order, swap_target.order = swap_target.order, chapter.order
+            chapter.save()
+            swap_target.save()
+        elif direction == "down" and current_index < len(siblings_list) - 1:
+            # Swap with next sibling
+            swap_target = siblings_list[current_index + 1]
+            chapter.order, swap_target.order = swap_target.order, chapter.order
+            chapter.save()
+            swap_target.save()
+        else:
+            return JsonResponse({"success": False, "error": "더 이상 이동할 수 없습니다."})
+        
+        return JsonResponse({"success": True, "message": "순서가 변경되었습니다."})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})

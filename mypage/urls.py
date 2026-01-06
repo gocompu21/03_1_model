@@ -42,4 +42,16 @@ urlpatterns = [
     path("admin/generate-tts/", views.generate_tts_api, name="generate_tts_api"),
     path("admin/get-existing-tts/", views.get_existing_tts_api, name="get_existing_tts_api"),
     path("admin/generate-infographic/", views.generate_infographic_api, name="generate_infographic_api"),
+    # Practice Question Input (CSV)
+    path("admin/practice-input/books/", views.practice_input_get_books, name="practice_input_get_books"),
+    path("admin/practice-input/parse/", views.practice_input_parse_csv, name="practice_input_parse_csv"),
+    path("admin/practice-input/save/", views.practice_input_save, name="practice_input_save"),
+    path("admin/practice-input/check-similarity/", views.practice_input_check_similarity, name="practice_input_check_similarity"),
+    path("admin/practice-input/textbook-explanation/", views.practice_input_get_textbook_explanation, name="practice_input_get_textbook_explanation"),
+    # Chapter Tree Management
+    path("admin/chapter-list/", views.chapter_list_api, name="chapter_list_api"),
+    path("admin/chapter-create/", views.chapter_create, name="chapter_create"),
+    path("admin/chapter-update/<int:chapter_id>/", views.chapter_update, name="chapter_update"),
+    path("admin/chapter-delete/<int:chapter_id>/", views.chapter_delete, name="chapter_delete"),
+    path("admin/chapter-move/<int:chapter_id>/", views.chapter_move, name="chapter_move"),
 ]

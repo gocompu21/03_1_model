@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block header %}
+{% include 'practice/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<!-- Summernote CSS -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+
+<style>
+    body {
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        min-height: 100vh;
+    }
+    
+    .form-container {
+        max-width: 900px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+    
+    .form-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 35px 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .form-title {
+        color: #2d6a4f;
+        font-size: 1.8rem;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #2d6a4f;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 1rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #2d6a4f;
+        box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+    }
+    
+    select.form-control {
+        cursor: pointer;
+        background: white;
+    }
+    
+    .chapter-info {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        padding: 15px 20px;
+        border-radius: 10px;
+        border-left: 4px solid #2d6a4f;
+        margin-bottom: 25px;
+    }
+    
+    .chapter-info strong {
+        color: #1a4a2e;
+    }
+    
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+    
+    .btn {
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #1b4332, #2d6a4f);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+    }
+    
+    .btn-cancel {
+        background: white;
+        color: #666;
+        border: 1px solid #ccc;
+    }
+    
+    .btn-cancel:hover {
+        background: #f5f5f5;
+    }
+    
+    /* Summernote Custom Styles */
+    .note-editor {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .note-editor .note-toolbar {
+        background: #f8f9fa;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-card">
+        <h2 class="form-title">📝 {{ title }}</h2>
+        
+        <form method="post">
+            {% csrf_token %}
+            
+            {% if not is_edit %}
+            <!-- 목차 선택 (신규 작성 시만) -->
+            <div class="form-group">
+                <label class="form-label">교재 선택</label>
+                <select id="book-select" class="form-control" {% if selected_chapter %}disabled{% endif %}>
+                    <option value="">-- 교재를 선택하세요 --</option>
+                    {% for book in books %}
+                    <option value="{{ book.id }}" {% if selected_chapter and selected_chapter.book.id == book.id %}selected{% endif %}>
+                        {{ book.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">목차 선택</label>
+                <select id="chapter-select" name="chapter_id" class="form-control" required {% if selected_chapter %}disabled{% endif %}>
+                    <option value="">-- 목차를 선택하세요 --</option>
+                    {% if selected_chapter %}
+                    <option value="{{ selected_chapter.id }}" selected>{{ selected_chapter.code }} {{ selected_chapter.title }}</option>
+                    {% endif %}
+                </select>
+                {% if selected_chapter %}
+                <input type="hidden" name="chapter_id" value="{{ selected_chapter.id }}">
+                {% endif %}
+            </div>
+            
+            {% if selected_chapter %}
+            <div class="chapter-info">
+                <strong>선택된 목차:</strong> {{ selected_chapter.code }} {{ selected_chapter.title }}
+            </div>
+            {% endif %}
+            {% else %}
+            <!-- 수정 시 목차 정보 표시 -->
+            <div class="chapter-info">
+                <strong>목차:</strong> {{ selected_chapter.code }} {{ selected_chapter.title }}
+            </div>
+            {% endif %}
+            
+            <!-- 내용 입력 -->
+            <div class="form-group">
+                <label class="form-label">내용</label>
+                <textarea id="summernote" name="content">{% if content %}{{ content.content }}{% endif %}</textarea>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{% if selected_chapter %}{% url 'practice:chapter_detail' selected_chapter.id %}{% else %}{% url 'practice:book_list' %}{% endif %}" class="btn btn-cancel">
+                    취소
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    {{ btn_text }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Summernote JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/lang/summernote-ko-KR.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Summernote 초기화
+        $('#summernote').summernote({
+            placeholder: '학습 내용을 입력해주세요.',
+            tabsize: 2,
+            height: 400,
+            lang: 'ko-KR',
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'italic', 'clear']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'video']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            callbacks: {
+                onInit: function() {
+                    // 맞춤법 검사 비활성화
+                    $('.note-editable').attr('spellcheck', 'false');
+                }
+            }
+        });
+        
+        // 교재 선택 시 목차 로드
+        $('#book-select').on('change', function() {
+            var bookId = $(this).val();
+            var $chapterSelect = $('#chapter-select');
+            
+            $chapterSelect.html('<option value="">로딩 중...</option>');
+            
+            if (!bookId) {
+                $chapterSelect.html('<option value="">-- 목차를 선택하세요 --</option>');
+                return;
+            }
+            
+            // AJAX로 목차 로드
+            $.ajax({
+                url: '/practice/' + bookId + '/',
+                method: 'GET',
+                success: function(html) {
+                    // HTML 파싱하여 목차 추출
+                    var $html = $(html);
+                    var options = '<option value="">-- 목차를 선택하세요 --</option>';
+                    
+                    $html.find('.chapter-item').each(function() {
+                        var $link = $(this).find('.chapter-link');
+                        var href = $link.attr('href');
+                        var code = $(this).find('.chapter-code').text();
+                        var title = $(this).find('.chapter-title').text();
+                        
+                        // URL에서 chapter_id 추출
+                        var match = href.match(/chapter\/(\d+)/);
+                        if (match) {
+                            var chapterId = match[1];
+                            var level = 1;
+                            if ($(this).hasClass('level-2')) level = 2;
+                            if ($(this).hasClass('level-3')) level = 3;
+                            if ($(this).hasClass('level-4')) level = 4;
+                            
+                            var indent = '　'.repeat(level - 1);
+                            options += '<option value="' + chapterId + '">' + indent + code + ' ' + title + '</option>';
+                        }
+                    });
+                    
+                    $chapterSelect.html(options);
+                },
+                error: function() {
+                    $chapterSelect.html('<option value="">목차를 불러올 수 없습니다</option>');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

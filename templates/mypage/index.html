@@ -466,6 +466,281 @@
             font-size: 0.85rem;
             transition: width 0.5s ease;
         }
+
+        /* --- Practice Input Card Styles Refined --- */
+        .preview-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .input-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            /* overflow: hidden; Removed to prevent cutting off shadow/borders */
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .input-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            background-color: #f1f8e9; /* Light green/mint tint */
+            padding: 15px 20px;
+            border-bottom: 1px solid #dcedc8;
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+        
+        .card-number-badge {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(45, 106, 79, 0.2);
+            display: flex; align-items: center; gap: 8px;
+        }
+        
+        .similarity-badge {
+            background-color: rgba(255,255,255,0.25);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: normal;
+            margin-left: 5px;
+        }
+        
+        .similarity-badge.low {
+            background-color: #a5d6a7; /* Green for low similarity */
+            color: #1b5e20;
+        }
+        
+        .similarity-badge.medium {
+            background-color: #fff59d; /* Yellow for medium */
+            color: #f57f17;
+        }
+        
+        .similarity-badge.high {
+            background-color: #ef9a9a; /* Red for high similarity */
+            color: #b71c1c;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .row-info {
+            color: #777;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.6);
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-delete {
+            background: white;
+            border: 1px solid #ffcdd2;
+            color: #e53935;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .btn-delete:hover {
+            background-color: #ffebee;
+            border-color: #e57373;
+        }
+
+        .card-body {
+            padding: 25px;
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .custom-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+            font-size: 1rem;
+            line-height: 1.6;
+            transition: all 0.2s;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+        }
+        
+        .custom-textarea:focus {
+            border-color: #2d6a4f;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+            outline: none;
+        }
+        
+        /* Choices Grid: 1 column for clean editing layout */
+        .choices-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #f1f3f5;
+        }
+        
+        .choice-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .choice-number {
+            width: 32px; height: 32px;
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .choice-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        
+        .choice-input:focus { 
+            border-color: #2d6a4f; 
+            outline: none; 
+            background-color: white;
+        }
+
+        .meta-row {
+            display: flex; 
+            flex-direction: column; /* Vertical stack */
+            gap: 12px; 
+            align-items: stretch;
+            margin-top: 5px; /* Reduced top margin */
+            padding-top: 10px; /* Reduced padding */
+            border-top: 1px dashed #e9ecef;
+        }
+
+        .meta-col-answer {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .meta-col-explanation {
+            width: 100%;
+            /* box-sizing is border-box by default in Bootstrap, but ensuring it here */
+            box-sizing: border-box;
+        }
+
+        .input-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+            white-space: nowrap; /* Prevent wrapping */
+        }
+        
+        /* Specific label styling for explanation to keep it above */
+        .meta-col-explanation .input-label {
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .custom-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+            font-size: 1rem;
+            line-height: 1.6;
+            transition: all 0.2s;
+            resize: none; /* Disable manual resize */
+            min-height: 50px; /* Reduced min-height */
+            font-family: inherit;
+            box-sizing: border-box; /* IMPORTANT: Prevents width + padding overflow */
+            overflow-y: hidden; /* Hide scrollbar for auto-resize */
+        }
+
+        .answer-input {
+            width: 80px; /* Fixed width */
+            padding: 8px;
+            border: 2px solid #aeb5bc;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2d6a4f;
+        }
+        
+        .answer-input:focus {
+            border-color: #2d6a4f;
+            outline: none;
+        }
+        
+        .btn-update {
+            background: white;
+            border: 1px solid #4dabf7;
+            color: #1971c2;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        
+        .btn-update:hover {
+            background-color: #e7f5ff;
+            border-color: #339af0;
+        }
+        
+        .btn-textbook {
+            background: white;
+            border: 1px solid #69db7c;
+            color: #2b8a3e;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+        
+        .btn-textbook:hover {
+            background-color: #ebfbee;
+            border-color: #40c057;
+        }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -540,6 +815,12 @@
             <a href="{% url 'mypage:prompt_generator' %}" class="menu-item" style="color: #ff9800;">
                 <i class="fas fa-cog"></i> 문제 관리
             </a>
+            <div id="menu-practice-input" class="menu-item" onclick="showSection('practice_input')" style="border-left: 3px solid #17a2b8;">
+                <i class="fas fa-edit"></i> 기본서 문제입력
+            </div>
+            <div id="menu-chapter-tree" class="menu-item" onclick="showSection('chapter_tree')" style="border-left: 3px solid #6c757d;">
+                <i class="fas fa-sitemap"></i> 목차 관리
+            </div>
             {% endif %}
 
             <a href="{% url 'main:index' %}" class="menu-item back-home">
@@ -865,6 +1146,167 @@
                 </div>
             </div>
 
+            <!-- Section: Practice Question Input (Superuser Only) -->
+            {% if user.is_superuser %}
+            <div id="practice-input-section" class="content-section">
+                <h1><i class="fas fa-edit" style="color: #17a2b8;"></i> 기본서 학습문제 입력</h1>
+                
+                <div style="margin-bottom: 25px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <label style="font-weight: bold; color: #2d6a4f;">교재</label>
+                            <select id="practice-book-select" onchange="updateChapterSelect()" 
+                                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                                <option value="">-- 교재 선택 --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight: bold; color: #2d6a4f;">목차</label>
+                            <select id="practice-chapter-select" 
+                                style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                                <option value="">-- 목차 선택 --</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-weight: bold; color: #2d6a4f;">탭(Tab) 구분 형식으로 문제 입력</label>
+                        <p style="color: #666; font-size: 0.9rem; margin: 5px 0 10px;">
+                            <i class="fas fa-info-circle"></i> 형식: <strong>문제번호</strong>[Tab]문제내용[Tab]선지1[Tab]선지2[Tab]선지3[Tab]선지4[Tab]선지5[Tab]정답(1-5)[Tab]해설
+                        </p>
+                        <textarea id="csv-input-textarea" rows="10" 
+                            placeholder="엑셀에서 복사-붙여넣기 하세요 (탭 구분)
+예시:
+1	다음 중 옳은 것은?	선택지A	선택지B	선택지C	선택지D	선택지E	3	C가 정답
+2	두번째 문제?	A	B	C	D	E	1	A가 정답"
+                            style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; font-family: inherit; resize: vertical; line-height: 1.6;"></textarea>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button onclick="parseCSVQuestions()" class="btn btn-primary" style="padding: 12px 30px;">
+                            <i class="fas fa-search"></i> 파싱하기
+                        </button>
+                        <button onclick="clearCSVInput()" class="btn" style="padding: 12px 30px; background-color: #6c757d; color: white; margin-left: 10px;">
+                            <i class="fas fa-eraser"></i> 비우기
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Preview Section (Card UI) -->
+                <div id="csv-preview-section" style="display: none; margin-top: 30px;">
+                    <h2 style="color: #2d6a4f; border-bottom: 2px solid #2d6a4f; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fas fa-layer-group"></i> 문제 미리보기 (카드형)</span>
+                        <button id="save-questions-btn" type="button" class="btn" 
+                            style="padding: 8px 20px; background-color: #17a2b8; color: white; font-size: 0.9rem; border-radius: 20px;">
+                            <i class="fas fa-upload"></i> 전체 저장
+                        </button>
+                    </h2>
+                    
+                    <div class="preview-card-list" id="preview-card-list">
+                        <!-- Cards will be injected here via JS -->
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Chapter Tree Management Section -->
+            {% if user.is_superuser %}
+            <div id="chapter-tree-section" class="content-section">
+                <h1><i class="fas fa-sitemap" style="color: #6c757d;"></i> 목차 관리</h1>
+                
+                <!-- Book Select -->
+                <div style="margin-bottom: 25px;">
+                    <label style="font-weight: bold; color: #2d6a4f;">교재 선택</label>
+                    <select id="chapter-tree-book-select" onchange="loadChapterTree(this.value)" 
+                        style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                        <option value="">-- 교재를 선택하면 목차가 로드됩니다 --</option>
+                    </select>
+                </div>
+                
+                <!-- Tree Container -->
+                <div id="chapter-tree-container" class="chapter-tree-container" style="display:none;">
+                    <style>
+                        .chapter-tree-container {
+                            font-family: 'Noto Sans KR', sans-serif;
+                        }
+                        .chapter-node input, .chapter-node button, .chapter-node span {
+                            font-family: 'Noto Sans KR', sans-serif;
+                        }
+                        /* Restore FontAwesome font for icons */
+                        .chapter-node i.fas {
+                            font-family: "Font Awesome 5 Free" !important;
+                            font-weight: 900;
+                        }
+                        .chapter-node {
+                            display: flex;
+                            align-items: center;
+                            padding: 8px 12px;
+                            border-bottom: 1px solid #eee;
+                            transition: background 0.2s;
+                        }
+                        .chapter-node:hover {
+                            background-color: #f8f9fa;
+                        }
+                        .node-content {
+                            flex: 1;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        .node-actions {
+                            display: flex;
+                            gap: 5px;
+                            /* Always visible */
+                            opacity: 1; 
+                        }
+                        .btn-tree {
+                            padding: 4px 8px;
+                            font-size: 0.8rem;
+                            border: 1px solid #ced4da;
+                            background: white;
+                            border-radius: 4px;
+                            cursor: pointer;
+                            color: #495057;
+                        }
+                        .btn-tree:hover {
+                            background: #e9ecef;
+                            color: #212529;
+                        }
+                        .btn-tree.add-child { color: #2d6a4f; border-color: #2d6a4f; }
+                        .btn-tree.add-sibling { color: #17a2b8; border-color: #17a2b8; }
+                        .btn-tree.delete { color: #e53935; border-color: #e53935; }
+                        
+                        .ch-code {
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                            font-weight: 700;
+                            letter-spacing: -0.03em;
+                        }
+                        
+                        .indent-1 { margin-left: 0px; font-weight: bold; font-size: 1.05rem; background-color: #f1f8f5; }
+                        .indent-2 { margin-left: 20px; font-weight: 600; }
+                        .indent-3 { margin-left: 40px; }
+                        .indent-4 { margin-left: 60px; font-size: 0.95rem; color: #666; }
+                        
+                        .edit-mode input {
+                            padding: 4px 8px;
+                            border: 1px solid #2d6a4f;
+                            border-radius: 4px;
+                        }
+                    </style>
+                    <div id="tree-root"></div>
+                    
+                    <div style="margin-top: 20px; text-align: center;">
+                        <button onclick="addRootChapter()" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> 최상위 목차 추가
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+
+
         </div>
 
     </div>
@@ -872,6 +1314,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Admin Dashboard Toggle
+        let parsedQuestions = []; // Global variable for parsed questions
+        let booksData = []; // Global variable for book/chapter data
+
         function toggleAdminDashboard() {
             const content = document.getElementById('admin-dashboard-content');
             const icon = document.getElementById('admin-toggle-icon');
@@ -937,6 +1382,16 @@
             } else if (sectionId === 'edit_profile' || sectionId === 'info') {
                 document.querySelectorAll('.menu-item')[7].classList.add('active');
                 document.getElementById('info-section').classList.add('active');
+            } else if (sectionId === 'practice_input') {
+                const menu = document.getElementById('menu-practice-input');
+                if (menu) menu.classList.add('active');
+                document.getElementById('practice-input-section').classList.add('active');
+                loadPracticeBooks();
+            } else if (sectionId === 'chapter_tree') {
+                const menu = document.getElementById('menu-chapter-tree');
+                if (menu) menu.classList.add('active');
+                document.getElementById('chapter-tree-section').classList.add('active');
+                loadPracticeBooksForTree();
             }
         }
 
@@ -1546,6 +2001,48 @@
             }
         });
 
+        function updateChapterSelect() {
+            const bookSelect = document.getElementById('practice-book-select');
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            
+            if (!bookSelect || !chapterSelect) {
+                console.error("Debug: Select elements not found");
+                return;
+            }
+
+            const bookIdStr = bookSelect.value;
+            const bookId = parseInt(bookIdStr);
+
+            chapterSelect.innerHTML = '<option value="">-- 목차 선택 --</option>';
+            
+            if (!bookIdStr) return; // "교재 선택" (empty value) selected
+
+            if (isNaN(bookId)) {
+                alert('유효하지 않은 교재 ID입니다: ' + bookIdStr);
+                return;
+            }
+
+            // Find book in booksData
+            const book = booksData.find(b => b.id === bookId);
+            
+            if (!book) {
+                alert('교재 데이터를 찾을 수 없습니다. (ID: ' + bookId + ')');
+                console.error('Available books:', booksData);
+                return;
+            }
+            
+            if (!book.chapters || book.chapters.length === 0) {
+                alert('[주의] 선택하신 교재 "' + book.name + '"에는 등록된 목차가 없습니다.');
+                return;
+            }
+
+            // Populate chapters
+            book.chapters.forEach(chapter => {
+                const indent = '　'.repeat((chapter.level || 1) - 1); // Default level 1
+                chapterSelect.innerHTML += `<option value="${chapter.id}">${indent}${chapter.code} ${chapter.title}</option>`;
+            });
+        }
+
         function loadMyQuestionDetail(url) {
             const listSection = document.getElementById('question-list-view');
             const detailSection = document.getElementById('question-detail-view');
@@ -1631,6 +2128,747 @@
                     alert('서버 통신 중 오류가 발생했습니다.');
                 });
         }
+
+        function loadPracticeBooks() {
+            const bookSelect = document.getElementById('practice-book-select');
+            // Element might not be found if the section is hidden or ID is mismatched
+            if (!bookSelect) {
+                console.error('Debug: practice-book-select element not found');
+                return;
+            }
+
+            // Allow reload for debugging purposes
+            // if (booksData.length > 0) return;
+
+            fetch("{% url 'mypage:practice_input_get_books' %}")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        booksData = data.books;
+                        // Debug alert if empty
+                        if (!booksData || booksData.length === 0) {
+                            alert('서버에서 받은 교재 데이터가 없습니다.');
+                        }
+
+                        bookSelect.innerHTML = '<option value="">-- 교재 선택 --</option>';
+                        booksData.forEach(book => {
+                            bookSelect.innerHTML += `<option value="${book.id}">${book.subject} - ${book.name}</option>`;
+                        });
+                    } else {
+                        alert(data.error || '교재 로드 실패');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading books:', err);
+                    alert('교재 데이터를 불러오는 중 오류가 발생했습니다.\n' + err.message);
+                });
+        }
+
+        // --- Practice Question Input Functions ---
+        // let parsedQuestions = []; // Moved to top of script
+
+        
+        function clearCSVInput() {
+            document.getElementById('csv-input-textarea').value = '';
+            document.getElementById('csv-preview-section').style.display = 'none';
+            parsedQuestions = [];
+        }
+
+        function parseCSVQuestions() {
+            const textarea = document.getElementById('csv-input-textarea');
+            const csvText = textarea.value.trim();
+            const previewSection = document.getElementById('csv-preview-section');
+            
+            if (!csvText) {
+                alert('붙여넣은 엑셀 데이터가 없습니다.');
+                return;
+            }
+            
+            // console.log('Parsing started...'); // Debug
+
+            const formData = new FormData();
+            formData.append('csv_text', csvText);
+
+            // Show loading state (optional: add spinner)
+            // alert('파싱 요청을 시작합니다...'); // Removed as requested
+
+            fetch("{% url 'mypage:practice_input_parse_csv' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    parsedQuestions = data.questions;
+                    // Check similarity after parsing
+                    checkSimilarity();
+                    renderPreviewCards();
+                    previewSection.style.display = 'block';
+                    console.log('Parsing complete:', parsedQuestions.length);
+                } else {
+                    alert(data.error || '파싱 실패');
+                }
+            })
+            .catch(err => {
+                console.error('Network Error:', err);
+                alert('서버 통신 오류: ' + err.message);
+            });
+        }
+        
+        function checkSimilarity() {
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            if (!chapterSelect.value) {
+                console.log('No chapter selected, skipping similarity check');
+                return;
+            }
+            
+            fetch("{% url 'mypage:practice_input_check_similarity' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    chapter_id: chapterSelect.value,
+                    questions: parsedQuestions
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.similarities) {
+                    // Update parsedQuestions with similarity data
+                    data.similarities.forEach((sim, index) => {
+                        if (parsedQuestions[index]) {
+                            parsedQuestions[index].content_sim = sim.content_sim;
+                            parsedQuestions[index].choices_sim = sim.choices_sim;
+                        }
+                    });
+                    // Re-render with similarity data
+                    renderPreviewCards();
+                }
+            })
+            .catch(err => {
+                console.error('Similarity check error:', err);
+            });
+        }
+
+        function renderPreviewCards() {
+            const container = document.getElementById('preview-card-list');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            parsedQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'input-card';
+                
+                // Determine similarity badge class and text
+                let simBadgeHtml = '';
+                if (q.content_sim !== undefined) {
+                    const maxSim = Math.max(q.content_sim, q.choices_sim);
+                    let simClass = 'low';
+                    if (maxSim >= 80) simClass = 'high';
+                    else if (maxSim >= 50) simClass = 'medium';
+                    simBadgeHtml = `<span class="similarity-badge ${simClass}">${q.content_sim}% / ${q.choices_sim}%</span>`;
+                }
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-number-badge">
+                            <i class="fas fa-question-circle"></i> 문제 ${q.number} ${simBadgeHtml}
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn-textbook" onclick="getTextbookExplanation(${index})">
+                                <i class="fas fa-book"></i> 기본서 해설
+                            </button>
+                            <button class="btn-update" onclick="saveSingleQuestion(${index})">
+                                <i class="fas fa-save"></i> 개별 저장
+                            </button>
+                            <button class="btn-delete" onclick="deleteQuestion(${index})">
+                                <i class="fas fa-trash-alt"></i> 삭제
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="input-label">문제 내용</label>
+                            <textarea class="custom-textarea" rows="1" data-field="content" 
+                                oninput="autoResize(this)"
+                                onchange="updateQuestion(${index}, 'content', this.value)">${q.content}</textarea>
+                        </div>
+                        
+                        <div class="choices-container">
+                            ${[1, 2, 3, 4, 5].map(i => `
+                                <div class="choice-row">
+                                    <div class="choice-number">`+i+`</div>
+                                    <input type="text" class="choice-input" value="${q['choice'+i] || ''}" 
+                                        data-field="choice${i}" onchange="updateQuestion(${index}, 'choice${i}', this.value)" placeholder="선택지 ${i}">
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="meta-row">
+                            <div class="meta-col-answer">
+                                <label class="input-label">정답</label>
+                                <input type="number" min="1" max="5" class="answer-input" value="${q.answer}"
+                                    data-field="answer" onchange="updateQuestion(${index}, 'answer', parseInt(this.value))">
+                            </div>
+                            <div class="meta-col-explanation">
+                                <label class="input-label">해설</label>
+                                <textarea class="custom-textarea" rows="1" data-field="explanation" 
+                                    oninput="autoResize(this)"
+                                    onchange="updateQuestion(${index}, 'explanation', this.value)" placeholder="해설을 입력하세요">${q.explanation || ''}</textarea>
+                            </div>
+                        </div>
+                        ${q.error ? `<div class="error-msg" style="color:#e53935; margin-top:10px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Warning: ${q.error}</div>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            // Trigger auto-resize for all textareas with a small delay to ensure rendering
+            setTimeout(() => {
+                container.querySelectorAll('textarea.custom-textarea').forEach(textarea => {
+                    autoResize(textarea);
+                });
+            }, 0);
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto'; // Reset height
+            // Increase buffer to ensure no cutoff (approx 1 line padding + border)
+            textarea.style.height = (textarea.scrollHeight + 10) + 'px'; 
+        }
+        
+        function getTextbookExplanation(index) {
+            const question = parsedQuestions[index];
+            if (!question) return;
+            
+            // Show loading state
+            const btn = event.target.closest('.btn-textbook');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 조회중...';
+            btn.disabled = true;
+            
+            fetch("{% url 'mypage:practice_input_get_textbook_explanation' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    content: question.content,
+                    choice1: question.choice1,
+                    choice2: question.choice2,
+                    choice3: question.choice3,
+                    choice4: question.choice4,
+                    choice5: question.choice5
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.explanation) {
+                    // Update the question's explanation
+                    parsedQuestions[index].explanation = data.explanation;
+                    
+                    // Update the textarea in the card
+                    const cards = document.querySelectorAll('.input-card');
+                    if (cards[index]) {
+                        const textarea = cards[index].querySelector('textarea[data-field="explanation"]');
+                        if (textarea) {
+                            textarea.value = data.explanation;
+                            autoResize(textarea);
+                        }
+                    }
+                    
+                    // Show success briefly
+                    btn.innerHTML = '<i class="fas fa-check"></i> 완료';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }, 1500);
+                } else {
+                    alert(data.error || '기본서 해설을 가져오는 데 실패했습니다.');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error('Textbook Error:', err);
+                alert('기본서 조회 중 오류 발생: ' + err.message);
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        }
+        
+        function saveSingleQuestion(index) {
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            
+            if (!chapterSelect.value) {
+                alert('목차를 선택해주세요.');
+                return;
+            }
+            
+            const question = parsedQuestions[index];
+            if (!question) return;
+            
+            fetch("{% url 'mypage:practice_input_save' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    chapter_id: chapterSelect.value,
+                    questions: [question]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('저장되었습니다.');
+                    // Auto-remove from list after successful save
+                    deleteQuestionSilent(index);
+                } else {
+                    alert('저장 실패: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Save Error:', err);
+                alert('저장 중 오류 발생: ' + err.message);
+            });
+        }
+
+        function updateQuestion(index, field, value) {
+            if (parsedQuestions[index]) {
+                parsedQuestions[index][field] = value;
+            }
+        }
+
+        function deleteQuestion(index) {
+            if (confirm('이 문제를 목록에서 제거하시겠습니까?')) {
+                deleteQuestionSilent(index);
+            }
+        }
+        
+        function deleteQuestionSilent(index) {
+            parsedQuestions.splice(index, 1);
+            renderPreviewCards();
+        }
+        
+        function saveQuestions(e) {
+            if (e && e.preventDefault) {
+                e.preventDefault();
+            }
+
+            try {
+                console.log('Attempting to save questions...');
+
+
+            const bookSelect = document.getElementById('practice-book-select');
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            
+            if (!chapterSelect.value) {
+                alert('목차를 선택해주세요.');
+                return;
+            }
+            
+            if (parsedQuestions.length === 0) {
+                alert('저장할 문제가 없습니다.');
+                return;
+            }
+
+            // if (!confirm(`총 ${parsedQuestions.length}문제를 DB에 저장하시겠습니까?`)) return;
+            
+            fetch("{% url 'mypage:practice_input_save' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    chapter_id: chapterSelect.value,
+                    questions: parsedQuestions
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Server response:', data); // Debug log
+                if (data.success) {
+                    alert('저장되었습니다.');
+                    // Reset UI
+                    document.getElementById('csv-input-textarea').value = '';
+                    document.getElementById('csv-preview-section').style.display = 'none';
+                    parsedQuestions = [];
+                } else {
+                    alert('저장 실패 (서버 응답): ' + (data.error || JSON.stringify(data)));
+                }
+            })
+            .catch(err => {
+                console.error('Save Error:', err);
+                alert('저장 중 오류 발생: ' + err.message);
+            });
+            } catch (e) {
+                console.error('Runtime Error in saveQuestions:', e);
+                alert('실행 중 치명적 오류: ' + e.message);
+            }
+        }
+
+
+
+        // Global variable to store tree data
+        let currentTreeData = [];
+
+
+        function loadPracticeBooksForTree() {
+            const bookSelect = document.getElementById('chapter-tree-book-select');
+            if (!bookSelect) return;
+
+            fetch("{% url 'mypage:practice_input_get_books' %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        bookSelect.innerHTML = '<option value="">-- 교재를 선택하면 목차가 로드됩니다 --</option>';
+                        data.books.forEach(book => {
+                            bookSelect.innerHTML += `<option value="${book.id}">${book.subject} - ${book.name}</option>`;
+                        });
+                    }
+                })
+                .catch(err => console.error('Error loading books:', err));
+        }
+
+        function loadChapterTree(bookId) {
+            const container = document.getElementById('chapter-tree-container');
+            const root = document.getElementById('tree-root');
+            
+            if (!bookId) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            root.innerHTML = '<div style="padding:20px; text-align:center; color:#666;"><i class="fas fa-spinner fa-spin"></i> 로딩중...</div>';
+            
+            fetch(`{% url 'mypage:chapter_list_api' %}?book_id=${bookId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        currentTreeData = data.chapters; // Store data globally
+                        renderChapterTree(data.chapters);
+                    } else {
+                        root.innerHTML = `<div class="error-msg">${data.error}</div>`;
+                    }
+                })
+                .catch(err => {
+                    console.error('Tree Load Error:', err);
+                    root.innerHTML = `<div class="error-msg">로드 실패: ${err.message}</div>`;
+                });
+        }
+
+        // ... (renderChapterTree, makeEditable, cancelEdit, updateChapter functions remain same) ...
+        function renderChapterTree(chapters) {
+            const root = document.getElementById('tree-root');
+            root.innerHTML = '';
+            
+            if (!chapters || chapters.length === 0) {
+                root.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">등록된 목차가 없습니다.</div>';
+                return;
+            }
+            
+            function createNode(chapter, parentElement) {
+                const node = document.createElement('div');
+                node.className = 'chapter-node';
+                node.dataset.id = chapter.id;
+                
+                const indentClass = `indent-${Math.min(chapter.level, 4)}`;
+                const hasChildren = chapter.children && chapter.children.length > 0;
+                
+                node.innerHTML = `
+                    <div class="node-content ${indentClass}">
+                        <div class="display-mode" style="display:flex; align-items:center; gap:10px; width:100%;">
+                            ${hasChildren ? '<i class="fas fa-caret-down" style="color:#6c757d; width:15px;"></i>' : '<span style="width:15px;"></span>'}
+                            <span class="ch-code" style="font-weight:bold; color:#2d6a4f; min-width:60px;">${chapter.code}</span>
+                            <span class="ch-title">${chapter.title}</span>
+                        </div>
+                        <div class="edit-mode" style="display:none; align-items:center; gap:5px; width:100%;">
+                            <input type="text" class="edit-code" value="${chapter.code}" style="width:80px;" placeholder="번호">
+                            <input type="text" class="edit-title" value="${chapter.title}" style="flex:1;" placeholder="제목">
+                            <button onclick="updateChapter(${chapter.id})" class="btn-tree"><i class="fas fa-check"></i></button>
+                            <button onclick="cancelEdit(${chapter.id})" class="btn-tree"><i class="fas fa-times"></i></button>
+                        </div>
+                    </div>
+                    <div class="node-actions">
+                        <button onclick="moveChapter(${chapter.id}, 'up')" class="btn-tree" title="위로 이동"><i class="fas fa-arrow-up"></i></button>
+                        <button onclick="moveChapter(${chapter.id}, 'down')" class="btn-tree" title="아래로 이동"><i class="fas fa-arrow-down"></i></button>
+                        <button onclick="addSiblingChapter(${chapter.id})" class="btn-tree add-sibling" title="형제 목차 추가"><i class="fas fa-plus"></i> 형제</button>
+                        <button onclick="addChildChapter(${chapter.id})" class="btn-tree add-child" title="자식 목차 추가"><i class="fas fa-level-down-alt"></i> 자식</button>
+                        <button onclick="makeEditable(${chapter.id})" class="btn-tree" title="수정"><i class="fas fa-pencil-alt"></i></button>
+                        ${!hasChildren ? `<button onclick="deleteChapter(${chapter.id})" class="btn-tree delete" title="삭제"><i class="fas fa-trash-alt"></i></button>` : ''}
+                    </div>
+                `;
+                
+                parentElement.appendChild(node);
+                
+                if (hasChildren) {
+                    chapter.children.forEach(child => createNode(child, parentElement));
+                }
+            }
+            
+            chapters.forEach(ch => createNode(ch, root));
+        }
+
+        function makeEditable(chapterId) {
+            const node = document.querySelector(`.chapter-node[data-id="${chapterId}"]`);
+            if (node) {
+                node.querySelector('.display-mode').style.display = 'none';
+                node.querySelector('.edit-mode').style.display = 'flex';
+                node.querySelector('.edit-title').focus();
+            }
+        }
+
+        function cancelEdit(chapterId) {
+            const node = document.querySelector(`.chapter-node[data-id="${chapterId}"]`);
+            if (node) {
+                node.querySelector('.display-mode').style.display = 'flex';
+                node.querySelector('.edit-mode').style.display = 'none';
+            }
+        }
+
+        function updateChapter(chapterId) {
+            const node = document.querySelector(`.chapter-node[data-id="${chapterId}"]`);
+            if (!node) return;
+            
+            const code = node.querySelector('.edit-code').value.trim();
+            const title = node.querySelector('.edit-title').value.trim();
+            
+            if (!code || !title) {
+                alert('코드와 제목을 입력해주세요.');
+                return;
+            }
+            
+            const url = `{% url 'mypage:chapter_update' 0 %}`.replace('0', chapterId);
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ code, title })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Quick UI update without reload
+                    node.querySelector('.ch-code').textContent = code;
+                    node.querySelector('.ch-title').textContent = title;
+                    cancelEdit(chapterId);
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        }
+
+
+
+
+        // Helper to find node and its parent list in the tree
+        function findNodeAndSiblings(nodes, targetId) {
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].id === targetId) {
+                    return { node: nodes[i], siblings: nodes };
+                }
+                if (nodes[i].children) {
+                    const result = findNodeAndSiblings(nodes[i].children, targetId);
+                    if (result) return result;
+                }
+            }
+            return null;
+        }
+
+        function getNextCode(currentCode, type) {
+            // Simple heuristic to generate next code
+            // type: 'sibling' (increment last part) or 'child' (append .1)
+            
+            if (!currentCode) return "";
+            
+            const parts = currentCode.split('.').map(s => s.trim());
+            
+            if (type === 'child') {
+                return currentCode + ".1";
+            } else if (type === 'sibling') {
+                // Try to increment the last number
+                const last = parts[parts.length - 1];
+                if (!isNaN(last)) {
+                    parts[parts.length - 1] = parseInt(last) + 1;
+                    return parts.join('.');
+                }
+            }
+            return currentCode; 
+        }
+
+        function suggestCode(referenceId, type) {
+             const found = findNodeAndSiblings(currentTreeData, referenceId);
+             if (!found) return "";
+             
+             const { node, siblings } = found;
+             
+             if (type === 'child') {
+                 // Check if it already has children
+                 if (node.children && node.children.length > 0) {
+                     // Increment the last child's code
+                     const lastChild = node.children[node.children.length - 1];
+                     return getNextCode(lastChild.code, 'sibling');
+                 } else {
+                     // First child
+                     return getNextCode(node.code, 'child');
+                 }
+             } else {
+                 // Sibling: just increment current code
+                 return getNextCode(node.code, 'sibling');
+             }
+        }
+
+        function addSiblingChapter(referenceId) {
+            createChapter(referenceId, 'sibling');
+        }
+
+        function addChildChapter(referenceId) {
+            createChapter(referenceId, 'child');
+        }
+
+        function addRootChapter() {
+            // Find last root node
+            let suggested = "1";
+            if (currentTreeData.length > 0) {
+                suggested = getNextCode(currentTreeData[currentTreeData.length - 1].code, 'sibling');
+            }
+            createChapter(null, 'root', suggested);
+        }
+
+        function createChapter(referenceId, type, suggestedCodeInput) {
+            const bookId = document.getElementById('chapter-tree-book-select').value;
+            if (!bookId) return;
+
+            let suggestedCode = suggestedCodeInput;
+            if (!suggestedCode && referenceId) {
+                suggestedCode = suggestCode(referenceId, type);
+            }
+
+            const code = prompt("목차 번호를 입력하세요 (예: 1.2.3):", suggestedCode || "");
+            if (code === null) return;
+            
+            const title = prompt("목차 제목을 입력하세요:", "새 목차");
+            if (title === null) return;
+
+            if (!code || !title) {
+                alert("코드와 제목은 필수입니다.");
+                return;
+            }
+            
+            // ... (rest of fetch logic remains same)
+            fetch("{% url 'mypage:chapter_create' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    book_id: bookId,
+                    reference_id: referenceId,
+                    add_type: type, // 'sibling', 'child', or 'root'
+                    code: code,
+                    title: title
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadChapterTree(bookId); // Reload tree
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        }
+
+
+        function deleteChapter(chapterId) {
+            if (!confirm("정말 이 목차를 삭제하시겠습니까? (하위 목차나 문제가 없어야 합니다)")) return;
+            
+            const url = `{% url 'mypage:chapter_delete' 0 %}`.replace('0', chapterId);
+            const bookId = document.getElementById('chapter-tree-book-select').value;
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadChapterTree(bookId); // Reload tree
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        }
+
+        function moveChapter(chapterId, direction) {
+            const url = `{% url 'mypage:chapter_move' 0 %}`.replace('0', chapterId);
+            const bookId = document.getElementById('chapter-tree-book-select').value;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ direction })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadChapterTree(bookId); // Reload tree
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(err => alert('Error: ' + err.message));
+        }
+
+    // Event listener for save button to prevent form submission issues
+    document.addEventListener('DOMContentLoaded', function() {
+        const saveBtn = document.getElementById('save-questions-btn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('Save button clicked via Listener');
+                // Pass event to function
+                saveQuestions(e); 
+            });
+        }
+    });
     </script>
 </body>
 

@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.name }} - 목차{% endblock %}
+
+{% block header %}
+{% include 'practice/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* 전체 페이지 배경 */
+    body {
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        min-height: 100vh;
+        position: relative;
+        font-size: 0.95rem;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(ellipse at 20% 20%, rgba(45, 106, 79, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse at 80% 80%, rgba(26, 83, 92, 0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 50%, rgba(34, 139, 34, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    main.container {
+        position: relative;
+        z-index: 1;
+        padding: 20px;
+        max-width: 1100px;
+    }
+    
+    .chapter-container {
+        max-width: 1000px;
+        margin: 20px auto 40px;
+        padding: 0 20px;
+    }
+    
+    /* 브레드크럼 */
+    .breadcrumb {
+        margin-bottom: 25px;
+        padding: 14px 24px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        backdrop-filter: blur(10px);
+        display: inline-block;
+        font-size: 1.05rem;
+    }
+    
+    .breadcrumb a {
+        color: #90EE90;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .breadcrumb a:hover {
+        color: #98FB98;
+        text-decoration: underline;
+    }
+    
+    .breadcrumb span {
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    /* 페이지 타이틀 영역 */
+    .page-header {
+        text-align: center;
+        margin-bottom: 35px;
+        position: relative;
+    }
+    
+    .page-title {
+        color: #ffffff;
+        margin-bottom: 10px;
+        font-size: 2.8rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .page-title .tree-icon {
+        font-size: 2.8rem;
+        animation: sway 4s ease-in-out infinite;
+    }
+    
+    @keyframes sway {
+        0%, 100% { transform: rotate(-3deg); }
+        50% { transform: rotate(3deg); }
+    }
+    
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.25rem;
+        font-weight: 400;
+        letter-spacing: 2px;
+    }
+    
+    /* 목차 트리 컨테이너 - 유리모피즘 */
+    .chapter-tree {
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 30px 35px;
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.15),
+            0 2px 8px rgba(0, 0, 0, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* 잎 장식 SVG */
+    .chapter-tree::before {
+        content: '';
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 200px;
+        height: 200px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5 C30 25, 10 45, 50 95 C90 45, 70 25, 50 5' fill='%232d6a4f' opacity='0.08'/%3E%3C/svg%3E") no-repeat center;
+        background-size: contain;
+        pointer-events: none;
+    }
+    
+    .chapter-tree::after {
+        content: '';
+        position: absolute;
+        bottom: -40px;
+        left: -40px;
+        width: 180px;
+        height: 180px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 5 C30 25, 10 45, 50 95 C90 45, 70 25, 50 5' fill='%231a535c' opacity='0.06'/%3E%3C/svg%3E") no-repeat center;
+        background-size: contain;
+        transform: rotate(45deg);
+        pointer-events: none;
+    }
+    
+    /* 기본 chapter-item 스타일 */
+    .chapter-item {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+    }
+    
+    .chapter-item .chapter-link {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .chapter-item .chapter-count {
+        flex-shrink: 0;
+        margin-left: 10px;
+    }
+    
+    /* Level 1 - 대제목: 깊은 숲 그라디언트 */
+    .chapter-item.level-1 {
+        background: linear-gradient(135deg, #1a4a2e 0%, #2d6a4f 50%, #1a535c 100%);
+        color: white;
+        padding: 10px 18px;
+        margin: 12px 0 6px 0;
+        border-radius: 10px;
+        font-size: 1.1em;
+        font-weight: bold;
+        box-shadow: 
+            0 4px 15px rgba(45, 106, 79, 0.3),
+            0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .chapter-item.level-1::before {
+        content: '🌲';
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        opacity: 0.3;
+    }
+    
+    .chapter-item.level-1:first-child {
+        margin-top: 0;
+    }
+    
+    .chapter-item.level-1 .chapter-link {
+        color: white;
+    }
+    
+    .chapter-item.level-1 .chapter-code {
+        color: #b7e4c7;
+        font-weight: bold;
+    }
+    
+    .chapter-item.level-1:hover {
+        background: linear-gradient(135deg, #0d3d0d 0%, #1b4332 50%, #0d4444 100%);
+        box-shadow: 
+            0 6px 20px rgba(45, 106, 79, 0.4),
+            0 3px 6px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Level 2 - 중제목: 부드러운 녹색 배경 */
+    .chapter-item.level-2 {
+        padding: 8px 15px 8px 25px;
+        margin: 4px 0;
+        border-left: 4px solid #40916c;
+        background: linear-gradient(90deg, #f0fdf4 0%, #ffffff 100%);
+        border-radius: 0 10px 10px 0;
+        transition: all 0.25s ease;
+    }
+    
+    .chapter-item.level-2 .chapter-code {
+        color: #1a535c;
+        font-weight: bold;
+        font-size: 1em;
+    }
+    
+    .chapter-item.level-2 .chapter-title {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 0.95em;
+    }
+    
+    .chapter-item.level-2:hover {
+        background: linear-gradient(90deg, #dcfce7 0%, #f0fdf4 100%);
+        border-left-color: #2d6a4f;
+    }
+    
+    /* Level 3 - 소제목: 섬세한 스타일 */
+    .chapter-item.level-3 {
+        padding: 6px 15px 6px 50px;
+        margin: 2px 0;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .chapter-item.level-3::before {
+        content: '🍃';
+        position: absolute;
+        left: 35px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.7rem;
+        opacity: 0.4;
+    }
+    
+    .chapter-item.level-3 .chapter-code {
+        color: #4a5568;
+        font-size: 0.9em;
+        font-weight: 500;
+    }
+    
+    .chapter-item.level-3 .chapter-title {
+        color: #4a5568;
+        font-size: 0.9em;
+    }
+    
+    .chapter-item.level-3:hover {
+        background: rgba(45, 106, 79, 0.08);
+    }
+    
+    .chapter-item.level-3:hover::before {
+        opacity: 0.8;
+        animation: leafShake 0.5s ease;
+    }
+    
+    @keyframes leafShake {
+        0%, 100% { transform: translateY(-50%) rotate(0deg); }
+        25% { transform: translateY(-50%) rotate(-10deg); }
+        75% { transform: translateY(-50%) rotate(10deg); }
+    }
+    
+    /* Level 4 - 부제목: 미니멀 스타일 */
+    .chapter-item.level-4 {
+        padding: 5px 12px 5px 75px;
+        margin: 1px 0;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    
+    .chapter-item.level-4 .chapter-code {
+        color: #718096;
+        font-size: 0.9em;
+        font-weight: normal;
+    }
+    
+    .chapter-item.level-4 .chapter-title {
+        color: #5a6677;
+        font-size: 0.95em;
+    }
+    
+    .chapter-item.level-4:hover {
+        background: rgba(45, 106, 79, 0.05);
+    }
+    
+    /* 공통 스타일 */
+    .chapter-link {
+        text-decoration: none;
+        color: #333;
+        display: flex;
+        align-items: center;
+    }
+    
+    .chapter-title {
+        flex: 1;
+    }
+    
+    /* 문제 수 배지 */
+    .chapter-count {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+        transition: all 0.2s ease;
+    }
+    
+    .chapter-count:hover {
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(34, 197, 94, 0.4);
+    }
+    
+    .chapter-item.level-1 .chapter-count {
+        background: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    
+    /* 페이드인 애니메이션 */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .chapter-tree {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    /* 빈 상태 */
+    .empty-state {
+        text-align: center;
+        color: #888;
+        padding: 60px 40px;
+        font-size: 1.1rem;
+    }
+    
+    .empty-state::before {
+        content: '🌱';
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.6;
+    }
+    
+    /* 반응형 */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.8rem;
+        }
+        
+        .chapter-tree {
+            padding: 20px 15px;
+        }
+        
+        .chapter-item.level-1 {
+            padding: 12px 16px;
+        }
+        
+        .chapter-item.level-2 {
+            padding-left: 20px;
+        }
+        
+        .chapter-item.level-3 {
+            padding-left: 35px;
+        }
+        
+        .chapter-item.level-3::before {
+            left: 18px;
+        }
+        
+        .chapter-item.level-4 {
+            padding-left: 50px;
+        }
+    }
+</style>
+
+<div class="chapter-container">
+    <div class="breadcrumb">
+        <a href="{% url 'practice:book_list' %}">📚 교재 목록</a> &gt; 
+        <span>{{ book.name }}</span>
+    </div>
+    
+    <div class="page-header">
+        <h1 class="page-title">
+            <span class="tree-icon">🌲</span>
+            {{ book.name }}
+        </h1>
+        <p class="page-subtitle">Forest Pathology · 수목병리학 학습</p>
+    </div>
+    
+    <div class="chapter-tree">
+        {% for chapter in root_chapters %}
+            {% include 'practice/_chapter_item.html' with chapter=chapter %}
+        {% empty %}
+            <p class="empty-state">등록된 목차가 없습니다.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

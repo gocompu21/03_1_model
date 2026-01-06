@@ -32,6 +32,7 @@ urlpatterns = [
     path("bbs/", include("bbs.urls")),
     path("mypage/", include("mypage.urls")),
     path("mock_exam/", include("mock_exam.urls")),
+    path("practice/", include("practice.urls")),
 ]
 
 if settings.DEBUG:

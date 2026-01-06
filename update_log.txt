@@ -1,0 +1,9 @@
+=== Processing Chapter: 2.3.1 세균의 분류 ===
+Traceback (most recent call last):
+Book: 수목병리학
+Total questions: 10
+Available stores: [{'name': '수목생리학', 'display_name': '수목생리학', 'file_count': 2}, {'name': '수목병리학', 'display_name': '수목병리학', 'file_count': 2}, {'name': '수목해충학', 'display_name': '수목해충학', 'file_count': 1}, {'name': '산림토양학', 'display_name': '산림토양학', 'file_count': 1}, {'name': '수목관리학', 'display_name': '수목관리학', 'file_count': 4}]
+  File "C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\update_practice_explanations.py", line 39, in <module>
+    if '기본서' in s or 'textbook' in s.lower():
+                                      ^^^^^^^
+AttributeError: 'dict' object has no attribute 'lower'

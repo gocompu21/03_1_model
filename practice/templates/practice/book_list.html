@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}기본서 연습문제{% endblock %}
+
+{% block header %}
+{% include 'practice/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .practice-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .page-title {
+        color: #2d6a4f;
+        margin-bottom: 30px;
+        font-size: 1.8rem;
+    }
+    
+    .book-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    
+    .book-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 25px;
+        transition: all 0.3s;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .book-card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+    
+    .book-subject {
+        background: #d8f3dc;
+        color: #2d6a4f;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+    
+    .book-name {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+    }
+    
+    .book-stats {
+        color: #666;
+        font-size: 0.9em;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #888;
+    }
+    
+    .upload-link {
+        display: inline-block;
+        background: #2d6a4f;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        margin-top: 20px;
+    }
+    
+    .upload-link:hover {
+        background: #1b4332;
+    }
+</style>
+
+<div class="practice-container">
+    <h1 class="page-title">📚 기본서 연습문제</h1>
+    
+    {% if books %}
+    <div class="book-grid">
+        {% for book in books %}
+        <a href="{% url 'practice:chapter_list' book.id %}" class="book-card">
+            <span class="book-subject">{{ book.subject }}</span>
+            <div class="book-name">{{ book.name }}</div>
+            <div class="book-stats">
+                {{ book.chapters.count }}개 목차
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>등록된 교재가 없습니다.</p>
+        {% if user.is_staff %}
+        <a href="{% url 'practice:upload_questions' %}" class="upload-link">문제 업로드</a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% if user.is_staff %}
+    <div style="margin-top: 30px; text-align: right;">
+        <a href="{% url 'practice:upload_questions' %}" class="upload-link">📤 문제 업로드</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

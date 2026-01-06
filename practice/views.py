@@ -1,0 +1,342 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.contrib import messages
+import openpyxl
+from .models import Book, Chapter, PracticeQuestion, PracticeAttempt, ChapterContent
+
+
+@login_required
+def book_list(request):
+    """교재 목록"""
+    books = Book.objects.all()
+    return render(request, 'practice/book_list.html', {'books': books})
+
+
+@login_required
+def chapter_list(request, book_id):
+    """교재의 목차 트리"""
+    book = get_object_or_404(Book, id=book_id)
+    
+    # 최상위 목차만 가져오기 (하위는 템플릿에서 재귀적으로)
+    root_chapters = Chapter.objects.filter(book=book, parent=None).order_by('order', 'code')
+    
+    return render(request, 'practice/chapter_list.html', {
+        'book': book,
+        'root_chapters': root_chapters,
+    })
+
+
+@login_required  
+def practice_questions(request, chapter_id):
+    """목차별 문제 풀이"""
+    chapter = get_object_or_404(Chapter, id=chapter_id)
+    questions = PracticeQuestion.objects.filter(chapter=chapter).order_by('number')
+    
+    # 사용자의 이전 풀이 기록 가져오기
+    user_attempts = {}
+    if request.user.is_authenticated:
+        attempts = PracticeAttempt.objects.filter(
+            user=request.user,
+            question__in=questions
+        ).order_by('-attempted_at')
+        
+        # 각 문제별 최신 시도만 저장
+        for attempt in attempts:
+            if attempt.question_id not in user_attempts:
+                user_attempts[attempt.question_id] = attempt
+    
+    return render(request, 'practice/practice_questions.html', {
+        'chapter': chapter,
+        'questions': questions,
+        'user_attempts': user_attempts,
+    })
+
+
+@login_required
+def submit_answer(request, question_id):
+    """정답 제출 (AJAX)"""
+    if request.method == 'POST':
+        question = get_object_or_404(PracticeQuestion, id=question_id)
+        
+        try:
+            selected = int(request.POST.get('answer', 0))
+        except ValueError:
+            return JsonResponse({'error': 'Invalid answer'}, status=400)
+        
+        is_correct = (selected == question.answer)
+        
+        # 풀이 기록 저장
+        PracticeAttempt.objects.create(
+            user=request.user,
+            question=question,
+            selected_answer=selected,
+            is_correct=is_correct
+        )
+        
+        return JsonResponse({
+            'is_correct': is_correct,
+            'correct_answer': question.answer,
+            'explanation': question.explanation,
+        })
+    
+    return JsonResponse({'error': 'Invalid method'}, status=405)
+
+
+@login_required
+def upload_questions(request):
+    """엑셀 파일로 문제 일괄 업로드"""
+    if not request.user.is_staff:
+        messages.error(request, '관리자만 접근 가능합니다.')
+        return redirect('practice:book_list')
+    
+    books = Book.objects.all()
+    
+    if request.method == 'POST':
+        book_id = request.POST.get('book_id')
+        file = request.FILES.get('excel_file')
+        
+        if not book_id or not file:
+            messages.error(request, '교재와 파일을 모두 선택해주세요.')
+            return redirect('practice:upload_questions')
+        
+        book = get_object_or_404(Book, id=book_id)
+        
+        try:
+            wb = openpyxl.load_workbook(file)
+            ws = wb.active
+            
+            created_count = 0
+            error_rows = []
+            
+            # 첫 행은 헤더로 가정
+            for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                if not row[0]:  # 빈 행 스킵
+                    continue
+                
+                chapter_code = str(row[0]).strip()
+                content = str(row[1]).strip() if row[1] else ''
+                choice1 = str(row[2]).strip() if row[2] else ''
+                choice2 = str(row[3]).strip() if row[3] else ''
+                choice3 = str(row[4]).strip() if row[4] else ''
+                choice4 = str(row[5]).strip() if row[5] else ''
+                choice5 = str(row[6]).strip() if row[6] else ''
+                
+                try:
+                    answer = int(row[7]) if row[7] else 0
+                except:
+                    answer = 0
+                    
+                explanation = str(row[8]).strip() if len(row) > 8 and row[8] else ''
+                
+                # 목차 찾기
+                try:
+                    chapter = Chapter.objects.get(book=book, code=chapter_code)
+                except Chapter.DoesNotExist:
+                    error_rows.append(f"행 {row_idx}: 목차 '{chapter_code}'를 찾을 수 없음")
+                    continue
+                
+                # 문제 번호 자동 할당
+                last_q = PracticeQuestion.objects.filter(chapter=chapter).order_by('-number').first()
+                next_number = (last_q.number + 1) if last_q else 1
+                
+                PracticeQuestion.objects.create(
+                    chapter=chapter,
+                    number=next_number,
+                    content=content,
+                    choice1=choice1,
+                    choice2=choice2,
+                    choice3=choice3,
+                    choice4=choice4,
+                    choice5=choice5,
+                    answer=answer,
+                    explanation=explanation,
+                )
+                created_count += 1
+            
+            if error_rows:
+                messages.warning(request, f'{created_count}개 문제 추가됨. 오류: {"; ".join(error_rows[:5])}')
+            else:
+                messages.success(request, f'{created_count}개 문제가 추가되었습니다.')
+                
+        except Exception as e:
+            messages.error(request, f'파일 처리 중 오류: {str(e)}')
+        
+        return redirect('practice:upload_questions')
+    
+    return render(request, 'practice/upload.html', {'books': books})
+
+
+@login_required
+def upload_chapters(request):
+    """엑셀 파일로 목차 일괄 업로드"""
+    if not request.user.is_staff:
+        messages.error(request, '관리자만 접근 가능합니다.')
+        return redirect('practice:book_list')
+    
+    books = Book.objects.all()
+    
+    if request.method == 'POST':
+        book_id = request.POST.get('book_id')
+        file = request.FILES.get('excel_file')
+        
+        if not book_id or not file:
+            messages.error(request, '교재와 파일을 모두 선택해주세요.')
+            return redirect('practice:upload_chapters')
+        
+        book = get_object_or_404(Book, id=book_id)
+        
+        try:
+            wb = openpyxl.load_workbook(file)
+            ws = wb.active
+            
+            created_count = 0
+            updated_count = 0
+            
+            # 첫 행은 헤더로 가정
+            for row_idx, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+                if not row[0]:  # 빈 행 스킵
+                    continue
+                
+                code = str(row[0]).strip()
+                title = str(row[1]).strip() if row[1] else ''
+                
+                # level 자동 계산 (점 개수 + 1)
+                level = code.count('.') + 1
+                
+                # parent 찾기 (상위 목차)
+                parent = None
+                if '.' in code:
+                    parent_code = '.'.join(code.split('.')[:-1])
+                    try:
+                        parent = Chapter.objects.get(book=book, code=parent_code)
+                    except Chapter.DoesNotExist:
+                        pass  # 상위가 없으면 루트로
+                
+                # order 자동 할당
+                order = row_idx
+                
+                # 기존 목차가 있으면 업데이트, 없으면 생성
+                chapter, created = Chapter.objects.update_or_create(
+                    book=book,
+                    code=code,
+                    defaults={
+                        'title': title,
+                        'level': level,
+                        'parent': parent,
+                        'order': order,
+                    }
+                )
+                
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+            
+            messages.success(request, f'목차 {created_count}개 생성, {updated_count}개 업데이트되었습니다.')
+                
+        except Exception as e:
+            messages.error(request, f'파일 처리 중 오류: {str(e)}')
+        
+        return redirect('practice:upload_chapters')
+    
+    return render(request, 'practice/upload_chapters.html', {'books': books})
+
+
+@login_required
+def chapter_detail(request, chapter_id):
+    """목차 컨텐츠 상세 보기"""
+    chapter = get_object_or_404(Chapter, id=chapter_id)
+    
+    # 컨텐츠가 있는지 확인
+    try:
+        content = chapter.content
+    except ChapterContent.DoesNotExist:
+        content = None
+    
+    # 관련 문제 가져오기
+    questions = PracticeQuestion.objects.filter(chapter=chapter).order_by('number')
+    
+    # 형제 목차 (같은 부모)
+    if chapter.parent:
+        siblings = Chapter.objects.filter(parent=chapter.parent).order_by('order', 'code')
+    else:
+        siblings = Chapter.objects.filter(book=chapter.book, parent=None).order_by('order', 'code')
+    
+    return render(request, 'practice/chapter_detail.html', {
+        'chapter': chapter,
+        'content': content,
+        'questions': questions,
+        'siblings': siblings,
+    })
+
+
+@login_required
+def content_create(request):
+    """학습 컨텐츠 작성"""
+    books = Book.objects.all()
+    
+    # URL 파라미터로 chapter_id가 전달되면 해당 목차 선택
+    chapter_id = request.GET.get('chapter_id')
+    selected_chapter = None
+    if chapter_id:
+        selected_chapter = get_object_or_404(Chapter, id=chapter_id)
+    
+    if request.method == 'POST':
+        chapter_id = request.POST.get('chapter_id')
+        content_text = request.POST.get('content', '')
+        
+        if not chapter_id:
+            messages.error(request, '목차를 선택해주세요.')
+            return redirect('practice:content_create')
+        
+        chapter = get_object_or_404(Chapter, id=chapter_id)
+        
+        # 이미 컨텐츠가 있는지 확인
+        if hasattr(chapter, 'content'):
+            messages.error(request, '이 목차에는 이미 컨텐츠가 있습니다. 수정 기능을 사용하세요.')
+            return redirect('practice:chapter_detail', chapter_id=chapter.id)
+        
+        ChapterContent.objects.create(
+            chapter=chapter,
+            content=content_text,
+            author=request.user,
+        )
+        
+        messages.success(request, '컨텐츠가 저장되었습니다.')
+        return redirect('practice:chapter_detail', chapter_id=chapter.id)
+    
+    return render(request, 'practice/content_form.html', {
+        'books': books,
+        'selected_chapter': selected_chapter,
+        'title': '컨텐츠 작성',
+        'btn_text': '저장하기',
+    })
+
+
+@login_required
+def content_update(request, content_id):
+    """학습 컨텐츠 수정"""
+    content = get_object_or_404(ChapterContent, id=content_id)
+    
+    # 작성자 또는 관리자만 수정 가능
+    if content.author != request.user and not request.user.is_staff:
+        messages.error(request, '수정 권한이 없습니다.')
+        return redirect('practice:chapter_detail', chapter_id=content.chapter.id)
+    
+    if request.method == 'POST':
+        content_text = request.POST.get('content', '')
+        content.content = content_text
+        content.save()
+        
+        messages.success(request, '컨텐츠가 수정되었습니다.')
+        return redirect('practice:chapter_detail', chapter_id=content.chapter.id)
+    
+    return render(request, 'practice/content_form.html', {
+        'content': content,
+        'selected_chapter': content.chapter,
+        'title': '컨텐츠 수정',
+        'btn_text': '수정하기',
+        'is_edit': True,
+    })
+

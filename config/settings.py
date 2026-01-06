@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "bbs",
     "mypage",
     "mock_exam",
+    "practice",
 ]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

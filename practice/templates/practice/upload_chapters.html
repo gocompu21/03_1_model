@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}목차 업로드{% endblock %}
+
+{% block header %}
+{% include 'practice/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    .upload-container {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .page-title {
+        color: #2d6a4f;
+        margin-bottom: 30px;
+    }
+    
+    .upload-form {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    .form-select, .form-file {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1em;
+    }
+    
+    .form-select:focus, .form-file:focus {
+        outline: none;
+        border-color: #2d6a4f;
+    }
+    
+    .submit-btn {
+        background: #2d6a4f;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 8px;
+        font-size: 1em;
+        font-weight: bold;
+        cursor: pointer;
+        width: 100%;
+    }
+    
+    .submit-btn:hover {
+        background: #1b4332;
+    }
+    
+    .help-text {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 30px;
+    }
+    
+    .help-text h3 {
+        color: #2d6a4f;
+        margin-bottom: 15px;
+    }
+    
+    .help-text table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .help-text th, .help-text td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+    
+    .help-text th {
+        background: #e8f5e9;
+    }
+    
+    .messages {
+        margin-bottom: 20px;
+    }
+    
+    .message {
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+    }
+    
+    .message-success {
+        background: #d4edda;
+        color: #155724;
+    }
+    
+    .message-error {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    
+    .nav-links-upload {
+        margin-bottom: 20px;
+    }
+    
+    .nav-links-upload a {
+        display: inline-block;
+        padding: 10px 20px;
+        margin-right: 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #555;
+        background: #f0f0f0;
+    }
+    
+    .nav-links-upload a.active {
+        background: #2d6a4f;
+        color: white;
+    }
+</style>
+
+<div class="upload-container">
+    <h1 class="page-title">📤 업로드 관리</h1>
+    
+    <div class="nav-links-upload">
+        <a href="{% url 'practice:upload_chapters' %}" class="active">목차 업로드</a>
+        <a href="{% url 'practice:upload_questions' %}">문제 업로드</a>
+    </div>
+    
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <form method="post" enctype="multipart/form-data" class="upload-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label class="form-label">교재 선택</label>
+            <select name="book_id" class="form-select" required>
+                <option value="">-- 교재를 선택하세요 --</option>
+                {% for book in books %}
+                <option value="{{ book.id }}">{{ book.subject }} - {{ book.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">엑셀 파일 (.xlsx)</label>
+            <input type="file" name="excel_file" class="form-file" accept=".xlsx" required>
+        </div>
+        
+        <button type="submit" class="submit-btn">업로드</button>
+    </form>
+    
+    <div class="help-text">
+        <h3>📋 엑셀 파일 형식</h3>
+        <table>
+            <tr>
+                <th>열</th>
+                <th>내용</th>
+                <th>예시</th>
+            </tr>
+            <tr><td>A</td><td>목차 코드</td><td>1, 1.1, 1.1.1, 1.1.1.1</td></tr>
+            <tr><td>B</td><td>목차 제목</td><td>수목병리학 개요</td></tr>
+        </table>
+        <p style="margin-top: 15px; color: #666;">※ 첫 번째 행은 헤더로 인식되어 건너뜁니다.</p>
+        <p style="color: #666;">※ level과 parent는 목차 코드를 기반으로 자동 계산됩니다.</p>
+        <p style="color: #666;">※ 상위 목차가 먼저 등록되어야 합니다. (예: 1 → 1.1 → 1.1.1 순서)</p>
+    </div>
+</div>
+{% endblock %}

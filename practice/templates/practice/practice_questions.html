@@ -1,0 +1,432 @@
+{% extends 'base.html' %}
+{% load practice_extras %}
+{% load static %}
+{% load markdown_extras %}
+
+{% block title %}{{ chapter.title }} - 연습문제{% endblock %}
+
+{% block header %}
+{% include 'practice/_header.html' %}
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Global Background */
+    body {
+        background-color: #f8f6e6;
+        margin: 0;
+        font-family: sans-serif;
+    }
+
+    /* Hide global header */
+    header {
+        display: none !important;
+    }
+
+    .practice-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 60px);
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #f8f6e6;
+    }
+
+    /* Tabs Header Layout */
+    .tabs-header {
+        display: flex;
+        background: white;
+        border-bottom: 2px solid #e0e0e0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 15px 20px;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .header-title {
+        flex: 1;
+        font-weight: bold;
+        color: #2c5f2d;
+        font-size: 1.1em;
+    }
+
+    .tab-btn {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        background: #fdfdfd;
+        font-size: 0.85em;
+        font-weight: 600;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+    }
+
+    .tab-btn:hover {
+        background-color: #f0f7f4;
+        border-color: #97bc62;
+        color: #2c5f2d;
+    }
+
+    /* Content Area */
+    .content-area {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    /* Question Card Styles */
+    .question-card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .q-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .q-badge {
+        background: #eee;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.9em;
+        color: #555;
+    }
+
+    .q-content {
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .q-choices {
+        padding-left: 20px;
+        margin-bottom: 20px;
+    }
+
+    .choice-item {
+        margin-bottom: 8px;
+        font-size: 1.05em;
+        padding: 8px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .choice-item:hover {
+        background-color: #f0f7f4;
+    }
+
+    .choice-item.selected {
+        background-color: #e8f5e9;
+    }
+
+    .choice-num {
+        display: inline-block;
+        width: auto;
+        height: auto;
+        margin-right: 8px;
+        font-size: 1.1em;
+        position: relative;
+    }
+
+    /* Check mark on selected choice */
+    .choice-item.selected .choice-num::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-35%, -115%) scale(2.5);
+        width: 100%;
+        height: 100%;
+        background-image: url("{% static 'exam/images/check_mark_black.png' %}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        mix-blend-mode: multiply;
+        filter: contrast(1.5) brightness(1.1);
+        pointer-events: none;
+    }
+
+    /* Correct answer circle */
+    .choice-num.correct::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 26px;
+        height: 26px;
+        border: 3px solid #d93025;
+        border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+        transform: translate(-50%, -50%) rotate(-5deg);
+        pointer-events: none;
+    }
+
+    /* Explanation Section */
+    .explanation-section {
+        margin-top: 20px;
+        background-color: #fdfdfd;
+        border: 1px dashed #bbb;
+        border-radius: 5px;
+        padding: 20px;
+        display: none;
+    }
+
+    .exp-title {
+        font-weight: bold;
+        color: #d35400;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+    }
+
+    .exp-text {
+        font-size: 1.0em;
+        line-height: 1.7;
+        color: #333;
+    }
+
+    .text-blue {
+        color: blue;
+        font-weight: bold;
+    }
+
+    .text-red {
+        color: red;
+        font-weight: bold;
+    }
+
+    .toggle-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #555;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+
+    .toggle-btn:hover {
+        color: #2c5f2d;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #888;
+    }
+</style>
+
+<div class="practice-container">
+    <!-- Header -->
+    <div class="tabs-header">
+        <div class="header-title">
+            📖 {{ chapter.book.name }} > {{ chapter.code }} {{ chapter.title }}
+        </div>
+
+        <!-- Expand All Button -->
+        <button class="tab-btn" id="expand-all-btn" onclick="toggleAllExplanations()" style="background-color: #fff3cd; color: #856404;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="expand-all-text">전체 펼치기</span>
+        </button>
+
+        <!-- Back Button -->
+        <a href="{% url 'practice:chapter_list' chapter.book.id %}" class="tab-btn" style="background-color: #f7f7f7; color: #555;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>목록</span>
+        </a>
+    </div>
+
+    <!-- Questions Content -->
+    <div class="content-area">
+        {% if questions %}
+            {% for q in questions %}
+            <div class="question-card" id="question-{{ q.id }}">
+                <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
+                    <div style="margin-bottom: 10px;">
+                        {% if q.id in user_attempts %}
+                            {% with attempt=user_attempts|get_item:q.id %}
+                                <span class="q-badge" style="float: right; {% if attempt.is_correct %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
+                                    {% if attempt.is_correct %}✓ 정답{% else %}✗ 오답{% endif %}
+                                </span>
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                    <div class="q-content">
+                        {{ q.number }}. {{ q.content|safe|linebreaksbr }}
+                    </div>
+                </div>
+
+                <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
+                    <div class="choice-item" onclick="selectChoice(this, 1)">
+                        <span class="choice-num" data-choice="1">①</span> {{ q.choice1|safe }}
+                    </div>
+                    <div class="choice-item" onclick="selectChoice(this, 2)">
+                        <span class="choice-num" data-choice="2">②</span> {{ q.choice2|safe }}
+                    </div>
+                    <div class="choice-item" onclick="selectChoice(this, 3)">
+                        <span class="choice-num" data-choice="3">③</span> {{ q.choice3|safe }}
+                    </div>
+                    <div class="choice-item" onclick="selectChoice(this, 4)">
+                        <span class="choice-num" data-choice="4">④</span> {{ q.choice4|safe }}
+                    </div>
+                    <div class="choice-item" onclick="selectChoice(this, 5)">
+                        <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5|safe }}
+                    </div>
+                </div>
+
+                <!-- Toggle Button for Explanation -->
+                <div style="text-align: right;">
+                    <button type="button" class="toggle-btn" onclick="toggleExplanation('exp-{{ q.id }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                        </svg>
+                        해설 보기
+                    </button>
+                </div>
+
+                <div id="exp-{{ q.id }}" class="explanation-section">
+                    <div class="exp-title">
+                        <span>💡 정답 및 해설</span>
+                    </div>
+                    <div class="exp-text markdown-content">
+                        {{ q.explanation|default:"해설이 없습니다."|markdown|safe }}
+                    </div>
+                    
+                    <!-- Close button -->
+                    <div style="text-align: center; margin-top: 15px; cursor: pointer;" onclick="toggleExplanation('exp-{{ q.id }}')" title="해설 접기">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                            fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <polyline points="18 15 12 9 6 15"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <p>이 목차에 등록된 문제가 없습니다.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Highlight Text Logic & MathJax
+    document.addEventListener("DOMContentLoaded", function () {
+        const expTexts = document.querySelectorAll('.markdown-content');
+        expTexts.forEach(div => {
+            let html = div.innerHTML;
+            html = html.replace(/\(옳음\)/g, '<span class="text-blue">(옳음)</span>');
+            html = html.replace(/\(그름\)/g, '<span class="text-red">(그름)</span>');
+            div.innerHTML = html;
+        });
+
+        // Force MathJax typeset if available
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise();
+        }
+    });
+
+    // Select Choice
+    function selectChoice(choiceItem, choiceNum) {
+        const parent = choiceItem.closest('.q-choices');
+        parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
+        choiceItem.classList.add('selected');
+    }
+
+    // Toggle Explanation
+    function toggleExplanation(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            const isHidden = el.style.display === 'none' || el.style.display === '';
+            el.style.display = isHidden ? 'block' : 'none';
+            
+            const card = el.closest('.question-card');
+            if (card && isHidden) {
+                const qChoices = card.querySelector('.q-choices');
+                const correctAnswer = parseInt(qChoices.getAttribute('data-answer'));
+                qChoices.querySelectorAll('.choice-num').forEach(cn => {
+                    cn.classList.remove('correct');
+                    const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                    if (choiceNum === correctAnswer) {
+                        cn.classList.add('correct');
+                    }
+                });
+            } else if (card && !isHidden) {
+                const qChoices = card.querySelector('.q-choices');
+                qChoices.querySelectorAll('.choice-num').forEach(cn => {
+                    cn.classList.remove('correct');
+                });
+            }
+        }
+    }
+
+    // Toggle All Explanations
+    let allExpanded = false;
+    function toggleAllExplanations() {
+        const explanations = document.querySelectorAll('.explanation-section');
+        const btn = document.getElementById('expand-all-btn');
+        const text = document.getElementById('expand-all-text');
+        
+        allExpanded = !allExpanded;
+        
+        explanations.forEach(el => {
+            el.style.display = allExpanded ? 'block' : 'none';
+        });
+        
+        // Show/hide correct answers on all questions
+        document.querySelectorAll('.q-choices').forEach(qChoices => {
+            const correctAnswer = parseInt(qChoices.getAttribute('data-answer'));
+            qChoices.querySelectorAll('.choice-num').forEach(cn => {
+                const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                if (allExpanded && choiceNum === correctAnswer) {
+                    cn.classList.add('correct');
+                } else {
+                    cn.classList.remove('correct');
+                }
+            });
+        });
+        
+        if (allExpanded) {
+            text.textContent = '전체 접기';
+            btn.style.backgroundColor = '#d4edda';
+            btn.style.color = '#155724';
+        } else {
+            text.textContent = '전체 펼치기';
+            btn.style.backgroundColor = '#fff3cd';
+            btn.style.color = '#856404';
+        }
+    }
+</script>
+{% endblock %}
