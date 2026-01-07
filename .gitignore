@@ -8,3 +8,7 @@ db.sqlite3.bak
 local_stores.json
 data/FileStore/
 media/questions/explanations/
+chapter_*.html
+chapter_*.pdf
+*.sqlite3*
+explanations_*.json
