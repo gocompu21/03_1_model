@@ -257,18 +257,45 @@ def chapter_detail(request, chapter_id):
     # 관련 문제 가져오기
     questions = PracticeQuestion.objects.filter(chapter=chapter).order_by('number')
     
-    # 형제 목차 (같은 부모)
-    if chapter.parent:
-        siblings = Chapter.objects.filter(parent=chapter.parent).order_by('order', 'code')
+    # Natural sort function for code like "1.2.3"
+    def natural_sort_key(ch):
+        if not ch.code:
+            return (999,)
+        parts = ch.code.split('.')
+        result = []
+        for p in parts:
+            try:
+                result.append(int(p))
+            except ValueError:
+                result.append(999)
+        return tuple(result)
+    
+    # 현재 목차 기준으로 앞뒤 5개씩 가져오기 (레벨 무관, code 기준 정렬)
+    all_chapters = list(Chapter.objects.filter(book=chapter.book))
+    all_chapters.sort(key=natural_sort_key)
+    
+    # 현재 목차의 인덱스 찾기
+    current_index = None
+    for i, ch in enumerate(all_chapters):
+        if ch.id == chapter.id:
+            current_index = i
+            break
+    
+    # 앞뒤 5개씩 슬라이싱 (현재 포함해서 총 11개)
+    if current_index is not None:
+        start_idx = max(0, current_index - 5)
+        end_idx = min(len(all_chapters), current_index + 6)
+        nearby_chapters = all_chapters[start_idx:end_idx]
     else:
-        siblings = Chapter.objects.filter(book=chapter.book, parent=None).order_by('order', 'code')
+        nearby_chapters = all_chapters[:11]
     
     return render(request, 'practice/chapter_detail.html', {
         'chapter': chapter,
         'content': content,
         'questions': questions,
-        'siblings': siblings,
+        'siblings': nearby_chapters,  # 이름은 그대로 유지 (템플릿 호환)
     })
+
 
 
 @login_required
