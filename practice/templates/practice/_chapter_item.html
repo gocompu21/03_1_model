@@ -1,5 +1,5 @@
 {% load practice_extras %}
-<div class="chapter-item level-{{ chapter.level }}">
+<div id="chapter-{{ chapter.id }}" class="chapter-item level-{{ chapter.level }}">
     <a href="{% url 'practice:chapter_detail' chapter.id %}" class="chapter-link">
         <span class="chapter-code">{{ chapter.code }}</span>&nbsp;&nbsp;<span class="chapter-title">{{ chapter.title }}</span>
     </a>

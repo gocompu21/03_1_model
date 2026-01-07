@@ -386,7 +386,7 @@
         
         <!-- Bottom Navigation -->
         <div class="bottom-nav">
-            <a href="{% url 'practice:chapter_list' chapter.book.id %}" class="btn btn-secondary">
+            <a href="{% url 'practice:chapter_list' chapter.book.id %}#chapter-{{ chapter.id }}" class="btn btn-secondary">
                 📚 목차로 돌아가기
             </a>
             {% if questions %}
