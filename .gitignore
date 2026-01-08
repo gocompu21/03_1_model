@@ -3,11 +3,12 @@ venv/
 db.sqlite3
 *.log
 debug_chat_log.txt
-media/tts/
 db.sqlite3.bak
 local_stores.json
 data/FileStore/
+media/tts/
 media/questions/explanations/
+media/chapter_content/
 chapter_*.html
 !**/chapter_detail.html
 !**/chapter_list.html
