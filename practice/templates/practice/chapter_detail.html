@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load glossary_tags %}
 
 {% block title %}{{ chapter.code }} {{ chapter.title }}{% endblock %}
 
@@ -341,9 +342,10 @@
             </div>
             
             <!-- Content Body -->
+            {% glossary_styles %}
             <div class="content-body">
                 {% if content %}
-                    {{ content.content|safe }}
+                    {{ content.content|link_terms|safe }}
                 {% else %}
                     <div class="empty-content">
                         <div class="icon">📝</div>

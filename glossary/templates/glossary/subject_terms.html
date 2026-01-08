@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ subject.name }} - 찾아보기{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        min-height: 100vh;
+    }
+    
+    main.container {
+        max-width: 900px;
+    }
+    
+    .page-container {
+        padding: 30px 20px;
+    }
+    
+    .back-link {
+        color: #90EE90;
+        text-decoration: none;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .page-title {
+        color: #ffffff;
+        font-size: 2rem;
+    }
+    
+    .terms-list {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 20px;
+    }
+    
+    .term-link {
+        display: block;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        text-decoration: none;
+        color: #333;
+        transition: background 0.2s;
+    }
+    
+    .term-link:last-child {
+        border-bottom: none;
+    }
+    
+    .term-link:hover {
+        background: #f0f7f4;
+    }
+    
+    .term-link .word {
+        font-weight: bold;
+        color: #2d6a4f;
+    }
+</style>
+
+<div class="page-container">
+    <a href="{% url 'glossary:term_list' %}" class="back-link">← 찾아보기 목록</a>
+    
+    <div class="page-header">
+        <h1 class="page-title">📚 {{ subject.name }}</h1>
+    </div>
+    
+    <div class="terms-list">
+        {% for term in terms %}
+        <a href="{% url 'glossary:term_detail' term.pk %}" class="term-link">
+            <span class="word">{{ term.word }}</span>
+        </a>
+        {% empty %}
+        <p style="text-align: center; color: #888; padding: 30px;">
+            이 과목에 등록된 용어가 없습니다.
+        </p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

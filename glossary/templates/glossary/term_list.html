@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %}찾아보기{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        min-height: 100vh;
+    }
+    
+    main.container {
+        max-width: 1000px;
+    }
+    
+    .glossary-container {
+        padding: 30px 20px;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .page-title {
+        color: #ffffff;
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Search & Filter */
+    .filter-bar {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .filter-bar input[type="text"] {
+        flex: 1;
+        min-width: 200px;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .filter-bar select {
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .filter-bar button {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    
+    .filter-bar button:hover {
+        background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    }
+    
+    /* Terms Grid */
+    .terms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 15px;
+    }
+    
+    .term-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 20px;
+        text-decoration: none;
+        color: #333;
+        transition: all 0.2s;
+        display: block;
+    }
+    
+    .term-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .term-word {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2d6a4f;
+        margin-bottom: 8px;
+    }
+    
+    .term-subjects {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .subject-tag {
+        background: #e8f5e9;
+        color: #2d6a4f;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+    }
+</style>
+
+<div class="glossary-container">
+    <div class="page-header">
+        <h1 class="page-title">📖 찾아보기</h1>
+    </div>
+    
+    <form class="filter-bar" method="get">
+        <input type="text" name="q" placeholder="용어 검색..." value="{{ search_query }}">
+        <select name="subject">
+            <option value="">전체 과목</option>
+            {% for subject in subjects %}
+            <option value="{{ subject.id }}" {% if selected_subject == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">검색</button>
+    </form>
+    
+    {% if terms %}
+    <div class="terms-grid">
+        {% for term in terms %}
+        <a href="{% url 'glossary:term_detail' term.pk %}" class="term-card">
+            <div class="term-word">{{ term.word }}</div>
+            <div class="term-subjects">
+                {% for subject in term.subjects.all %}
+                <span class="subject-tag">{{ subject.name }}</span>
+                {% endfor %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>등록된 용어가 없습니다.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ term.word }} - 찾아보기{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        min-height: 100vh;
+    }
+    
+    main.container {
+        max-width: 900px;
+    }
+    
+    .term-container {
+        padding: 30px 20px;
+    }
+    
+    .back-link {
+        color: #90EE90;
+        text-decoration: none;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    
+    .term-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        padding: 30px 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .term-header {
+        border-bottom: 2px solid #2d6a4f;
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .term-word {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1a4a2e;
+        margin: 0 0 15px 0;
+    }
+    
+    .term-subjects {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .subject-tag {
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .term-content {
+        line-height: 1.9;
+        font-size: 1.1rem;
+        color: #333;
+    }
+    
+    .term-content img {
+        max-width: 100%;
+        border-radius: 8px;
+        margin: 15px 0;
+    }
+    
+    /* References Section */
+    .references-section {
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 1px solid #eee;
+    }
+    
+    .references-title {
+        color: #2d6a4f;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    
+    .reference-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .reference-item {
+        padding: 10px 15px;
+        background: #f8fdf9;
+        border-radius: 8px;
+        margin-bottom: 8px;
+    }
+    
+    .reference-item a {
+        color: #2d6a4f;
+        text-decoration: none;
+    }
+    
+    .reference-item a:hover {
+        text-decoration: underline;
+    }
+    
+    .reference-type {
+        color: #888;
+        font-size: 0.85rem;
+    }
+    
+    .term-meta {
+        margin-top: 20px;
+        color: #888;
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="term-container">
+    <a href="{% url 'glossary:term_list' %}" class="back-link">← 찾아보기 목록</a>
+    
+    <div class="term-card">
+        <div class="term-header">
+            <h1 class="term-word">{{ term.word }}</h1>
+            <div class="term-subjects">
+                {% for subject in term.subjects.all %}
+                <span class="subject-tag">{{ subject.name }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="term-content">
+            {{ term.content|safe }}
+        </div>
+        
+        {% if references %}
+        <div class="references-section">
+            <h3 class="references-title">📎 연결된 컨텐츠</h3>
+            <ul class="reference-list">
+                {% for ref in references %}
+                <li class="reference-item">
+                    <span class="reference-type">[{{ ref.get_source_type_display }}]</span>
+                    {% if ref.source_type == 'chapter_content' %}
+                    <a href="{% url 'practice:chapter_detail' ref.source_id %}">{{ ref.source_title }}</a>
+                    {% else %}
+                    {{ ref.source_title }}
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        <div class="term-meta">
+            최종 수정: {{ term.updated_at|date:"Y-m-d H:i" }}
+        </div>
+    </div>
+</div>
+{% endblock %}

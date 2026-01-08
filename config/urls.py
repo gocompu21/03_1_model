@@ -33,6 +33,8 @@ urlpatterns = [
     path("mypage/", include("mypage.urls")),
     path("mock_exam/", include("mock_exam.urls")),
     path("practice/", include("practice.urls")),
+    path("glossary/", include("glossary.urls")),
+    path("dashboard/", include("dashboard.urls")),
 ]
 
 if settings.DEBUG:

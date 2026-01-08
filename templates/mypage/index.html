@@ -759,6 +759,9 @@
         <nav class="nav-links">
             {% if user.is_authenticated %}
             <span>{{ user.username }}님 환영합니다</span>
+            {% if user.is_staff or user.is_superuser %}
+            <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">Dashboard</a>
+            {% endif %}
             <a href="{% url 'mypage:index' %}">마이페이지</a>
             <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
@@ -801,27 +804,9 @@
                 <i class="fas fa-robot"></i> 내 최근 질의 분석
             </div>
 
-            {% if user.is_staff or user.is_superuser %}
-            <div class="menu-item" onclick="showSection('dashboard')" style="border-left: 3px solid #ff9800;">
-                <i class="fas fa-chart-line"></i> 관리자 대시보드
-            </div>
-            {% endif %}
-
             <div class="menu-item" onclick="showSection('info')">
                 <i class="fas fa-user"></i> 회원 정보
             </div>
-
-            {% if user.is_superuser %}
-            <a href="{% url 'mypage:prompt_generator' %}" class="menu-item" style="color: #ff9800;">
-                <i class="fas fa-cog"></i> 문제 관리
-            </a>
-            <div id="menu-practice-input" class="menu-item" onclick="showSection('practice_input')" style="border-left: 3px solid #17a2b8;">
-                <i class="fas fa-edit"></i> 기본서 문제입력
-            </div>
-            <div id="menu-chapter-tree" class="menu-item" onclick="showSection('chapter_tree')" style="border-left: 3px solid #6c757d;">
-                <i class="fas fa-sitemap"></i> 목차 관리
-            </div>
-            {% endif %}
 
             <a href="{% url 'main:index' %}" class="menu-item back-home">
                 <i class="fas fa-home"></i> 홈으로
@@ -2987,6 +2972,13 @@
                 // Pass event to function
                 saveQuestions(e); 
             });
+        }
+        
+        // Handle URL section parameter for Dashboard direct access
+        const urlParams = new URLSearchParams(window.location.search);
+        const section = urlParams.get('section');
+        if (section) {
+            showSection(section);
         }
     });
     </script>
