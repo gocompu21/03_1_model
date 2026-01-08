@@ -47,28 +47,20 @@ def index(request):
         # Last activity
         last_session = UserSession.objects.filter(user=user).order_by('-login_time').first()
         
-        # Check if user is currently online (active session within last 30 minutes)
-        from datetime import timedelta
-        is_online = False
-        if last_session and last_session.logout_time is None:
-            # Session without logout is potentially active, check last_activity
-            time_since_last_activity = timezone.now() - last_session.last_activity
-            is_online = time_since_last_activity < timedelta(minutes=30)
+        # Check if user is currently online (has active session with no logout_time)
+        is_online = last_session and last_session.logout_time is None
         
         user_stats.append({
             'username': user.username,
             'first_name': user.first_name,
             'exam_count': exam_count,
             'study_count': study_count,
-            'avg_score': avg_score,
             'review_count': review_count,
             'today_duration': format_duration(today_minutes),
             'total_duration': format_duration(total_minutes),
             'total_minutes_raw': total_minutes,  # For sorting
             'is_online': is_online,
-            'last_logout_time': last_session.logout_time if last_session else None,
-            'last_activity_time': last_session.login_time if last_session else None,
-            'last_activity_type': '로그인' if last_session else '-',
+            'last_activity': last_session.last_activity if last_session else None,
         })
     
     # Sort by total duration (descending)
