@@ -192,7 +192,6 @@
         <nav class="nav-links">
             <a href="{% url 'dashboard:index' %}" class="highlight">Dashboard</a>
             <a href="{% url 'mypage:index' %}">마이페이지</a>
-            <a href="{% url 'main:index' %}">홈</a>
         </nav>
     </header>
     
@@ -259,6 +258,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
+                        <th>상태</th>
                         <th>사용자</th>
                         <th>시험 응시</th>
                         <th>기출학습</th>
@@ -271,6 +271,19 @@
                 <tbody>
                     {% for user in admin_dashboard.user_stats %}
                     <tr>
+                        <td>
+                            {% if user.is_online %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; color: #28a745;">
+                                <span style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; display: inline-block;"></span>
+                                접속중
+                            </span>
+                            {% else %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; color: #888;">
+                                <span style="width: 8px; height: 8px; background: #ccc; border-radius: 50%; display: inline-block;"></span>
+                                오프라인
+                            </span>
+                            {% endif %}
+                        </td>
                         <td>{{ user.first_name|default:user.username }}</td>
                         <td>{{ user.exam_count }}회</td>
                         <td>{{ user.study_count }}회</td>
@@ -281,7 +294,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
+                        <td colspan="8" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -157,13 +157,13 @@ class Command(BaseCommand):
                     for old, new in replacements.items():
                         tts_text = tts_text.replace(old, new)
                     
-                    # Build prompt with instruction
-                    prompt_text = "천천히, 또박또박 명확하게 읽어주세요:\n\n" + tts_text
+                    # Add simple slow speech instruction
+                    tts_text = "천천히, 또박또박 명확하게 읽어주세요:\n\n" + tts_text
                     
                     contents = [
                         types.Content(
                             role="user",
-                            parts=[types.Part.from_text(text=prompt_text)],
+                            parts=[types.Part.from_text(text=tts_text)],
                         ),
                     ]
 
@@ -173,16 +173,16 @@ class Command(BaseCommand):
                         speech_config=types.SpeechConfig(
                             voice_config=types.VoiceConfig(
                                 prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                    voice_name="Orus"
+                                    voice_name="Orus"  # Mature, deep male voice
                                 )
                             ),
                         ),
                     )
-                    
+
+                    # Collect audio chunks
                     audio_chunks = []
                     mime_type = None
-                
-                    # Stream audio
+
                     for chunk in client.models.generate_content_stream(
                         model="gemini-2.5-pro-preview-tts",
                         contents=contents,

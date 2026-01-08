@@ -1,5 +1,7 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib import messages
 from .models import Subject, Term, TermReference
 
 
@@ -63,3 +65,64 @@ def subject_terms(request, pk):
         'terms': terms,
     }
     return render(request, 'glossary/subject_terms.html', context)
+
+
+@login_required
+@staff_member_required
+def term_create(request):
+    """용어 등록"""
+    subjects = Subject.objects.all()
+    
+    if request.method == 'POST':
+        word = request.POST.get('word', '').strip()
+        content = request.POST.get('content', '').strip()
+        subject_ids = request.POST.getlist('subjects')
+        
+        if not word:
+            messages.error(request, '용어를 입력해주세요.')
+        elif Term.objects.filter(word=word).exists():
+            messages.error(request, f'"{word}" 용어가 이미 존재합니다.')
+        else:
+            term = Term.objects.create(word=word, content=content)
+            if subject_ids:
+                term.subjects.set(subject_ids)
+            messages.success(request, f'"{word}" 용어가 등록되었습니다.')
+            return redirect('glossary:term_detail', pk=term.pk)
+    
+    context = {
+        'subjects': subjects,
+    }
+    return render(request, 'glossary/term_form.html', context)
+
+
+@login_required
+@staff_member_required
+def term_edit(request, pk):
+    """용어 수정"""
+    term = get_object_or_404(Term, pk=pk)
+    subjects = Subject.objects.all()
+    
+    if request.method == 'POST':
+        word = request.POST.get('word', '').strip()
+        content = request.POST.get('content', '').strip()
+        subject_ids = request.POST.getlist('subjects')
+        
+        if not word:
+            messages.error(request, '용어를 입력해주세요.')
+        elif Term.objects.filter(word=word).exclude(pk=pk).exists():
+            messages.error(request, f'"{word}" 용어가 이미 존재합니다.')
+        else:
+            term.word = word
+            term.content = content
+            term.save()
+            term.subjects.set(subject_ids)
+            messages.success(request, f'"{word}" 용어가 수정되었습니다.')
+            return redirect('glossary:term_detail', pk=term.pk)
+    
+    context = {
+        'term': term,
+        'subjects': subjects,
+        'edit_mode': True,
+    }
+    return render(request, 'glossary/term_form.html', context)
+
