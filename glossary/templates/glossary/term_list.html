@@ -158,19 +158,32 @@
         {% endif %}
     </form>
     
+    
     {% if terms %}
-    <div class="terms-grid">
-        {% for term in terms %}
-        <a href="{% url 'glossary:term_detail' term.pk %}" class="term-card">
-            <div class="term-word">{{ term.word }}</div>
-            <div class="term-subjects">
-                {% for subject in term.subjects.all %}
-                <span class="subject-tag">{{ subject.name }}</span>
-                {% endfor %}
-            </div>
-        </a>
-        {% endfor %}
-    </div>
+    <table class="terms-table" style="width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.95); border-radius: 12px; overflow: hidden;">
+        <thead>
+            <tr style="background: linear-gradient(135deg, #2d6a4f, #40916c); color: white;">
+                <th style="padding: 15px; text-align: left;">용어</th>
+                <th style="padding: 15px; text-align: left;">과목</th>
+                <th style="padding: 15px; text-align: center; width: 80px;">링크수</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for term in terms %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 12px 15px;">
+                    <a href="{% url 'glossary:term_detail' term.pk %}" style="color: #2d6a4f; font-weight: 600; text-decoration: none;">{{ term.word }}</a>
+                </td>
+                <td style="padding: 12px 15px;">
+                    {% for subject in term.subjects.all %}
+                    <span style="background: #e8f5e9; color: #2d6a4f; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; margin-right: 3px;">{{ subject.name }}</span>
+                    {% endfor %}
+                </td>
+                <td style="padding: 12px 15px; text-align: center; color: #666;">{{ term.reference_count|default:0 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% else %}
     <div class="empty-state">
         <p>등록된 용어가 없습니다.</p>

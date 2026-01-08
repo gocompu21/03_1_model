@@ -2,13 +2,16 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
+from django.db.models import Count
 from .models import Subject, Term, TermReference
 
 
 @login_required
 def term_list(request):
     """용어 목록"""
-    terms = Term.objects.prefetch_related('subjects').all()
+    terms = Term.objects.prefetch_related('subjects').annotate(
+        reference_count=Count('references')
+    ).all()
     subjects = Subject.objects.all()
     
     # 과목 필터
