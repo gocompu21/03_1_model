@@ -254,11 +254,13 @@
         placeholder: '용어에 대한 설명을 입력하세요...'
     });
     
-    // Load existing content
-    var existingContent = document.getElementById('content').value;
+    // Load existing content using a safer method
+    {% if term.content %}
+    var existingContent = `{{ term.content|escapejs }}`;
     if (existingContent) {
-        quill.root.innerHTML = existingContent;
+        quill.clipboard.dangerouslyPasteHTML(existingContent);
     }
+    {% endif %}
     
     // Sync Quill content to textarea before form submission
     document.querySelector('form').addEventListener('submit', function() {
