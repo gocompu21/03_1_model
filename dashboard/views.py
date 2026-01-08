@@ -50,6 +50,14 @@ def index(request):
         # Check if user is currently online (has active session with no logout_time)
         is_online = last_session and last_session.logout_time is None
         
+        # Determine last activity type
+        last_activity_type = ''
+        if last_session:
+            if last_session.logout_time:
+                last_activity_type = '로그아웃'
+            else:
+                last_activity_type = '활동중'
+        
         user_stats.append({
             'username': user.username,
             'first_name': user.first_name,
@@ -61,6 +69,7 @@ def index(request):
             'total_minutes_raw': total_minutes,  # For sorting
             'is_online': is_online,
             'last_activity': last_session.last_activity if last_session else None,
+            'last_activity_type': last_activity_type,
         })
     
     # Sort by total duration (descending)
