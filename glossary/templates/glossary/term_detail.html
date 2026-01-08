@@ -143,7 +143,15 @@
     
     <div class="term-card">
         <div class="term-header">
-            <h1 class="term-word">{{ term.word }}</h1>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <h1 class="term-word">{{ term.word }}</h1>
+                {% if user.is_staff or user.is_superuser %}
+                <a href="{% url 'glossary:term_edit' term.pk %}" 
+                   style="padding: 8px 16px; background: #ffc107; color: #333; text-decoration: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
+                    ✏️ 수정
+                </a>
+                {% endif %}
+            </div>
             <div class="term-subjects">
                 {% for subject in term.subjects.all %}
                 <span class="subject-tag">{{ subject.name }}</span>
