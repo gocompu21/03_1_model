@@ -126,3 +126,31 @@ def term_edit(request, pk):
     }
     return render(request, 'glossary/term_form.html', context)
 
+
+@login_required
+@staff_member_required
+def api_add_term(request):
+    """API: 용어 추가 (JSON 응답)"""
+    from django.http import JsonResponse
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST 요청만 허용됩니다.'}, status=405)
+    
+    word = request.POST.get('word', '').strip()
+    content = request.POST.get('content', '').strip()
+    subject_id = request.POST.get('subject_id', '')
+    
+    if not word:
+        return JsonResponse({'success': False, 'error': '용어를 입력해주세요.'})
+    
+    # Check if term already exists
+    if Term.objects.filter(word=word).exists():
+        return JsonResponse({'success': False, 'error': f'"{word}" 용어가 이미 존재합니다.'})
+    
+    try:
+        term = Term.objects.create(word=word, content=content)
+        if subject_id:
+            term.subjects.set([subject_id])
+        return JsonResponse({'success': True, 'term_id': term.pk, 'word': word})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

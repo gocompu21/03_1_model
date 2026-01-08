@@ -185,6 +185,14 @@
     </div>
 
     <div class="container">
+        <!-- Card: 기본서 학습 -->
+        <div class="card">
+            <div class="icon">📗</div>
+            <h3>기본서 학습</h3>
+            <p>기본서 핵심정리와<br>단원 이해 문제</p>
+            <a href="{% url 'practice:book_list' %}" class="btn">학습 하기</a>
+        </div>
+
         <!-- Card 1: Study/Exam -->
         <div class="card">
             <div class="icon">📖</div>
@@ -223,15 +231,6 @@
             <h3>나무주치의에게 물어보세요</h3>
             <p>폭넓은 지식으로 궁금증을<br>해결해드립니다.</p>
             <a href="{% url 'chat:index' %}" class="btn">질문 하러 가기</a>
-        </div>
-
-
-        <!-- Card: 기본서 학습 -->
-        <div class="card">
-            <div class="icon">📗</div>
-            <h3>기본서 학습</h3>
-            <p>기본서 목차별로 정리된<br>연습문제를 풀어보세요.</p>
-            <a href="{% url 'practice:book_list' %}" class="btn">학습 하기</a>
         </div>
 
         <!-- Card 5: BBS -->

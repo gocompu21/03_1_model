@@ -444,6 +444,18 @@
                 <div class="message user-message">
                     <strong>질문:</strong><br>
                     {{ user_input }}
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                        <select id="subject-select-static" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.8rem;">
+                            <option value="">과목 선택</option>
+                            {% for subject in subjects %}
+                            <option value="{{ subject.id }}">{{ subject.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button onclick="addToGlossary('{{ user_input|escapejs }}', '{{ response_text|escapejs }}', document.getElementById('subject-select-static').value)" 
+                                style="padding: 4px 10px; background: #ffc107; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                            📖 용어집 추가
+                        </button>
+                    </div>
                 </div>
                 {% endif %}
 
@@ -540,12 +552,56 @@
                 clearInterval(timerInterval);
             }
 
-            function appendMessage(role, text) {
+            // Store last question and response for glossary button
+            let lastQuestion = '';
+            let lastResponse = '';
+
+            function appendMessage(role, text, addGlossaryBtn = false) {
                 if (welcomeMsg) welcomeMsg.style.display = 'none';
 
                 const msgDiv = document.createElement('div');
                 msgDiv.className = `message ${role}-message`;
-                msgDiv.innerHTML = `<strong>${role === 'user' ? '질문' : '나무주치의 답변'}:</strong><br>${text}`;
+                
+                if (role === 'user') {
+                    lastQuestion = text;
+                    msgDiv.innerHTML = `<strong>질문:</strong><br>${text}`;
+                } else {
+                    lastResponse = text;
+                    msgDiv.innerHTML = `<strong>나무주치의 답변:</strong><br>${text}`;
+                    
+                    // Add glossary button to the previous user message
+                    const userMessages = chatBox.querySelectorAll('.user-message');
+                    if (userMessages.length > 0) {
+                        const lastUserMsg = userMessages[userMessages.length - 1];
+                        if (!lastUserMsg.querySelector('.glossary-btn-area')) {
+                            const btnArea = document.createElement('div');
+                            btnArea.className = 'glossary-btn-area';
+                            btnArea.style.cssText = 'margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;';
+                            
+                            let selectOptions = '<option value="">과목 선택</option>';
+                            subjectsData.forEach(s => {
+                                selectOptions += `<option value="${s.id}">${s.name}</option>`;
+                            });
+                            
+                            btnArea.innerHTML = `
+                                <select class="glossary-subject-select" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.8rem;">
+                                    ${selectOptions}
+                                </select>
+                                <button class="glossary-add-btn" style="padding: 4px 10px; background: #ffc107; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                                    📖 용어집 추가
+                                </button>
+                            `;
+                            lastUserMsg.appendChild(btnArea);
+                            
+                            // Add click event
+                            btnArea.querySelector('.glossary-add-btn').onclick = function() {
+                                const subjectId = btnArea.querySelector('.glossary-subject-select').value;
+                                addToGlossary(lastQuestion, lastResponse, subjectId);
+                            };
+                        }
+                    }
+                }
+                
                 chatBox.appendChild(msgDiv);
                 chatBox.scrollTop = chatBox.scrollHeight;
                 processLinks();
@@ -668,6 +724,49 @@
                 window.MathJax.typesetPromise().catch(err => console.log(err));
             }
         });
+        
+        // Global subjects data for dynamic buttons
+        const subjectsData = [
+            {% for subject in subjects %}
+            { id: {{ subject.id }}, name: "{{ subject.name }}" },
+            {% endfor %}
+        ];
+        
+        // 용어집 추가 함수
+        async function addToGlossary(word, content, subjectId) {
+            if (!word.trim()) {
+                alert('용어를 입력해주세요.');
+                return;
+            }
+            
+            if (!subjectId) {
+                alert('과목을 선택해주세요.');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('word', word);
+                formData.append('content', content);
+                formData.append('subject_id', subjectId);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                
+                const response = await fetch("{% url 'glossary:api_add_term' %}", {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('용어집에 추가되었습니다!');
+                } else {
+                    alert(data.error || '추가에 실패했습니다.');
+                }
+            } catch (error) {
+                alert('오류가 발생했습니다: ' + error.message);
+            }
+        }
     </script>
 </body>
 

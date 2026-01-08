@@ -89,6 +89,10 @@ def index(request):
     paginator = Paginator(chat_history_list, 15)  # Show 15 contacts per page.
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+    
+    # Import subjects for glossary feature
+    from glossary.models import Subject
+    subjects = Subject.objects.all()
 
     return render(
         request,
@@ -98,6 +102,7 @@ def index(request):
             "response_text": response_text,
             "page_obj": page_obj,
             "selected_history": selected_history,
+            "subjects": subjects,
         },
     )
 

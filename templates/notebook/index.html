@@ -523,6 +523,13 @@
                 <div class="message user-message">
                     <strong>질문:</strong><br>
                     {{ user_input|linebreaksbr }}
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
+                        <span style="font-size: 0.8rem; color: #666; margin-right: 8px;">📚 {{ current_subject }}</span>
+                        <button onclick="addToGlossary('{{ user_input|escapejs }}', '{{ response_text|escapejs }}', '{{ current_subject }}')" 
+                                style="padding: 4px 10px; background: #ffc107; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                            📖 용어집 추가
+                        </button>
+                    </div>
                 </div>
                 {% endif %}
 
@@ -633,6 +640,10 @@
 
             stopTimer();
 
+            // Store last question and response for glossary
+            let lastQuestion = '';
+            let lastResponse = '';
+
             async function appendMessage(role, text) {
                 if (welcomeMsg) welcomeMsg.style.display = 'none';
 
@@ -643,9 +654,36 @@
                 let displayHtml = text;
                 if (role === 'user') {
                     displayHtml = text.replace(/\n/g, '<br>');
+                    lastQuestion = text;
+                    msgDiv.innerHTML = `<strong>질문:</strong><br>${displayHtml}`;
+                } else {
+                    lastResponse = text;
+                    msgDiv.innerHTML = `<strong>기본서 내용:</strong><br>${displayHtml}`;
+                    
+                    // Add glossary button to the previous user message
+                    const userMessages = chatBox.querySelectorAll('.user-message');
+                    if (userMessages.length > 0) {
+                        const lastUserMsg = userMessages[userMessages.length - 1];
+                        if (!lastUserMsg.querySelector('.glossary-btn-area')) {
+                            const currentSubject = document.getElementById('selected-store').value;
+                            const btnArea = document.createElement('div');
+                            btnArea.className = 'glossary-btn-area';
+                            btnArea.style.cssText = 'margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;';
+                            btnArea.innerHTML = `
+                                <span style="font-size: 0.8rem; color: #666; margin-right: 8px;">📚 ${currentSubject}</span>
+                                <button class="glossary-add-btn" style="padding: 4px 10px; background: #ffc107; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                                    📖 용어집 추가
+                                </button>
+                            `;
+                            lastUserMsg.appendChild(btnArea);
+                            
+                            btnArea.querySelector('.glossary-add-btn').onclick = function() {
+                                addToGlossary(lastQuestion, lastResponse, currentSubject);
+                            };
+                        }
+                    }
                 }
-
-                msgDiv.innerHTML = `<strong>${role === 'user' ? '질문' : '기본서 내용'}:</strong><br>${displayHtml}`;
+                
                 chatBox.appendChild(msgDiv);
                 chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -788,6 +826,52 @@
                 }
             }
         });
+        
+        // Subject to ID mapping for glossary
+        const subjectToId = {
+            '수목생리학': 1,
+            '수목병리학': 2,
+            '수목해충학': 3,
+            '수목관리학': 4,
+            '산림토양학': 5
+        };
+        
+        // 용어집 추가 함수
+        async function addToGlossary(word, content, subjectName) {
+            if (!word.trim()) {
+                alert('용어를 입력해주세요.');
+                return;
+            }
+            
+            const subjectId = subjectToId[subjectName] || '';
+            if (!subjectId) {
+                alert('과목 정보가 없습니다.');
+                return;
+            }
+            
+            try {
+                const formData = new FormData();
+                formData.append('word', word);
+                formData.append('content', content);
+                formData.append('subject_id', subjectId);
+                formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+                
+                const response = await fetch("{% url 'glossary:api_add_term' %}", {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('용어집에 추가되었습니다!');
+                } else {
+                    alert(data.error || '추가에 실패했습니다.');
+                }
+            } catch (error) {
+                alert('오류가 발생했습니다: ' + error.message);
+            }
+        }
     </script>
 </body>
 
