@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load glossary_tags %}
 
 {% block title %}찾아보기{% endblock %}
 
@@ -157,10 +158,67 @@
     
     
     {% if terms %}
-    <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem;">
-        {% regroup terms by word.0 as grouped_terms %}
+    {% regroup terms by word|get_initial as grouped_terms %}
+    
+    <!-- Index Navigation (Multi-row Tabs Style) -->
+    <div style="display: flex; flex-wrap: wrap; border-bottom: 2px solid #2d6a4f; margin-bottom: 0px; padding: 0 5px 0 55px; gap: 2px;">
+        <style>
+            .glossary-tab {
+                display: block; 
+                padding: 4px 17px; 
+                background: linear-gradient(135deg, #2d6a4f, #40916c);
+                color: white; 
+                text-decoration: none; 
+                border: 1px solid #1b4332;
+                border-bottom: none; 
+                border-radius: 6px 6px 0 0; 
+                font-weight: bold; 
+                font-size: 0.85rem; 
+                white-space: nowrap; 
+                transition: all 0.2s; 
+                position: relative; 
+                top: 0px;
+                margin-bottom: -1px; /* Align deeply */
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            }
+            .glossary-tab:hover {
+                background: linear-gradient(135deg, #1b4332, #2d6a4f);
+                transform: translateY(-2px);
+            }
+        </style>
         {% for group in grouped_terms %}
-        <tr>
+        <a href="#term-group-{{ group.grouper }}" class="glossary-tab">
+            {{ group.grouper }}
+        </a>
+        {% endfor %}
+    </div>
+    
+    <!-- Script to highlight active tab -->
+    <script>
+        document.querySelectorAll('a[href^="#term-group-"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                // Reset styling for all tabs
+                document.querySelectorAll('a[href^="#term-group-"]').forEach(t => {
+                    t.style.background = 'linear-gradient(135deg, #2d6a4f, #40916c)';
+                    t.style.color = 'white';
+                    t.style.zIndex = '0';
+                    t.style.borderBottom = 'none';
+                    t.style.transform = 'translateY(0)';
+                    t.style.fontWeight = 'bold';
+                });
+                // Style active tab (Darker/Different to indicate selection)
+                this.style.background = 'linear-gradient(135deg, #1b4332, #2d6a4f)';
+                this.style.color = '#ffc107'; // Highlight text color
+                this.style.borderColor = '#1b4332';
+                this.style.zIndex = '1';
+                this.style.transform = 'translateY(2px)'; // Connect to border
+            });
+        });
+    </script>
+
+    <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem; margin-top: 0; border-top: none;">
+        {% for group in grouped_terms %}
+        <tr id="term-group-{{ group.grouper }}">
             <td rowspan="{{ group.list|length }}" style="background: linear-gradient(135deg, #2d6a4f, #40916c); color: white; padding: 8px 12px; font-weight: 700; text-align: center; width: 30px; vertical-align: top; border-bottom: 1px solid #1b4332;">
                 {{ group.grouper }}
             </td>

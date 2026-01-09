@@ -144,3 +144,43 @@ def get_relevant_terms(content, subject_name=None):
     return Term.objects.filter(id__in=found_term_ids).annotate(
         reference_count=Count('references')
     ).order_by('word')
+
+
+@register.filter(name='get_initial')
+def get_initial(value):
+    """
+    한글 문자열의 초성을 반환합니다. 영문/숫자는 그대로 또는 대문자화.
+    사용자 요청 그룹: 1, A, S, 가, 나, 다, 라, 마, 바, 사, 아, 자, 차, 카, 타, 파, 하
+    """
+    if not value:
+        return ''
+        
+    char = value[0]
+    
+    # 1. 숫자
+    if char.isdigit():
+        return '1'
+        
+    # 2. 한글
+    if '가' <= char <= '힣':
+        # 초성 인덱스 계산
+        initial_index = (ord(char) - 0xAC00) // 588
+        
+        # 초성 리스트 (19개)
+        # ㄱ ㄲ ㄴ ㄷ ㄸ ㄹ ㅁ ㅂ ㅃ ㅅ ㅆ ㅇ ㅈ ㅉ ㅊ ㅋ ㅌ ㅍ ㅎ
+        initials = ['가', '가', '나', '다', '다', '라', '마', '바', '바', '사', '사', '아', 
+                    '자', '자', '차', '카', '타', '파', '하']
+                    
+        if 0 <= initial_index < len(initials):
+            return initials[initial_index]
+            
+    # 3. 영문
+    if 'a' <= char.lower() <= 'z':
+        upper_char = char.upper()
+        if 'A' <= upper_char <= 'N':
+            return 'A~N'
+        elif 'O' <= upper_char <= 'Z':
+            return 'O~Z'
+        return upper_char
+        
+    return char
