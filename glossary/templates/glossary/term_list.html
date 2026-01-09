@@ -170,7 +170,7 @@
                 <a href="{% url 'glossary:term_detail' term.pk %}" style="color: #2d6a4f; text-decoration: none; font-weight: 500;">{{ term.word }}</a>
             </td>
             <td style="padding: 4px 6px; border-bottom: 1px solid #eee; text-align: center; width: 40px; color: #666;">
-                {{ term.reference_count|default:0 }}
+                {{ term.reference_count|default:0 }}회
             </td>
             <td style="padding: 4px 10px; border-bottom: 1px solid #eee;">
                 {% for ref in term.references.all %}

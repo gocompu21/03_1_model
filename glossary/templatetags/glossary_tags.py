@@ -78,31 +78,7 @@ def glossary_styles():
     ''')
 
 
-from functools import lru_cache
-
-@lru_cache(maxsize=100)
-def get_terms_pattern(subject_name):
-    """
-    해당 과목의 용어 패턴을 캐싱하여 반환
-    반환: (compile된 regex 패턴, term_map 딕셔너리)
-    """
-    # 과목에 해당하는 용어들 가져오기 (긴 단어 우선)
-    from glossary.models import Term  # 순환 참조 방지
-    terms = Term.objects.filter(subjects__name=subject_name).values('id', 'word')
-    
-    if not terms:
-        return None, None
-        
-    # 긴 단어부터 매칭되도록 정렬
-    sorted_terms = sorted(terms, key=lambda t: len(t['word']), reverse=True)
-    
-    # {word: id} 맵핑 생성
-    term_map = {t['word']: t['id'] for t in sorted_terms}
-    
-    # 정규식 패턴 생성 (특수문자 이스케이프)
-    words = [re.escape(t['word']) for t in sorted_terms]
-    pattern_str = r'(' + '|'.join(words) + r')'
-    return re.compile(pattern_str), term_map
+from .utils import get_terms_pattern
 
 
 @register.filter(name='autolink_terms')
