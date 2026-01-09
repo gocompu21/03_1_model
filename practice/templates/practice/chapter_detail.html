@@ -367,6 +367,22 @@
                 </a>
             </div>
             {% endif %}
+            
+            <!-- Related Terms -->
+            {% get_relevant_terms content.content chapter.book.subject as related_terms %}
+            {% if related_terms %}
+            <div style="margin-top: 40px; border-top: 1px dashed #ddd; padding-top: 20px;">
+                <h3 style="font-size: 1.1rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                    {% for term in related_terms %}
+                    <a href="{% url 'glossary:term_detail' term.pk %}" target="glossary_popup" 
+                       style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.85rem; border: 1px solid #2d6a4f; transition: all 0.2s;">
+                        {{ term.word }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
         </div>
         
         <!-- Questions Section -->

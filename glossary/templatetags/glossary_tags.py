@@ -76,3 +76,92 @@ def glossary_styles():
         }
     </style>
     ''')
+
+
+from functools import lru_cache
+
+@lru_cache(maxsize=100)
+def get_terms_pattern(subject_name):
+    """
+    해당 과목의 용어 패턴을 캐싱하여 반환
+    반환: (compile된 regex 패턴, term_map 딕셔너리)
+    """
+    # 과목에 해당하는 용어들 가져오기 (긴 단어 우선)
+    from glossary.models import Term  # 순환 참조 방지
+    terms = Term.objects.filter(subjects__name=subject_name).values('id', 'word')
+    
+    if not terms:
+        return None, None
+        
+    # 긴 단어부터 매칭되도록 정렬
+    sorted_terms = sorted(terms, key=lambda t: len(t['word']), reverse=True)
+    
+    # {word: id} 맵핑 생성
+    term_map = {t['word']: t['id'] for t in sorted_terms}
+    
+    # 정규식 패턴 생성 (특수문자 이스케이프)
+    words = [re.escape(t['word']) for t in sorted_terms]
+    pattern_str = r'(' + '|'.join(words) + r')'
+    return re.compile(pattern_str), term_map
+
+
+@register.filter(name='autolink_terms')
+def autolink_terms(content, subject_name=None):
+    """
+    텍스트 내의 용어를 자동으로 링크로 변환 (과목 기준)
+    
+    Usage:
+        {{ text|autolink_terms:"수목병리학" }}
+    """
+    if not content or not subject_name:
+        return content
+        
+    pattern, term_map = get_terms_pattern(subject_name)
+    if not pattern:
+        return content
+        
+    def replace_func(match):
+        word = match.group(0)
+        term_id = term_map.get(word)
+        if term_id:
+            # target="glossary_popup"으로 설정하여 하나의 창만 재사용
+            return f'<a href="/glossary/term/{term_id}/" class="glossary-link" target="glossary_popup" title="용어: {word}">{word}</a>'
+        return word
+        
+    # 이미 링크된 태그 내부나 HTML 속성 등을 제외하고 텍스트만 치환하도록 복잡하게 짜는 대신,
+    # 여기서는 마크다운 변환 전의 Plain Text라고 가정하고 단순 치환.
+    # 만약 HTML이 섞여있다면 BeautifulSoup 등을 써야 하지만 성능 이슈가 있음.
+    # 현재는 Markdown 필터 적용 전에 이 필터를 적용할 것이므로 텍스트 상태임.
+    
+    return mark_safe(pattern.sub(replace_func, content))
+
+
+@register.simple_tag
+def get_relevant_terms(content, subject_name=None):
+    """
+    텍스트에 포함된 용어 목록을 반환 (중복 제거)
+    
+    Usage:
+        {% get_relevant_terms content.content chapter.book.subject as terms %}
+    """
+    if not content or not subject_name:
+        return []
+        
+    pattern, term_map = get_terms_pattern(subject_name)
+    if not pattern:
+        return []
+        
+    found_term_ids = set()
+    
+    # 텍스트에서 모든 매칭 찾기
+    for match in pattern.finditer(content):
+        term_id = term_map.get(match.group(0))
+        if term_id:
+            found_term_ids.add(term_id)
+            
+    if not found_term_ids:
+        return []
+        
+    # 용어 객체 조회 (정렬)
+    from glossary.models import Term
+    return Term.objects.filter(id__in=found_term_ids).order_by('word')

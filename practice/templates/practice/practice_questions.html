@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load glossary_tags %}
 {% load practice_extras %}
 {% load static %}
 {% load markdown_extras %}
@@ -16,6 +17,23 @@
         background-color: #f8f6e6;
         margin: 0;
         font-family: sans-serif;
+    }
+    
+    /* Glossary Link Styles */
+    .glossary-link {
+        color: #2d6a4f;
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        cursor: pointer;
+        font-weight: 500;
+        background-color: rgba(45, 106, 79, 0.05);
+        padding: 0 2px;
+        border-radius: 3px;
+    }
+    .glossary-link:hover {
+        background: #e8f5e9;
+        text-decoration-style: solid;
+        color: #1b4332;
     }
 
     /* Hide global header */
@@ -321,6 +339,22 @@
                     <div class="exp-text markdown-content">
                         {{ q.explanation|default:"해설이 없습니다."|markdown|safe }}
                     </div>
+
+                    <!-- Related Terms in Explanation -->
+                    {% get_relevant_terms q.explanation chapter.book.subject as related_terms %}
+                    {% if related_terms %}
+                    <div style="margin-top: 20px; border-top: 1px dashed #ddd; padding-top: 15px;">
+                        <h4 style="font-size: 0.95rem; color: #2d6a4f; margin: 0 0 10px 0;">🔑 관련 용어</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                            {% for term in related_terms %}
+                            <a href="{% url 'glossary:term_detail' term.pk %}" target="glossary_popup" 
+                               style="display: inline-block; padding: 3px 8px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; border: 1px solid #2d6a4f; transition: all 0.2s;">
+                                {{ term.word }}
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
                     
                     <!-- Close button -->
                     <div style="text-align: center; margin-top: 15px; cursor: pointer;" onclick="toggleExplanation('exp-{{ q.id }}')" title="해설 접기">
