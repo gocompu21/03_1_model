@@ -78,7 +78,7 @@ def glossary_styles():
     ''')
 
 
-from .utils import get_terms_pattern
+from glossary.utils import get_terms_pattern
 
 
 @register.filter(name='autolink_terms')
