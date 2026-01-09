@@ -1,0 +1,5332 @@
+{
+  "subject": "수목병리학",
+  "total_keywords": 1065,
+  "total_questions": 175,
+  "keywords": [
+    {
+      "word": "자낭반",
+      "count": 17,
+      "frequency_percent": 100.0
+    },
+    {
+      "word": "무성포자",
+      "count": 15,
+      "frequency_percent": 88.2
+    },
+    {
+      "word": "자낭각",
+      "count": 14,
+      "frequency_percent": 82.4
+    },
+    {
+      "word": "영양기관",
+      "count": 12,
+      "frequency_percent": 70.6
+    },
+    {
+      "word": "분생포자",
+      "count": 11,
+      "frequency_percent": 64.7
+    },
+    {
+      "word": "파이토플라스마(Phytoplasma)",
+      "count": 10,
+      "frequency_percent": 58.8
+    },
+    {
+      "word": "담자균문",
+      "count": 10,
+      "frequency_percent": 58.8
+    },
+    {
+      "word": "표징",
+      "count": 9,
+      "frequency_percent": 52.9
+    },
+    {
+      "word": "곰팡이",
+      "count": 9,
+      "frequency_percent": 52.9
+    },
+    {
+      "word": "자낭균문",
+      "count": 9,
+      "frequency_percent": 52.9
+    },
+    {
+      "word": "병징",
+      "count": 9,
+      "frequency_percent": 52.9
+    },
+    {
+      "word": "유성포자",
+      "count": 9,
+      "frequency_percent": 52.9
+    },
+    {
+      "word": "파이토플라스마",
+      "count": 7,
+      "frequency_percent": 41.2
+    },
+    {
+      "word": "참나무 시들음병:",
+      "count": 7,
+      "frequency_percent": 41.2
+    },
+    {
+      "word": "생식기관",
+      "count": 7,
+      "frequency_percent": 41.2
+    },
+    {
+      "word": "솔수염하늘소",
+      "count": 7,
+      "frequency_percent": 41.2
+    },
+    {
+      "word": "백색부후균",
+      "count": 6,
+      "frequency_percent": 35.3
+    },
+    {
+      "word": "갈색부후균",
+      "count": 6,
+      "frequency_percent": 35.3
+    },
+    {
+      "word": "세균",
+      "count": 6,
+      "frequency_percent": 35.3
+    },
+    {
+      "word": "광릉긴나무좀",
+      "count": 6,
+      "frequency_percent": 35.3
+    },
+    {
+      "word": "북방수염하늘소",
+      "count": 6,
+      "frequency_percent": 35.3
+    },
+    {
+      "word": "무성생식 포자",
+      "count": 6,
+      "frequency_percent": 35.3
+    },
+    {
+      "word": "낙엽송",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "자낭포자",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "잣나무 털녹병:",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "전나무 잎녹병",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "마름무늬매미충",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "녹포자",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "이상비대",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "Xanthomonas",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "침엽수",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "Pseudocercospora(슈도세르코스포라)속",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "기주 영향",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "광범위 기주",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "유연격벽",
+      "count": 5,
+      "frequency_percent": 29.4
+    },
+    {
+      "word": "바이러스",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "뱀고사리",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "까치밥나무",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "화학적 방제",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "담자포자",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "소나무 시들음병:",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "번식기관",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "오답:",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "(그름)",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "[학습 팁]",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "맞습니다.",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "자낭반(apothecium)",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "분생포자각",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "그름.",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "신갈나무",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "소나무 시들음병(소나무재선충병):",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "자낭균문(Ascomycota)",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "ㄴ (자주날개무늬병):",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "그름",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "유성생식 포자",
+      "count": 4,
+      "frequency_percent": 23.5
+    },
+    {
+      "word": "잣나무 털녹병",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "소나무 혹병",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "자낭각 (perithecium)",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄹ. 소나무류 모잘록병:",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄴ:",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄷ:",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "맞습니다",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄷ. 버섯:",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㅁ. 흡기:",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄹ. 균사판:",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "Septoria속",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "광합성 저해",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄱ(목재청변):",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "세포벽",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "곰팡이(자낭균류)",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "자주날개무늬병",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄴ. 느타리 (Pleurotus ostreatus):",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄷ. 왕잎새버섯 (Meripilus giganteus):",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㅁ. 덕다리버섯 (Laetiporus sulphureus):",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "Guignardia",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "자낭균(Ascomycota)",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "ㄱ(곰팡이)",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "파이토플라스마(ㄹ):",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "곰팡이(ㄱ):",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "올바른 조합:",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "자낭각(perithecium)",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "녹포자기",
+      "count": 3,
+      "frequency_percent": 17.6
+    },
+    {
+      "word": "병의 원인체인 파이토플라스마 자체는 육안으로 관찰할 수 없습니다.",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "관찰",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "낙엽송 가지끝마름병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "모자이크 증상",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄹ (세포로 구성): 그름",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "a (물관부 폐쇄): 그름",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄷ (DNA로만 구성): 그름",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "b (균핵 형성): 그름",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "자낭반 (apothecium)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "참나무류",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄷ. 소나무류 수지궤양병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅁ. 오리나무 갈색무늬병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "저병원성 균주(hypovirulent strain)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "생물적 방제",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "물리적 방제",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "주요",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "체관부(사부)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄱ:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄹ:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "이주성 내부 기생선충",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "e(녹병균)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "d(떡병균)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "f(목재청변병균)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "b(탄저병균)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "녹병균 (Pucciniales 목)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "틀립니다",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "떡병균 (Exobasidium spp.)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "목재청변병균",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "탄저병균 (Colletotrichum spp.)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "고온다습하고 통풍이 불량한 환경",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄱ. 포자:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄴ. 자낭:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅂ. 뿌리꼴균사다발:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "버즘나무 탄저병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "뽕나무 오갈병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "아밀라리아뿌리썩음병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "회화나무 녹병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "소나무 시들음병(소나무재선충병)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "Pseudocercospora속",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "병징(symptom)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "표징(sign)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "유합조직 형성 촉진",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "가. 대추나무 빗자루병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "나. 소나무 목재청변병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "나무좀류",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "다. 느릅나무 시들음병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "라. 참나무 시들음병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "마. 소나무 시들음병(소나무재선충병):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "하늘소류",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "딱정벌레목",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "여름포자",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "담배장님노린재",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "광합성을 방해",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "그을음병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "절대활물기생체",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅁ. 벚나무 빗자루병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "전자현미경",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "분생포자(conidia)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "흡기(haustorium)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "단풍나무 타르점무늬병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅈ(소나무 시들음병(소나무재선충병)):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅁ(명자나무 불마름병):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "병자각",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "이을용",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "갈참나무",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "$\\text{dsRNA}$ 바이러스",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "밤나무 줄기마름병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "상처",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "후벽포자(ㅂ)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "담자포자(ㄴ)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "석회 시비",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄷ. 뽕나무 오갈병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅂ. 대추나무 빗자루병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "장란기(oogonium)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "전나무 잎녹병균",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "나출자낭",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "선충",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "회양목 잎마름병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "적용약제",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "아까시나무",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "흰색",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "흰색 또는 회백색",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "흰색 균사막",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "병원균",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄱ (흰날개무늬병):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄹ (안노섬뿌리썩음병):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅁ (아밀라리아뿌리썩음병):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄷ (리지나뿌리썩음병):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅂ (파이토프토라뿌리썩음병):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄱ. 말굽버섯 (Fomes fomentarius):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅂ. 소나무잔나비버섯 (Fomitopsis pinicola):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄹ. 해면버섯 (Phaeolus schweinitzii):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄹ. 소나무 혹병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄴ. 뽕나무 자주날개무늬병:",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "기주특이성",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "Sphaeropsis sapinea",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "분생포자반(acervuli)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄱ. 철쭉 떡병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄴ. 소나무 혹병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅇ. 잣나무 아밀라리아뿌리썩음병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "담자균(Basidiomycota)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄷ. 뽕나무 오갈병 (그름)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄹ. 밤나무 뿌리혹병 (그름)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "세균(Bacteria)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅂ. 대추나무 빗자루병 (그름)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㅁ. 벚나무 빗자루병 (그름)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "ㄹ(파이토플라스마)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "세균(ㄴ):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "선충(ㅂ):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "바이러스(ㄷ):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "기생식물(ㅁ):",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "분생포자각(pycnidium)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "줄기마름병균(㉠)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "가지마름병균(㉡)",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "소나무류·전나무류의 잎녹병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "전나무 빗자루병",
+      "count": 2,
+      "frequency_percent": 11.8
+    },
+    {
+      "word": "표징이 없습니다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자각(표징)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "육안으로 뚜렷하게 관찰 가능하므로 표징으로 진단이 가능합니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "담자포자가 모여 있는 구조로 육안으로 쉽게 관찰 가능하므로 표징으로 진단이 가능합니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이의 자낭과 자낭포자로, 육안으로 확인할 수 있으므로 표징으로 진단이 가능합니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "임의기생체",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "임의기생체(Facultative parasite)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "한입버섯",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "장미 모자이크병 – ELISA",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "호두나무 탄저병 – DAPI염색법",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뽕나무 오갈병 – 형광현미경기법",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "사과나무 불마름병 – 그람염색법",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 리지나뿌리썩음병 – 영양배지법",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "특정적으로",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "특이적인 진단",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "특정적인",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진단",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "포플러 잎녹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "낙엽송 잎떨림병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "낙엽송 가지끝 마름병의 잠복기는 10~14일이다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 절대 기생성:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 기주 특이성:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. DNA로만 구성:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 세포로 구성:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "a. 물관부 폐쇄:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "b. 균핵 형성:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "c. 잎의 기형:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "d. 모자이크 증상:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "절대 기생성(ㄱ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주 특이성(ㄴ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잎의 기형(c)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모자이크 증상(d)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "절대 기생성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주 특이성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잎의 기형",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "절대 기생성:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주 특이성:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잎의 기형 및 모자이크 증상:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "나출된 자낭",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭반(apothecia)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "나출자낭 (naked asci)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 후박나무 녹병 – e. 없음",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "동종기생균",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 포플러 잎녹병 – b (X)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 산철쭉 잎녹병 – a (X)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가문비나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "황벽나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 소나무 혹병 – c (X)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 오리나무 잎녹병 – d (X)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "쑥부쟁이",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전나무, 젓나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$16\\text{S}$ rRNA(rDNA)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "바이러스는 세균과는 완전히 다른 종류의 미생물",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 소나무 혹병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 편백 가지마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 철쭉류 떡병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 배롱나무 흰가루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 칠엽수 얼룩무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 소나무류 피목가지마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 소나무류 수지궤양병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "_Fusarium circinatum_",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 소나무류 모잘록병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "_Fusarium_",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 오리나무 갈색무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 밤나무 가지마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 칠엽수 얼룩무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 소나무류 피목가지마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 밤나무 가지마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기생 관계",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "육종학적 방제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "내병성 품종의 이용",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "임업적(생태적) 방제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "저항성 품종 이용",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "경종적 방제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 다범성 병해",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 뿌리꼴균사다발 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 심재가 먼저 썩고 나중에 변재가 썩음",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 균사망이 발달하여 자갈색의 헝겊 같은 피막 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 6, 7월경에 균사층의 자낭포자가 많이 형성되어 흰가루처럼 보임",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "참나무 급사병의 병원균이 속한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Rhizoctonia solani는 묘목에 피해를 준다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "격벽이 있는 균사",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "불완전균류(또는 담자균문)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파이토프토라뿌리썩음병은 병원균 우점형이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 수피 표면이 젖어 있고, 검은색의 액체가 흘러나온다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 잉크병 병원균의 장란기 표면이 울퉁불퉁하다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "난균류(Oomycetes)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "간벌을 강하게 할 경우 줄기마름병이 많이 발생",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. (X):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. (O):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. (O):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. (X):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "20~25℃ 정도의 비교적 낮은 온도",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "산성 토양",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "성충은 감염된 뿌리 내에 산란한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Meloidogyne속 선충으로 고착성 내부 기생성 선충이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유충과 성충은 주로 뿌리의 피층조직 안을 이동하면서 양분을 흡수한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "선충의 침입 부위로 Fusarium 등 토양 병원미생물이 쉽게 침입하게 된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "이동성 내부 기생",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방제 방법이 없다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원체는 주로 물관에 기생한다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원체는 줄기나 가지를 감염한다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "최근 발생이 급격히 증가하고 있다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원체는 천공성 해충에 의해 전반된다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 시들음병 (소나무재선충병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "선모(Pilus)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "a(역병균)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "c(흰가루병균)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "역병균 (Phytophthora spp.)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흰가루병균 (Erysiphales 목)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "시고(Alex Shigo) 박사",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "변색재(discolored wood)와 건전재(sound wood)의 경계",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "상처가 난 후 형성층이 세포분열을 통해 만든 신생세포(신규 조직)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방어벽 4(Barrier Zone)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "형성층(Cambium)에 의해 새롭게 만들어지는 조직",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가장 강력한 방어벽",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방어벽 3",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "측면(둘레 방향/나이테 방향)으로 확산되는 것을 저지",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방사 방향(수심에서 껍질 쪽으로 뻗어나가는 방향)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'Compartmentalization Of Decay In Trees'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "알렉스 시고(Alex Shigo)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가장 약한 벽",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'장벽층(Barrier Zone)'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방어벽 4는 상처 이후에 생성되는 물리적 경계",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방어벽 4가 상처 후 형성층에 의해 만들어지는 가장 강력한 벽",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "빗자루병(Witch’s Broom)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "솎음전정",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병해의 조기 발견 및 예찰 기회를 오히려 증대",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "묘포(양묘장)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "임지(Forest land)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "생리적 산성 비료",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "토양을 산성화",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "교육적 팁",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "일부 침엽수",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "시들음",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "상처를 통해 침입",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "버섯(자실체)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "구조적인 강도가 약해져서",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "고온건조한 곳에서 피해가 심하다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "고온 다습",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "디플로디아순마름병이라고도 한다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "명나방류 유충이 피해를 증가시킨다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "초여름 감염과 늦여름 감염의 증상이 다르다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "6~7월(초여름)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "8~9월(늦여름)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "감염된 조직에서 수지가 흘러나오지는 않는다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흘러내린 수지로 인해 희게 보이는",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "다습",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흔히",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "그람염색(Gram staining)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Biolog 시스템",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "영양원의 분해 및 이용 반응",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "그람염색 반응",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "영양원(탄소원 등) 이용 능력",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "염색반응",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "영양원 이용 특성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "생화학적 검사",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 포자 (Spore):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 자낭 (Ascus):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 버섯 (Mushroom):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 균사판 (Mycelial fan):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 흡기 (Haustorium):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 뿌리꼴균사다발 (Rhizomorph):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "균사판:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흡기:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뿌리꼴균사다발 (Rhizomorph):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "선단부의 작은 가지에서 시작",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가지의 아랫부분(큰 가지나 몸통 방향)으로 번져나가",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "철쭉류 떡병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 가지마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "녹포자기(I)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "여름포자퇴(II)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 잎마름병(엽고병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "당년생 침엽 뒷면에 형성되는 것이 아니라 월동 후 다음 해 봄에 발생한 잎 뒷면에 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가을에는 겨울포자퇴(담갈색 기둥 모양)가 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "당년생 침엽이 아니라 월동 후 다음 해 봄에 발생한 잎 뒷면에 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "장미 모자이크병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "살선충제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무 녹병 - 가지 고사",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 줄기마름병 - 줄기 터짐",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Nectria 궤양병 - 윤문 형태의 궤양",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "편백·화백 가지마름병 - 수지 분비",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Scleroderris 궤양병 - 어린 수피에 자갈색 괴저",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "연두색",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자갈색으로 약간 괴저",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "오동나무 줄기마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "붉은 갈색의 함몰된 궤양",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "갈색 테두리를 가진 회백색 병반",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Sphaerulina속",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Septoria류 및 Sphaerulina류",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "속(Genus)부터가 다릅니다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "주로 체관부에서 발견된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "주로 매미충류에 의해 전염된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "대추나무 빗자루병균이 해당된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "페니실린계 항생물질에 감수성이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "DAPI 를 이용한 형광현미경 기법으로 진단한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "균핵(sclerotia)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균 또는 곰팡이에 의한 증상이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "나무 생장 저해 효과보다는 미관을 해치는 피해가 더 크다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원균이 이층(떨켜)을 형성하여 조직을 탈락시킨 결과이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원균은 기주식물의 잎 이외에 열매나 가지를 감염하기도 한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "구멍은 아주 작은 것부터 수 ㎜에 이르는 것까지 크기가 다양하다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주식물(나무)이 자신을 보호하기 위해 형성하는 방어 기작의 결과",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균성 구멍병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진균성(곰팡이성) 구멍병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "조경 가치를 하락시키는 피해",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "이층(Abscission layer)을 형성하는 주체는 병원균이 아니라 '기주식물'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "열매와 가지에도 감염",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "열매",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가지",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'이층 형성'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "국부적 저항성(Local Resistance)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'해부학적 방어'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "100% 에탄올",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "물 흐름 개선",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "심미성 향상",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "수분 증발 억제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "감염 방지",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "노린재목(매미목) 매미충과",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무좀, 소나무줄나무좀",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "딱정벌레목 나무좀과(또는 바구미과 나무좀아과)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유럽느릅나무좀, 미국느릅나무좀",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "딱정벌레목 나무좀과",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "딱정벌레목 긴나무좀과",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "긴나무좀류(나무좀류와 유사 분류군)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "솔수염하늘소, 북방수염하늘소",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "딱정벌레목 하늘소과",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "(가)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "노린재목",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "(나, 다, 라)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "나무좀/긴나무좀류",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "(마)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "현호색류",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "2004년",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "매개충의 정확한 명칭",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'소나무하늘소'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "오동나무매미충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "현호색, 애기똥풀",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "2004년 5월 경기도 성남시 이배재고개",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "매개충의 이름(솔수염 vs 소나무)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "중간기주의 종류",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원의 종류(파이토플라스마, 곰팡이, 세균 등)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "회양목 그을음병-광합성 저해",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "조팝나무 흰가루병-양분의 저장 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "양분을 탈취",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "감나무 열매썩음병-양분의 저장, 증식 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "양분의 저장 및 재생능력(개화 및 착과)의 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 안노섬뿌리썩음병-물과 무기양분의 흡수 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "수분과 무기양분을 흡수하는 기능을 저해",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 시들음병(소나무재선충병)-물과 무기양분의 이동 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "수분과 양분의 이동(수송)을 차단",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흰가루병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흡수 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "시들음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "통도(이동) 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "저장 및 재생능력(생식) 장애",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 뿌리혹병(근두암종병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "여름포자 세대를 형성하지 않는",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "여름포자 세대가 없는",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "봄포자(정자)와 정자기",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "봄포자(精子, Spermatium)와 정자기(精子器, Spermogonium)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "일부",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전체",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "철쭉 떡병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잣나무 아밀라리아뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뿌리병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "대추나무 빗자루병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "인공배양에 성공하지 못한",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "절대기생체(순활물기생체)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "바이러스(American plum line pattern virus)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "바이러스(Poplar mosaic virus)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이(자낭균)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "순수 분리 및 배양이 가능",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 뽕나무 오갈병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 버즘나무 탄저병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 장미 모자이크병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 버드나무 잎녹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 붉나무 빗자루병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ. 동백나무 겹둥근무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ (뽕나무 오갈병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ (장미 모자이크병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ (붉나무 빗자루병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ (버드나무 잎녹병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ (동백나무 겹둥근무늬병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ (버즘나무 탄저병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ (벚나무 빗자루병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "체관(사관)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "물관(xylem)에는 일반적으로 존재하지 않습니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흡기($haustorium$)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "무성세대인 분생포자경과 분생포자",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자경 및 분생포자",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "균사",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "비기생성 종자식물(얹혀사는 식물)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "다육질의 열매(장과)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무(난쟁이)겨우살이",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진정겨우살이",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "비기생성 종자식물",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "칡은 기생식물이 아닌 덩굴식물",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "칡은 스스로 광합성을 하여 살아가는 덩굴식물",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 목재청변:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 라일락 그을음병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 밤나무 흰가루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 참나무 시들음병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 명자나무 불마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 오동나무 빗자루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ. 단풍나무 타르점무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅇ. 소나무 리지나뿌리썩음병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅈ. 소나무 시들음병(소나무재선충병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 밤나무 흰가루병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ. 단풍나무 타르점무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅇ. 소나무 리지나뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ(밤나무 흰가루병), ㅅ(단풍나무 타르점무늬병), ㅇ(소나무 리지나뿌리썩음병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 흰가루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 리지나뿌리썩음병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ(라일락 그을음병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ(밤나무 흰가루병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ(오동나무 빗자루병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ(단풍나무 타르점무늬병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ(밤나무 흰가루병), ㅅ(단풍나무 타르점무늬병), ㅇ(소나무 리지나뿌리썩음병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ(참나무 시들음병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "피해를 입은 새 가지와 침엽은 수지에 젖어 있고 수지가 흐른다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "명나방류나 얼룩나방류의 유충에 의해 고사하는 증상과 비슷하다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "말라죽은 침엽의 표피를 뚫고 나온 검은 자낭각이 중요한 표징이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "감염된 리기다소나무의 어린 침엽은 아래쪽 일부가 볏집색으로 퇴색된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 겨우살이 (식물):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 소나무재선충 (동물):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "큐티클(cuticle)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 대추나무 빗자루병균 (파이토플라스마):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세포벽을 갖지 않으며",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 쥐똥나무 흰가루병균 (곰팡이):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 밤나무혹병균 (세균):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 벚나무 번개무늬병 병원체 (바이러스):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세포벽이 없습니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 소나무재선충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 대추나무 빗자루병균(파이토플라스마)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 벚나무 번개무늬병 병원체(바이러스)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무재선충:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "대추나무 빗자루병균:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "벚나무 번개무늬병 병원체:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뽕나무 오갈병-뽕나무하늘소",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "참나무 시들음병-붉은목나무좀",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느릅나무 시들음병-썩덩나무노린재",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유럽느릅나무좀",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "미국느릅나무좀",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "붉나무 빗자루병-모무늬(마름무늬)매미충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 시들음병(소나무재선충병)-알락하늘소",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뽕나무이",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모무늬매미충(또는 마름무늬매미충)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "티오파네이트메틸은 상처도포제로 사용된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "나무주사는 이미 발생한 병의 치료목적으로만 사용된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "예방 목적",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잣나무털녹병 방제를 위해 매발톱 나무를 제거한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "송이풀",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "보르도액은 방제효과의 지속시간이 짧으나 침투이행성이 뛰어나다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "보호살균제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "지속기간이 길지만(15~20일)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "침투이행성은 없습니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "공동 내의 부후부를 제거할 때는 변색부만 제거하되 건전부는 도려내면 안된다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "변색부(변색재)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "제거하지 말고 그대로 두어야 합니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "골무꽃",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "약간의 건전부",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$\\text{Pythium}$ 속",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$\\text{Rhizoctonia solani}$",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "수목병의 원인에는 전염성과 비전염성 요인이 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전염성 수목병의 원인은 균류, 세균, 바이러스, 선충, 기생성 종자식물 등이 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가지나 줄기에 황갈색~적갈색의 병반을 형성한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원균의 자좌는 수피 밑에 플라스크 모양의 자낭각을 형성한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "저병원성 균주는 dsDNA 바이러스를 가지며 생물적 방제에 이용한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "일본 및 중국 밤나무 종은 상대적으로 저항성이고, 미국과 유럽종은 상대적으로 감수성이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "오엽송류(잣나무류) 털녹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느릅나무 시들음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 줄기마름병 (Chestnut blight):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느릅나무 시들음병 (Dutch elm disease):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잣나무 털녹병 (White pine blister rust):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느릅나무 시들음병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "배나무 불마름병(화상병):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "대추나무 빗자루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "포플러 녹병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무 녹병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 줄기마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잣나무털녹병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류(푸자리움)가지마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자좌",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "제공된 자료에 따르면,",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "(제품명 Cartapip)은 참나무 시들음병이 아니라",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Baermann funnel(깔때기)법",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진균(곰팡이)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균(Bacterium)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "펩티도글리칸(peptidoglycan)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이(담자균류)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "펩티도글리칸",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "펩티도글리칸 층의 두께",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "감귤 궤양병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "내생균근(특히 VA 균근)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모무늬매미충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "외부착생균",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "천공성 해충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "침입",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "꿀벌, 파리, 진딧물",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 난포자 ($Oospore$):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 담자포자 ($Basidiospore$):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 분생포자 ($Conidium$):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 유주포자 ($Zoospore$):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 자낭포자 ($Ascospore$):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 후벽포자 ($Chlamydospore$):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자(ㄷ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유주포자(ㄹ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "난포자(ㄱ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭포자(ㅁ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ, ㄹ, ㅂ",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파이토프토라뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모잘록병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "칠엽수 얼룩무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 잎떨림병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모과나무 점무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "칠엽수 얼룩무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 잎떨림병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "버즘나무 탄저병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 피목가지마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 (푸자리움)가지마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "사철나무 탄저병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "심재가 먼저 썩고 나중에 변재가 썩는 것",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "심재를 우선적으로 부후",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "심재부후균",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "미끼법:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "선택배지법:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$\\text{Fusarium}$ 균에 의한 모잘록병은 비교적 건조한 토양에서 잘 발생",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "환경 개선을 통한 방제(임업적 방제)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "은 일명 '파상땅해파리버섯'에 의해 발생하며, 가장 중요한 생태적 특징은",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흰날개무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "토양 가열",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "산불 예방 및 임내 취사 행위 금지",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "산성 토양(pH 5.0 내외)에서 번식이 왕성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "지표면 근처의 습도가 높아져",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "토양이 과습하고 배수가 불량할 때",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병의 원인(병원체)이 좋아하는 환경을 반대로 바꾸어 주는 것",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "리지나뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "불(火), 열(熱)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 소나무 혹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 철쭉류 떡병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 벚나무 빗자루병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 밤나무 가지마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ. 호두나무 근두암종병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅇ. 사과나무 자주날개무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 혹병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "철쭉류 떡병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "사과나무 자주날개무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 버즘나무 탄저병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 밤나무 줄기마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 낙엽송 가지끝마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 단풍나무 타르점무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 소나무류 피목가지마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 소나무류 리지나뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "단풍나무 타르점무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 피목가지마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 리지나뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "겨울포자(teliospore)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "핵상이 2n(복상, diploid)인 포자는 오직 '겨울포자(Teliospore)'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "\"해당 병원균의 겨울포자(2n)가 형성되는 기주(중간기주 또는 최종기주)가 어디인가?\"",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'녹병정자(0)'와 '녹포자(I)'가 형성되는 기주",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "n+n(이핵체)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "배토초, 뱀고사리, 가래나무 등 다른 중간기주",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무에서 겨울포자(III)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "2n",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "참나무류(신갈나무) 잎 뒷면에서 여름포자와 겨울포자(III)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "산철쭉의 잎에서 겨울포자(III)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전나무는 녹포자(I) 기주",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "겨울포자(2n)는 중간기주(식물의 종류에 따라 앵초, 솜나물, 가래나무 등)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "황벽나무 잎에 도달하여 여름포자와 겨울포자(III)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "녹병정자(0):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "녹포자(I):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "여름포자(II):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "겨울포자(III):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "2n (복상)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "담자포자(IV):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "건전 부위와의 경계는 뚜렷하지 않은 것",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$Taphrina \\ wiesneri$",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "나출자낭(naked asci)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "왕벚나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "4~5년 후에는 가지 전체가 말라죽게",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "지오판 도포제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "목재부후(wood decay)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 재선충병(소나무 시들음병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "변재 부위 방사유조직",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "참나무 시들음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 잉크병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방사유조직",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "형광현미경",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "균사체",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "불규칙한 모양의 퇴록반점",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잎자루와 주맥에 괴사반점",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잎이 뒤틀리고 모양이 일그러지며 일찍 떨어지는(조기낙엽)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "갈색부후",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "백색부후",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "참나무 갈색무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파괴적 방법",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "일부를 채취하여",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "시료(목재 조직)를 채취",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "비파괴적 탐색기술",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "초음파(ultrasonic)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "화상기법(imaging)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "살아있는 뿌리 내부에서 월동",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뿌리에서 월동",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "배롱나무 흰가루병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "미국밤나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "포플러류 점무늬잎떨림병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느티나무 흰별무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무재선충병 매개충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느티나무 흰별무늬병($\\textit{Sphaerulina abeliceae}$)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "조기 낙엽을 일으키지는 않는다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자각을 형성한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자반(acervulus)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자는 막대형이며 여러 개의 세포로 나뉘어 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "무색의 두 세포",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "은백양은 포플러류 점무늬잎떨림병에 감수성이 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "은백양과 일본사시나무 등은 저항성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "증상이 심한 병반에는 짧은 털이 밀생한 것처럼 보인다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "장미 검은무늬병은 봄비가 잦은 해에는 5~6월에도 심하게 발생한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자퇴(acervulus)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "2세포",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "타원형 또는 콩팥 모양",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "작은 검은 점들이 밀생",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "즙액전염(즙액접촉전염)은 되지 않습니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "매미충류",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "페니실린계 항생제에는 저항성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균(일반적인 식물병원세균)에 비해서는 훨씬 작습니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파이토플라스마 (Phytoplasma)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "매개충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "매미충류, 멸구류, 진딧물",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "페니실린계 항생제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "옥시테트라사이클린",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "칠엽수 잎마름병(얼룩무늬병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "칠엽수 얼룩무늬병(오반병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "탄저병(Anthracnose)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "클로로탈로닐 수화물, 디페노코나졸 수화물",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "클로로탈로닐(Chlorothalonil)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'주요 조경수 5대 병해'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "사철나무, 장미, 소나무, 향나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "쥐똥나무 빗자루병 - 매개충 방제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 가지마름병 - 주변 오리나무 제거",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "밤나무 잉크병 - 물이 고이지 않게 배수관리",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전나무 잎녹병 - 발생지 부근의 뱀고사리 제거",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 리지나뿌리썩음병 - 주변에서 취사행위 금지",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잎맥을 중심으로 번개 모양의 갈색 반점",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가을",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "봄포자(urediniospores)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "이른 봄",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$A.\\ radiobacter$ K84",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "생물적 방제용 길항균",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뿌리접목(root graft)을 통하여 이동 및 전염이 가능",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "매개충 방제:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "감염목 제거:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "저항성 품종 식재:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "예방적 관리:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 밤나무 잉크병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 참나무 급사병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 삼나무 잎마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 철쭉류 잎마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 포플러 잎마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 동백나무 겹둥근무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "에 속합니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "제시된 병해 중",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "은 모두 병원균의 속이",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 감염목의 뿌리 표면에 균핵이 형성된다. (X)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 감염된 나무뿌리는 흰색 균사막으로 싸여있다. (O)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 뿌리꼴균사다발이나 뽕나무버섯이 주요한 병징이다. (X)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 병원균은 리지나뿌리썩음병과 동일한 문(phylum)에 속한다. (O)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "흰날개무늬병(White root rot)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "형태적, 생태적 주요 표징(Sign)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "균핵 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 감염목의 뿌리 표면에 균핵이 형성된다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "균핵(Sclerotia)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 감염된 나무뿌리는 흰색 균사막으로 싸여있다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "하얀색의 깃털 모양(날개무늬)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 뿌리꼴균사다발이나 뽕나무버섯이 주요한 병징이다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뽕나무버섯뿌리썩음병(Armillaria root rot)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뿌리꼴균사다발(Rhizomorph)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뽕나무버섯",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 병원균은 리지나뿌리썩음병과 동일한 문(phylum)에 속한다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "'담자균문에 속한다'",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "현미경적 특징",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "서양배 모양(Pear-shaped swelling)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "육안적 특징",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "부채꼴 모양의 균사체",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방제",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 디플로디아순마름병(또는 소나무 가지끝마름병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Sphaeropsis sapinea (디플로디아속 구과고병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "장미 검은별무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무 잎마름병 (레카노스티카잎마름병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "디플로디아속 구과고병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모과나무, 배나무, 사과나무 등 장미과 식물에 발생하는 붉은별무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "버드나무 탄저병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 흰날개무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 자주날개무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "활엽수와 침엽수에 모두 발생",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 리지나뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 안노섬뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "주로 침엽수",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 아밀라리아뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "침엽수와 활엽수 모두",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 파이토프토라뿌리썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "적송(침엽수) 묘목과 밤나무(활엽수)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주 범위(Host Range)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "은 주로 침엽수를 가해하는 특성이 강하며,",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느타리, 덕다리버섯, 소나무잔나비버섯",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느타리(Pleurotus ostreatus):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "덕다리버섯(Laetiporus sulphureus):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무잔나비버섯(Fomitopsis pinicola):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "추가 학습 포인트:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "겨울포자퇴",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "겨울포자",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무 녹병(Gymnosporangium 속)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무 녹병(또는 붉은별무늬병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "이종기생성(Heteroecism)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "황색 또는 오렌지색의 젤리 모양",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "겨울포자(Teliospore)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "중간기주(배나무, 사과나무 등)의 잎 뒷면",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파이토프토라(Phytophthora)나 노균병균",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "겨울포자퇴(Telium)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "중간기주(배나무 등)에 침입한 후, 잎 표면",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무(기주):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "배나무/사과나무(중간기주):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "특이사항:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Hyponectria(히포넥트리아)속",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Macrophoma(마크로포마)속",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "표징이 없습니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자좌(stroma)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 자낭포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 담자포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 난포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 분생포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 유주포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 후벽포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "무성포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자(ㄹ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유주포자(ㅁ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유성포자:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "난포자(ㄷ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭포자(ㄱ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ, ㅁ",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "난포자(oospore)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭구",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "난포자",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "빗자루병을 일으킬 수 있다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Biolog 검정법을 통해 동정할 수 있다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기공과 피목을 통해 식물체 내부로 침입할 수 있다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "휴면 월동 구조체인 균핵과 후벽포자는 전염원이 될 수 있다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "탄저병을 일으키는 Colletotrichum 속은 강모(setae)를 형성하기도 한다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "제한적으로 사용될 수 있지만",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분리, 배양, 접종, 재분리",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "선충 - ㅁ, ㅇ",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균 - ㄷ, ㄹ",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이 - ㄴ, ㄹ",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "바이러스 - ㄴ, ㅂ",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파이토플라스마 - ㄱ, ㅅ",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이에 의한 병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균에 의한 병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파이토플라스마에 의한 병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "선충에 의한 병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 호두나무 근두암종병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅇ. 소나무재선충병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 감귤 궤양병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 배나무 붉은별무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 벚나무 빗자루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ. 쥐똥나무 빗자루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "정정:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Melampsora larici-populina",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "중간기주(일본잎갈나무, 현호색)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세포 체제를 가지고 있지 않다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "절대기생성이며 기주특이성이 없다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "복제 시 핵산에 돌연변이가 발생할 수 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "식물체 내 원거리 이동 통로는 주로 체관이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유전자 발현은 기주의 단백질 합성기구에 의존한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "절대기생체",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진정한 세포벽을 갖지 않으며",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전신성 병원체",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$\\text{oxytetracycline}$($\\text{OTC}$)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "녹조류",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "키틴($\\text{chitin}$)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "단순격벽공($\\text{simple septal pore}$)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Ophiostoma",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "토양 속에 균핵을 형성한다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "천공성 해충의 몸에 붙어 전반된다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "느릅나무 시들음병의 병원균이 속한다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "멜라닌 색소를 합성하여 목재 변색을 일으킨다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "변재부의 방사유조직에서 생장하여 감염 부위가 나타난다:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Pythium",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Rhizoctonia solani",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유주포자낭",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "줄기밑둥썩음병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "파상땅해파리버섯",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원균 우점병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "고착성 내부기생 선충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "이주성 내부기생 선충",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Diplodia pinea",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Guignardia laricina",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "물관부(xylem)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "물관부",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전충체(tylose)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진정겨우살이는 침엽수에 피해를 준다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진정겨우살이(true mistletoe, leafy mistletoe)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "침엽수(구과류)에 기생하는 것은 꼬마겨우살이(dwarf mistletoe)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주식물에 흡기를 만들어 양분과 수분을 흡수한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "수간이나 가지의 감염 부위는 부풀고 강풍에 쉽게 부러질 수 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "국부적인 이상비대",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "방제를 위해 감염된 가지를 전정한 후 상처도포제를 처리하는 것이 좋다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "아래쪽으로 50cm 이상",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진정겨우살이는 광합성을 할 수 있으나 수분과 무기양분은 기주식물에 의존한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "광합성을 할 수 있는 푸른 잎과 줄기",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "진정겨우살이(True mistletoe)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "꼬마겨우살이(Dwarf mistletoe)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "American plum line pattern virus",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "일반적으로 나무를 고사시킬 정도로 심각한 피해를 일으키지는 않습니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "벚나무 번개무늬병은 일반적으로 나무를 고사시킬 정도로 치명적인 질병은 아닙니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Apiognomonia",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자각이 아닌 분생포자퇴를 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자퇴를 형성",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전신 감염병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 밤나무 뿌리혹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ. 밤나무 가지마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ(철쭉 떡병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ(소나무 혹병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅇ(잣나무 아밀라리아뿌리썩음병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "담자포자(Basidiospore)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅅ. 밤나무 가지마름병 (그름)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "담자균",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ(세균), ㅂ(선충)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ(세균)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ(바이러스)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ(바이러스), ㅁ(기생식물)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ(선충)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ(곰팡이), ㄹ(파이토플라스마)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ(세균), ㄷ(바이러스), ㅁ(기생식물)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "점무늬(반점)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "혹:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "점무늬:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "세균:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "바이러스:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "목재부후:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "뿌리썩음:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "빗자루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "습실처리법은 곰팡이 감염이 의심될 때 주로 사용한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "광학현미경으로 바이러스 감염에 의한 봉입체를 관찰할 수 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰팡이에 의한 병 중에도 '코흐의 원칙'을 적용할 수 없는 경우가 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "면역학적 진단을 하려면 대상 병원체에 대한 항혈청을 가지고 있어야 한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "썩고 있는 뿌리를 DAPI로 염색하여 형광현미경으로 관찰하면 감염 여부를 알 수 있다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "체관(사부)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "도관 유무와 관계없이 다양한 수종에서 쇠락 현상이 관찰",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "㉠과 ㉡은 모두 목재부후균이다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "㉠은 주로 침엽수를 ㉡은 주로 활엽수를 감염한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "㉡의 피해가 심해지면 목질부가 스펀지처럼 쉽게 부서진다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "㉠의 피해를 심하게 받은 목질부는 네모 모양으로 금이 가면서 쪼개진다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "㉠은 리그닌을 완전히 분해하지만 ㉡은 리그닌을 거의 분해하지 못한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "갈색부후균(㉠)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "백색부후균(㉡)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "다범성(polyphagous) 병원균",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자각(pycnidia)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "줄기마름병(Chestnut Blight)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "가지마름병(Chestnut Canker/Dieback)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "은 줄기나 가지의 조직 내에",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "을 형성하며,",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "역시 주로",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "이나",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "좁습니다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "넓습니다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "\"㉡균의 기주범위가 ㉠균보다 훨씬 넓다\"",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자각(무성세대)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭각(유성세대)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "분생포자반(Acervulus)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "줄기와 가지",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Cryphonectria",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Botryosphaeria",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Valsa",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "속(Genus)이 다릅니다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "수세가 약해진 나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "비배 관리(거름주기)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "배수 관리",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주범위",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "무성세대 구조",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "주요 증상",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "공통점",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "꽃사과나무와 향나무의 격리 식재",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무재선충 감염목 제거",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "포플러류와 일본잎갈나무의 격리 식재",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "장미 모자이크병 관리",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "전정도구 소독",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "주로 상처나 자연개구를 통하여 기주 식물로 침입한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자연개구",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "화상병균은 토양 속에서 기주식물이 없으면 수가 급격히 감소한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주식물 밖에서도 살 수 있지만, 대부분 기주식물 안에서 기생한다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "매개충에 의해 전반되는 것은 많으나, 매개충 체내에서 증식하는 것은 없다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곤충 체내에서 오래 견딜 수 있으며, 자신의 증식과 전반을 곤충에 의존하기도 한다",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모과나무 붉은별무늬병 (Gymnosporangium asiaticum)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "이상비대(hypertrophy)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Ti-plasmid",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "빗자루 증상",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "사이토카인",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "옥신($\\text{auxin}$)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "기주 우점형(host-dominant)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "유연공격벽(dolipore septum)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병원체 우점형(pathogen-dominant)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 감귤 궤양병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 배나무 뿌리혹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Agrobacterium",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 사과나무 화상병(불마름병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Erwinia",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 포도나무 피어스병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "Xylella",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 살구나무 세균구멍병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "수간주입법",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "잠복기(보통 온도에 따라 10~45일)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄱ. 섬잣나무 잎떨림병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄴ. 밤나무 줄기마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄷ. 물푸레나무 흰가루병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭구(cleistothecium)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㄹ. 곰솔 리지나뿌리썩음병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅁ. 단풍나무 타르점무늬병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "ㅂ. 잣나무 송진가지마름병:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "子囊殼",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "섬잣나무 잎떨림병 (ㄱ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰솔 리지나뿌리썩음병 (ㄹ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "단풍나무 타르점무늬병 (ㅁ)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "盤形子囊殼 (접시모양 자낭각, Apothecium)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭과 (子囊殼, Ascoma):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자낭각의 종류:",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "폐쇄형 자낭각 (Cleistothecium):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "침상 자낭각 (Perithecium):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "접시모양 자낭각 (Apothecium):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "병자각 (Pycnidium):",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "‘이종기생성(Heteroecious) 녹병균’",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "‘중간기주(Alternate host)’",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "풀(초본류)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "풀베기(제초)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "별꽃류(별꽃, 쇠별꽃 등)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "참나무류(신갈나무, 졸참나무 등)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "교목(나무)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무 녹병(붉은별무늬병)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "장미과 식물(배나무, 사과나무, 산사나무 등)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "교목 또는 관목",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "곰솔 잎녹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "황해쑥, 참취 등 국화과 초본",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "별꽃, 쇠별꽃 등 초본",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "별꽃, 쇠별꽃(초본)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "별꽃류 또는 가막살나무",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "별꽃(초본)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "송이풀류(초본)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "까치밥나무류(관목)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "오리나무 잎녹병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "낙엽송(교목)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "모과나무 붉은별무늬병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "향나무(교목)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "단식기생균(Autoecious)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "중간기주가 초본(풀)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "초본 중간기주 대표 예시",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "자웅이형(sexual dimorphism)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "개화도 불량해지게 만듭니다.",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "개화 불량",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "소나무류 피목가지마름병의 병원균은",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "삼나무 잎마름병(Pestalotia disease)",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "삼나무 잎마름병",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "$Pestalotiopsis$ $glandicola$",
+      "count": 1,
+      "frequency_percent": 5.9
+    },
+    {
+      "word": "갈반병균(Gymnosporangium asiaticum)",
+      "count": 1,
+      "frequency_percent": 5.9
+    }
+  ]
+}

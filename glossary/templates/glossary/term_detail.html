@@ -31,7 +31,7 @@
     }
     
     .term-container {
-        padding: 30px 20px;
+        padding: 10px 20px;
     }
     
     .back-link {
@@ -59,10 +59,10 @@
     }
     
     .term-word {
-        font-size: 2rem;
+        font-size: 1.4rem;
         font-weight: bold;
         color: #1a4a2e;
-        margin: 0 0 15px 0;
+        margin: 0;
     }
     
     .term-subjects {
@@ -72,16 +72,19 @@
     }
     
     .subject-tag {
-        background: linear-gradient(135deg, #2d6a4f, #40916c);
-        color: white;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 0.9rem;
+        background: transparent;
+        color: #333;
+        border: 1px solid #333;
+        padding: 0px 6px;
+        border-radius: 8px;
+        font-size: 0.55rem;
+        position: relative;
+        top: -3px;
     }
     
     .term-content {
-        line-height: 1.9;
-        font-size: 1.1rem;
+        line-height: 1.6;
+        font-size: 0.85rem;
         color: #333;
     }
     
@@ -136,48 +139,73 @@
         color: #888;
         font-size: 0.9rem;
     }
+    
+    .term-content {
+        font-size: 1.05rem; /* 조금만 키움 (기본 1rem -> 1.05rem) */
+        line-height: 1.7;
+    }
+    
+    .term-content ul, .term-content ol {
+        padding-left: 20px;
+        margin-bottom: 0.8rem;
+    }
+    
+    .term-content li {
+        margin-bottom: 0.4rem;
+    }
 </style>
 
 <div class="term-container">
-    <a href="{% url 'glossary:term_list' %}" class="back-link">← 찾아보기 목록</a>
     
     <div class="term-card">
         <div class="term-header">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                <h1 class="term-word">{{ term.word }}</h1>
-                {% if user.is_staff or user.is_superuser %}
-                <a href="{% url 'glossary:term_edit' term.pk %}" 
-                   style="padding: 8px 16px; background: #ffc107; color: #333; text-decoration: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600;">
-                    ✏️ 수정
-                </a>
-                {% endif %}
-            </div>
-            <div class="term-subjects">
-                {% for subject in term.subjects.all %}
-                <span class="subject-tag">{{ subject.name }}</span>
-                {% endfor %}
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h1 class="term-word" style="margin: 0;">{{ term.word }}</h1>
+                    <div class="term-subjects" style="display: flex; gap: 5px;">
+                        {% for subject in term.subjects.all %}
+                        <span class="subject-tag">{{ subject.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <a href="{% url 'glossary:term_list' %}" 
+                       style="padding: 4px 10px; background: transparent; color: #333; border: 1px solid #333; text-decoration: none; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">
+                        ← 목록
+                    </a>
+                    {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'glossary:term_edit' term.pk %}" 
+                       style="padding: 4px 10px; background: #ffc107; color: #333; text-decoration: none; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">
+                        ✏️ 수정
+                    </a>
+                    <form action="{% url 'glossary:term_delete' term.pk %}" method="post" style="margin: 0;" 
+                          onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                style="padding: 4px 10px; background: #e63946; color: white; border: none; border-radius: 4px; font-size: 0.75rem; font-weight: 500; cursor: pointer;">
+                            🗑️ 삭제
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
             </div>
         </div>
         
         <div class="term-content">
-            {{ term.content|safe }}
+            {{ rendered_content|safe }}
         </div>
         
         {% if references %}
         <div class="references-section">
-            <h3 class="references-title">📎 연결된 컨텐츠</h3>
-            <ul class="reference-list">
-                {% for ref in references %}
-                <li class="reference-item">
-                    <span class="reference-type">[{{ ref.get_source_type_display }}]</span>
-                    {% if ref.source_type == 'chapter_content' %}
-                    <a href="{% url 'practice:chapter_detail' ref.source_id %}">{{ ref.source_title }}</a>
-                    {% else %}
-                    {{ ref.source_title }}
-                    {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
+            <h3 class="references-title" style="display: inline;">📎 연결된 기출문제 ({{ references|length }}개)</h3>
+            <button onclick="toggleAllQuestions()" id="toggle-btn"
+               style="margin-left: 10px; background: #1565c0; color: white; padding: 4px 15px; border-radius: 15px; font-size: 0.8rem; border: none; cursor: pointer;">
+                보기
+            </button>
+            
+            <div id="all-questions-container" style="display: none; margin-top: 15px;">
+                <p id="loading-text" style="color: #666;">문제 불러오는 중...</p>
+            </div>
         </div>
         {% endif %}
         
@@ -186,4 +214,165 @@
         </div>
     </div>
 </div>
+
+<script>
+const questionIds = [{% for ref in references %}{% if ref.source_type == 'question' %}{{ ref.source_id }},{% endif %}{% endfor %}];
+const currentTerm = "{{ term.word }}";
+let questionsLoaded = false;
+
+// 텍스트에서 현재 용어를 빨간색으로 강조 + 별 추가
+function highlightTerm(text) {
+    if (!currentTerm || !text) return text;
+    const regex = new RegExp(`(${currentTerm})`, 'gi');
+    return text.replace(regex, '<span class="term-highlight">✨$1✨</span>');
+}
+
+async function toggleAllQuestions() {
+    const container = document.getElementById('all-questions-container');
+    const btn = document.getElementById('toggle-btn');
+    
+    if (container.style.display !== 'none') {
+        container.style.display = 'none';
+        btn.textContent = '보기';
+        return;
+    }
+    
+    container.style.display = 'block';
+    btn.textContent = '접기';
+    
+    if (questionsLoaded) return;
+    
+    let allHtml = '';
+    for (const qId of questionIds) {
+        try {
+            const response = await fetch(`/study/api/question/${qId}/`);
+            const data = await response.json();
+            
+            let choicesHtml = '';
+            for (let i = 1; i <= 5; i++) {
+                const choice = data['choice' + i];
+                const isAnswer = data.answer.includes(i);
+                const circled = ['①','②','③','④','⑤'][i-1];
+                choicesHtml += `
+                    <div class="choice-item ${isAnswer ? 'correct' : ''}">
+                        <span class="choice-num ${isAnswer ? 'correct' : ''}" style="position: relative;">${circled}</span> ${highlightTerm(choice)}
+                    </div>`;
+            }
+            
+            allHtml += `
+                <div class="question-card">
+                    <div class="q-header">
+                        <div style="margin-bottom: 10px;">
+                            <span class="q-badge">${data.exam_round}회</span>
+                        </div>
+                        <div class="q-content">
+                            ${data.number}. ${highlightTerm(data.content)}
+                        </div>
+                    </div>
+                    <div class="q-choices">${choicesHtml}</div>
+                    <div class="explanation-section">
+                        <div class="exp-title">💡 정답 및 해설</div>
+                        <div class="exp-text">${highlightTerm(data.explanation) || '해설 없음'}</div>
+                    </div>
+                </div>
+            `;
+        } catch (e) {
+            allHtml += `<p style="color: red;">문제 ${qId} 불러오기 실패</p>`;
+        }
+    }
+    
+    container.innerHTML = allHtml || '<p style="color: #666;">연결된 문제가 없습니다.</p>';
+    questionsLoaded = true;
+}
+</script>
+
+<style>
+    /* study/detail.html과 동일한 스타일 */
+    .question-card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    .q-header {
+        display: block;
+        border-bottom: none;
+        margin-bottom: 5px;
+    }
+    .q-badge {
+        background: #eee;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.9em;
+        color: #555;
+        float: right;
+    }
+    .q-content {
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+    .q-choices {
+        padding-left: 20px;
+        margin-bottom: 20px;
+    }
+    .choice-item {
+        margin-bottom: 8px;
+        font-size: 1.05em;
+        padding: 5px;
+        border-radius: 5px;
+    }
+    .choice-item.correct {
+        background-color: #e8f5e9;
+    }
+    .choice-num {
+        display: inline-block;
+        margin-right: 5px;
+        font-size: 1.1em;
+    }
+    .choice-num.correct::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 26px;
+        height: 26px;
+        border: 3px solid #d93025;
+        border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+        transform: translate(-50%, -50%) rotate(-5deg);
+        pointer-events: none;
+    }
+    .explanation-section {
+        margin-top: 30px;
+        background-color: #fdfdfd;
+        border: 1px dashed #bbb;
+        border-radius: 5px;
+        padding: 20px;
+    }
+    .exp-title {
+        font-weight: bold;
+        color: #d35400;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+    }
+    .exp-text {
+        font-size: 1.0em;
+        line-height: 1.7;
+        color: #333;
+    }
+    /* 용어 강조 스타일 */
+    .term-highlight {
+        color: #d93025;
+        font-weight: bold;
+        animation: sparkle 1.5s ease-in-out infinite;
+    }
+    @keyframes sparkle {
+        0%, 100% { text-shadow: 0 0 5px #ffeb3b, 0 0 10px #ffc107; }
+        50% { text-shadow: 0 0 15px #ffeb3b, 0 0 25px #ffc107, 0 0 35px #ff9800; }
+    }
+</style>
 {% endblock %}
+

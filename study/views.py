@@ -319,3 +319,42 @@ def tts_generate(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def api_question(request, question_id):
+    """API: 문제 데이터 반환 (JSON)"""
+    import markdown as md
+    import re
+    
+    try:
+        question = Question.objects.select_related('exam').get(id=question_id)
+    except Question.DoesNotExist:
+        return JsonResponse({"error": "Question not found"}, status=404)
+    
+    # 해설 마크다운을 HTML로 변환
+    explanation_raw = question.textbook_chat or question.general_chat or ''
+    
+    # \text{content} 패턴을 <em>content</em>로 변환 (LaTeX 스타일)
+    explanation_raw = re.sub(r'\\text\{([^}]+)\}', r'<em>\1</em>', explanation_raw)
+    
+    # $text$ 패턴을 <em>text</em>로 변환 (LaTeX 스타일 → HTML 이탤릭)
+    explanation_raw = re.sub(r'\$([^$]+)\$', r'<em>\1</em>', explanation_raw)
+    
+    explanation_html = md.markdown(explanation_raw, extensions=['extra', 'nl2br', 'sane_lists'])
+    
+    data = {
+        "id": question.id,
+        "exam_round": question.exam.round_number,
+        "number": question.number,
+        "content": question.content,
+        "choice1": question.choice1,
+        "choice2": question.choice2,
+        "choice3": question.choice3,
+        "choice4": question.choice4,
+        "choice5": question.choice5,
+        "answer": question.answer,
+        "explanation": explanation_html,
+    }
+    return JsonResponse(data)
+

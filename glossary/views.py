@@ -9,9 +9,9 @@ from .models import Subject, Term, TermReference
 @login_required
 def term_list(request):
     """용어 목록"""
-    terms = Term.objects.prefetch_related('subjects').annotate(
+    terms = Term.objects.prefetch_related('subjects', 'references').annotate(
         reference_count=Count('references')
-    ).all()
+    ).order_by('word')
     subjects = Subject.objects.all()
     
     # 과목 필터
@@ -36,10 +36,18 @@ def term_list(request):
 @login_required
 def term_detail(request, pk):
     """용어 상세 (ID로 조회)"""
+    import markdown as md
     term = get_object_or_404(Term.objects.prefetch_related('subjects', 'references'), pk=pk)
+    
+    # 마크다운을 HTML로 렌더링 (extra, nl2br, sane_lists 확장 사용)
+    rendered_content = md.markdown(
+        term.content or '', 
+        extensions=['extra', 'nl2br', 'sane_lists']
+    )
     
     context = {
         'term': term,
+        'rendered_content': rendered_content,
         'references': term.references.all(),
     }
     return render(request, 'glossary/term_detail.html', context)
@@ -68,6 +76,21 @@ def subject_terms(request, pk):
         'terms': terms,
     }
     return render(request, 'glossary/subject_terms.html', context)
+
+
+@login_required
+@staff_member_required
+def term_delete(request, pk):
+    """용어 삭제"""
+    term = get_object_or_404(Term, pk=pk)
+    
+    if request.method == 'POST':
+        word = term.word
+        term.delete()
+        messages.success(request, f'"{word}" 용어가 삭제되었습니다.')
+        return redirect('glossary:term_list')
+    
+    return redirect('glossary:term_detail', pk=pk)
 
 
 @login_required
@@ -122,8 +145,13 @@ def term_edit(request, pk):
             messages.success(request, f'"{word}" 용어가 수정되었습니다.')
             return redirect('glossary:term_detail', pk=term.pk)
     
+    # 마크다운을 HTML로 변환해서 Quill 에디터에 전달
+    import markdown as md
+    rendered_content = md.markdown(term.content or '', extensions=['extra', 'nl2br', 'sane_lists'])
+    
     context = {
         'term': term,
+        'rendered_content': rendered_content,
         'subjects': subjects,
         'edit_mode': True,
     }
@@ -157,3 +185,41 @@ def api_add_term(request):
         return JsonResponse({'success': True, 'term_id': term.pk, 'word': word})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@staff_member_required
+def api_upload_image(request):
+    """이미지 업로드 API for Quill editor"""
+    from django.http import JsonResponse
+    from django.conf import settings
+    import os
+    import uuid
+    
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
+    
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No image provided'}, status=400)
+    
+    image = request.FILES['image']
+    
+    # Generate unique filename
+    ext = os.path.splitext(image.name)[1].lower()
+    if ext not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+        return JsonResponse({'error': 'Invalid image format'}, status=400)
+    
+    filename = f"{uuid.uuid4().hex}{ext}"
+    
+    # Save to media/term_images/
+    upload_dir = os.path.join(settings.MEDIA_ROOT, 'term_images')
+    os.makedirs(upload_dir, exist_ok=True)
+    
+    filepath = os.path.join(upload_dir, filename)
+    with open(filepath, 'wb+') as f:
+        for chunk in image.chunks():
+            f.write(chunk)
+    
+    # Return URL
+    image_url = f"{settings.MEDIA_URL}term_images/{filename}"
+    return JsonResponse({'success': True, 'url': image_url})
