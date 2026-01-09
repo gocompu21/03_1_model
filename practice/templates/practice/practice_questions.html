@@ -348,7 +348,12 @@
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                             {% for term in related_terms %}
                             <a href="{% url 'glossary:term_detail' term.pk %}" target="glossary_popup" 
-                               style="display: inline-block; padding: 3px 8px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; border: 1px solid #2d6a4f; transition: all 0.2s;">
+                               style="display: inline-block; padding: 3px 8px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.9rem; border: 1px solid #2d6a4f; 
+                               {% if term.reference_count > 0 %}
+                               border-right-width: 5px; 
+                               border-right-color: {% if term.reference_count >= 10 %}#d32f2f{% elif term.reference_count >= 5 %}#f57c00{% else %}#1976d2{% endif %};
+                               {% endif %}
+                               transition: all 0.2s;">
                                 {{ term.word }}
                             </a>
                             {% endfor %}

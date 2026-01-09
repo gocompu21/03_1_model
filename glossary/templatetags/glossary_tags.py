@@ -140,4 +140,7 @@ def get_relevant_terms(content, subject_name=None):
         
     # 용어 객체 조회 (정렬)
     from glossary.models import Term
-    return Term.objects.filter(id__in=found_term_ids).order_by('word')
+    from django.db.models import Count
+    return Term.objects.filter(id__in=found_term_ids).annotate(
+        reference_count=Count('references')
+    ).order_by('word')
