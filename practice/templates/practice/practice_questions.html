@@ -341,7 +341,7 @@
                     </div>
 
                     <!-- Related Terms in Explanation -->
-                    {% get_relevant_terms q.explanation chapter.book.subject as related_terms %}
+                    {% get_relevant_terms q chapter.book.subject as related_terms %}
                     {% if related_terms %}
                     <div style="margin-top: 20px; border-top: 1px dashed #ddd; padding-top: 15px;">
                         <h4 style="font-size: 0.95rem; color: #2d6a4f; margin: 0 0 10px 0;">🔑 관련 용어</h4>
