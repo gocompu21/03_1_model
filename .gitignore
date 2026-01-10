@@ -9,6 +9,7 @@ data/FileStore/
 media/tts/
 media/questions/explanations/
 media/chapter_content/
+media/uploads/
 chapter_*.html
 !**/chapter_detail.html
 !**/chapter_list.html
@@ -16,3 +17,4 @@ exam_questions_selected.html
 chapter_*.pdf
 *.sqlite3*
 explanations_*.json
+

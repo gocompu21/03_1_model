@@ -1,73 +1,67 @@
-"""
-Script to extract Base64 images from ChapterContent and save to media files.
-Usage: python manage.py shell < extract_images.py
-"""
 import os
+import django
 import re
 import base64
-import hashlib
+import uuid
 from django.conf import settings
-from practice.models import ChapterContent
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
-# Output directory
-IMAGES_DIR = os.path.join(settings.MEDIA_ROOT, 'chapter_content')
-os.makedirs(IMAGES_DIR, exist_ok=True)
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
 
-# Pattern to find Base64 images
-IMG_PATTERN = re.compile(
-    r'<img([^>]*?)src="data:image/([^;]+);base64,([^"]+)"([^>]*?)>',
-    re.IGNORECASE | re.DOTALL
-)
+from practice.models import Chapter, ChapterContent
 
-def extract_images():
+def extract_all_images():
+    print("Checking all chapters for embedded images...")
     contents = ChapterContent.objects.all()
-    total_images = 0
-    updated_contents = 0
+    
+    total_extracted = 0
+    chapters_processed = 0
     
     for content in contents:
-        original = content.content
-        new_content = original
-        images_in_content = 0
+        chapter_id = content.chapter.id
+        # We can reuse the logic, but let's inline it or call a helper to keep it clean.
+        # Logic from extract_images_from_chapter adapted here
         
-        for match in IMG_PATTERN.finditer(original):
-            pre_attrs = match.group(1)
-            img_type = match.group(2)
-            b64_data = match.group(3)
-            post_attrs = match.group(4)
+        html_content = content.content
+        if not html_content or 'data:image' not in html_content:
+            continue
+            
+        print(f"Processing Chapter {chapter_id}: {content.chapter.title}")
+            
+        pattern = re.compile(r'src="data:image/(?P<ext>png|jpeg|jpg|gif|webp);base64,(?P<data>[^"]+)"')
+        
+        replacement_count = 0
+        
+        def replace_match(match):
+            nonlocal replacement_count
+            ext = match.group('ext')
+            data_str = match.group('data')
+            
+            filename = f"chapter_{chapter_id}_{uuid.uuid4().hex[:8]}.{ext}"
+            upload_path = f"uploads/content_images/{filename}"
             
             try:
-                # Decode Base64
-                img_data = base64.b64decode(b64_data)
-                
-                # Generate filename
-                img_hash = hashlib.md5(img_data).hexdigest()[:12]
-                filename = f"chapter_{content.chapter.id}_{img_hash}.{img_type}"
-                filepath = os.path.join(IMAGES_DIR, filename)
-                
-                # Save file
-                with open(filepath, 'wb') as f:
-                    f.write(img_data)
-                
-                # Replace in content
-                media_url = f"{settings.MEDIA_URL}chapter_content/{filename}"
-                new_img_tag = f'<img{pre_attrs}src="{media_url}"{post_attrs}>'
-                new_content = new_content.replace(match.group(0), new_img_tag, 1)
-                
-                images_in_content += 1
-                total_images += 1
-                print(f"  Saved: {filename}")
-                
+                img_data = base64.b64decode(data_str)
+                saved_path = default_storage.save(upload_path, ContentFile(img_data))
+                url = default_storage.url(saved_path)
+                replacement_count += 1
+                return f'src="{url}"'
             except Exception as e:
-                print(f"  Error: {e}")
+                print(f"  Error saving image: {e}")
+                return match.group(0)
+
+        new_content, count = pattern.subn(replace_match, html_content)
         
-        if images_in_content > 0:
+        if count > 0:
             content.content = new_content
             content.save()
-            updated_contents += 1
-            print(f"Chapter {content.chapter.id}: {images_in_content} images extracted")
-    
-    print(f"\n" + "="*50)
-    print(f"Done! Extracted {total_images} images from {updated_contents} contents.")
+            print(f"  -> Extracted {count} images. Size reduced: {len(html_content)} -> {len(new_content)}")
+            total_extracted += count
+            chapters_processed += 1
+            
+    print(f"\nCompleted! Processed {chapters_processed} chapters, extracted {total_extracted} images total.")
 
 if __name__ == "__main__":
-    extract_images()
+    extract_all_images()
