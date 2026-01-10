@@ -14,6 +14,20 @@ def extract():
     print("Kiwi 초기화 중...")
     try:
         kiwi = Kiwi()
+        # DB의 모든 용어를 사용자 사전에 등록
+        db_terms = Term.objects.values_list('word', flat=True)
+        for t in db_terms:
+            # 공백 제거 등 정규화 필요시 처리, 여기선 원본 그대로
+            kiwi.add_user_word(t, 'NNP')
+        print(f"  Kiwi 사용자 사전 등록: {len(db_terms)}개 (DB 기반)")
+        
+        # 추가 하드코딩 필요시 유지
+        extra_words = [
+            '감수분열', '유사분열' # DB에 없을 수 있는 것들
+        ]
+        for w in extra_words:
+            kiwi.add_user_word(w, 'NNP')
+
     except Exception as e:
         print(f"Kiwi 초기화 실패: {e}")
         return
