@@ -38,8 +38,7 @@ for term in terms:
         search_texts = [
             q.content or '',
             q.choice1 or '', q.choice2 or '', q.choice3 or '', q.choice4 or '', q.choice5 or '',
-            q.textbook_chat or '',
-            q.general_chat or '',
+            # 해설 제외 (textbook_chat, general_chat)
         ]
         
         # 용어가 포함된 문제 찾기

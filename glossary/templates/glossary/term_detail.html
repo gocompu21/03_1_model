@@ -221,10 +221,51 @@ const currentTerm = "{{ term.word }}";
 let questionsLoaded = false;
 
 // 텍스트에서 현재 용어를 빨간색으로 강조 + 별 추가
-function highlightTerm(text) {
-    if (!currentTerm || !text) return text;
-    const regex = new RegExp(`(${currentTerm})`, 'gi');
-    return text.replace(regex, '<span class="term-highlight">✨$1✨</span>');
+// 텍스트에서 현재 용어를 빨간색으로 강조 (HTML 태그 안전 처리)
+function highlightTerm(htmlContent) {
+    if (!currentTerm || !htmlContent) return htmlContent;
+    
+    // Create a temporary container
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    
+    // Recursive function to walk text nodes
+    function walk(node) {
+        if (node.nodeType === 3) { // Text node
+            const text = node.nodeValue;
+            // Escape regex special characters in currentTerm
+            const escapedTerm = currentTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${escapedTerm})`, 'gi');
+            
+            if (regex.test(text)) {
+                const fragment = document.createDocumentFragment();
+                let lastIdx = 0;
+                text.replace(regex, (match, p1, offset) => {
+                    // Push preceding text matches
+                    fragment.appendChild(document.createTextNode(text.slice(lastIdx, offset)));
+                    
+                    // Push highlighted span
+                    const span = document.createElement('span');
+                    span.className = 'term-highlight';
+                    span.textContent = p1; // No extra characters added
+                    fragment.appendChild(span);
+                    
+                    lastIdx = offset + match.length;
+                    return match;
+                });
+                // Push remaining text
+                fragment.appendChild(document.createTextNode(text.slice(lastIdx)));
+                
+                node.parentNode.replaceChild(fragment, node);
+            }
+        } else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+            // Traverse child nodes
+            Array.from(node.childNodes).forEach(walk);
+        }
+    }
+    
+    walk(tempDiv);
+    return tempDiv.innerHTML;
 }
 
 async function toggleAllQuestions() {
