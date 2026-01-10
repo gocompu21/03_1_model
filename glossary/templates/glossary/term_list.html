@@ -152,7 +152,7 @@
         </select>
         <button type="submit" style="padding: 6px 15px; font-size: 0.9rem;">검색</button>
         {% if user.is_staff or user.is_superuser %}
-        <a href="{% url 'glossary:term_create' %}" style="padding: 6px 15px; margin-left: auto; background: #ffc107; color: #333; border: none; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">+ 용어 등록</a>
+        <a href="{% url 'glossary:term_create' %}" style="padding: 6px 15px; margin-left: auto; background: transparent; color: #2d6a4f; border: 1px solid #2d6a4f; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">+ 용어 등록</a>
         {% endif %}
     </form>
     
