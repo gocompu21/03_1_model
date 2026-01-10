@@ -161,11 +161,11 @@
     {% regroup terms by word|get_initial as grouped_terms %}
     
     <!-- Index Navigation (Multi-row Tabs Style) -->
-    <div style="display: flex; flex-wrap: wrap; border-bottom: 2px solid #2d6a4f; margin-bottom: 0px; padding: 0 5px 0 55px; gap: 2px;">
+    <div style="display: flex; flex-wrap: wrap; border-bottom: 2px solid #2d6a4f; margin-bottom: 4px; padding: 0; gap: 2px;">
         <style>
             .glossary-tab {
                 display: block; 
-                padding: 4px 17px; 
+                padding: 6px 16px; 
                 background: linear-gradient(135deg, #2d6a4f, #40916c);
                 color: white; 
                 text-decoration: none; 
@@ -173,7 +173,7 @@
                 border-bottom: none; 
                 border-radius: 6px 6px 0 0; 
                 font-weight: bold; 
-                font-size: 0.85rem; 
+                font-size: 0.9rem; 
                 white-space: nowrap; 
                 transition: all 0.2s; 
                 position: relative; 
@@ -189,35 +189,35 @@
             .exam-segmented-control {
                 display: flex;
                 background: white;
-                border: 1px solid #d32f2f;
+                border: 1px solid #1b4332;
                 border-radius: 4px; /* Rounded corners for the pill shape */
                 overflow: hidden;
                 margin-left: auto;
-                height: 28px; /* Match tab height roughly */
+                height: 30px; /* Match tab height roughly */
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             }
             .exam-option {
-                padding: 0 12px;
+                padding: 0 14px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 0.8rem;
+                font-size: 0.85rem;
                 font-weight: 600;
-                color: #d32f2f;
+                color: #2d6a4f;
                 text-decoration: none;
                 cursor: pointer;
                 transition: all 0.2s;
                 background: white;
             }
             .exam-option.active {
-                background: #d32f2f;
+                background: #2d6a4f;
                 color: white;
             }
             .exam-option:hover:not(.active) {
-                background: #ffebee;
+                background: #e8f5e9;
             }
             .exam-option:not(:last-child) {
-                border-right: 1px solid #d32f2f;
+                border-right: 1px solid #1b4332;
             }
         </style>
         {% for group in grouped_terms %}
@@ -287,8 +287,15 @@
             </td>
             {% for term in group.list %}
             {% if not forloop.first %}</tr><tr>{% endif %}
-            <td style="padding: 4px 10px; border-bottom: 1px solid #eee; width: 120px;">
-                <a href="{% url 'glossary:term_detail' term.pk %}" style="color: #2d6a4f; text-decoration: none; font-weight: 500;">{{ term.word }}</a>
+            <td style="padding: 4px 10px; border-bottom: 1px solid #eee; width: 200px;">
+                <a href="{% url 'glossary:term_detail' term.pk %}" style="color: #2d6a4f; text-decoration: none; font-weight: 500;">
+                    {{ term.word }}
+                </a>
+            </td>
+            <td style="padding: 4px 0px; border-bottom: 1px solid #eee; width: 20px; text-align: center;">
+                {% if term.content and term.content|length > 100 %}
+                <span style="font-size: 0.8rem; cursor: help;" title="설명 있음">📝</span>
+                {% endif %}
             </td>
             <td style="padding: 4px 6px; border-bottom: 1px solid #eee; text-align: center; width: 40px; color: #666;">
                 {{ term.reference_count|default:0 }}회
