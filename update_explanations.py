@@ -79,24 +79,45 @@ def update_explanations(chapter_code):
 3. 관련 핵심 개념을 정리해주세요.
 """
         
-        print(f'Querying textbook...')
-        try:
-            response = manager.query_store(store_name, query)
-            print(f'Response length: {len(response) if response else 0}')
-            
-            if response and len(response) > 100 and not response.startswith('Error') and not response.startswith('No valid'):
-                # Update explanation
-                q.explanation = response
-                q.save()
-                print(f'✓ Explanation saved')
-                # Rate limiting
-                time.sleep(3)
-            else:
-                print(f'✗ Response invalid or too short')
-            
-        except Exception as e:
-            print(f'✗ Error: {e}')
-            time.sleep(5)
+        # Retry loop for rate limits
+        max_retries = 3
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            print(f'Querying textbook... (Attempt {retry_count+1}/{max_retries})')
+            try:
+                response = manager.query_store(store_name, query)
+                
+                # Check for Rate Limit (429) or other API errors
+                if response and ('429' in response or 'ResourceExhausted' in response):
+                    print(f'⚠ Quota Exceeded (429). Waiting 30 seconds...')
+                    time.sleep(30)
+                    retry_count += 1
+                    continue
+                
+                print(f'Response length: {len(response) if response else 0}')
+                
+                if response and len(response) > 100 and not response.startswith('Error') and not response.startswith('No valid'):
+                    # Update explanation
+                    q.explanation = response
+                    q.save()
+                    print(f'✓ Explanation saved')
+                    # Rate limiting success padding (User requested 60s)
+                    print('Waiting 60 seconds...')
+                    time.sleep(60)
+                    break # Success, exit retry loop
+                else:
+                    print(f'✗ Response invalid or too short: {response[:100]}...')
+                    retry_count += 1
+                    time.sleep(2)
+                
+            except Exception as e:
+                print(f'✗ Error: {e}')
+                time.sleep(5)
+                retry_count += 1
+        
+        if retry_count >= max_retries:
+            print(f'✗ Failed to get explanation after {max_retries} attempts. Skipping.')
 
     print('\n=== Done! ===')
 
