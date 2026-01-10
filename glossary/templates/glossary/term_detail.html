@@ -233,16 +233,61 @@
         
         {% if references %}
         <div class="references-section">
-            <h3 class="references-title" style="display: inline;">📎 연결된 기출문제 ({{ references|length }}개)</h3>
-            <button onclick="toggleAllQuestions()" id="toggle-btn"
-               style="margin-left: 10px; background: #1565c0; color: white; padding: 4px 15px; border-radius: 15px; font-size: 0.8rem; border: none; cursor: pointer;">
-                보기
-            </button>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <h3 class="references-title" style="display: inline; font-size: 1.1rem; margin: 0;">📎 기출문제</h3>
+                <button onclick="toggleAllQuestions()" id="toggle-btn" class="view-qs-btn">
+                    {{ references|length }} 문제 보기
+                </button>
+            </div>
+            
+            <div style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 4px;">
+                {% for ref in references %}
+                <span class="round-badge" data-round="{{ ref.source_title|slice:':2'|cut:'회' }}">{{ ref.source_title }}</span>
+                {% endfor %}
+            </div>
             
             <div id="all-questions-container" style="display: none; margin-top: 15px;">
                 <p id="loading-text" style="color: #666;">문제 불러오는 중...</p>
             </div>
         </div>
+        <style>
+            .view-qs-btn {
+                background: transparent;
+                color: #d32f2f;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 0.8rem;
+                border: 1px solid #d32f2f;
+                cursor: pointer;
+                font-weight: bold;
+                transition: all 0.2s;
+            }
+            .view-qs-btn:hover {
+                background-color: #d32f2f;
+                color: white;
+            }
+            .round-badge { 
+                display: inline-block; 
+                color: white; 
+                padding: 3px 8px; 
+                border-radius: 12px; 
+                font-size: 0.8rem; 
+                font-weight: 500;
+                background: #757575; 
+            }
+            .round-badge[data-round="1"] { background: #e53935; }
+            .round-badge[data-round="2"] { background: #d81b60; }
+            .round-badge[data-round="3"] { background: #8e24aa; }
+            .round-badge[data-round="4"] { background: #5e35b1; }
+            .round-badge[data-round="5"] { background: #3949ab; }
+            .round-badge[data-round="6"] { background: #1e88e5; }
+            .round-badge[data-round="7"] { background: #00acc1; }
+            .round-badge[data-round="8"] { background: #00897b; }
+            .round-badge[data-round="9"] { background: #43a047; }
+            .round-badge[data-round="10"] { background: #7cb342; }
+            .round-badge[data-round="11"] { background: #c0ca33; color: #333; }
+            .round-badge[data-round="12"] { background: #ffb300; color: #333; }
+        </style>
         {% endif %}
         
         <div class="term-meta">
@@ -323,12 +368,12 @@ async function toggleAllQuestions() {
     
     if (container.style.display !== 'none') {
         container.style.display = 'none';
-        btn.textContent = '보기';
+        btn.textContent = `${questionIds.length} 문제 보기`;
         return;
     }
     
     container.style.display = 'block';
-    btn.textContent = '접기';
+    btn.textContent = `${questionIds.length} 문제 접기`;
     
     if (questionsLoaded) return;
     
