@@ -53,7 +53,7 @@ def update_explanations(chapter_code):
         print(f'Answer: {q.answer}')
         
         # Check if explanation already exists (length check)
-        if q.explanation and len(q.explanation.strip()) > 30:
+        if q.explanation and len(q.explanation.strip()) > 200:
             print(f'✓ Skipping: Already has explanation ({len(q.explanation)} chars)')
             continue
 
