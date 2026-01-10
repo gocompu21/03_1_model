@@ -308,6 +308,16 @@
         transition: 0.3s;
         cursor: pointer;
     }
+
+    /* Reset Markdown List Styles to prevent double numbering */
+    .markdown-content ol, .markdown-content ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+    }
+    .markdown-content li {
+        margin-bottom: 0.5em;
+    }
 </style>
 
 <div class="study-container">
