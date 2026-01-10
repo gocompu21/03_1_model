@@ -294,7 +294,9 @@
             </td>
             <td style="padding: 4px 0px; border-bottom: 1px solid #eee; width: 20px; text-align: center;">
                 {% if term.content and term.content|length > 100 %}
-                <span style="font-size: 0.8rem; cursor: help;" title="설명 있음">📝</span>
+                <a href="{% url 'glossary:term_detail' term.pk %}" style="text-decoration: none;">
+                    <span style="font-size: 0.8rem; cursor: pointer;" title="설명 있음">📝</span>
+                </a>
                 {% endif %}
             </td>
             <td style="padding: 4px 6px; border-bottom: 1px solid #eee; text-align: center; width: 40px; color: #666;">
