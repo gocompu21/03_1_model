@@ -23,6 +23,17 @@ def term_list(request):
     search = request.GET.get('q')
     if search:
         terms = terms.filter(word__icontains=search)
+        
+    # 기출 위주 필터 (기본값: on)
+    exam_only = request.GET.get('exam_only', 'on')
+    # 만약 URL이 ?exam_only= (빈 값)으로 오면 'on'으로 처리하거나 'off'로 처리?
+    # 보통 빈 값은 False로 하지만, 사용자가 '기본은 기출'이라고 했으므로 아예 없거나 'on'이면 켠다.
+    # 명시적으로 'off'일 때만 해제.
+    if exam_only != 'off':
+        terms = terms.filter(reference_count__gt=0)
+        exam_only = 'on'
+    else:
+        exam_only = 'off'
     
     # 정렬: DB 정렬 후 Python에서 이니셜 그룹별로 확실히 재정렬
     # (regroup 템플릿 태그가 연속된 그룹을 제대로 묶으려면 리스트가 그룹별로 정렬되어 있어야 함)
@@ -35,6 +46,7 @@ def term_list(request):
         'subjects': subjects,
         'selected_subject': subject_id,
         'search_query': search or '',
+        'exam_only': exam_only == 'on',
     }
     return render(request, 'glossary/term_list.html', context)
 

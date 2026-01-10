@@ -152,7 +152,7 @@
         </select>
         <button type="submit" style="padding: 6px 15px; font-size: 0.9rem;">검색</button>
         {% if user.is_staff or user.is_superuser %}
-        <a href="{% url 'glossary:term_create' %}" style="padding: 6px 15px; background: #ffc107; color: #333; border: none; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">+ 용어 등록</a>
+        <a href="{% url 'glossary:term_create' %}" style="padding: 6px 15px; margin-left: auto; background: #ffc107; color: #333; border: none; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">+ 용어 등록</a>
         {% endif %}
     </form>
     
@@ -185,6 +185,40 @@
                 background: linear-gradient(135deg, #1b4332, #2d6a4f);
                 transform: translateY(-2px);
             }
+            /* Exam Segmented Control Style */
+            .exam-segmented-control {
+                display: flex;
+                background: white;
+                border: 1px solid #d32f2f;
+                border-radius: 4px; /* Rounded corners for the pill shape */
+                overflow: hidden;
+                margin-left: auto;
+                height: 28px; /* Match tab height roughly */
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .exam-option {
+                padding: 0 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.8rem;
+                font-weight: 600;
+                color: #d32f2f;
+                text-decoration: none;
+                cursor: pointer;
+                transition: all 0.2s;
+                background: white;
+            }
+            .exam-option.active {
+                background: #d32f2f;
+                color: white;
+            }
+            .exam-option:hover:not(.active) {
+                background: #ffebee;
+            }
+            .exam-option:not(:last-child) {
+                border-right: 1px solid #d32f2f;
+            }
         </style>
         {% for group in grouped_terms %}
         {% if not group.grouper|is_hangul %}
@@ -203,6 +237,18 @@
         </a>
         {% endif %}
         {% endfor %}
+
+        <!-- Exam Focused Segmented Control -->
+        <div class="exam-segmented-control">
+            <a href="?exam_only=off&q={{ search_query }}&subject={{ selected_subject|default:'' }}" 
+               class="exam-option {% if not exam_only %}active{% endif %}">
+               {% if not exam_only %}✔ {% endif %}전체
+            </a>
+            <a href="?exam_only=on&q={{ search_query }}&subject={{ selected_subject|default:'' }}" 
+               class="exam-option {% if exam_only %}active{% endif %}">
+               {% if exam_only %}✔ {% endif %}기출
+            </a>
+        </div>
     </div>
     
     <!-- Script to highlight active tab -->
