@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load markdown_extras %}
+{% load glossary_tags %}
 
 {% block content %}
 <style>
@@ -385,6 +386,28 @@
                 <div class="infographic-container">
                     <p style="text-align: center; font-weight: bold; color: #555; margin-bottom: 5px;">[비주얼 암기 카드]</p>
                     <img src="{{ q.infographic_image.url }}" onclick="openModal(this.src)">
+                </div>
+                {% endif %}
+
+                <!-- Related Terms -->
+                {% get_relevant_terms q q.subject as related_terms %}
+                {% if related_terms %}
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                    <h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                        {% for term in related_terms %}
+                        <a href="/glossary/term/{{ term.id }}/" target="glossary_popup"
+                           onclick="window.open(this.href, 'glossary_popup', 'width=500,height=600,scrollbars=yes,resizable=yes'); return false;"
+                           style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; border: 1px solid #2d6a4f; 
+                           {% if term.reference_count > 0 %}
+                           border-right-width: 5px; 
+                           border-right-color: {% if term.reference_count >= 10 %}#d32f2f{% elif term.reference_count >= 5 %}#f57c00{% else %}#1976d2{% endif %};
+                           {% endif %}
+                           transition: all 0.2s;">
+                            {{ term.word }}
+                        </a>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% endif %}
 

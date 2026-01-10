@@ -119,8 +119,39 @@ def get_relevant_terms(content, subject_name=None):
     
     Usage:
         {% get_relevant_terms content.content chapter.book.subject as terms %}
+        {% get_relevant_terms question_object subject_object as terms %}
     """
     if not content or not subject_name:
+        return []
+
+    # Handle Subject object (if passed instead of string name)
+    if hasattr(subject_name, 'name'):
+        subject_name = subject_name.name
+    
+    # Handle content being an object (Question model)
+    search_text = ""
+    if isinstance(content, str):
+        search_text = content
+    else:
+        # Check for Question-like object (with choices)
+        # exam.models.Question or practice.models.PracticeQuestion
+        if hasattr(content, 'content'):
+            search_text += content.content + " "
+        
+        for i in range(1, 6):
+            choice_field = f'choice{i}'
+            if hasattr(content, choice_field):
+                search_text += getattr(content, choice_field) + " "
+        
+        # Optionally include explanation if available
+        if hasattr(content, 'general_chat') and content.general_chat:
+            search_text += content.general_chat + " "
+        if hasattr(content, 'textbook_chat') and content.textbook_chat:
+            search_text += content.textbook_chat + " "
+        if hasattr(content, 'explanation') and content.explanation:  # PracticeQuestion
+            search_text += content.explanation + " "
+
+    if not search_text:
         return []
         
     pattern, term_map = get_terms_pattern(subject_name)
@@ -130,7 +161,7 @@ def get_relevant_terms(content, subject_name=None):
     found_term_ids = set()
     
     # 텍스트에서 모든 매칭 찾기
-    for match in pattern.finditer(content):
+    for match in pattern.finditer(search_text):
         term_id = term_map.get(match.group(0))
         if term_id:
             found_term_ids.add(term_id)
