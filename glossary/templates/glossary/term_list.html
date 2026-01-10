@@ -187,9 +187,21 @@
             }
         </style>
         {% for group in grouped_terms %}
+        {% if not group.grouper|is_hangul %}
         <a href="#term-group-{{ group.grouper }}" class="glossary-tab">
             {{ group.grouper }}
         </a>
+        {% endif %}
+        {% endfor %}
+        
+        <div style="flex-basis: 100%; height: 2px;"></div>
+        
+        {% for group in grouped_terms %}
+        {% if group.grouper|is_hangul %}
+        <a href="#term-group-{{ group.grouper }}" class="glossary-tab">
+            {{ group.grouper }}
+        </a>
+        {% endif %}
         {% endfor %}
     </div>
     
@@ -221,6 +233,11 @@
         <tr id="term-group-{{ group.grouper }}">
             <td rowspan="{{ group.list|length }}" style="background: linear-gradient(135deg, #2d6a4f, #40916c); color: white; padding: 8px 12px; font-weight: 700; text-align: center; width: 30px; vertical-align: top; border-bottom: 1px solid #1b4332;">
                 {{ group.grouper }}
+                <div style="margin-top: 8px;">
+                    <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.7rem;" title="맨 위로">
+                        ▲
+                    </a>
+                </div>
             </td>
             {% for term in group.list %}
             {% if not forloop.first %}</tr><tr>{% endif %}

@@ -24,6 +24,12 @@ def term_list(request):
     if search:
         terms = terms.filter(word__icontains=search)
     
+    # 정렬: DB 정렬 후 Python에서 이니셜 그룹별로 확실히 재정렬
+    # (regroup 템플릿 태그가 연속된 그룹을 제대로 묶으려면 리스트가 그룹별로 정렬되어 있어야 함)
+    from glossary.templatetags.glossary_tags import get_initial
+    terms = list(terms)
+    terms.sort(key=lambda t: (get_initial(t.word), t.word))
+
     context = {
         'terms': terms,
         'subjects': subjects,
@@ -223,3 +229,71 @@ def api_upload_image(request):
     # Return URL
     image_url = f"{settings.MEDIA_URL}term_images/{filename}"
     return JsonResponse({'success': True, 'url': image_url})
+
+
+@login_required
+@staff_member_required
+def fetch_term_from_textbook(request, pk):
+    """기본서에서 용어 검색 및 설명 가져오기 (Gemini API 사용)"""
+    import sys
+    import os
+    from django.conf import settings
+    
+    # Ensure project root is in path to import fileSearchStore
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    try:
+        from fileSearchStore import GeminiStoreManager
+    except ImportError:
+        messages.error(request, 'fileSearchStore 모듈을 찾을 수 없습니다.')
+        return redirect('glossary:term_detail', pk=pk)
+
+    term = get_object_or_404(Term, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            # 1. 대상 과목(Store) 결정
+            # 용어에 연결된 첫 번째 과목을 기준으로 함. 없으면 'Tree Doctor Examp'(전체)
+            target_store = "Tree Doctor Examp"
+            subject = term.subjects.first()
+            if subject:
+                # Store Map: 과목명 -> 스토어명 매핑 (notebook/views.py 참고할 수도 있으나, 
+                # 현재 시스템은 과목명이 그대로 스토어명으로 사용되는 것으로 추정됨)
+                target_store = subject.name
+            
+            # 2. 질문 생성
+            user_input = f"'{term.word}'에 대해 설명해줘."
+            
+            # 3. API 호출
+            api_key = settings.GEMINI_API_KEY
+            manager = GeminiStoreManager(api_key=api_key)
+            
+            # 스토어 확인 및 싱크
+            if target_store not in manager.stores or not manager.stores[target_store]:
+                 manager.sync_all_stores()
+            
+            # 쿼리 실행
+            response_text = manager.query_store(target_store, user_input)
+            
+            # 결과 검증 (빈 응답 등)
+            if "No valid (ACTIVE) files found" in response_text or "Store is empty" in response_text:
+                 manager.sync_all_stores()
+                 response_text = manager.query_store(target_store, user_input)
+
+            # 4. 결과 저장
+            if response_text:
+                # 기존 내용이 있으면 아래에 추가
+                if term.content:
+                    term.content += f"\n\n---\n###기본서 발췌 ({target_store})\n{response_text}"
+                else:
+                    term.content = response_text
+                
+                term.save()
+                messages.success(request, f'기본서({target_store})에서 내용을 가져왔습니다.')
+            else:
+                messages.warning(request, 'API로부터 응답을 받지 못했습니다.')
+                
+        except Exception as e:
+            messages.error(request, f'오류가 발생했습니다: {str(e)}')
+            
+    return redirect('glossary:term_detail', pk=pk)

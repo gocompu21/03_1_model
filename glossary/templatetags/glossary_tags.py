@@ -206,12 +206,19 @@ def get_initial(value):
             return initials[initial_index]
             
     # 3. 영문
-    if 'a' <= char.lower() <= 'z':
-        upper_char = char.upper()
-        if 'A' <= upper_char <= 'N':
-            return 'A~N'
-        elif 'O' <= upper_char <= 'Z':
-            return 'O~Z'
-        return upper_char
+    if 'a' <= char <= 'z':
+        if char <= 'n': return 'a~n'
+        return 'o~z'
+    elif 'A' <= char <= 'Z':
+        if char <= 'N': return 'A~N'
+        return 'O~Z'
         
     return char
+
+
+@register.filter(name='is_hangul')
+def is_hangul(value):
+    """문자열이 한글로 시작하는지 여부 반환"""
+    if not value:
+        return False
+    return '가' <= value[0] <= '힣'

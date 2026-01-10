@@ -10,10 +10,7 @@
             margin: 0;
             padding: 0;
         }
-        /* Global waiting cursor */
-        body.waiting, body.waiting * {
-            cursor: wait !important;
-        }
+
 
         header {
             background: #333;
@@ -67,18 +64,6 @@
     <main class="container">
         {% block content %}{% endblock %}
     </main>
-    <script>
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a');
-            if (link && link.href && !link.href.startsWith('#') && !link.href.startsWith('javascript:') && !link.target && !e.ctrlKey && !e.metaKey) {
-                document.body.classList.add('waiting');
-            }
-        });
 
-        // 뒤로가기 시 커서 복구 (bfcache 대응)
-        window.onpageshow = function(event) {
-            document.body.classList.remove('waiting');
-        };
-    </script>
 </body>
 </html>
