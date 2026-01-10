@@ -153,6 +153,22 @@
     .term-content li {
         margin-bottom: 0.4rem;
     }
+
+    /* Question Card Styles for Dynamic Content */
+    .box {
+        border: 1px solid #333;
+        padding: 5px 15px; 
+        margin: 5px 0 15px 15px; /* Margin-left ensures spacing if floated */
+        background-color: #fff;
+        max-width: 100%;
+    }
+    .q-content {
+        display: flow-root; /* Contains floats */
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
 </style>
 
 <div class="term-container">
@@ -340,7 +356,7 @@ async function toggleAllQuestions() {
                             <span class="q-badge">${data.exam_round}회</span>
                         </div>
                         <div class="q-content">
-                            ${data.number}. ${highlightTerm(data.content)}
+                            ${data.number}. ${highlightTerm(data.content.replace(/\n/g, '<br>'))}
                         </div>
                     </div>
                     <div class="q-choices">${choicesHtml}</div>
