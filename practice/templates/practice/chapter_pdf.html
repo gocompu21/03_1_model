@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ root_chapter.code }} {{ root_chapter.title }}</title>
+    <!-- MathJax for LaTeX -->
+    <script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; padding: 20px; }
+        }
+        
+        @page {
+            size: A4;
+            margin: 2cm 1.5cm;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .print-button:hover {
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+        }
+        
+        h1 {
+            font-size: 18pt;
+            color: #1b4332;
+            border-bottom: 2px solid #2d6a4f;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 14pt;
+            color: #2d6a4f;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            page-break-after: avoid;
+        }
+        
+        h3 {
+            font-size: 12pt;
+            color: #40916c;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            page-break-after: avoid;
+        }
+        
+        .chapter-content {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+        
+        .chapter-content img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .questions-section {
+            margin-top: 30px;
+        }
+        
+        .question {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+            border: 2px solid #2d6a4f;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fafafa;
+        }
+        
+        .question-header {
+            font-weight: bold;
+            color: #1b4332;
+            margin-bottom: 10px;
+            font-size: 12pt;
+        }
+        
+        .question-content {
+            margin-bottom: 12px;
+        }
+        
+        .choices {
+            margin-left: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .choice {
+            margin-bottom: 5px;
+        }
+        
+        .choice-number {
+            display: inline-block;
+            width: 25px;
+            font-weight: bold;
+        }
+        
+        .answer-box {
+            background: #e8f5e9;
+            border-left: 4px solid #2d6a4f;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .answer-label {
+            font-weight: bold;
+            color: #1b4332;
+            margin-bottom: 8px;
+        }
+        
+        .explanation-content {
+            font-size: 10pt;
+            color: #444;
+            line-height: 1.5;
+        }
+        
+        .explanation-content p {
+            margin: 8px 0;
+        }
+        
+        .explanation-content ul, .explanation-content ol {
+            margin: 8px 0;
+            padding-left: 25px;
+        }
+        
+        .explanation-content code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+        }
+        
+        .explanation-content pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ PDF로 인쇄</button>
+    
+    <h1>{{ root_chapter.code }} {{ root_chapter.title }}</h1>
+    
+    {% for item in chapter_data %}
+    <section>
+        {% if item.chapter.level == 1 %}
+        <h2>{{ item.chapter.code }} {{ item.chapter.title }}</h2>
+        {% elif item.chapter.level == 2 %}
+        <h3>{{ item.chapter.code }} {{ item.chapter.title }}</h3>
+        {% else %}
+        <h4 style="font-size: 11pt; color: #666; margin-top: 15px;">{{ item.chapter.code }} {{ item.chapter.title }}</h4>
+        {% endif %}
+        
+        {% if item.content %}
+        <div class="chapter-content">
+            {{ item.content.content|safe }}
+        </div>
+        {% endif %}
+        
+        {% if item.questions %}
+        <div class="questions-section">
+            <strong style="color: #2d6a4f;">📝 연습문제</strong>
+            {% for q in item.questions %}
+            <div class="question">
+                <div class="question-header">문제 {{ q.number }}</div>
+                <div class="question-content">{{ q.content|safe }}</div>
+                <div class="choices">
+                    <div class="choice"><span class="choice-number">①</span> {{ q.choice1 }}</div>
+                    <div class="choice"><span class="choice-number">②</span> {{ q.choice2 }}</div>
+                    <div class="choice"><span class="choice-number">③</span> {{ q.choice3 }}</div>
+                    <div class="choice"><span class="choice-number">④</span> {{ q.choice4 }}</div>
+                    <div class="choice"><span class="choice-number">⑤</span> {{ q.choice5 }}</div>
+                </div>
+                
+                <div class="answer-box">
+                    <div class="answer-label">✔ 정답: {{ q.answer }}번</div>
+                    {% if q.explanation %}
+                    <div class="explanation-wrapper">
+                        <!-- Raw markdown stored in hidden div. Django auto-escapes HTML, textContent decodes it. -->
+                        <div class="explanation-raw" style="display: none;">{{ q.explanation }}</div>
+                        <div class="explanation-content"></div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+    {% endfor %}
+    
+    <script>
+        // Markdown 파싱 및 MathJax 렌더링
+        document.addEventListener('DOMContentLoaded', function() {
+            // Marked.js 옵션 설정: 줄바꿈(엔터)을 <br>로 인식
+            marked.use({
+                breaks: true,
+                gfm: true
+            });
+
+            const wrappers = document.querySelectorAll('.explanation-wrapper');
+            wrappers.forEach(function(wrapper) {
+                const rawEl = wrapper.querySelector('.explanation-raw');
+                const contentEl = wrapper.querySelector('.explanation-content');
+                if (rawEl && contentEl) {
+                    // textContent gets the unescaped text (e.g. &lt; -> <)
+                    const markdown = rawEl.textContent;
+                    // Marked.js로 파싱
+                    contentEl.innerHTML = marked.parse(markdown);
+                }
+            });
+            
+            // MathJax 재렌더링
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+    </script>
+</body>
+</html>

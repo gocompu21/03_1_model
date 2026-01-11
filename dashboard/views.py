@@ -101,3 +101,53 @@ def index(request):
         'admin_dashboard': admin_dashboard,
     }
     return render(request, 'dashboard/index.html', context)
+
+
+@login_required
+@staff_member_required
+def print_material(request):
+    """자료 인쇄 페이지"""
+    from practice.models import Book
+    books = Book.objects.all().order_by('id')
+    
+    context = {
+        'books': books,
+        'page_title': '자료 인쇄'
+    }
+    return render(request, 'dashboard/print.html', context)
+
+
+@login_required
+@staff_member_required
+def get_chapters(request):
+    """특정 교재의 목차 목록 반환 (JSON)"""
+    from django.http import JsonResponse
+    from practice.models import Chapter
+    
+    book_id = request.GET.get('book_id')
+    if not book_id:
+        return JsonResponse({'chapters': []})
+        
+    # 모든 챕터를 가져와서 계층 구조 표시
+    # code(1.2.3)를 기준으로 자연 정렬 (Natural Sort)
+    chapters = Chapter.objects.filter(book_id=book_id).order_by('order')
+    
+    # Python에서 정렬
+    def natural_key(ch):
+        # "1.2.3" -> [1, 2, 3] 변환하여 튜플 비교
+        import re
+        return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', ch.code)]
+
+    sorted_chapters = sorted(chapters, key=natural_key)
+    
+    data = []
+    for ch in sorted_chapters:
+        data.append({
+            'id': ch.id,
+            'code': ch.code,
+            'title': ch.title,
+            'level': ch.level,
+            'full_text': f"{ch.code} {ch.title}"
+        })
+        
+    return JsonResponse({'chapters': data})
