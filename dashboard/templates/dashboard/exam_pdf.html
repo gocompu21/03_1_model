@@ -190,14 +190,14 @@
         <img src="{{ q.image.url }}" class="question-image" alt="문제 이미지">
         {% endif %}
         
-        <div class="question-content">{{ q.content }}</div>
+        <div class="question-content">{{ q.content|safe }}</div>
         
         <div class="choices">
-            <div class="choice"><span class="choice-number">①</span> {{ q.choice1 }}</div>
-            <div class="choice"><span class="choice-number">②</span> {{ q.choice2 }}</div>
-            <div class="choice"><span class="choice-number">③</span> {{ q.choice3 }}</div>
-            <div class="choice"><span class="choice-number">④</span> {{ q.choice4 }}</div>
-            <div class="choice"><span class="choice-number">⑤</span> {{ q.choice5 }}</div>
+            <div class="choice"><span class="choice-number">①</span> {{ q.choice1|safe }}</div>
+            <div class="choice"><span class="choice-number">②</span> {{ q.choice2|safe }}</div>
+            <div class="choice"><span class="choice-number">③</span> {{ q.choice3|safe }}</div>
+            <div class="choice"><span class="choice-number">④</span> {{ q.choice4|safe }}</div>
+            <div class="choice"><span class="choice-number">⑤</span> {{ q.choice5|safe }}</div>
         </div>
         
         <div class="answer-box">
