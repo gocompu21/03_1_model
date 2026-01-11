@@ -108,10 +108,14 @@ def index(request):
 def print_material(request):
     """자료 인쇄 페이지"""
     from practice.models import Book
-    books = Book.objects.all().order_by('id')
+    from exam.models import Exam
+    
+    books = Book.objects.all().order_by('subject', 'name')
+    exams = Exam.objects.all().order_by('round_number')
     
     context = {
         'books': books,
+        'exams': exams,
         'page_title': '자료 인쇄'
     }
     return render(request, 'dashboard/print.html', context)
@@ -151,3 +155,72 @@ def get_chapters(request):
         })
         
     return JsonResponse({'chapters': data})
+
+
+@login_required
+@staff_member_required
+def get_exam_questions(request):
+    """특정 회차의 문제 목록 반환 (JSON)"""
+    from django.http import JsonResponse
+    from exam.models import Question
+    
+    exam_id = request.GET.get('exam_id')
+    if not exam_id:
+        return JsonResponse({'questions': []})
+        
+    questions = Question.objects.filter(exam_id=exam_id).select_related('subject').order_by('number')
+    
+    data = []
+    for q in questions:
+        data.append({
+            'id': q.id,
+            'number': q.number,
+            'subject': q.subject.name,
+            'full_text': f"{q.number}번 - [{q.subject.name}]"
+        })
+        
+    return JsonResponse({'questions': data})
+
+
+@login_required
+@staff_member_required
+def exam_pdf(request):
+    """선택한 기출문제 인쇄 페이지"""
+    from exam.models import Question, Exam
+    
+    if request.method == 'POST':
+        question_ids = request.POST.getlist('question_ids')
+        # exam_id는 이제 필수가 아님 (여러 회차가 섞일 수 있음)
+    else:
+        # GET으로 넘어온 경우 (거의 없겠지만)
+        return render(request, 'dashboard/print.html')
+        
+    if not question_ids:
+        # 혹시 쉼표로 구분된 문자열로 넘어올 경우 처리 (JS에서 hidden input으로 넘길 때)
+        question_ids_str = request.POST.get('question_ids_str')
+        if question_ids_str:
+            question_ids = question_ids_str.split(',')
+            
+    if not question_ids:
+        return HttpResponse('선택된 문제가 없습니다.', status=400)
+    
+    # 문제 조회
+    # filter(id__in=...)은 순서를 보장하지 않음
+    questions_queryset = Question.objects.filter(id__in=question_ids).select_related('exam', 'subject')
+    
+    # 사용자가 담은 순서(=question_ids 순서)대로 정렬하기 위해 딕셔너리 매핑
+    questions_dict = {str(q.id): q for q in questions_queryset}
+    
+    # 리스트 컴프리헨션으로 순서 유지하여 리스트 생성
+    questions = []
+    for q_id in question_ids:
+        if str(q_id) in questions_dict:
+            questions.append(questions_dict[str(q_id)])
+            
+    custom_title = request.POST.get('custom_title', '').strip()
+    
+    return render(request, 'dashboard/exam_pdf.html', {
+        'questions': questions,
+        'is_multi_exam': True,
+        'custom_title': custom_title
+    })

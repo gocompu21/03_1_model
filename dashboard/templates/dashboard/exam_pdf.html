@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if custom_title %}{{ custom_title }}{% else %}제 {{ exam.round_number }}회 기출문제{% endif %}</title>
+    <!-- MathJax for LaTeX -->
+    <script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { margin: 0; padding: 20px; }
+        }
+        
+        @page {
+            size: A4;
+            margin: 2cm 1.5cm;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+        
+        .print-button:hover {
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+        }
+        
+        h1 {
+            font-size: 18pt;
+            color: #1b4332;
+            border-bottom: 2px solid #2d6a4f;
+            padding-bottom: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .question {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+            border: 2px solid #2d6a4f;
+            border-radius: 8px;
+            padding: 20px;
+            background: #fafafa;
+        }
+        
+        .question-header {
+            font-weight: bold;
+            color: #1b4332;
+            margin-bottom: 12px;
+            font-size: 12pt;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .question-badge {
+            font-size: 0.9em;
+            background: #e8f5e9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #2d6a4f;
+        }
+        
+        .question-content {
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+        
+        .question-image {
+            max-width: 100%;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+        }
+        
+        .choices {
+            margin-left: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .choice {
+            margin-bottom: 6px;
+        }
+        
+        .choice-number {
+            display: inline-block;
+            width: 25px;
+            font-weight: bold;
+        }
+        
+        .answer-box {
+            background: #e8f5e9;
+            border-left: 4px solid #2d6a4f;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .answer-label {
+            font-weight: bold;
+            color: #1b4332;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+        
+        /* Explanation Styles */
+        .explanation-content {
+            font-size: 10pt;
+            color: #444;
+            line-height: 1.6;
+        }
+        
+        .explanation-content p { margin: 8px 0; }
+        .explanation-content ul, .explanation-content ol { margin: 8px 0; padding-left: 25px; }
+        .explanation-content code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+        }
+        .explanation-content pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        .infographic-image {
+            max-width: 100%;
+            margin-top: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button no-print" onclick="window.print()">🖨️ PDF로 인쇄</button>
+    
+    {% if custom_title %}
+    <h1>{{ custom_title }}</h1>
+    {% elif exam %}
+    <h1>제 {{ exam.round_number }}회 나무의사 기출문제</h1>
+    {% else %}
+    <h1>나만의 기출문제 모음</h1>
+    {% endif %}
+    
+    {% for q in questions %}
+    <div class="question">
+        <div class="question-header">
+            <span>
+                <span class="badge bg-secondary me-2" style="font-size: 0.8em; background-color: #6c757d !important; color: white;">{{ q.exam.round_number }}회</span>
+                문제 {{ q.number }}
+            </span>
+            <span class="question-badge">{{ q.subject.name }}</span>
+        </div>
+        
+        {% if q.image %}
+        <img src="{{ q.image.url }}" class="question-image" alt="문제 이미지">
+        {% endif %}
+        
+        <div class="question-content">{{ q.content }}</div>
+        
+        <div class="choices">
+            <div class="choice"><span class="choice-number">①</span> {{ q.choice1 }}</div>
+            <div class="choice"><span class="choice-number">②</span> {{ q.choice2 }}</div>
+            <div class="choice"><span class="choice-number">③</span> {{ q.choice3 }}</div>
+            <div class="choice"><span class="choice-number">④</span> {{ q.choice4 }}</div>
+            <div class="choice"><span class="choice-number">⑤</span> {{ q.choice5 }}</div>
+        </div>
+        
+        <div class="answer-box">
+            <div class="answer-label">✔ 정답: {{ q.answer|join:", " }}번</div>
+            
+            {% if q.textbook_chat %}
+            <div class="explanation-wrapper">
+                <!-- Raw markdown used for explanation -->
+                <div class="explanation-raw" style="display: none;">{{ q.textbook_chat }}</div>
+                <div class="explanation-content"></div>
+            </div>
+            {% elif q.general_chat %}
+            <div class="explanation-wrapper">
+                <!-- Fallback to general_chat if textbook_chat is missing -->
+                <div class="explanation-raw" style="display: none;">{{ q.general_chat }}</div>
+                <div class="explanation-content"></div>
+            </div>
+            {% endif %}
+            
+            {% if q.infographic_image %}
+            <div class="mt-3">
+                <strong>[참고 이미지]</strong><br>
+                <img src="{{ q.infographic_image.url }}" class="infographic-image" alt="해설 이미지">
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    
+    <script>
+        // Markdown 파싱 및 MathJax 렌더링
+        document.addEventListener('DOMContentLoaded', function() {
+            // Marked.js 옵션 설정
+            marked.use({
+                breaks: true,
+                gfm: true
+            });
+
+            const wrappers = document.querySelectorAll('.explanation-wrapper');
+            wrappers.forEach(function(wrapper) {
+                const rawEl = wrapper.querySelector('.explanation-raw');
+                const contentEl = wrapper.querySelector('.explanation-content');
+                if (rawEl && contentEl) {
+                    const markdown = rawEl.textContent;
+                    contentEl.innerHTML = marked.parse(markdown);
+                }
+            });
+            
+            // MathJax 재렌더링
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+    </script>
+</body>
+</html>

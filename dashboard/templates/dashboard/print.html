@@ -37,7 +37,7 @@
         }
         
         .dashboard-container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
         }
@@ -60,17 +60,25 @@
             box-shadow: 0 0 0 0.25rem rgba(45, 106, 79, 0.25);
         }
         
-        .btn-success {
+        .hover-bg:hover {
+            background-color: #e9ecef !important;
+        }
+        
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        
+        .btn-primary {
             background-color: #2d6a4f;
             border-color: #2d6a4f;
         }
         
-        .btn-success:hover {
+        .btn-primary:hover {
             background-color: #1b4332;
             border-color: #1b4332;
         }
         
-        .btn-success:disabled {
+        .btn-primary:disabled {
             background-color: #8faeb5;
             border-color: #8faeb5;
         }
@@ -91,60 +99,176 @@
                 <h4 class="mb-0"><i class="fas fa-print me-2"></i>자료 인쇄</h4>
             </div>
             <div class="card-body p-4">
-                <p class="text-muted mb-4">교재와 목차를 선택하면 해당 챕터와 하위 챕터의 학습 내용, 연습문제, 해설을 모두 포함한 인쇄용 페이지가 생성됩니다.</p>
+                <p class="text-muted mb-4">교재와 목차를 선택하거나 기출문제 회차를 선택하여 인쇄할 수 있습니다.</p>
                 
-                <div class="row g-4">
-                    <!-- 교재 선택 -->
-                    <div class="col-md-6">
-                        <label for="bookSelect" class="form-label fw-bold">1. 교재 선택</label>
-                        <select class="form-select form-select-lg" id="bookSelect">
-                            <option value="">-- 교재를 선택하세요 --</option>
-                            {% for book in books %}
-                            <option value="{{ book.id }}">{{ book }}</option>
-                            {% endfor %}
-                        </select>
+                <!-- 탭 메뉴 -->
+                <ul class="nav nav-tabs mb-4">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="tab-textbook" href="#" onclick="switchTab('textbook')">
+                            <i class="fas fa-book me-2"></i>기본서 교재 인쇄
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="tab-exam" href="#" onclick="switchTab('exam')">
+                            <i class="fas fa-file-alt me-2"></i>기출문제 인쇄
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- 1. 기본서 교재 인쇄 모드 -->
+                <div id="mode-textbook">
+                    <div class="row g-4">
+                        <!-- 교재 선택 -->
+                        <div class="col-md-6">
+                            <label for="bookSelect" class="form-label fw-bold">1. 교재 선택</label>
+                            <select class="form-select form-select-lg" id="bookSelect">
+                                <option value="">-- 교재를 선택하세요 --</option>
+                                {% for book in books %}
+                                <option value="{{ book.id }}">{{ book }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- 목차 선택 -->
+                        <div class="col-md-6">
+                            <label for="chapterSelect" class="form-label fw-bold">2. 목차 선택 (인쇄 범위)</label>
+                            <select class="form-select form-select-lg" id="chapterSelect" disabled>
+                                <option value="">-- 먼저 교재를 선택하세요 --</option>
+                            </select>
+                            <div class="form-text mt-2">선택한 목차와 하위 목차가 모두 포함됩니다.</div>
+                        </div>
                     </div>
                     
-                    <!-- 목차 선택 -->
-                    <div class="col-md-6">
-                        <label for="chapterSelect" class="form-label fw-bold">2. 목차 선택 (인쇄 범위)</label>
-                        <select class="form-select form-select-lg" id="chapterSelect" disabled>
-                            <option value="">-- 먼저 교재를 선택하세요 --</option>
-                        </select>
+                    <div class="mt-5 text-end border-top pt-4">
+                        <button type="button" class="btn btn-secondary me-2" onclick="location.href='{% url 'dashboard:index' %}'">
+                            취소
+                        </button>
+                        <button type="button" class="btn btn-success btn-lg px-5" id="printBtnTextbook" disabled>
+                            <i class="fas fa-print me-2"></i>인쇄 페이지 열기
+                        </button>
                     </div>
                 </div>
-                
-                <div class="mt-5 text-end border-top pt-4">
-                    <button type="button" class="btn btn-secondary me-2" onclick="location.href='{% url 'dashboard:index' %}'">
-                        취소
-                    </button>
-                    <button type="button" class="btn btn-success btn-lg px-5" id="printBtn" disabled>
-                        <i class="fas fa-print me-2"></i>인쇄 페이지 열기
-                    </button>
+
+                <!-- 2. 기출문제 인쇄 모드 -->
+                <div id="mode-exam" style="display: none;">
+                    <div class="row g-4">
+                        <!-- 왼쪽: 문제 선택 영역 -->
+                        <div class="col-md-7">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0 text-dark" style="font-size: 1rem;"><i class="fas fa-search me-2"></i>문제 찾기</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="examSelect" class="form-label fw-bold">회차 선택</label>
+                                        <select class="form-select" id="examSelect">
+                                            <option value="">-- 회차를 선택하세요 --</option>
+                                            {% for exam in exams %}
+                                            <option value="{{ exam.id }}" data-round="{{ exam.round_number }}">{{ exam.round_number }}회</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold mb-0">문제 목록</label>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="checkbox" id="selectAllQuestions">
+                                            <label class="form-check-label" for="selectAllQuestions" style="font-size: 0.9rem;">전체 선택</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="border rounded p-3 bg-light" style="height: 400px; overflow-y: auto;">
+                                        <div id="questionList" class="row g-2">
+                                            <div class="text-center text-muted py-5">
+                                                먼저 회차를 선택하세요.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3 text-end">
+                                        <button type="button" class="btn btn-primary" id="addQuestionsBtn" disabled>
+                                            <i class="fas fa-plus me-2"></i>선택한 문제 담기 <i class="fas fa-chevron-right ms-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 오른쪽: 담은 문제 목록 (장바구니) -->
+                        <div class="col-md-5">
+                            <div class="card h-100 shadow-sm border-primary">
+                                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0" style="font-size: 1rem;"><i class="fas fa-shopping-basket me-2"></i>인쇄할 문제 목록</h5>
+                                    <span class="badge bg-white text-primary" id="selectedCountBadge">0문제</span>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <div class="flex-grow-1 border rounded p-3 mb-3 bg-light" style="overflow-y: auto; height: 400px;" id="cartList">
+                                        <div class="text-center text-muted py-5 mt-5">
+                                            <i class="fas fa-inbox fa-3x mb-3 text-secondary opacity-25"></i>
+                                            <p>왼쪽에서 문제를 선택하고<br>'담기' 버튼을 눌러주세요.</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex gap-2 align-items-end">
+                                        <div class="flex-grow-1">
+                                            <label for="customTitle" class="form-label fw-bold">인쇄 제목 (선택)</label>
+                                            <input type="text" class="form-control" id="customTitle" name="custom_title" placeholder="예: 나의 오답노트 모음">
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger" id="clearCartBtn" disabled>
+                                            <i class="fas fa-trash-alt me-2"></i>전체 비우기
+                                        </button>
+                                    </div>
+                                    <form action="{% url 'dashboard:exam_pdf' %}" method="post" target="_blank" id="finalPrintForm" class="mt-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="question_ids_str" id="finalQuestionIds">
+                                        <!-- JS로 customTitle 값을 복사해서 넣을 hidden input -->
+                                        <input type="hidden" name="custom_title" id="hiddenCustomTitle">
+                                        <button type="submit" class="btn btn-success w-100 py-3 fs-5 fw-bold" id="finalPrintBtn" disabled>
+                                            <i class="fas fa-print me-2"></i>인쇄하기
+                                        </button>
+                                    </form>
+                                    <!-- 기존 버튼 삭제 -->
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+    // 탭 전환 함수
+    function switchTab(mode) {
+        document.getElementById('mode-textbook').style.display = (mode === 'textbook' ? 'block' : 'none');
+        document.getElementById('mode-exam').style.display = (mode === 'exam' ? 'block' : 'none');
+        
+        document.getElementById('tab-textbook').classList.toggle('active', mode === 'textbook');
+        document.getElementById('tab-exam').classList.toggle('active', mode === 'exam');
+    }
+
+    // 장바구니 데이터 관리
+    const cart = new Map(); // key: id, value: {text, round}
+
     document.addEventListener('DOMContentLoaded', function() {
+        // [기본서 모드 로직]
         const bookSelect = document.getElementById('bookSelect');
         const chapterSelect = document.getElementById('chapterSelect');
-        const printBtn = document.getElementById('printBtn');
+        const printBtnTextbook = document.getElementById('printBtnTextbook');
         
-        // 교재 선택 시 목차 로드
         bookSelect.addEventListener('change', function() {
             const bookId = this.value;
             if (!bookId) {
                 chapterSelect.innerHTML = '<option value="">-- 먼저 교재를 선택하세요 --</option>';
                 chapterSelect.disabled = true;
-                printBtn.disabled = true;
+                printBtnTextbook.disabled = true;
                 return;
             }
             
             chapterSelect.innerHTML = '<option value="">로딩 중...</option>';
             chapterSelect.disabled = true;
-            printBtn.disabled = true;
+            printBtnTextbook.disabled = true;
             
             fetch(`{% url 'dashboard:get_chapters' %}?book_id=${bookId}`)
                 .then(response => response.json())
@@ -154,41 +278,218 @@
                         options = '<option value="">목차가 없습니다</option>';
                     } else {
                         data.chapters.forEach(ch => {
-                            // 레벨에 따른 들여쓰기 시각화 (유니코드 공백 사용)
                             const indent = '\u00A0\u00A0\u00A0'.repeat(Math.max(0, ch.level - 1));
-                            // 레벨 1은 굵게 표시하고 싶지만 select option에서는 스타일 제한이 있음
-                            // 대신 기호로 구분을 둠
                             let prefix = '';
                             if (ch.level > 1) prefix = '└ ';
-                            
                             options += `<option value="${ch.id}">${indent}${prefix}${ch.full_text}</option>`;
                         });
                     }
                     chapterSelect.innerHTML = options;
                     chapterSelect.disabled = false;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    chapterSelect.innerHTML = '<option value="">목차 로드 실패</option>';
                 });
         });
         
-        // 목차 선택 시 인쇄 버튼 활성화
         chapterSelect.addEventListener('change', function() {
-            if (this.value) {
-                printBtn.disabled = false;
-            } else {
-                printBtn.disabled = true;
+            printBtnTextbook.disabled = !this.value;
+        });
+        
+        printBtnTextbook.addEventListener('click', function() {
+            const chapterId = chapterSelect.value;
+            if (chapterId) {
+                window.open(`/practice/chapter/${chapterId}/pdf/`, '_blank');
             }
         });
         
-        // 인쇄 버튼 클릭
-        printBtn.addEventListener('click', function() {
-            const chapterId = chapterSelect.value;
-            if (chapterId) {
-                // 새 창에서 PDF 뷰 열기
-                window.open(`/practice/chapter/${chapterId}/pdf/`, '_blank');
+        // [기출문제 모드 로직 - 장바구니 방식]
+        const examSelect = document.getElementById('examSelect');
+        const questionList = document.getElementById('questionList');
+        const selectAllQuestions = document.getElementById('selectAllQuestions');
+        const addQuestionsBtn = document.getElementById('addQuestionsBtn');
+        const cartList = document.getElementById('cartList');
+        const clearCartBtn = document.getElementById('clearCartBtn');
+        const finalPrintBtn = document.getElementById('finalPrintBtn');
+        const finalQuestionIds = document.getElementById('finalQuestionIds');
+        const selectedCountBadge = document.getElementById('selectedCountBadge');
+        
+        let currentQuestions = []; // 현재 로드된 문제 목록
+        
+        examSelect.addEventListener('change', function() {
+            const examId = this.value;
+            
+            if (!examId) {
+                questionList.innerHTML = '<div class="text-center text-muted py-5">먼저 회차를 선택하세요.</div>';
+                addQuestionsBtn.disabled = true;
+                currentQuestions = [];
+                return;
             }
+            
+            const roundNum = this.options[this.selectedIndex].getAttribute('data-round');
+            
+            questionList.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2">문제 로딩 중...</div></div>';
+            selectAllQuestions.checked = false;
+            
+            fetch(`{% url 'dashboard:get_exam_questions' %}?exam_id=${examId}`)
+                .then(response => response.json())
+                .then(data => {
+                    currentQuestions = data.questions;
+                    if (data.questions.length === 0) {
+                        questionList.innerHTML = '<div class="text-center text-muted py-5">등록된 문제가 없습니다.</div>';
+                        addQuestionsBtn.disabled = true;
+                        return;
+                    }
+                    
+                    renderQuestionList(data.questions, roundNum);
+                });
+        });
+        
+        function renderQuestionList(questions, roundNum) {
+            let html = '';
+            questions.forEach(q => {
+                // 이미 장바구니에 있는 문제는 비활성화 또는 표시
+                const isInCart = cart.has(String(q.id));
+                const disabled = isInCart ? 'disabled checked' : '';
+                const style = isInCart ? 'opacity: 0.6;' : '';
+                const labelSuffix = isInCart ? ' <span class="badge bg-success ms-1">담김</span>' : '';
+                
+                
+                html += `
+                <div class="col-12">
+                    <div class="form-check p-1 border-bottom hover-bg" style="${style}">
+                        <input class="form-check-input question-checkbox mt-1" type="checkbox" 
+                            name="temp_question_ids" value="${q.id}" id="q_${q.id}" 
+                            data-text="${q.full_text}" data-round="${roundNum}" ${disabled}>
+                        <label class="form-check-label w-100 cursor-pointer d-flex align-items-center" for="q_${q.id}" style="font-size: 0.9rem;">
+                            <span class="text-truncate">${q.full_text}</span> ${labelSuffix}
+                        </label>
+                    </div>
+                </div>`;
+            });
+            questionList.innerHTML = html;
+            updateAddBtn();
+            
+            // 체크박스 이벤트
+            document.querySelectorAll('.question-checkbox:not(:disabled)').forEach(cb => {
+                cb.addEventListener('change', updateAddBtn);
+            });
+        }
+        
+        // 전체 선택
+        selectAllQuestions.addEventListener('change', function() {
+            const isChecked = this.checked;
+            document.querySelectorAll('.question-checkbox:not(:disabled)').forEach(cb => {
+                cb.checked = isChecked;
+            });
+            updateAddBtn();
+        });
+        
+        function updateAddBtn() {
+            const checkedCount = document.querySelectorAll('.question-checkbox:checked:not(:disabled)').length;
+            addQuestionsBtn.disabled = checkedCount === 0;
+            addQuestionsBtn.innerHTML = `<i class="fas fa-plus me-2"></i>선택한 ${checkedCount}문제 담기 <i class="fas fa-chevron-right ms-1"></i>`;
+        }
+        
+        // 담기 버튼 클릭
+        addQuestionsBtn.addEventListener('click', function() {
+            const checkedBoxes = document.querySelectorAll('.question-checkbox:checked:not(:disabled)');
+            checkedBoxes.forEach(cb => {
+                cart.set(cb.value, {
+                    id: cb.value,
+                    text: cb.getAttribute('data-text'),
+                    round: cb.getAttribute('data-round')
+                });
+                
+                // UI 업데이트 (비활성화 및 배지 추가)
+                cb.disabled = true;
+                const label = document.querySelector(`label[for="${cb.id}"]`);
+                if (label) {
+                    if (!label.innerHTML.includes('담김')) {
+                         label.innerHTML += ' <span class="badge bg-success ms-1">담김</span>';
+                    }
+                }
+                cb.parentElement.style.opacity = '0.6';
+            });
+            
+            renderCart();
+            updateAddBtn(); // 선택된게 장바구니로 갔으니 버튼 비활성화
+            selectAllQuestions.checked = false; // 전체선택 해제
+        });
+        
+        // 장바구니 렌더링
+        function renderCart() {
+            selectedCountBadge.textContent = `${cart.size}문제`;
+            
+            if (cart.size === 0) {
+                cartList.innerHTML = `
+                    <div class="text-center text-muted py-5 mt-5">
+                        <i class="fas fa-inbox fa-3x mb-3 text-secondary opacity-25"></i>
+                        <p>왼쪽에서 문제를 선택하고<br>'담기' 버튼을 눌러주세요.</p>
+                    </div>`;
+                finalPrintBtn.disabled = true;
+                clearCartBtn.disabled = true;
+                return;
+            }
+            
+            let html = '<ul class="list-group list-group-flush">';
+            // 사용자가 추가한 순서(Map의 삽입 순서) 그대로 유지
+            const items = Array.from(cart.values());
+            
+            items.forEach(item => {
+                html += `
+                <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-1 border-bottom" style="font-size: 0.9rem;">
+                    <span class="text-truncate" style="max-width: 85%;">
+                        <span class="badge bg-secondary me-1" style="font-size: 0.75rem;">${item.round}회</span>
+                        ${item.text}
+                    </span>
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0 border-0" onclick="removeFromCart('${item.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </li>`;
+            });
+            html += '</ul>';
+            cartList.innerHTML = html;
+            
+            finalPrintBtn.disabled = false;
+            clearCartBtn.disabled = false;
+            
+            // 폼 데이터 업데이트
+            finalQuestionIds.value = Array.from(cart.keys()).join(',');
+        }
+        
+        // 장바구니 비우기
+        clearCartBtn.addEventListener('click', function() {
+            if (confirm('담은 문제를 모두 삭제하시겠습니까?')) {
+                cart.clear();
+                renderCart();
+                // 현재 보여지는 목록의 선택 상태 리셋
+                if (examSelect.value) {
+                    const roundNum = examSelect.options[examSelect.selectedIndex].getAttribute('data-round');
+                    renderQuestionList(currentQuestions, roundNum);
+                }
+            }
+        });
+        
+        // 전역 함수로 노출 (onclick용)
+        window.removeFromCart = function(id) {
+            cart.delete(id);
+            renderCart();
+            // 현재 화면에 해당 문제가 있다면 UI 복구
+            const cb = document.getElementById(`q_${id}`);
+            if (cb) {
+                cb.disabled = false;
+                cb.checked = false;
+                const label = document.querySelector(`label[for="q_${id}"]`);
+                // 배지 제거 logic (간단히 text 재설정)
+                const text = cb.getAttribute('data-text');
+                const round = cb.getAttribute('data-round');
+                label.innerHTML = `[${round}회] ${text}`;
+                cb.parentElement.style.opacity = '1';
+                updateAddBtn();
+            }
+        };
+
+        // 폼 제출 시 제목 복사
+        document.getElementById('finalPrintForm').addEventListener('submit', function() {
+            document.getElementById('hiddenCustomTitle').value = document.getElementById('customTitle').value;
         });
     });
     </script>
