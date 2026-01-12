@@ -107,10 +107,14 @@ def main():
     manager = GeminiStoreManager(api_key=api_key)
     print("\n✅ GeminiStoreManager 초기화 완료")
     
-    # 스토어 동기화
-    print("🔄 스토어 동기화 중...")
-    manager.sync_all_stores()
-    print("✅ 스토어 준비 완료")
+    # 타겟 스토어 (retry_terms.py와 동일하게 수목병리학 고정)
+    target_store = "수목병리학"
+    
+    # 스토어가 없을 때만 동기화
+    if target_store not in manager.stores or not manager.stores[target_store]:
+        print("🔄 스토어 동기화 중...")
+        manager.sync_all_stores()
+    print(f"✅ 스토어 준비 완료: {target_store}")
     print()
 
     # 3. 각 용어 처리
@@ -119,59 +123,30 @@ def main():
     skip_count = 0
 
     for idx, term in enumerate(terms, 1):
-        print(f"\n[{idx}/{total}] '{term.word}' 처리 중...")
-        
-        # 용어의 관련 과목 확인 -> 스토어 결정
-        subject = term.subjects.first()
-        target_store = subject.name if subject else "수목병리학"  # 기본값
-        
-        # 스토어 사용 가능 여부 확인
-        if target_store not in manager.stores:
-            print(f"  ⚠️ 스토어 '{target_store}' 없음. 기본 스토어 사용.")
-            target_store = "수목병리학"
-        
         try:
-            # 기본서에 질의
-            prompt = f"'{term.word}'에 대해 상세히 설명해주세요. 정의, 특징, 관련 개념을 포함해주세요."
-            print(f"  📖 스토어 '{target_store}'에 질의 중...")
+            # 기본서에 질의 (retry_terms.py와 동일한 프롬프트)
+            prompt = f"{term.word}에 대해 설명해주세요."
+            print(f"[{idx}/{total}] 조회 중: {term.word}")
             
             response = manager.query_store(target_store, prompt)
             
-            # 응답 검증
-            if not response:
-                print(f"  ❌ 응답 없음")
+            # 오류 응답이 아닌 경우에만 업데이트 (retry_terms.py 로직)
+            if "429" not in response and "Error" not in response and len(response) > 100:
+                term.content = response
+                term.save()
+                success_count += 1
+                print(f"  -> 업데이트 완료 ({len(response)}자)")
+            else:
                 error_count += 1
-                continue
+                print(f"  -> 오류: {response[:50] if response else 'None'}...")
                 
-            if "429" in response or "ResourceExhausted" in response:
-                print(f"  ⚠️ API 할당량 초과. 120초 대기 후 재시도...")
-                time.sleep(120)
-                response = manager.query_store(target_store, prompt)
-            
-            if "Error" in response or "No valid" in response:
-                print(f"  ❌ 오류 응답: {response[:80]}...")
-                error_count += 1
-                continue
-            
-            if len(response) <= args.max_length:
-                print(f"  ⚠️ 응답이 너무 짧음 ({len(response)}자). 건너뜀.")
-                skip_count += 1
-                continue
-            
-            # 업데이트
-            term.content = response
-            term.save()
-            success_count += 1
-            print(f"  ✅ 업데이트 완료 ({len(response)}자)")
-            
         except Exception as e:
-            print(f"  ❌ 예외 발생: {e}")
+            print(f"  -> 예외: {e}")
             error_count += 1
         
-        # API 호출 간 대기
-        if idx < total:
-            print(f"  ⏳ {args.wait}초 대기...")
-            time.sleep(args.wait)
+        # API 할당량 초과 방지를 위한 대기 (항상 60초)
+        print(f"  -> {args.wait}초 대기...")
+        time.sleep(args.wait)
 
     # 4. 결과 요약
     print("\n" + "=" * 60)
