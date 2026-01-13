@@ -61,8 +61,15 @@ def main():
             
             response_text = manager.query_store(target_store, prompt)
             
+            # 429 Resource Exhausted (Quota limit)
+            if "429" in response_text or "Resource has been exhausted" in response_text:
+                print("  -> ⚠️ Quota Exceeded (429). Waiting 5 minutes (300s) cooldown...")
+                count_fail += 1
+                time.sleep(300)
+                continue
+
             # 오류 응답이 아닌 경우에만 업데이트
-            if "429" not in response_text and "Error" not in response_text and len(response_text) > 100:
+            if "Error" not in response_text and len(response_text) > 100:
                 term.content = response_text
                 term.save()
                 count_success += 1
@@ -71,11 +78,14 @@ def main():
                 count_fail += 1
                 print(f"  -> 오류: {response_text[:50] if response_text else 'None'}...")
                 
+        except KeyboardInterrupt:
+            print("\n⛔ 작업이 중단되었습니다.")
+            break
         except Exception as e:
             print(f"  -> 예외: {e}")
             count_fail += 1
         
-        # API 할당량 초과 방지를 위한 대기 (항상 60초)
+        # API 할당량 초과 방지를 위한 대기
         print(f"  -> 60초 대기...")
         time.sleep(60)
 

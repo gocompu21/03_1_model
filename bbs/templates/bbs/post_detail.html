@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load bbs_extras %}
+{% load markdown_extras %}
 
 {% block title %}같이 공부해요{% endblock %}
 {% block header %}
@@ -39,6 +40,30 @@
     .custom-header span {
         color: rgba(255, 255, 255, 0.9);
         font-size: 0.95rem;
+    }
+
+    /* Markdown Table Styles */
+    .post-content table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+        margin-bottom: 20px;
+    }
+    .post-content th, .post-content td {
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        text-align: left;
+    }
+    .post-content th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        color: #333;
+    }
+    .post-content tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .post-content tr:hover {
+        background-color: #f1f1f1;
     }
 </style>
 <header class="custom-header">
@@ -115,7 +140,7 @@
 
             <!-- Post Content (Wysiwyg Rendered) -->
             <div class="post-content" style="min-height: 200px; line-height: 1.8; margin-bottom: 50px;">
-                {{ post.content|safe }}
+                {{ post.content|markdown|safe }}
             </div>
 
 
