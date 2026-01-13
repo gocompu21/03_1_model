@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load glossary_tags %}
+{% load markdown_extras %}
 
 {% block title %}{{ chapter.code }} {{ chapter.title }}{% endblock %}
 
@@ -345,7 +346,7 @@
             {% glossary_styles %}
             <div class="content-body">
                 {% if content %}
-                    {{ content.content|link_terms|safe }}
+                    {{ content.content|markdown|link_terms|safe }}
                 {% else %}
                     <div class="empty-content">
                         <div class="icon">📝</div>

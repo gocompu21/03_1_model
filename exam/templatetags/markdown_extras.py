@@ -16,18 +16,17 @@ def markdown_format(text):
     # Markdown consumes one backslash, so we need double for it to survive into HTML for MathJax.
     if text:
         # 1. Remove <p> tags wrapping markdown tables so they can be parsed as blocks
-        #    Pattern: Starts with <p> then |, contains content, ends with | then </p>
-        #    [\s\S] matches any character including newlines
         text = re.sub(r'<p>\s*(\|[\s\S]*?\|)\s*</p>', r'\n\1\n', text)
 
         # 2. Fix broken tables where formatting is merged into one line " | | "
-        # Use regex to handle variable whitespace between pipes
-        # This inserts a newline between merged table rows
         text = re.sub(r'\|\s+(?=\|)', '|\n', text)
         
-        # 3. Ensure table header starts on a new line if stuck to previous text
-        #    This handles cases like "... 비교표 | 구분 |"
+        # 3. Ensure table header starts on a new line
         text = text.replace(" | 구분 |", "\n| 구분 |")
+
+        # 4. Manually process bold text (**...**) to handle cases inside HTML blocks (div/span)
+        #    Python-Markdown ignores markdown inside HTML blocks by default.
+        text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
             
         text = text.replace(r"\text", r"\\text")
         text = text.replace(r"\times", r"\\times")
