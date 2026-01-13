@@ -16,9 +16,9 @@ def markdown_format(text):
     # Markdown consumes one backslash, so we need double for it to survive into HTML for MathJax.
     if text:
         # Fix broken tables where formatting is merged into one line " | | "
-        # This happens when table rows are concatenated without newlines
-        if "| |" in text:
-            text = text.replace("| |", "|\n|")
+        # Use regex to handle variable whitespace between pipes
+        # This inserts a newline between merged table rows
+        text = re.sub(r'\|\s+(?=\|)', '|\n', text)
             
         text = text.replace(r"\text", r"\\text")
         text = text.replace(r"\times", r"\\times")
