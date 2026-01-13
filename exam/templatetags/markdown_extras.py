@@ -12,7 +12,14 @@ def markdown_format(text):
         return ""
     # Pre-process to protect common LaTeX/MathJax commands from Markdown escaping
     # Markdown consumes one backslash, so we need double for it to survive into HTML for MathJax.
+    # Pre-process to protect common LaTeX/MathJax commands from Markdown escaping
+    # Markdown consumes one backslash, so we need double for it to survive into HTML for MathJax.
     if text:
+        # Fix broken tables where formatting is merged into one line " | | "
+        # This happens when table rows are concatenated without newlines
+        if "| |" in text:
+            text = text.replace("| |", "|\n|")
+            
         text = text.replace(r"\text", r"\\text")
         text = text.replace(r"\times", r"\\times")
         text = text.replace(r"\div", r"\\div")
