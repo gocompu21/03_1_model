@@ -8,6 +8,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.db import models
 from django.db.models import Count, Case, When, IntegerField, Q
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from functools import wraps
 import json
 
 from exam.models import UserQuestionResult, UserExamAttempt
@@ -15,6 +17,22 @@ from notebook.models import NotebookHistory
 from chat.models import ChatHistory
 from bbs.models import Post
 from .models import ReviewSchedule
+
+
+def ajax_login_required(view_func):
+    """
+    Decorator for AJAX views that returns JSON error instead of redirecting to login page.
+    """
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                "success": False, 
+                "error": "로그인이 필요합니다.",
+                "login_required": True
+            }, status=401)
+        return view_func(request, *args, **kwargs)
+    return wrapper
 
 
 @login_required
@@ -1164,7 +1182,7 @@ import csv
 from io import StringIO
 
 
-@login_required
+@ajax_login_required
 def practice_input_get_books(request):
     """AJAX endpoint to get list of books with their chapters."""
     if not request.user.is_superuser:
@@ -1210,7 +1228,7 @@ def practice_input_get_books(request):
     return JsonResponse({"success": True, "books": books_data})
 
 
-@login_required
+@ajax_login_required
 @require_POST
 def practice_input_parse_csv(request):
     """Parse CSV text and return structured question data."""
@@ -1286,7 +1304,7 @@ def practice_input_parse_csv(request):
         return JsonResponse({"success": False, "error": f"CSV 파싱 오류: {str(e)}"})
 
 
-@login_required
+@ajax_login_required
 @require_POST
 def practice_input_save(request):
     """Save parsed questions to database."""
@@ -1397,7 +1415,7 @@ def similarity_ratio(a: str, b: str) -> float:
     return SequenceMatcher(None, a.lower().strip(), b.lower().strip()).ratio()
 
 
-@login_required
+@ajax_login_required
 @require_POST
 def practice_input_check_similarity(request):
     """Check similarity of parsed questions against existing questions in the chapter."""
@@ -1461,7 +1479,7 @@ def practice_input_check_similarity(request):
 
 from fileSearchStore import GeminiStoreManager, SYSTEM_INSTRUCTION as TEXTBOOK_INSTRUCTION
 
-@login_required
+@ajax_login_required
 @require_POST
 def practice_input_get_textbook_explanation(request):
     """Get explanation from textbook using GeminiStoreManager."""

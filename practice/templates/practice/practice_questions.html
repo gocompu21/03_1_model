@@ -270,6 +270,14 @@
             <span id="expand-all-text">전체 펼치기</span>
         </button>
 
+        <!-- View Content Button (NEW) -->
+        <a href="{% url 'practice:chapter_detail' chapter.id %}" class="tab-btn" style="background-color: #d4edda; color: #155724;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 6V12M12 12V18M12 12H18M12 12H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>내용보기</span>
+        </a>
+
         <!-- Back Button -->
         <a href="{% url 'practice:chapter_list' chapter.book.id %}#chapter-{{ chapter.id }}" class="tab-btn" style="background-color: #f7f7f7; color: #555;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
