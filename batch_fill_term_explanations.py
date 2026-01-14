@@ -54,7 +54,9 @@ def main():
     count_success = 0
     count_fail = 0
     
-    for idx, term in enumerate(terms, 1):
+    # iterator()를 사용하여 메모리 효율 개선 (전체 객체를 메모리에 올리지 않음)
+    # total 개수를 구하기 위해 count()는 위에서 이미 호출했으므로 그대로 사용 가능
+    for idx, term in enumerate(terms.iterator(), 1):
         try:
             prompt = f"{term.word}에 대해 설명해주세요."
             print(f"[{idx}/{total}] 조회 중: {term.word}")
