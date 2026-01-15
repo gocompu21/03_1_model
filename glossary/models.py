@@ -24,6 +24,15 @@ class Term(models.Model):
         related_name='terms',
         verbose_name="관련 과목"
     )
+    canonical_term = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='synonyms',
+        verbose_name="대표 용어",
+        help_text="유사어인 경우, 대표 용어를 선택하세요"
+    )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="수정일")
     
@@ -34,6 +43,15 @@ class Term(models.Model):
     
     def __str__(self):
         return self.word
+    
+    def get_all_synonyms(self):
+        """대표 용어를 기준으로 모든 유사어 반환"""
+        if self.canonical_term:
+            # 자신이 유사어인 경우, 대표 용어 기준으로 조회
+            return self.canonical_term.synonyms.all()
+        else:
+            # 자신이 대표 용어인 경우
+            return self.synonyms.all()
 
 
 class TermReference(models.Model):

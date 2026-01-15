@@ -2,222 +2,174 @@
 {% load static %}
 {% load glossary_tags %}
 
+{% block title %}{{ subject.name }} 기출분석{% endblock %}
+
+{% block header %}
+<header style="background-color: #2d6a4f; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+    <a href="{% url 'main:index' %}" style="color: white; font-size: 1.5rem; font-weight: bold; text-decoration: none;">🌳 나무의사 합격반</a>
+    <nav style="display: flex; align-items: center; gap: 20px;">
+        {% if user.is_authenticated %}
+        <span style="color: rgba(255,255,255,0.8);">{{ user.username }}님</span>
+        <a href="{% url 'mypage:index' %}" style="color: white; text-decoration: none; font-weight: 500;">마이페이지</a>
+        {% else %}
+        <a href="{% url 'accounts:user_login' %}" style="color: white; text-decoration: none;">로그인</a>
+        {% endif %}
+    </nav>
+</header>
+{% endblock %}
+
 {% block content %}
 <style>
     body {
-        background-color: #f8f6e6;
-        font-family: 'Noto Sans KR', sans-serif;
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        min-height: 100vh;
     }
-
-    body>header {
-        display: none !important;
+    
+    main.container {
+        max-width: 1200px;
     }
-
-    .custom-main-header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-color: #2d6a4f;
-        padding: 15px 40px;
+    
+    .analysis-container {
+        padding: 20px 20px;
+    }
+    
+    .filter-bar {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        padding: 12px 15px;
+        margin-bottom: 15px;
         display: flex;
-        justify-content: space-between;
+        gap: 15px;
         align-items: center;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        box-sizing: border-box;
-        z-index: 1000;
     }
-
-    .custom-main-header .logo {
-        color: white;
-        font-size: 1.5rem;
-        font-weight: bold;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    
+    .page-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #2d6a4f;
     }
-
-    .custom-main-header .nav-links a {
-        color: white;
-        text-decoration: none;
-        margin-left: 20px;
-        font-weight: 500;
-        transition: color 0.3s;
-    }
-
-    .custom-main-header .nav-links a:hover {
-        color: #b7e4c7;
-    }
-
-    .custom-main-header .nav-links button {
-        background: none;
-        border: none;
-        color: rgba(255, 255, 255, 0.8);
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 500;
-        margin-left: 15px;
-    }
-
-    .analysis-layout {
-        max-width: 1400px;
-        margin: 0 auto;
-        padding: 100px 20px 40px 20px;
-        min-height: 80vh;
-    }
-
-    .analysis-header {
-        text-align: center;
-        margin-bottom: 30px;
-    }
-
-    .analysis-header h1 {
-        font-size: 2rem;
-        color: #2c5f2d;
-        margin-bottom: 10px;
-        font-weight: 800;
-    }
-
-    .header-deco {
-        width: 60px;
-        height: 4px;
-        background: #97bc62;
-        margin: 15px auto;
-        border-radius: 2px;
-    }
-
-    .back-link {
-        display: inline-block;
-        margin-bottom: 20px;
-        color: #2c5f2d;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .back-link:hover {
-        text-decoration: underline;
-    }
-
+    
     .subject-badge {
-        display: inline-block;
         background: linear-gradient(135deg, #2c5f2d, #40916c);
         color: white;
-        padding: 8px 20px;
-        border-radius: 20px;
-        font-size: 1.1rem;
+        padding: 5px 15px;
+        border-radius: 15px;
+        font-size: 0.9rem;
         font-weight: bold;
-        margin-bottom: 10px;
     }
-
-    .stats-bar {
-        background: white;
-        border-radius: 12px;
-        padding: 15px 30px;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        border: 1px solid #e0e0e0;
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-value {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: #2c5f2d;
-    }
-
-    .stat-label {
+    
+    .stats-info {
+        margin-left: auto;
+        color: #666;
         font-size: 0.85rem;
-        color: #888;
     }
-
+    
+    /* Round Tabs */
+    .round-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        border-bottom: 2px solid #2d6a4f;
+        margin-bottom: 4px;
+        gap: 2px;
+    }
+    
+    .round-tab {
+        display: block;
+        padding: 6px 16px;
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: white;
+        text-decoration: none;
+        border: 1px solid #1b4332;
+        border-bottom: none;
+        border-radius: 6px 6px 0 0;
+        font-weight: bold;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        margin-bottom: -1px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+    
+    .round-tab:hover {
+        background: linear-gradient(135deg, #1b4332, #2d6a4f);
+        transform: translateY(-2px);
+    }
+    
+    .round-tab.active {
+        background: linear-gradient(135deg, #1b4332, #2d6a4f);
+        color: #ffc107;
+    }
+    
     /* Table Styles */
     .analysis-table {
         width: 100%;
         border-collapse: collapse;
         background: white;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        font-size: 0.85rem;
+        margin-top: 0;
     }
-
+    
     .analysis-table th {
-        background: #2c5f2d;
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
         color: white;
-        padding: 12px 15px;
+        padding: 10px 12px;
         text-align: left;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
     }
-
+    
     .analysis-table th:first-child {
-        width: 60px;
-        text-align: center;
-    }
-
-    .analysis-table th:nth-child(2) {
         width: 50px;
         text-align: center;
     }
-
-    .analysis-table th:nth-child(3) {
-        width: 200px;
+    
+    .analysis-table th:nth-child(2) {
+        width: 180px;
     }
-
+    
     .analysis-table td {
-        padding: 10px 15px;
+        padding: 6px 12px;
         border-bottom: 1px solid #eee;
         vertical-align: middle;
-        font-size: 0.9rem;
     }
-
-    .analysis-table tr:hover {
-        background: #f8f9fa;
-    }
-
-    .analysis-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .round-cell {
+    
+    .round-header-cell {
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: white;
+        padding: 8px 12px;
+        font-weight: 700;
         text-align: center;
-        font-weight: bold;
-        color: #2c5f2d;
+        vertical-align: top;
+        border-bottom: 1px solid #1b4332;
     }
-
+    
+    .round-header-cell a {
+        display: block;
+        margin-top: 8px;
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        font-size: 0.7rem;
+    }
+    
     .number-cell {
         text-align: center;
-        background: #f0f7f4;
-        border-radius: 50%;
-        width: 28px;
-        height: 28px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
         font-weight: bold;
         color: #333;
-        font-size: 0.85rem;
     }
-
+    
     .summary-cell {
-        color: #333;
         font-weight: 500;
+        color: #333;
     }
-
+    
     .terms-cell {
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: 3px;
     }
-
+    
     .term-tag {
         display: inline-block;
-        padding: 3px 8px;
+        padding: 2px 8px;
         background: transparent;
         color: #1b4332;
         text-decoration: none;
@@ -226,118 +178,102 @@
         border: 1px solid #2d6a4f;
         transition: all 0.2s;
     }
-
+    
     .term-tag:hover {
         background: #2d6a4f;
         color: white;
     }
-
+    
     .term-tag.hot {
         border-right-width: 4px;
         border-right-color: #d32f2f;
     }
-
+    
     .term-tag.warm {
         border-right-width: 4px;
         border-right-color: #f57c00;
     }
-
+    
     .term-tag.cool {
         border-right-width: 4px;
         border-right-color: #1976d2;
     }
-
-    .no-terms {
-        color: #bbb;
-        font-size: 0.8rem;
-        font-style: italic;
+    
+    .round-section {
+        display: none;
+    }
+    
+    .round-section.active {
+        display: block;
     }
 </style>
 
-<div class="custom-main-header">
-    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-    <nav class="nav-links">
-        {% if user.is_authenticated %}
-        <span style="color: white; margin-right: 10px;">{{ user.username }}님 환영합니다</span>
-        <a href="{% url 'mypage:index' %}">마이페이지</a>
-        <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit">로그아웃</button>
-        </form>
-        {% else %}
-        <a href="{% url 'accounts:user_login' %}">로그인</a>
-        <a href="{% url 'accounts:user_signup' %}">회원가입</a>
-        {% endif %}
-    </nav>
-</div>
-
-<div class="analysis-layout">
-    <a href="{% url 'study:analysis_index' %}" class="back-link">← 과목 선택으로 돌아가기</a>
-    
-    <div class="analysis-header">
+<div class="analysis-container">
+    <div class="filter-bar">
+        <span class="page-title">📊 기출분석</span>
         <span class="subject-badge">{{ subject.name }}</span>
-        <h1>전체 문제 분석</h1>
-        <div class="header-deco"></div>
+        <span class="stats-info">총 {{ total_questions }}문제</span>
     </div>
-
-    <div class="stats-bar">
-        <div class="stat-item">
-            <div class="stat-value">{{ total_questions }}</div>
-            <div class="stat-label">총 문제</div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-value" id="total-terms">-</div>
-            <div class="stat-label">연결된 용어</div>
-        </div>
+    
+    <!-- Round Tabs -->
+    <div class="round-tabs">
+        {% for round_num in available_rounds %}
+        <a href="#round-{{ round_num }}" class="round-tab {% if forloop.first %}active{% endif %}" onclick="showRound({{ round_num }}, this)">{{ round_num }}회</a>
+        {% endfor %}
     </div>
-
-    <table class="analysis-table">
-        <thead>
-            <tr>
-                <th>회차</th>
-                <th>번호</th>
-                <th>문제 요약</th>
-                <th>관련 용어</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in questions_with_terms %}
-            <tr>
-                <td class="round-cell">{{ item.question.exam.round_number }}회</td>
-                <td><span class="number-cell">{{ item.question.number }}</span></td>
-                <td class="summary-cell">{% if item.question.summary %}{{ item.question.summary }}{% else %}{{ item.question.content|summarize_question }}{% endif %}</td>
-                <td>
-                    <div class="terms-cell">
-                        {% for term in item.terms %}
-                        <a href="{% url 'glossary:term_detail' term.id %}" target="glossary_popup" 
-                           class="term-tag {% if term.reference_count >= 10 %}hot{% elif term.reference_count >= 5 %}warm{% elif term.reference_count > 0 %}cool{% endif %}">
-                            {{ term.word }}
-                        </a>
-                        {% empty %}
-                        <span class="no-terms">-</span>
-                        {% endfor %}
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" style="text-align: center; color: #888; padding: 40px;">해당 과목의 문제가 없습니다.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    
+    <!-- Round-based Tables -->
+    {% for round_num, questions in rounds_data.items %}
+    <div id="round-section-{{ round_num }}" class="round-section {% if forloop.first %}active{% endif %}">
+        <table class="analysis-table">
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>문제 요약</th>
+                    <th style="text-align: center;">관련용어 및 기출빈도</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in questions %}
+                <tr>
+                    <td class="number-cell">{{ item.question.number }}</td>
+                    <td class="summary-cell">{% if item.question.summary %}{{ item.question.summary }}{% else %}{{ item.question.content|summarize_question }}{% endif %}</td>
+                    <td>
+                        <div class="terms-cell">
+                            {% for term in item.terms %}
+                            <a href="{% url 'glossary:term_detail' term.id %}" target="glossary_popup" 
+                               class="term-tag {% if term.reference_count >= 10 %}hot{% elif term.reference_count >= 5 %}warm{% elif term.reference_count > 0 %}cool{% endif %}">
+                                {{ term.word }}
+                            </a>
+                            {% empty %}
+                            <span style="color: #ccc; font-size: 0.75rem;">-</span>
+                            {% endfor %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const header = document.querySelector('header');
-    if (header) {
-        header.style.display = 'none';
-        header.remove();
-    }
-
-    const termTags = document.querySelectorAll('.term-tag');
-    document.getElementById('total-terms').textContent = termTags.length;
-});
+function showRound(roundNum, tab) {
+    // Hide all sections
+    document.querySelectorAll('.round-section').forEach(s => s.classList.remove('active'));
+    // Show selected section
+    document.getElementById('round-section-' + roundNum).classList.add('active');
+    
+    // Update tab styles
+    document.querySelectorAll('.round-tab').forEach(t => {
+        t.classList.remove('active');
+        t.style.background = 'linear-gradient(135deg, #2d6a4f, #40916c)';
+        t.style.color = 'white';
+    });
+    tab.classList.add('active');
+    tab.style.background = 'linear-gradient(135deg, #1b4332, #2d6a4f)';
+    tab.style.color = '#ffc107';
+}
 </script>
 {% endblock %}

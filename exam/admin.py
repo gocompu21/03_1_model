@@ -15,9 +15,9 @@ class SubjectAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ("exam", "subject", "number", "content", "answer")
+    list_display = ("exam", "subject", "number", "summary", "content", "answer")
     list_filter = ("exam", "subject")
-    search_fields = ("content", "general_chat")
+    search_fields = ("content", "general_chat", "summary")
     ordering = ("exam", "subject", "number")
     
     formfield_overrides = {

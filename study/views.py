@@ -374,6 +374,7 @@ def analysis_index(request):
 def analysis_subject(request, subject_id):
     """과목별 전체 회차 문제 및 관련 용어 리스트"""
     from glossary.models import TermReference, Term
+    from collections import OrderedDict
     
     subject = get_object_or_404(Subject, id=subject_id)
     
@@ -382,9 +383,14 @@ def analysis_subject(request, subject_id):
         subject=subject
     ).exclude(exam__round_number=0).select_related('exam').order_by('exam__round_number', 'number')
     
-    # 각 문제에 연결된 용어 조회
-    questions_with_terms = []
+    # 회차별로 그룹화
+    rounds_data = OrderedDict()
     for q in questions:
+        round_num = q.exam.round_number
+        if round_num not in rounds_data:
+            rounds_data[round_num] = []
+        
+        # 용어 조회
         term_refs = TermReference.objects.filter(
             source_type='question',
             source_id=q.id
@@ -395,15 +401,19 @@ def analysis_subject(request, subject_id):
         for term in terms:
             term.reference_count = TermReference.objects.filter(term=term).count()
         
-        questions_with_terms.append({
+        rounds_data[round_num].append({
             "question": q,
             "terms": terms
         })
     
+    # 사용 가능한 회차 목록
+    available_rounds = list(rounds_data.keys())
+    
     context = {
         "subject": subject,
-        "questions_with_terms": questions_with_terms,
-        "total_questions": len(questions_with_terms),
+        "rounds_data": rounds_data,
+        "available_rounds": available_rounds,
+        "total_questions": questions.count(),
     }
     return render(request, "study/analysis_subject.html", context)
 

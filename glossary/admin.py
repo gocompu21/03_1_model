@@ -20,15 +20,36 @@ class TermReferenceInline(admin.TabularInline):
 
 @admin.register(Term)
 class TermAdmin(admin.ModelAdmin):
-    list_display = ['word', 'get_subjects', 'updated_at']
-    list_filter = ['subjects']
+    list_display = ['word', 'canonical_term', 'get_synonyms_count', 'get_subjects', 'updated_at']
+    list_filter = ['subjects', ('canonical_term', admin.EmptyFieldListFilter)]
     search_fields = ['word', 'content']
     filter_horizontal = ['subjects']
+    autocomplete_fields = ['canonical_term']
     inlines = [TermReferenceInline]
+    
+    fieldsets = (
+        (None, {
+            'fields': ('word', 'content')
+        }),
+        ('유사어 설정', {
+            'fields': ('canonical_term',),
+            'description': '이 용어가 다른 용어의 유사어인 경우, 대표 용어를 선택하세요.'
+        }),
+        ('분류', {
+            'fields': ('subjects',)
+        }),
+    )
     
     def get_subjects(self, obj):
         return ", ".join([s.name for s in obj.subjects.all()])
     get_subjects.short_description = "관련 과목"
+    
+    def get_synonyms_count(self, obj):
+        count = obj.synonyms.count()
+        if count > 0:
+            return f"📌 {count}개"
+        return "-"
+    get_synonyms_count.short_description = "유사어"
 
 
 @admin.register(TermReference)

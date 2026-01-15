@@ -172,28 +172,34 @@
 </div>
 
 <div class="analysis-layout">
-    <a href="{% url 'main:index' %}" class="back-link">← 메인으로 돌아가기</a>
     
     <div class="analysis-header">
         <h1>📊 기출분석</h1>
         <div class="header-deco"></div>
-        <p>과목별 기출문제의 관련 용어를 분석합니다</p>
+        <p>문제와 관련된 용어들을 살펴보고 기출 빈도수를 참고합니다.</p>
     </div>
 
     <div class="subject-grid">
         {% for subject in subjects %}
+        {% if subject.name == '수목병리학' %}
         <a href="{% url 'study:analysis_subject' subject.id %}" class="subject-card">
-            <div class="subject-icon">
-                {% if subject.name == '수목병리학' %}🦠
-                {% elif subject.name == '수목해충학' %}🐛
+            <div class="subject-icon">🦠</div>
+            <div class="subject-name">{{ subject.name }}</div>
+            <div class="subject-desc">기출문제 용어 분석</div>
+        </a>
+        {% else %}
+        <div class="subject-card" style="opacity: 0.5; cursor: not-allowed; pointer-events: none;">
+            <div class="subject-icon" style="background: linear-gradient(135deg, #e0e0e0, #ccc);">
+                {% if subject.name == '수목해충학' %}🐛
                 {% elif subject.name == '수목생리학' %}🌿
                 {% elif subject.name == '산림토양학' %}🪨
                 {% elif subject.name == '수목관리학' %}🛠️
                 {% else %}📚{% endif %}
             </div>
-            <div class="subject-name">{{ subject.name }}</div>
-            <div class="subject-desc">기출문제 용어 분석</div>
-        </a>
+            <div class="subject-name" style="color: #999;">{{ subject.name }}</div>
+            <div class="subject-desc">준비 중</div>
+        </div>
+        {% endif %}
         {% empty %}
         <div style="text-align: center; color: #888; grid-column: 1/-1;">등록된 과목이 없습니다.</div>
         {% endfor %}
