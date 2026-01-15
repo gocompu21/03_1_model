@@ -216,6 +216,7 @@ def get_initial(value):
     return char
 
 
+@register.filter(name='is_hangul')
 def is_hangul(value):
     """문자열이 한글로 시작하는지 여부 반환"""
     if not value:
