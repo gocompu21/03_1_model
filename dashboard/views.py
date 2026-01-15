@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
@@ -223,4 +223,155 @@ def exam_pdf(request):
         'questions': questions,
         'is_multi_exam': True,
         'custom_title': custom_title
+    })
+
+
+@login_required
+@staff_member_required
+def save_topic_set(request):
+    """주제별 문제집 저장 (AJAX)"""
+    from django.http import JsonResponse
+    from exam.models import TopicQuestionSet, TopicQuestionSetItem, Question
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        description = data.get('description', '').strip()
+        question_ids = data.get('question_ids', [])
+        
+        if not title:
+            return JsonResponse({'success': False, 'error': '제목을 입력해주세요.'})
+        
+        if not question_ids:
+            return JsonResponse({'success': False, 'error': '문제를 선택해주세요.'})
+        
+        # 문제집 생성
+        topic_set = TopicQuestionSet.objects.create(
+            title=title,
+            description=description,
+            created_by=request.user,
+            is_public=True
+        )
+        
+        # 문제 추가 (순서 유지)
+        for order, question_id in enumerate(question_ids, start=1):
+            try:
+                question = Question.objects.get(id=question_id)
+                TopicQuestionSetItem.objects.create(
+                    question_set=topic_set,
+                    question=question,
+                    order=order
+                )
+            except Question.DoesNotExist:
+                pass  # 문제가 없으면 스킵
+        
+        return JsonResponse({'success': True, 'topic_set_id': topic_set.id})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required
+def topic_set_list(request):
+    """주제별 문제집 목록"""
+    from exam.models import TopicQuestionSet
+    
+    topic_sets = TopicQuestionSet.objects.filter(is_public=True).prefetch_related('items').order_by('-created_at')
+    
+    return render(request, 'dashboard/topic_set_list.html', {
+        'topic_sets': topic_sets
+    })
+
+
+@login_required
+def topic_set_solve(request, set_id):
+    """주제별 문제집 풀이"""
+    from exam.models import TopicQuestionSet, UserTopicSetAttempt, UserTopicQuestionResult
+    from django.utils import timezone
+    
+    topic_set = get_object_or_404(TopicQuestionSet, id=set_id)
+    
+    # 문제 가져오기 (순서대로)
+    items = topic_set.items.select_related('question__exam', 'question__subject').order_by('order')
+    questions = [item.question for item in items]
+    
+    if request.method == 'POST':
+        # 채점 및 결과 저장
+        attempt = UserTopicSetAttempt.objects.create(
+            user=request.user,
+            question_set=topic_set
+        )
+        
+        correct_count = 0
+        for q in questions:
+            selected_choice = request.POST.get(f'question_{q.id}')
+            if selected_choice:
+                selected_choice = int(selected_choice)
+                is_correct = selected_choice in q.answer
+                if is_correct:
+                    correct_count += 1
+                
+                UserTopicQuestionResult.objects.create(
+                    attempt=attempt,
+                    question=q,
+                    selected_choice=selected_choice,
+                    is_correct=is_correct
+                )
+                
+                # 오답 시 복습 스케줄 등록
+                if not is_correct:
+                    from mypage.models import ReviewSchedule
+                    
+                    review_schedule, created = ReviewSchedule.objects.get_or_create(
+                        user=request.user,
+                        question=q,
+                        defaults={
+                            'last_wrong_date': timezone.now(),
+                            'review_count': 0,
+                            'next_review_date': timezone.localdate(),
+                            'is_mastered': False,
+                        }
+                    )
+                    if not created:
+                        review_schedule.review_count = 0
+                        review_schedule.last_wrong_date = timezone.now()
+                        review_schedule.is_mastered = False
+                        review_schedule.next_review_date = review_schedule.calculate_next_review_date()
+                        review_schedule.save()
+        
+        attempt.total_score = correct_count
+        attempt.end_time = timezone.now()
+        attempt.save()
+        
+        return redirect('dashboard:topic_set_result', attempt_id=attempt.id)
+    
+    # study/detail.html과 호환을 위해 변수 이름 맞추기
+    return render(request, 'dashboard/topic_set_solve.html', {
+        'topic_set': topic_set,
+        'exam': topic_set,  # 템플릿 호환성
+        'round_number': topic_set.title,  # 제목을 회차처럼 표시
+        'questions': questions
+    })
+
+
+@login_required
+def topic_set_result(request, attempt_id):
+    """주제별 문제집 결과"""
+    from exam.models import UserTopicSetAttempt, UserTopicQuestionResult
+    
+    attempt = get_object_or_404(UserTopicSetAttempt, id=attempt_id)
+    results = UserTopicQuestionResult.objects.filter(attempt=attempt).select_related('question__exam', 'question__subject')
+    
+    total_attempted = results.count()
+    score_100 = (attempt.total_score / total_attempted * 100) if total_attempted > 0 else 0
+    
+    return render(request, 'dashboard/topic_set_result.html', {
+        'attempt': attempt,
+        'results': results,
+        'score_100': score_100,
+        'total_attempted': total_attempted
     })

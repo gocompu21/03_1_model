@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ attempt.question_set.title }} - 결과{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        min-height: 100vh;
+    }
+    
+    .container {
+        max-width: 1000px;
+        padding: 40px 20px;
+    }
+    
+    .result-header {
+        background: rgba(255,255,255,0.95);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        text-align: center;
+    }
+    
+    .score-display {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #2d6a4f;
+        margin: 20px 0;
+    }
+    
+    .result-item {
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .result-item.correct {
+        border-left: 5px solid #52b788;
+    }
+    
+    .result-item.incorrect {
+        border-left: 5px solid #e63946;
+    }
+    
+    .question-header {
+        font-weight: bold;
+        color: #2d6a4f;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+    
+    .question-content {
+        margin-bottom: 15px;
+        line-height: 1.8;
+    }
+    
+    .answer-info {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+    
+    .correct-badge {
+        background: #52b788;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+    
+    .incorrect-badge {
+        background: #e63946;
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: bold;
+    }
+    
+    .btn-retry {
+        background: linear-gradient(135deg, #52b788, #40916c);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-block;
+        margin: 10px 5px;
+        transition: all 0.2s;
+    }
+    
+    .btn-retry:hover {
+        background: linear-gradient(135deg, #40916c, #2d6a4f);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .btn-list {
+        background: #6c757d;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        text-decoration: none;
+        display: inline-block;
+        margin: 10px 5px;
+        transition: all 0.2s;
+    }
+    
+    .btn-list:hover {
+        background: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="container">
+    <div class="result-header">
+        <h2><i class="fas fa-trophy me-2" style="color: #ffd700;"></i>{{ attempt.question_set.title }}</h2>
+        <div class="score-display">{{ attempt.total_score }} / {{ total_attempted }}</div>
+        <div style="font-size: 1.5rem; color: #666;">
+            {{ score_100|floatformat:1 }}점
+        </div>
+        <div class="mt-3">
+            <a href="{% url 'dashboard:topic_set_solve' attempt.question_set.id %}" class="btn-retry">
+                <i class="fas fa-redo me-2"></i>다시 풀기
+            </a>
+            <a href="{% url 'dashboard:topic_set_list' %}" class="btn-list">
+                <i class="fas fa-list me-2"></i>목록으로
+            </a>
+        </div>
+    </div>
+    
+    <h3 style="color: white; margin-bottom: 20px;">
+        <i class="fas fa-clipboard-list me-2"></i>문제별 결과
+    </h3>
+    
+    {% for result in results %}
+    <div class="result-item {% if result.is_correct %}correct{% else %}incorrect{% endif %}">
+        <div class="question-header">
+            문제 {{ forloop.counter }} 
+            <span class="text-muted" style="font-size: 0.9rem; font-weight: normal;">
+                ({{ result.question.exam.round_number }}회 {{ result.question.number }}번 - {{ result.question.subject.name }})
+            </span>
+            <span class="float-end">
+                {% if result.is_correct %}
+                <span class="correct-badge"><i class="fas fa-check me-1"></i>정답</span>
+                {% else %}
+                <span class="incorrect-badge"><i class="fas fa-times me-1"></i>오답</span>
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="question-content">
+            {{ result.question.content|safe }}
+        </div>
+        
+        {% if result.question.image %}
+        <div class="mb-3">
+            <img src="{{ result.question.image.url }}" alt="문제 이미지" style="max-width: 100%; border-radius: 8px;">
+        </div>
+        {% endif %}
+        
+        <div class="answer-info">
+            <div class="mb-2">
+                <strong>선택한 답:</strong> 
+                <span class="{% if result.is_correct %}text-success{% else %}text-danger{% endif %}">
+                    ⓵⓶⓷⓸⓹|safe|slice:"{{ result.selected_choice }}" 
+                    {% if result.selected_choice == 1 %}{{ result.question.choice1 }}{% endif %}
+                    {% if result.selected_choice == 2 %}{{ result.question.choice2 }}{% endif %}
+                    {% if result.selected_choice == 3 %}{{ result.question.choice3 }}{% endif %}
+                    {% if result.selected_choice == 4 %}{{ result.question.choice4 }}{% endif %}
+                    {% if result.selected_choice == 5 %}{{ result.question.choice5 }}{% endif %}
+                </span>
+            </div>
+            <div>
+                <strong>정답:</strong> 
+                <span class="text-success">
+                    {% for ans in result.question.answer %}
+                        ⓵⓶⓷⓸⓹|safe|slice:"{{ ans }}"
+                        {% if ans == 1 %}{{ result.question.choice1 }}{% endif %}
+                        {% if ans == 2 %}{{ result.question.choice2 }}{% endif %}
+                        {% if ans == 3 %}{{ result.question.choice3 }}{% endif %}
+                        {% if ans == 4 %}{{ result.question.choice4 }}{% endif %}
+                        {% if ans == 5 %}{{ result.question.choice5 }}{% endif %}
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+            {% if result.question.general_chat %}
+            <div class="mt-3 pt-3 border-top">
+                <strong>해설:</strong>
+                <div class="mt-2">{{ result.question.general_chat|safe }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

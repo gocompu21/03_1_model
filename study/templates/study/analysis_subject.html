@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load glossary_tags %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f8f6e6;
+        font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    body>header {
+        display: none !important;
+    }
+
+    .custom-main-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #2d6a4f;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        z-index: 1000;
+    }
+
+    .custom-main-header .logo {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-main-header .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .custom-main-header .nav-links a:hover {
+        color: #b7e4c7;
+    }
+
+    .custom-main-header .nav-links button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        margin-left: 15px;
+    }
+
+    .analysis-layout {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 100px 20px 40px 20px;
+        min-height: 80vh;
+    }
+
+    .analysis-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .analysis-header h1 {
+        font-size: 2rem;
+        color: #2c5f2d;
+        margin-bottom: 10px;
+        font-weight: 800;
+    }
+
+    .header-deco {
+        width: 60px;
+        height: 4px;
+        background: #97bc62;
+        margin: 15px auto;
+        border-radius: 2px;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        color: #2c5f2d;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .subject-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #2c5f2d, #40916c);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .stats-bar {
+        background: white;
+        border-radius: 12px;
+        padding: 15px 30px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #2c5f2d;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: #888;
+    }
+
+    /* Table Styles */
+    .analysis-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .analysis-table th {
+        background: #2c5f2d;
+        color: white;
+        padding: 12px 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .analysis-table th:first-child {
+        width: 60px;
+        text-align: center;
+    }
+
+    .analysis-table th:nth-child(2) {
+        width: 50px;
+        text-align: center;
+    }
+
+    .analysis-table th:nth-child(3) {
+        width: 200px;
+    }
+
+    .analysis-table td {
+        padding: 10px 15px;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+
+    .analysis-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .analysis-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .round-cell {
+        text-align: center;
+        font-weight: bold;
+        color: #2c5f2d;
+    }
+
+    .number-cell {
+        text-align: center;
+        background: #f0f7f4;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #333;
+        font-size: 0.85rem;
+    }
+
+    .summary-cell {
+        color: #333;
+        font-weight: 500;
+    }
+
+    .terms-cell {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .term-tag {
+        display: inline-block;
+        padding: 3px 8px;
+        background: transparent;
+        color: #1b4332;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        border: 1px solid #2d6a4f;
+        transition: all 0.2s;
+    }
+
+    .term-tag:hover {
+        background: #2d6a4f;
+        color: white;
+    }
+
+    .term-tag.hot {
+        border-right-width: 4px;
+        border-right-color: #d32f2f;
+    }
+
+    .term-tag.warm {
+        border-right-width: 4px;
+        border-right-color: #f57c00;
+    }
+
+    .term-tag.cool {
+        border-right-width: 4px;
+        border-right-color: #1976d2;
+    }
+
+    .no-terms {
+        color: #bbb;
+        font-size: 0.8rem;
+        font-style: italic;
+    }
+</style>
+
+<div class="custom-main-header">
+    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    <nav class="nav-links">
+        {% if user.is_authenticated %}
+        <span style="color: white; margin-right: 10px;">{{ user.username }}님 환영합니다</span>
+        <a href="{% url 'mypage:index' %}">마이페이지</a>
+        <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">로그아웃</button>
+        </form>
+        {% else %}
+        <a href="{% url 'accounts:user_login' %}">로그인</a>
+        <a href="{% url 'accounts:user_signup' %}">회원가입</a>
+        {% endif %}
+    </nav>
+</div>
+
+<div class="analysis-layout">
+    <a href="{% url 'study:analysis_index' %}" class="back-link">← 과목 선택으로 돌아가기</a>
+    
+    <div class="analysis-header">
+        <span class="subject-badge">{{ subject.name }}</span>
+        <h1>전체 문제 분석</h1>
+        <div class="header-deco"></div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item">
+            <div class="stat-value">{{ total_questions }}</div>
+            <div class="stat-label">총 문제</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="total-terms">-</div>
+            <div class="stat-label">연결된 용어</div>
+        </div>
+    </div>
+
+    <table class="analysis-table">
+        <thead>
+            <tr>
+                <th>회차</th>
+                <th>번호</th>
+                <th>문제 요약</th>
+                <th>관련 용어</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in questions_with_terms %}
+            <tr>
+                <td class="round-cell">{{ item.question.exam.round_number }}회</td>
+                <td><span class="number-cell">{{ item.question.number }}</span></td>
+                <td class="summary-cell">{% if item.question.summary %}{{ item.question.summary }}{% else %}{{ item.question.content|summarize_question }}{% endif %}</td>
+                <td>
+                    <div class="terms-cell">
+                        {% for term in item.terms %}
+                        <a href="{% url 'glossary:term_detail' term.id %}" target="glossary_popup" 
+                           class="term-tag {% if term.reference_count >= 10 %}hot{% elif term.reference_count >= 5 %}warm{% elif term.reference_count > 0 %}cool{% endif %}">
+                            {{ term.word }}
+                        </a>
+                        {% empty %}
+                        <span class="no-terms">-</span>
+                        {% endfor %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: #888; padding: 40px;">해당 과목의 문제가 없습니다.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const header = document.querySelector('header');
+    if (header) {
+        header.style.display = 'none';
+        header.remove();
+    }
+
+    const termTags = document.querySelectorAll('.term-tag');
+    document.getElementById('total-terms').textContent = termTags.length;
+});
+</script>
+{% endblock %}

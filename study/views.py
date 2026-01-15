@@ -358,3 +358,87 @@ def api_question(request, question_id):
     }
     return JsonResponse(data)
 
+
+# ============================================================================
+# 기출분석 Views
+# ============================================================================
+
+@login_required
+def analysis_index(request):
+    """과목 선택 화면"""
+    subjects = Subject.objects.all().order_by("code")
+    return render(request, "study/analysis_index.html", {"subjects": subjects})
+
+
+@login_required
+def analysis_subject(request, subject_id):
+    """과목별 전체 회차 문제 및 관련 용어 리스트"""
+    from glossary.models import TermReference, Term
+    
+    subject = get_object_or_404(Subject, id=subject_id)
+    
+    # 해당 과목의 모든 문제 (회차 0 제외)
+    questions = Question.objects.filter(
+        subject=subject
+    ).exclude(exam__round_number=0).select_related('exam').order_by('exam__round_number', 'number')
+    
+    # 각 문제에 연결된 용어 조회
+    questions_with_terms = []
+    for q in questions:
+        term_refs = TermReference.objects.filter(
+            source_type='question',
+            source_id=q.id
+        ).select_related('term')
+        terms = [ref.term for ref in term_refs]
+        
+        # 용어의 reference_count 계산
+        for term in terms:
+            term.reference_count = TermReference.objects.filter(term=term).count()
+        
+        questions_with_terms.append({
+            "question": q,
+            "terms": terms
+        })
+    
+    context = {
+        "subject": subject,
+        "questions_with_terms": questions_with_terms,
+        "total_questions": len(questions_with_terms),
+    }
+    return render(request, "study/analysis_subject.html", context)
+
+
+@login_required
+def analysis_round(request, subject_id, round_number):
+    """회차별 문제와 관련 용어 리스트"""
+    from glossary.models import TermReference
+    
+    subject = get_object_or_404(Subject, id=subject_id)
+    exam = get_object_or_404(Exam, round_number=round_number)
+    
+    # 해당 과목, 회차의 모든 문제
+    questions = Question.objects.filter(
+        subject=subject, exam=exam
+    ).order_by("number")
+    
+    # 각 문제에 연결된 용어 조회
+    questions_with_terms = []
+    for q in questions:
+        term_refs = TermReference.objects.filter(
+            source_type='question',
+            source_id=q.id
+        ).select_related('term')
+        terms = [ref.term for ref in term_refs]
+        questions_with_terms.append({
+            "question": q,
+            "terms": terms
+        })
+    
+    context = {
+        "subject": subject,
+        "exam": exam,
+        "round_number": round_number,
+        "questions_with_terms": questions_with_terms,
+    }
+    return render(request, "study/analysis_round.html", context)
+

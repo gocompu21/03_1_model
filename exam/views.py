@@ -171,3 +171,105 @@ def question_delete(request, pk):
         question.delete()
         return redirect("exam:question_list")
     return render(request, "exam/question_confirm_delete.html", {"question": question})
+
+
+@login_required
+def topic_set_list(request):
+    """주제별 문제집 목록"""
+    from .models import TopicQuestionSet
+    
+    topic_sets = TopicQuestionSet.objects.filter(is_public=True).prefetch_related('items').order_by('-created_at')
+    
+    return render(request, 'exam/topic_set_list.html', {
+        'topic_sets': topic_sets
+    })
+
+
+@login_required
+def topic_set_solve(request, set_id):
+    """주제별 문제집 풀이"""
+    from .models import TopicQuestionSet, UserTopicSetAttempt, UserTopicQuestionResult
+    from django.utils import timezone
+    
+    topic_set = get_object_or_404(TopicQuestionSet, id=set_id)
+    
+    # 문제 가져오기 (순서대로)
+    items = topic_set.items.select_related('question__exam', 'question__subject').order_by('order')
+    questions = [item.question for item in items]
+    
+    if request.method == 'POST':
+        # 채점 및 결과 저장
+        attempt = UserTopicSetAttempt.objects.create(
+            user=request.user,
+            question_set=topic_set
+        )
+        
+        correct_count = 0
+        for q in questions:
+            selected_choice = request.POST.get(f'question_{q.id}')
+            if selected_choice:
+                selected_choice = int(selected_choice)
+                is_correct = selected_choice in q.answer
+                if is_correct:
+                    correct_count += 1
+                
+                UserTopicQuestionResult.objects.create(
+                    attempt=attempt,
+                    question=q,
+                    selected_choice=selected_choice,
+                    is_correct=is_correct
+                )
+                
+                # 오답 시 복습 스케줄 등록
+                if not is_correct:
+                    from mypage.models import ReviewSchedule
+                    
+                    review_schedule, created = ReviewSchedule.objects.get_or_create(
+                        user=request.user,
+                        question=q,
+                        defaults={
+                            'last_wrong_date': timezone.now(),
+                            'review_count': 0,
+                            'next_review_date': timezone.localdate(),
+                            'is_mastered': False,
+                        }
+                    )
+                    if not created:
+                        review_schedule.review_count = 0
+                        review_schedule.last_wrong_date = timezone.now()
+                        review_schedule.is_mastered = False
+                        review_schedule.next_review_date = review_schedule.calculate_next_review_date()
+                        review_schedule.save()
+        
+        attempt.total_score = correct_count
+        attempt.end_time = timezone.now()
+        attempt.save()
+        
+        return redirect('exam:topic_set_result', attempt_id=attempt.id)
+    
+    # study/detail.html과 호환을 위해 변수 이름 맞추기
+    return render(request, 'exam/topic_set_solve.html', {
+        'topic_set': topic_set,
+        'exam': topic_set,  # 템플릿 호환성
+        'round_number': topic_set.title,  # 제목을 회차처럼 표시
+        'questions': questions
+    })
+
+
+@login_required
+def topic_set_result(request, attempt_id):
+    """주제별 문제집 결과"""
+    from .models import UserTopicSetAttempt, UserTopicQuestionResult
+    
+    attempt = get_object_or_404(UserTopicSetAttempt, id=attempt_id)
+    results = UserTopicQuestionResult.objects.filter(attempt=attempt).select_related('question__exam', 'question__subject')
+    
+    total_attempted = results.count()
+    score_100 = (attempt.total_score / total_attempted * 100) if total_attempted > 0 else 0
+    
+    return render(request, 'exam/topic_set_result.html', {
+        'attempt': attempt,
+        'results': results,
+        'score_100': score_100,
+        'total_attempted': total_attempted
+    })

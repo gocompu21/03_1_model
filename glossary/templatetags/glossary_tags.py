@@ -216,9 +216,85 @@ def get_initial(value):
     return char
 
 
-@register.filter(name='is_hangul')
 def is_hangul(value):
     """문자열이 한글로 시작하는지 여부 반환"""
     if not value:
         return False
     return '가' <= value[0] <= '힣'
+
+
+@register.filter
+def summarize_question(content):
+    """
+    문제 내용을 간단한 주제로 요약합니다.
+    예: "파이토플라스마의 설명 중 옳지 않은 것은?" -> "파이토플라스마 설명"
+    """
+    if not content:
+        return ""
+    
+    text = content.strip()
+    
+    # HTML 태그 제거
+    text = re.sub(r'<[^>]+>', '', text)
+    
+    # 줄바꿈을 공백으로
+    text = re.sub(r'\s+', ' ', text)
+    
+    # 불필요한 문구 제거 패턴 (순서 중요: 긴 패턴 먼저)
+    remove_patterns = [
+        # 설명 관련
+        r'에 대한 설명으로 옳은 것은\?*',
+        r'에 대한 설명으로 옳지 않은 것은\?*',
+        r'에 대한 설명 중 옳은 것은\?*',
+        r'에 대한 설명 중 옳지 않은 것은\?*',
+        r'의 설명으로 옳은 것은\?*',
+        r'의 설명으로 옳지 않은 것은\?*',
+        r'의 설명 중 옳은 것은\?*',
+        r'의 설명 중 옳지 않은 것은\?*',
+        r'에 관한 설명으로 옳은 것은\?*',
+        r'에 관한 설명으로 옳지 않은 것은\?*',
+        # 일반적인 질문 패턴
+        r'으로 옳은 것은\?*',
+        r'으로 옳지 않은 것은\?*',
+        r'로 옳은 것은\?*',
+        r'로 옳지 않은 것은\?*',
+        r'중 옳은 것은\?*',
+        r'중 옳지 않은 것은\?*',
+        # 긴 패턴 (문장 중간~끝까지 제거)
+        r'을 할 수 있는 것은\?*',
+        r'를 할 수 있는 것은\?*',
+        r'할 수 있는 것은\?*',
+        r'이지만[^?]*것은\?*',
+        r'지만[^?]*것은\?*',
+        r',\s*조건에 따라서는[^?]*',
+        # 끝에 오는 패턴들
+        r'것은\?*$',
+        r'무엇인가\?*$',
+        r'무엇인가요\?*$',
+        # 시작 부분 제거
+        r'^다음 중 ',
+        r'^다음의 ',
+        r'^아래 중 ',
+        r'\?$',
+    ]
+    
+    # 패턴 제거
+    for pattern in remove_patterns:
+        text = re.sub(pattern, '', text)
+    
+    text = text.strip()
+    
+    # 쉼표가 있으면 첫 부분만
+    if ',' in text:
+        text = text[:text.find(',')]
+    
+    # 최대 15자
+    text = text.strip()
+    if len(text) > 15:
+        text = text[:15]
+    
+    # 마지막 조사/접속어 정리
+    text = re.sub(r'(은|는|이|가|을|를|의|에|며|고|하며|이며|으며|하는|하고)$', '', text.strip())
+    
+    return text.strip()
+

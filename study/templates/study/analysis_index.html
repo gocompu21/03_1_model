@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f8f6e6;
+        font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    body>header {
+        display: none !important;
+    }
+
+    .custom-main-header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #2d6a4f;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        z-index: 1000;
+    }
+
+    .custom-main-header .logo {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .custom-main-header .nav-links a {
+        color: white;
+        text-decoration: none;
+        margin-left: 20px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    .custom-main-header .nav-links a:hover {
+        color: #b7e4c7;
+    }
+
+    .custom-main-header .nav-links button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+        margin-left: 15px;
+    }
+
+    .analysis-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 100px 20px 40px 20px;
+        min-height: 80vh;
+    }
+
+    .analysis-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .analysis-header h1 {
+        font-size: 2.5rem;
+        color: #2c5f2d;
+        margin-bottom: 10px;
+        font-weight: 800;
+        letter-spacing: -1px;
+    }
+
+    .analysis-header p {
+        color: #555;
+        font-size: 1.1rem;
+    }
+
+    .header-deco {
+        width: 60px;
+        height: 4px;
+        background: #97bc62;
+        margin: 20px auto;
+        border-radius: 2px;
+    }
+
+    .subject-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .subject-card {
+        background: white;
+        border-radius: 12px;
+        padding: 30px 20px;
+        text-align: center;
+        text-decoration: none;
+        color: #333;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        border-color: #2c5f2d;
+    }
+
+    .subject-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #d8f3dc, #b7e4c7);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+    }
+
+    .subject-name {
+        font-size: 1.3rem;
+        font-weight: bold;
+        color: #2c5f2d;
+    }
+
+    .subject-desc {
+        font-size: 0.9rem;
+        color: #777;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 30px;
+        color: #2c5f2d;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="custom-main-header">
+    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    <nav class="nav-links">
+        {% if user.is_authenticated %}
+        <span style="color: white; margin-right: 10px;">{{ user.username }}님 환영합니다</span>
+        <a href="{% url 'mypage:index' %}">마이페이지</a>
+        <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">로그아웃</button>
+        </form>
+        {% else %}
+        <a href="{% url 'accounts:user_login' %}">로그인</a>
+        <a href="{% url 'accounts:user_signup' %}">회원가입</a>
+        {% endif %}
+    </nav>
+</div>
+
+<div class="analysis-layout">
+    <a href="{% url 'main:index' %}" class="back-link">← 메인으로 돌아가기</a>
+    
+    <div class="analysis-header">
+        <h1>📊 기출분석</h1>
+        <div class="header-deco"></div>
+        <p>과목별 기출문제의 관련 용어를 분석합니다</p>
+    </div>
+
+    <div class="subject-grid">
+        {% for subject in subjects %}
+        <a href="{% url 'study:analysis_subject' subject.id %}" class="subject-card">
+            <div class="subject-icon">
+                {% if subject.name == '수목병리학' %}🦠
+                {% elif subject.name == '수목해충학' %}🐛
+                {% elif subject.name == '수목생리학' %}🌿
+                {% elif subject.name == '산림토양학' %}🪨
+                {% elif subject.name == '수목관리학' %}🛠️
+                {% else %}📚{% endif %}
+            </div>
+            <div class="subject-name">{{ subject.name }}</div>
+            <div class="subject-desc">기출문제 용어 분석</div>
+        </a>
+        {% empty %}
+        <div style="text-align: center; color: #888; grid-column: 1/-1;">등록된 과목이 없습니다.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const header = document.querySelector('header');
+    if (header) {
+        header.style.display = 'none';
+        header.remove();
+    }
+});
+</script>
+{% endblock %}
