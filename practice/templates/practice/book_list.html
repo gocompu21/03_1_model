@@ -86,11 +86,12 @@
 </style>
 
 <div class="practice-container">
-    <h1 class="page-title">📚 기본서 연습문제</h1>
+    <h1 class="page-title">📚 기본서 내용이해 및 연습문제 학습</h1>
     
     {% if books %}
     <div class="book-grid">
         {% for book in books %}
+        {% if book.subject == '수목병리학' %}
         <a href="{% url 'practice:chapter_list' book.id %}" class="book-card">
             <span class="book-subject">{{ book.subject }}</span>
             <div class="book-name">{{ book.name }}</div>
@@ -98,6 +99,13 @@
                 {{ book.chapters.count }}개 목차
             </div>
         </a>
+        {% else %}
+        <div class="book-card" style="opacity: 0.5; cursor: not-allowed; pointer-events: none;">
+            <span class="book-subject" style="background: #e0e0e0; color: #999;">{{ book.subject }}</span>
+            <div class="book-name" style="color: #999;">{{ book.name }}</div>
+            <div class="book-stats">준비 중</div>
+        </div>
+        {% endif %}
         {% endfor %}
     </div>
     {% else %}
@@ -108,11 +116,6 @@
         {% endif %}
     </div>
     {% endif %}
-    
-    {% if user.is_staff %}
-    <div style="margin-top: 30px; text-align: right;">
-        <a href="{% url 'practice:upload_questions' %}" class="upload-link">📤 문제 업로드</a>
-    </div>
-    {% endif %}
+
 </div>
 {% endblock %}
