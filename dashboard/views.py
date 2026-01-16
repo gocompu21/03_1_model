@@ -23,7 +23,7 @@ def index(request):
     
     # User performance data with stats
     user_stats = []
-    for user in User.objects.filter(is_active=True).exclude(is_superuser=True):
+    for user in User.objects.filter(is_active=True):
         exam_count = UserExamAttempt.objects.filter(user=user).count()
         study_count = StudyViewLog.objects.filter(user=user).count()
         avg_score = UserExamAttempt.objects.filter(user=user).aggregate(
