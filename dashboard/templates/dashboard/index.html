@@ -264,6 +264,7 @@
                 <thead>
                     <tr>
                         <th>상태</th>
+                        <th>최근 로그인</th>
                         <th>마지막 활동</th>
                         <th>사용자</th>
                         <th>시험 응시</th>
@@ -290,6 +291,9 @@
                             {% endif %}
                         </td>
                         <td style="font-size: 0.85rem;">
+                            {{ user.last_login|date:"m/d H:i"|default:"-" }}
+                        </td>
+                        <td style="font-size: 0.85rem;">
                             {{ user.last_activity|date:"m/d H:i"|default:"-" }}
                             <span style="color: #888; font-size: 0.75rem;">{{ user.last_activity_type }}</span>
                         </td>
@@ -302,7 +306,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
+                        <td colspan="9" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

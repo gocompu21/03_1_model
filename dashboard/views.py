@@ -61,6 +61,7 @@ def index(request):
         user_stats.append({
             'username': user.username,
             'first_name': user.first_name,
+            'last_login': user.last_login,
             'exam_count': exam_count,
             'study_count': study_count,
             'review_count': review_count,
