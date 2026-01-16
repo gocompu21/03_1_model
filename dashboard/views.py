@@ -70,6 +70,7 @@ def index(request):
             'total_minutes_raw': total_minutes,  # For sorting
             'is_online': is_online,
             'last_activity': last_session.last_activity if last_session else None,
+            'last_page_name': last_session.last_page_name if last_session else '',
             'last_activity_type': last_activity_type,
         })
     

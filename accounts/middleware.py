@@ -1,6 +1,36 @@
 """세션 활동 추적 미들웨어"""
 from django.utils import timezone
 from .models import UserSession
+import re
+
+
+def get_page_name(path):
+    """URL 경로를 한글 페이지 이름으로 변환"""
+    # URL 패턴 매핑
+    patterns = [
+        (r'^/study/(\d+)/$', lambda m: f"기출학습 {m.group(1)}회"),
+        (r'^/study/(\d+)/(\d+)/$', lambda m: f"기출학습 {m.group(1)}회 {m.group(2)}번"),
+        (r'^/study/analysis/', lambda m: "기출분석"),
+        (r'^/mock_exam/take/', lambda m: "모의고사 응시"),
+        (r'^/mock_exam/', lambda m: "모의고사"),
+        (r'^/exam/take/', lambda m: "시험 응시"),
+        (r'^/practice/', lambda m: "기본서 학습"),
+        (r'^/glossary/', lambda m: "찾아보기"),
+        (r'^/mypage/', lambda m: "마이페이지"),
+        (r'^/dashboard/', lambda m: "대시보드"),
+        (r'^/review/', lambda m: "복습"),
+        (r'^/chat/', lambda m: "AI 채팅"),
+        (r'^/bbs/', lambda m: "게시판"),
+        (r'^/$', lambda m: "메인"),
+        (r'^/admin/', lambda m: "관리자"),
+    ]
+    
+    for pattern, handler in patterns:
+        match = re.match(pattern, path)
+        if match:
+            return handler(match)
+    
+    return ""
 
 
 class SessionTrackingMiddleware:
@@ -37,9 +67,15 @@ class SessionTrackingMiddleware:
                 ).first()
                 
                 if session:
+                    # 페이지 이름 감지
+                    page_name = get_page_name(request.path)
+                    if page_name:
+                        session.last_page_name = page_name
+                    
                     # last_activity 업데이트 (auto_now 필드는 save()로 자동 업데이트)
-                    session.save(update_fields=['last_activity'])
+                    session.save(update_fields=['last_activity', 'last_page_name'])
             except Exception:
                 pass  # 에러 발생 시 무시
         
         return response
+

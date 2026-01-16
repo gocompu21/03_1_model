@@ -9,6 +9,7 @@ class UserSession(models.Model):
     session_key = models.CharField(max_length=40, unique=True)
     login_time = models.DateTimeField(auto_now_add=True)
     last_activity = models.DateTimeField(auto_now=True)
+    last_page_name = models.CharField(max_length=100, blank=True, default='', verbose_name="마지막 페이지")
     logout_time = models.DateTimeField(null=True, blank=True)
     ip_address = models.GenericIPAddressField(null=True, blank=True)
     user_agent = models.CharField(max_length=500, blank=True)
