@@ -265,6 +265,7 @@
                     <tr>
                         <th>상태</th>
                         <th>최근 로그인</th>
+                        <th>로그아웃</th>
                         <th>활동시각</th>
                         <th>활동내용</th>
                         <th>사용자</th>
@@ -295,6 +296,9 @@
                             {{ user.last_login|date:"m/d H:i"|default:"-" }}
                         </td>
                         <td style="font-size: 0.85rem;">
+                            {{ user.last_logout|date:"m/d H:i"|default:"-" }}
+                        </td>
+                        <td style="font-size: 0.85rem;">
                             {{ user.last_activity|date:"m/d H:i"|default:"-" }}
                         </td>
                         <td style="font-size: 0.85rem;">
@@ -309,7 +313,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="10" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
+                        <td colspan="11" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -62,6 +62,7 @@ def index(request):
             'username': user.username,
             'first_name': user.first_name,
             'last_login': user.last_login,
+            'last_logout': last_session.logout_time if last_session else None,
             'exam_count': exam_count,
             'study_count': study_count,
             'review_count': review_count,
