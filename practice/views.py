@@ -330,8 +330,14 @@ def content_create(request):
             author=request.user,
         )
         
-        messages.success(request, '컨텐츠가 저장되었습니다.')
-        return redirect('practice:chapter_detail', chapter_id=chapter.id)
+        # 같은 페이지에서 저장 완료 표시 (다른 페이지로 메시지 전파 방지)
+        return render(request, 'practice/chapter_detail.html', {
+            'chapter': chapter,
+            'content': chapter.content,
+            'questions': PracticeQuestion.objects.filter(chapter=chapter).order_by('number'),
+            'siblings': [],
+            'saved': True,
+        })
     
     return render(request, 'practice/content_form.html', {
         'books': books,
@@ -356,8 +362,14 @@ def content_update(request, content_id):
         content.content = content_text
         content.save()
         
-        messages.success(request, '컨텐츠가 수정되었습니다.')
-        return redirect('practice:chapter_detail', chapter_id=content.chapter.id)
+        # 같은 페이지에서 수정 완료 표시
+        return render(request, 'practice/chapter_detail.html', {
+            'chapter': content.chapter,
+            'content': content,
+            'questions': PracticeQuestion.objects.filter(chapter=content.chapter).order_by('number'),
+            'siblings': [],
+            'saved': True,
+        })
     
     return render(request, 'practice/content_form.html', {
         'content': content,
