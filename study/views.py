@@ -13,9 +13,59 @@ def index(request):
     """
     List all available exam rounds and subjects.
     """
+    from exam.models import TopicQuestionSet
+    from collections import defaultdict
+    
     exams = Exam.objects.exclude(round_number=0).order_by("round_number")
     subjects = Subject.objects.all().order_by("code")
-    return render(request, "study/index.html", {"exams": exams, "subjects": subjects})
+    rounds = [e.round_number for e in exams]
+
+    # Topic Tab Logic
+    subject_id = request.GET.get('subject')
+    active_tab = 'round' # Default tab
+    
+    if subject_id:
+        active_tab = 'topic'
+        try:
+            selected_subject = Subject.objects.get(id=subject_id)
+        except Subject.DoesNotExist:
+            selected_subject = subjects.filter(name__contains='수목병리').first() or subjects.first()
+    else:
+        # Default topic subject if tab is requested via other means (e.g. ?tab=topic)
+        if request.GET.get('tab') == 'topic':
+            active_tab = 'topic'
+        selected_subject = subjects.filter(name__contains='수목병리').first() or subjects.first()
+            
+    # Filter topic sets
+    topic_sets_qs = TopicQuestionSet.objects.filter(
+        is_public=True,
+        subject=selected_subject
+    ).prefetch_related('items__question__exam').order_by('order', '-created_at')
+    
+    topic_sets_data = []
+    for ts in topic_sets_qs:
+        round_counts = defaultdict(int)
+        for item in ts.items.all():
+            if item.question and item.question.exam:
+                round_counts[item.question.exam.round_number] += 1
+        
+        topic_sets_data.append({
+            'id': ts.id,
+            'title': ts.title,
+            'description': ts.description,
+            'total': ts.items.count(),
+            'created_at': ts.created_at,
+            'round_counts': dict(round_counts)
+        })
+    
+    return render(request, "study/index.html", {
+        "exams": exams, 
+        "subjects": subjects,
+        "rounds": rounds,
+        "topic_sets": topic_sets_data,
+        "selected_subject": selected_subject,
+        "active_tab": active_tab,
+    })
 
 
 def detail(request, round_number):
@@ -452,3 +502,401 @@ def analysis_round(request, subject_id, round_number):
     }
     return render(request, "study/analysis_round.html", context)
 
+
+@login_required
+def topic_solve(request, set_id):
+    """주제별 문제집 풀기"""
+    from exam.models import TopicQuestionSet, UserTopicSetAttempt, UserTopicQuestionResult
+    from django.utils import timezone
+    from django.shortcuts import redirect
+    
+    topic_set = get_object_or_404(TopicQuestionSet, id=set_id)
+    
+    # 문제 가져오기 (순서대로)
+    items = topic_set.items.select_related('question__exam', 'question__subject').order_by('order')
+    questions = [item.question for item in items]
+    
+    if request.method == 'POST':
+        # 채점 및 결과 저장
+        attempt = UserTopicSetAttempt.objects.create(
+            user=request.user,
+            question_set=topic_set
+        )
+        
+        correct_count = 0
+        for q in questions:
+            selected_choice = request.POST.get(f'question_{q.id}')
+            if selected_choice:
+                selected_choice = int(selected_choice)
+                is_correct = selected_choice in q.answer
+                if is_correct:
+                    correct_count += 1
+                
+                UserTopicQuestionResult.objects.create(
+                    attempt=attempt,
+                    question=q,
+                    selected_choice=selected_choice,
+                    is_correct=is_correct
+                )
+                
+                # 오답 시 복습 스케줄 등록
+                if not is_correct:
+                    from mypage.models import ReviewSchedule
+                    
+                    review_schedule, created = ReviewSchedule.objects.get_or_create(
+                        user=request.user,
+                        question=q,
+                        defaults={
+                            'last_wrong_date': timezone.now(),
+                            'review_count': 0,
+                            'next_review_date': timezone.localdate(),
+                            'is_mastered': False,
+                        }
+                    )
+                    if not created:
+                        review_schedule.review_count = 0
+                        review_schedule.last_wrong_date = timezone.now()
+                        review_schedule.is_mastered = False
+                        review_schedule.next_review_date = review_schedule.calculate_next_review_date()
+                        review_schedule.save()
+        
+        attempt.total_score = correct_count
+        attempt.end_time = timezone.now()
+        attempt.save()
+        
+        return redirect('study:topic_result', set_id=set_id, attempt_id=attempt.id)
+    
+    return render(request, 'study/topic_solve.html', {
+        'topic_set': topic_set,
+        'questions': questions
+    })
+
+
+@login_required
+def topic_result(request, set_id, attempt_id):
+    """주제별 문제집 결과"""
+    from exam.models import TopicQuestionSet, UserTopicSetAttempt, UserTopicQuestionResult
+    
+    topic_set = get_object_or_404(TopicQuestionSet, id=set_id)
+    attempt = get_object_or_404(UserTopicSetAttempt, id=attempt_id)
+    results = UserTopicQuestionResult.objects.filter(attempt=attempt).select_related('question__exam', 'question__subject')
+    
+    total_attempted = results.count()
+    score_100 = (attempt.total_score / total_attempted * 100) if total_attempted > 0 else 0
+    
+    return render(request, 'study/topic_result.html', {
+        'topic_set': topic_set,
+        'attempt': attempt,
+        'results': results,
+        'score_100': score_100,
+        'total_attempted': total_attempted
+    })
+
+
+@login_required
+def topic_set_list(request):
+    """주제별 문제집 목록"""
+    from exam.models import TopicQuestionSet, Subject, Exam
+    from collections import defaultdict
+    
+    subjects = Subject.objects.all().order_by('code')
+    exams = Exam.objects.all().order_by('round_number')
+    rounds = [e.round_number for e in exams]
+    
+    # 과목 필터 (기본값: 수목병리학)
+    subject_id = request.GET.get('subject')
+    if subject_id:
+        try:
+            selected_subject = Subject.objects.get(id=subject_id)
+        except Subject.DoesNotExist:
+            selected_subject = subjects.filter(name__contains='수목병리').first() or subjects.first()
+    else:
+        selected_subject = subjects.filter(name__contains='수목병리').first() or subjects.first()
+    
+    # 해당 과목의 문제집 필터링
+    topic_sets = TopicQuestionSet.objects.filter(
+        is_public=True,
+        subject=selected_subject
+    ).prefetch_related('items__question__exam').order_by('order', '-created_at')
+    
+    # 각 문제집의 회차별 문제 수 계산
+    topic_set_data = []
+    for ts in topic_sets:
+        round_counts = defaultdict(int)
+        for item in ts.items.all():
+            if item.question and item.question.exam:
+                round_counts[item.question.exam.round_number] += 1
+        
+        topic_set_data.append({
+            'id': ts.id,
+            'title': ts.title,
+            'description': ts.description,
+            'total': ts.items.count(),
+            'round_counts': dict(round_counts)
+        })
+    
+    return render(request, 'study/topic_set_list.html', {
+        'topic_sets': topic_set_data,
+        'subjects': subjects,
+        'selected_subject': selected_subject,
+        'rounds': rounds
+    })
+
+
+@login_required
+def topic_set_create(request):
+    """주제별 문제집 생성 페이지"""
+    from exam.models import Exam, Subject
+    
+    if not request.user.is_staff:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("관리자만 접근 가능합니다.")
+    
+    exams = Exam.objects.all().order_by('round_number')
+    subjects = Subject.objects.all().order_by('code')
+    
+    return render(request, 'study/topic_set_create.html', {
+        'exams': exams,
+        'subjects': subjects
+    })
+
+
+@login_required
+def topic_set_edit(request, set_id):
+    """주제별 문제집 수정 페이지"""
+    from exam.models import Exam, Subject, TopicQuestionSet
+    import json
+    
+    if not request.user.is_staff:
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("관리자만 접근 가능합니다.")
+    
+    topic_set = get_object_or_404(TopicQuestionSet, id=set_id)
+    exams = Exam.objects.all().order_by('round_number')
+    subjects = Subject.objects.all().order_by('code')
+    
+    # 초기 카트 데이터 생성
+    initial_cart = []
+    from django.utils.html import strip_tags
+    
+    for item in topic_set.items.select_related('question', 'question__exam').order_by('order'):
+        q = item.question
+        # 텍스트 정리
+        text = strip_tags(q.content).strip()
+        text = " ".join(text.split()) # 연속된 공백 제거
+        text = text[:30] + '...' if len(text) > 30 else text
+        
+        initial_cart.append({
+            'id': q.id,
+            'text': text,
+            'round': q.exam.round_number,
+            'number': q.number
+        })
+    
+    return render(request, 'study/topic_set_create.html', {
+        'exams': exams,
+        'subjects': subjects,
+        'topic_set': topic_set,
+        'initial_cart_json': json.dumps(initial_cart)
+    })
+
+
+@login_required
+def delete_topic_set(request, set_id):
+    """주제별 문제집 삭제 (AJAX)"""
+    from exam.models import TopicQuestionSet
+    
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': '관리자만 삭제할 수 있습니다.'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        topic_set = TopicQuestionSet.objects.get(id=set_id)
+        topic_set.delete()
+        return JsonResponse({'success': True})
+    except TopicQuestionSet.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '문제집을 찾을 수 없습니다.'})
+
+
+@login_required
+def api_exam_questions(request):
+    """특정 회차의 문제 목록 반환 (JSON)"""
+    from exam.models import Exam, Question
+    import re
+    
+    def strip_html(text):
+        """HTML 태그 제거"""
+        return re.sub(r'<[^>]+>', '', text)
+    
+    exam_id = request.GET.get('exam_id')
+    if not exam_id:
+        return JsonResponse({'questions': []})
+    
+    questions = Question.objects.filter(exam_id=exam_id).order_by('number')
+    data = []
+    for q in questions:
+        clean_content = strip_html(q.content)
+        if len(clean_content) > 40:
+            full_text = f"{q.number}번 {clean_content[:40]}..."
+        else:
+            full_text = f"{q.number}번 {clean_content}"
+        data.append({
+            'id': q.id,
+            'number': q.number,
+            'full_text': full_text
+        })
+    
+    return JsonResponse({'questions': data})
+
+
+@login_required
+def api_save_topic_set(request):
+    """주제별 문제집 저장 (AJAX)"""
+    from exam.models import TopicQuestionSet, TopicQuestionSetItem, Question, Subject
+    
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': '관리자만 저장할 수 있습니다.'}, status=403)
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        description = data.get('description', '').strip()
+        question_ids = data.get('question_ids', [])
+        subject_id = data.get('subject_id')
+        set_id = data.get('set_id') # 수정 시 ID
+        
+        if not title:
+            return JsonResponse({'success': False, 'error': '제목을 입력해주세요.'})
+        
+        if not question_ids:
+            return JsonResponse({'success': False, 'error': '문제를 선택해주세요.'})
+        
+        # 과목 가져오기
+        subject = None
+        if subject_id:
+            try:
+                subject = Subject.objects.get(id=subject_id)
+            except Subject.DoesNotExist:
+                pass
+        
+        if set_id:
+            # 수정 모드
+            topic_set = get_object_or_404(TopicQuestionSet, id=set_id)
+            topic_set.title = title
+            topic_set.description = description
+            topic_set.subject = subject
+            topic_set.save()
+            
+            # 기존 아이템 삭제 후 재생성 (순서 재정렬 위해)
+            TopicQuestionSetItem.objects.filter(question_set=topic_set).delete()
+        else:
+            # 생성 모드
+            topic_set = TopicQuestionSet.objects.create(
+                title=title,
+                description=description,
+                subject=subject,
+                created_by=request.user,
+                is_public=True
+            )
+        
+        # 문제 추가 (순서 유지)
+        for order, question_id in enumerate(question_ids, start=1):
+            try:
+                question = Question.objects.get(id=question_id)
+                TopicQuestionSetItem.objects.create(
+                    question_set=topic_set,
+                    question=question,
+                    order=order
+                )
+            except Question.DoesNotExist:
+                pass
+        
+        return JsonResponse({'success': True, 'topic_set_id': topic_set.id})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def api_reorder_topic_set(request):
+    """주제별 문제집 순서 변경 API"""
+    from exam.models import TopicQuestionSet
+    import json
+    
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': '관리자만 권한이 있습니다.'}, status=403)
+        
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+        
+    try:
+        data = json.loads(request.body)
+        set_id = data.get('set_id')
+        direction = data.get('direction') # 'up' or 'down'
+        
+        if not set_id or not direction:
+            return JsonResponse({'success': False, 'error': 'Missing parameters'})
+            
+        target_set = get_object_or_404(TopicQuestionSet, id=set_id)
+        
+        # 필터링 조건 확인 (과목 등)
+        subject_id = data.get('subject_id')
+        
+        qs = TopicQuestionSet.objects.filter(is_public=True)
+        if subject_id:
+            qs = qs.filter(subject_id=subject_id)
+            
+        # 정렬 기준대로 가져오기
+        sets = list(qs.order_by('order', '-created_at'))
+        
+        # Order 초기화가 안되어있으면 (모두 0이면) 초기화
+        if all(s.order == 0 for s in sets) and len(sets) > 1:
+            for idx, s in enumerate(sets):
+                s.order = (idx + 1) * 10
+                s.save()
+            # 다시 로드
+            sets = list(qs.order_by('order', '-created_at'))
+            target_set.refresh_from_db()
+            
+        current_idx = -1
+        for i, s in enumerate(sets):
+            if s.id == target_set.id:
+                current_idx = i
+                break
+        
+        if current_idx == -1:
+            return JsonResponse({'success': False, 'error': 'Target not found in list'})
+            
+        swap_idx = -1
+        if direction == 'up':
+            if current_idx > 0:
+                swap_idx = current_idx - 1
+        elif direction == 'down':
+            if current_idx < len(sets) - 1:
+                swap_idx = current_idx + 1
+                
+        if swap_idx != -1:
+            swap_set = sets[swap_idx]
+            
+            # Swap orders
+            if target_set.order == swap_set.order:
+                for idx, s in enumerate(sets):
+                    s.order = (idx + 1) * 10
+                    s.save()
+                target_set = sets[current_idx]
+                swap_set = sets[swap_idx]
+            
+            target_set.order, swap_set.order = swap_set.order, target_set.order
+            target_set.save()
+            swap_set.save()
+            
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Cannot move further'})
+            
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

@@ -85,12 +85,14 @@ class TopicQuestionSet(models.Model):
     """주제별 문제집"""
     title = models.CharField(max_length=200, verbose_name="문제집 제목")
     description = models.TextField(blank=True, verbose_name="설명")
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True, related_name='topic_sets', verbose_name="과목")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='topic_sets')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
     is_public = models.BooleanField(default=True, verbose_name="공개 여부")
+    order = models.IntegerField(default=0, verbose_name="정렬 순서")
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['order', '-created_at']
         verbose_name = "주제별 문제집"
         verbose_name_plural = "주제별 문제집"
     

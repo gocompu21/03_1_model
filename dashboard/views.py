@@ -111,14 +111,16 @@ def index(request):
 def print_material(request):
     """자료 인쇄 페이지"""
     from practice.models import Book
-    from exam.models import Exam
+    from exam.models import Exam, Subject
     
     books = Book.objects.all().order_by('subject', 'name')
     exams = Exam.objects.all().order_by('round_number')
+    subjects = Subject.objects.all().order_by('code')
     
     context = {
         'books': books,
         'exams': exams,
+        'subjects': subjects,
         'page_title': '자료 인쇄'
     }
     return render(request, 'dashboard/print.html', context)
@@ -245,6 +247,7 @@ def save_topic_set(request):
         title = data.get('title', '').strip()
         description = data.get('description', '').strip()
         question_ids = data.get('question_ids', [])
+        subject_id = data.get('subject_id')
         
         if not title:
             return JsonResponse({'success': False, 'error': '제목을 입력해주세요.'})
@@ -252,10 +255,20 @@ def save_topic_set(request):
         if not question_ids:
             return JsonResponse({'success': False, 'error': '문제를 선택해주세요.'})
         
+        # 과목 가져오기
+        from exam.models import Subject
+        subject = None
+        if subject_id:
+            try:
+                subject = Subject.objects.get(id=subject_id)
+            except Subject.DoesNotExist:
+                pass
+        
         # 문제집 생성
         topic_set = TopicQuestionSet.objects.create(
             title=title,
             description=description,
+            subject=subject,
             created_by=request.user,
             is_public=True
         )
@@ -378,3 +391,23 @@ def topic_set_result(request, attempt_id):
         'score_100': score_100,
         'total_attempted': total_attempted
     })
+
+
+@login_required
+@staff_member_required
+def delete_topic_set(request, set_id):
+    """주제별 문제집 삭제 (AJAX)"""
+    from django.http import JsonResponse
+    from exam.models import TopicQuestionSet
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        topic_set = TopicQuestionSet.objects.get(id=set_id)
+        topic_set.delete()
+        return JsonResponse({'success': True})
+    except TopicQuestionSet.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '문제집을 찾을 수 없습니다.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

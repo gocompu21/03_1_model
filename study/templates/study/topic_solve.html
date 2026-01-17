@@ -1,0 +1,715 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load markdown_extras %}
+{% load glossary_tags %}
+
+{% block content %}
+<style>
+    /* Global Background */
+    body {
+        background-color: #f8f6e6;
+        margin: 0;
+        font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    /* Hide global header only on this page */
+    header {
+        display: none !important;
+    }
+
+    .study-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 60px);
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #f8f6e6;
+    }
+
+    /* Top Bar similar to detail.html but simplified for Topic Set */
+    .tabs-header {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        background: white;
+        border-bottom: 2px solid #e0e0e0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        padding: 15px 20px;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .topic-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #2c5f2d;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .tab-btn {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        background: #fdfdfd;
+        font-size: 0.85em;
+        font-weight: 600;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        text-decoration: none;
+    }
+
+    .tab-btn:hover {
+        background-color: #f0f7f4;
+        border-color: #97bc62;
+        color: #2c5f2d;
+    }
+
+    /* Content Area */
+    .content-area {
+        flex: 1;
+        padding: 20px 0;
+        overflow-y: auto;
+    }
+
+    .question-card {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .q-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .q-badge {
+        background: #eee;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 0.9em;
+        color: #555;
+    }
+
+    .q-content {
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    .q-choices {
+        padding-left: 20px;
+        margin-bottom: 20px;
+    }
+
+    .choice-item {
+        margin-bottom: 8px;
+        font-size: 1.05em;
+        padding: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .choice-item:hover {
+        background-color: #f0f7f4;
+    }
+
+    .choice-item.selected {
+        background-color: #e8f5e9;
+    }
+
+    .choice-num {
+        display: inline-block;
+        width: auto;
+        height: auto;
+        border: none;
+        border-radius: 0;
+        text-align: center;
+        line-height: 1;
+        margin-right: 5px;
+        font-size: 1.1em;
+        background: transparent;
+        position: relative;
+    }
+
+    /* Check mark on selected choice */
+    .choice-item.selected .choice-num::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-35%, -115%) scale(2.5);
+        width: 100%;
+        height: 100%;
+        background-image: url("{% static 'exam/images/check_mark_black.png' %}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        mix-blend-mode: multiply;
+        filter: contrast(1.5) brightness(1.1);
+        pointer-events: none;
+    }
+
+    /* Correct answer circle (shown when explanation is visible) */
+    .choice-num.correct::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 26px;
+        height: 26px;
+        border: 3px solid #d93025;
+        border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+        transform: translate(-50%, -50%) rotate(-5deg);
+        pointer-events: none;
+    }
+
+    /* Explanation Section */
+    .explanation-section {
+        margin-top: 30px;
+        background-color: #fdfdfd;
+        border: 1px dashed #bbb;
+        border-radius: 5px;
+        padding: 20px;
+    }
+
+    .exp-title {
+        font-weight: bold;
+        color: #d35400;
+        margin-bottom: 15px;
+        font-size: 1.1em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .exp-text {
+        font-size: 1.0em;
+        line-height: 1.7;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .text-blue { color: blue; font-weight: bold; }
+    .text-red { color: red; font-weight: bold; }
+
+    .infographic-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .infographic-container img {
+        max-width: 100%;
+        border: 2px solid #333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    /* Image Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.8);
+    }
+    .modal-content {
+        margin: 5% auto;
+        display: block;
+        width: 80%;
+        max-width: 1000px;
+    }
+    .close-modal {
+        position: absolute;
+        top: 20px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+    
+    /* Reset Markdown List Styles */
+    .markdown-content ol, .markdown-content ul {
+        list-style: none;
+        padding-left: 0;
+        margin: 0;
+    }
+    .markdown-content li {
+        margin-bottom: 0.5em;
+    }
+</style>
+
+<div class="study-container">
+    <div class="tabs-header">
+        <div class="topic-title">
+            📚 {{ topic_set.title }}
+        </div>
+
+        <!-- Expand All Button -->
+        <button class="tab-btn" id="expand-all-btn" onclick="toggleAllExplanations()" style="background-color: #fff3cd; color: #856404;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="expand-all-text">전체 펼치기</span>
+        </button>
+
+        <!-- Back Button -->
+        <a href="{% url 'study:index' %}?tab=topic&subject={{ topic_set.subject.id }}" class="tab-btn back-btn" style="background-color: #f7f7f7; color: #555;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right:5px;">
+                <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>목록으로</span>
+        </a>
+    </div>
+
+    <div class="content-area" id="question-list">
+        {% for q in questions %}
+        <div class="question-card" data-subject="{{ q.subject.name }}">
+            <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
+                <div style="margin-bottom: 10px;">
+                    <span class="q-badge" style="float: right;">{{ q.subject.name }}</span>
+                    <!-- Show Round info if mixed set -->
+                    <span class="q-badge" style="float: right; margin-right: 5px; background: #e3f2fd; color: #1976d2;">
+                        {{ q.exam.round_number }}회 {{ q.number }}번
+                    </span>
+                </div>
+                <div class="q-content">
+                    {{ forloop.counter }}. {{ q.content|safe|linebreaksbr }}
+                </div>
+            </div>
+
+            {% if q.image %}
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="{{ q.image.url }}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc;">
+            </div>
+            {% endif %}
+
+            <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
+                <div class="choice-item" onclick="selectChoice(this, 1)">
+                    <span class="choice-num" data-choice="1">①</span> {{ q.choice1|safe }}
+                </div>
+                <div class="choice-item" onclick="selectChoice(this, 2)">
+                    <span class="choice-num" data-choice="2">②</span> {{ q.choice2|safe }}
+                </div>
+                <div class="choice-item" onclick="selectChoice(this, 3)">
+                    <span class="choice-num" data-choice="3">③</span> {{ q.choice3|safe }}
+                </div>
+                <div class="choice-item" onclick="selectChoice(this, 4)">
+                    <span class="choice-num" data-choice="4">④</span> {{ q.choice4|safe }}
+                </div>
+                <div class="choice-item" onclick="selectChoice(this, 5)">
+                    <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5|safe }}
+                </div>
+            </div>
+
+            <!-- Toggle Button for Explanation -->
+            <div style="margin-top: 10px; text-align: right; display: flex; justify-content: flex-end; gap: 15px; align-items: center;">
+                <!-- Listen to Explanation Button -->
+                <button type="button" class="tts-btn" data-question-id="{{ q.id }}" onclick="toggleTTS(this, '{{ q.id }}')"
+                    style="background:none; border:none; cursor:pointer; color:#2196F3; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="tts-icon-play">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                    </svg>
+                    <span class="tts-text">해설 듣기</span>
+                </button>
+                
+                <!-- TTS Speed -->
+                <select class="tts-speed-selector" onchange="setTTSSpeed(this.value)"
+                    style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.85em; color: #555; cursor: pointer; background: #f9f9f9;">
+                    <option value="0.8">0.8x</option>
+                    <option value="1" selected>1.0x</option>
+                    <option value="1.2">1.2x</option>
+                    <option value="1.5">1.5x</option>
+                </select>
+                
+                <!-- View Explanation Button -->
+                <button type="button" onclick="toggleExplanation('exp-{{ q.id }}')"
+                    style="background:none; border:none; cursor:pointer; color:#555; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        <line x1="11" y1="8" x2="11" y2="14"></line>
+                        <line x1="8" y1="11" x2="14" y2="11"></line>
+                    </svg>
+                    해설 보기
+                </button>
+            </div>
+
+            <div id="exp-{{ q.id }}" class="explanation-section" style="display: none;">
+                <div class="exp-title">
+                    <span>💡 정답 및 해설</span>
+                </div>
+
+                <div class="exp-tabs" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #eee;">
+                    <button class="exp-tab-btn active" onclick="switchExpTab(this, 'textbook')"
+                        style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #d35400; border-bottom: 2px solid #d35400; cursor: pointer;">기본서 해설</button>
+                    <button class="exp-tab-btn" onclick="switchExpTab(this, 'general')"
+                        style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">일반 해설</button>
+                    <button class="exp-tab-btn" onclick="switchExpTab(this, 'narration')"
+                        style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">🎙️ 나레이션</button>
+                </div>
+
+                <div class="exp-content-area">
+                    <div class="exp-content textbook-content" style="display: block;">
+                        <div class="exp-text markdown-content">
+                            {{ q.textbook_chat|markdown|safe }}
+                        </div>
+                        {% if not q.textbook_chat %}
+                        <p style="color: #999; font-style: italic;">기본서 해설이 없습니다.</p>
+                        {% endif %}
+                    </div>
+                    <div class="exp-content narration-content" style="display: none;">
+                        <div class="exp-text markdown-content" style="line-height: 1.8; font-size: 1.05em;">
+                            {{ q.narration|markdown|safe }}
+                        </div>
+                        {% if not q.narration %}
+                        <p style="color: #999; font-style: italic;">나레이션이 없습니다.</p>
+                        {% endif %}
+                    </div>
+                    <div class="exp-content general-content" style="display: none;">
+                        <div class="exp-text markdown-content">
+                            {{ q.general_chat|markdown|safe }}
+                        </div>
+                        {% if not q.general_chat %}
+                        <p style="color: #999; font-style: italic;">일반 해설이 없습니다.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if q.infographic_image %}
+                <div class="infographic-container">
+                    <p style="text-align: center; font-weight: bold; color: #555; margin-bottom: 5px;">[비주얼 암기 카드]</p>
+                    <img src="{{ q.infographic_image.url }}" onclick="openModal(this.src)">
+                </div>
+                {% endif %}
+
+                <!-- Related Terms -->
+                {% get_relevant_terms q q.subject as related_terms %}
+                {% if related_terms %}
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">
+                    <h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                        {% for term in related_terms %}
+                        <a href="{% url 'glossary:term_detail' term.pk %}" target="glossary_popup" 
+                           style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; border: 1px solid #2d6a4f; 
+                           {% if term.reference_count > 0 %}
+                           border-right-width: 5px; 
+                           border-right-color: {% if term.reference_count >= 10 %}#d32f2f{% elif term.reference_count >= 5 %}#f57c00{% else %}#1976d2{% endif %};
+                           {% endif %}
+                           transition: all 0.2s;">
+                            {{ term.word }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Close button -->
+                <div style="text-align: center; margin-top: 10px; cursor: pointer;" onclick="toggleExplanation('exp-{{ q.id }}')" title="해설 접기">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal -->
+<div id="imgModal" class="modal">
+    <span class="close-modal" onclick="closeModal()">&times;</span>
+    <img class="modal-content" id="modalImg">
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Highlight logic
+        const expTexts = document.querySelectorAll('.markdown-content');
+        expTexts.forEach(div => {
+            let html = div.innerHTML;
+            html = html.replace(/\(옳음\)/g, '<span class="text-blue">(옳음)</span>');
+            html = html.replace(/\(그름\)/g, '<span class="text-red">(그름)</span>');
+            div.innerHTML = html;
+        });
+    });
+
+    // Select Choice
+    function selectChoice(choiceItem, choiceNum) {
+        const parent = choiceItem.closest('.q-choices');
+        parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
+        choiceItem.classList.add('selected');
+    }
+
+    // Toggle Explanation
+    function toggleExplanation(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            const isHidden = el.style.display === 'none';
+            el.style.display = isHidden ? 'block' : 'none';
+            
+            // Find the parent question card
+            const card = el.closest('.question-card');
+            if (card && isHidden) {
+                // Show correct answer circle
+                const qChoices = card.querySelector('.q-choices');
+                const correctAnswerStr = qChoices.getAttribute('data-answer');
+                const correctAnswers = JSON.parse(correctAnswerStr);
+                qChoices.querySelectorAll('.choice-num').forEach(cn => {
+                    cn.classList.remove('correct');
+                    const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                    if (correctAnswers.includes(choiceNum)) {
+                        cn.classList.add('correct');
+                    }
+                });
+            } else if (card && !isHidden) {
+                // Hide correct answer circle when closing
+                const qChoices = card.querySelector('.q-choices');
+                qChoices.querySelectorAll('.choice-num').forEach(cn => {
+                    cn.classList.remove('correct');
+                });
+            }
+        }
+    }
+
+    // Toggle All Explanations
+    let allExpanded = false;
+    function toggleAllExplanations() {
+        const explanations = document.querySelectorAll('.explanation-section');
+        const btn = document.getElementById('expand-all-btn');
+        const text = document.getElementById('expand-all-text');
+        
+        allExpanded = !allExpanded;
+        
+        explanations.forEach(el => {
+            el.style.display = allExpanded ? 'block' : 'none';
+        });
+        
+        // Show/hide correct answers on all questions
+        document.querySelectorAll('.q-choices').forEach(qChoices => {
+            const correctAnswerStr = qChoices.getAttribute('data-answer');
+            const correctAnswers = JSON.parse(correctAnswerStr);
+            qChoices.querySelectorAll('.choice-num').forEach(cn => {
+                const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                if (allExpanded && correctAnswers.includes(choiceNum)) {
+                    cn.classList.add('correct');
+                } else {
+                    cn.classList.remove('correct');
+                }
+            });
+        });
+        
+        if (allExpanded) {
+            text.textContent = '전체 접기';
+            btn.style.backgroundColor = '#d4edda';
+            btn.style.color = '#155724';
+        } else {
+            text.textContent = '전체 펼치기';
+            btn.style.backgroundColor = '#fff3cd';
+            btn.style.color = '#856404';
+        }
+    }
+
+    // Modal Logic
+    function openModal(src) {
+        const modal = document.getElementById('imgModal');
+        const modalImg = document.getElementById('modalImg');
+        modal.style.display = "block";
+        modalImg.src = src;
+    }
+
+    function closeModal() {
+        document.getElementById('imgModal').style.display = "none";
+    }
+
+    window.onclick = function (event) {
+        const modal = document.getElementById('imgModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    // Explanation Tab Logic
+    function switchExpTab(btn, type) {
+        const section = btn.closest('.explanation-section');
+        const buttons = section.querySelectorAll('.exp-tab-btn');
+        buttons.forEach(b => {
+            b.classList.remove('active');
+            b.style.color = '#888';
+            b.style.borderBottom = 'none';
+        });
+
+        btn.classList.add('active');
+        btn.style.color = '#d35400';
+        btn.style.borderBottom = '2px solid #d35400';
+
+        const tContent = section.querySelector('.textbook-content');
+        const gContent = section.querySelector('.general-content');
+        const nContent = section.querySelector('.narration-content');
+
+        tContent.style.display = 'none';
+        gContent.style.display = 'none';
+        nContent.style.display = 'none';
+
+        if (type === 'textbook') {
+            tContent.style.display = 'block';
+        } else if (type === 'general') {
+            gContent.style.display = 'block';
+        } else if (type === 'narration') {
+            nContent.style.display = 'block';
+        }
+    }
+
+    // TTS Logic
+    let currentAudio = null;
+    let currentTTSButton = null;
+    let isLoading = false;
+    let isPaused = false;
+    let currentPlaybackRate = 1.0;
+    
+    function setTTSSpeed(speed) {
+        currentPlaybackRate = parseFloat(speed);
+        if (currentAudio) {
+            currentAudio.playbackRate = currentPlaybackRate;
+        }
+        document.querySelectorAll('.tts-speed-selector').forEach(sel => {
+            sel.value = speed;
+        });
+    }
+    
+    function toggleTTS(btn, questionId) {
+        if (isLoading && currentTTSButton === btn) return;
+        
+        if (isPaused && currentAudio && currentTTSButton === btn) {
+            currentAudio.play();
+            isPaused = false;
+            setTTSButtonActive(btn);
+            return;
+        }
+        
+        if (currentAudio && currentTTSButton === btn && !currentAudio.paused) {
+            currentAudio.pause();
+            isPaused = true;
+            setTTSButtonPaused(btn);
+            return;
+        }
+        
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+            if (currentTTSButton) setTTSButtonInactive(currentTTSButton);
+        }
+        
+        isLoading = true;
+        currentTTSButton = btn;
+        
+        // Show loading state
+        const playIcon = btn.querySelector('.tts-icon-play');
+        const stopIcon = btn.querySelector('.tts-icon-stop');
+        const textSpan = btn.querySelector('.tts-text');
+        
+        textSpan.textContent = '로딩중...';
+        
+        // Fetch TTS
+        fetch(`/study/tts/?question_id=${questionId}`)
+            .then(response => response.blob())
+            .then(blob => {
+                const audioUrl = URL.createObjectURL(blob);
+                currentAudio = new Audio(audioUrl);
+                currentAudio.playbackRate = currentPlaybackRate;
+                
+                currentAudio.onended = function() {
+                    setTTSButtonInactive(btn);
+                    currentAudio = null;
+                    isPaused = false;
+                };
+                
+                currentAudio.play().then(() => {
+                    isLoading = false;
+                    setTTSButtonActive(btn);
+                }).catch(err => {
+                    console.error("Playback failed", err);
+                    isLoading = false;
+                    textSpan.textContent = "재생 오류";
+                    setTimeout(() => setTTSButtonInactive(btn), 2000);
+                });
+            })
+            .catch(err => {
+                console.error("TTS fetch failed", err);
+                isLoading = false;
+                textSpan.textContent = "오류 발생";
+                setTimeout(() => setTTSButtonInactive(btn), 2000);
+            });
+    }
+
+    function setTTSButtonActive(btn) {
+        const playIcon = btn.querySelector('.tts-icon-play');
+        const stopIcon = btn.querySelector('.tts-icon-stop');
+        const textSpan = btn.querySelector('.tts-text');
+        
+        playIcon.style.display = 'none';
+        stopIcon.style.display = 'inline-block';
+        textSpan.textContent = '중지';
+        btn.style.color = '#d32f2f';
+    }
+
+    function setTTSButtonPaused(btn) {
+        const playIcon = btn.querySelector('.tts-icon-play');
+        const stopIcon = btn.querySelector('.tts-icon-stop');
+        const textSpan = btn.querySelector('.tts-text');
+        
+        playIcon.style.display = 'inline-block';
+        stopIcon.style.display = 'none';
+        textSpan.textContent = '계속 듣기';
+        btn.style.color = '#1976D2';
+    }
+
+    function setTTSButtonInactive(btn) {
+        const playIcon = btn.querySelector('.tts-icon-play');
+        const stopIcon = btn.querySelector('.tts-icon-stop');
+        const textSpan = btn.querySelector('.tts-text');
+        
+        playIcon.style.display = 'inline-block';
+        stopIcon.style.display = 'none';
+        textSpan.textContent = '해설 듣기';
+        btn.style.color = '#2196F3';
+    }
+</script>
+{% endblock %}

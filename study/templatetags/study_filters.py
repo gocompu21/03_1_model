@@ -62,3 +62,14 @@ def summarize_question(content):
     text = re.sub(r'[은는이가을를의에]$', '', text.strip())
     
     return text.strip()
+
+
+@register.filter
+def get_item(dictionary, key):
+    """
+    딕셔너리에서 키에 해당하는 값을 반환합니다.
+    사용법: {{ dictionary|get_item:key }}
+    """
+    if dictionary is None:
+        return None
+    return dictionary.get(key)

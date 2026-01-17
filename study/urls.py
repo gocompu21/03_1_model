@@ -13,4 +13,15 @@ urlpatterns = [
     path("analysis/", views.analysis_index, name="analysis_index"),
     path("analysis/<int:subject_id>/", views.analysis_subject, name="analysis_subject"),
     path("analysis/<int:subject_id>/<int:round_number>/", views.analysis_round, name="analysis_round"),
+    # 주제별 학습 URLs
+    path("topic/<int:set_id>/", views.topic_solve, name="topic_solve"),
+    path("topic/<int:set_id>/result/<int:attempt_id>/", views.topic_result, name="topic_result"),
+    # 주제별 문제집 관리
+    path("topic-sets/", views.topic_set_list, name="topic_set_list"),
+    path("topic-sets/create/", views.topic_set_create, name="topic_set_create"),
+    path("topic-sets/<int:set_id>/edit/", views.topic_set_edit, name="topic_set_edit"),
+    path("topic-sets/<int:set_id>/delete/", views.delete_topic_set, name="delete_topic_set"),
+    path("api/exam_questions/", views.api_exam_questions, name="api_exam_questions"),
+    path("api/save_topic_set/", views.api_save_topic_set, name="api_save_topic_set"),
+    path("api/reorder_topic_set/", views.api_reorder_topic_set, name="api_reorder_topic_set"),
 ]

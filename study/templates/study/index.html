@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static study_filters %}
 
 {% block content %}
 <style>
@@ -97,6 +97,7 @@
         margin-bottom: 40px;
         position: relative;
     }
+
 
     .study-header h1 {
         font-size: 2.5rem;
@@ -198,86 +199,46 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        align-items: center;
-        min-height: 120px;
+        aspect-ratio: 1/1;
         position: relative;
         overflow: hidden;
     }
 
-    .subject-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        text-align: center;
-        cursor: pointer;
-        border: 1px solid #e0e0e0;
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .round-card:hover,
-    .subject-card:hover {
+    .round-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        border-color: #97bc62;
-    }
-
-    .subject-icon {
-        width: 80px;
-        height: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 10px;
-    }
-
-    .s-icon-img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-    }
-
-    .subject-card.selected {
-        border: 2px solid #2c5f2d;
-        background-color: #f0f7f4;
-    }
-
-    /* Specific Elements */
-    .round-badge {
-        background: #f0f7f4;
-        color: #2c5f2d;
-        padding: 5px 15px;
-        border-radius: 20px;
-        font-size: 0.9em;
-        font-weight: bold;
-        margin-bottom: 15px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        border-color: #2c5f2d;
     }
 
     .round-number {
-        font-size: 2.0em;
-        font-weight: 800;
-        color: #333;
-        line-height: 1;
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #2c5f2d;
         margin-bottom: 5px;
     }
 
     .round-number span {
-        font-size: 0.4em;
-        color: #888;
-        font-weight: normal;
-        margin-left: 2px;
+        font-size: 1rem;
+        color: #666;
+    }
+
+    .round-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: #e8f5e9;
+        color: #2c5f2d;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: bold;
     }
 
     .round-action {
         margin-top: 15px;
-        color: #d93025;
-        /* Accent color */
-        font-weight: bold;
         font-size: 0.9rem;
+        color: #2c5f2d;
+        font-weight: bold;
         opacity: 0;
         transform: translateY(10px);
         transition: all 0.3s ease;
@@ -287,70 +248,186 @@
         opacity: 1;
         transform: translateY(0);
     }
-
-    .subject-name {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: #333;
-    }
-
-    /* Subject to Round Selection Area */
-    .subject-round-selection {
-        margin-top: 40px;
-        padding: 30px;
+    
+    .subject-card {
         background: white;
         border-radius: 12px;
-        border: 1px solid #ddd;
-        display: none;
-        /* Hidden until subject selected */
-    }
-
-    .selection-title {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 20px;
-        color: #2c5f2d;
-    }
-
-    .mini-round-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-        gap: 15px;
-    }
-
-    .mini-round-btn {
-        padding: 10px;
-        background: #f8f6e6;
-        border: 1px solid #ccc;
-        border-radius: 8px;
+        padding: 20px;
         text-align: center;
-        text-decoration: none;
-        color: #333;
-        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 1px solid #e0e0e0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1/0.8;
     }
-
-    .mini-round-btn:hover {
-        background: #2c5f2d;
-        color: white;
+    
+    .subject-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         border-color: #2c5f2d;
     }
+    
+    .subject-icon {
+        width: 60px;
+        height: 60px;
+        background: #f1f8e9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+    }
+    
+    .subject-name {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #333;
+    }
+    
+    /* Topic Table Styles */
+    .filter-bar {
+        background: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+    }
+    
+    .filter-label { font-weight: bold; color: #333; }
+    
+    .filter-select {
+        padding: 6px 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.9rem;
+    }
+    
+    .topic-table {
+        width: 100%;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+        border-collapse: collapse;
+        overflow: hidden;
+    }
+    
+    .topic-table th, .topic-table td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .topic-table th {
+        background: #f5f5f5;
+        font-weight: bold;
+        color: #333;
+        font-size: 0.9rem;
+    }
+    
+    .topic-table th:first-child, .topic-table td:first-child {
+        text-align: left;
+        padding-left: 20px;
+    }
+    
+    .topic-table tbody tr:hover { background: #f9f9f9; }
+    
+    .title-cell a {
+        font-weight: 500;
+        color: #2d6a4f;
+        text-decoration: none;
+        font-size: 1.05rem;
+    }
+    
+    .title-cell a:hover { text-decoration: underline; }
+    
+    .count-cell {
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    .count-cell.has-count {
+        color: #1976d2;
+        font-weight: bold;
+    }
+    
+    .total-cell {
+        font-weight: bold;
+        color: #2d6a4f;
+    }
+    
+    .btn-solve {
+        padding: 6px 14px;
+        background: #52b788;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: bold;
+        display: inline-block;
+    }
+    
+    .btn-solve:hover { background: #40916c; color: white; }
+
+    .btn-edit {
+        padding: 6px 10px;
+        background: #2196f3;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-right: 4px;
+        cursor: pointer;
+    }
+    .btn-edit:hover { background: #1976d2; color: white; }
+
+    .btn-delete {
+        padding: 6px 10px;
+        background: #f44336;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: bold;
+    }
+    
+    .btn-move {
+        background: none;
+        border: none;
+        color: #999;
+        cursor: pointer;
+        padding: 2px 4px;
+        font-size: 0.8rem;
+    }
+    .btn-move:hover { color: #2d6a4f; }
 </style>
 
 <div class="study-layout">
     <div class="study-header">
-        <h1>나무의사 기출문제 학습</h1>
+        <h1>문제풀이 학습</h1>
         <div class="header-deco"></div>
-        <p>합격을 위한 첫걸음, 기출문제 완벽 분석</p>
+        <p>기출문제, 과목별 학습, 그리고 주제별 맞춤 학습까지 한곳에서 시작하세요</p>
     </div>
 
-    <!-- Tab Navigation -->
     <div class="main-tabs">
-        <button class="main-tab-btn active" onclick="switchView('round')">회차별 학습</button>
-        <button class="main-tab-btn" onclick="switchView('subject')">과목별 학습</button>
+        <button class="main-tab-btn {% if active_tab == 'round' %}active{% endif %}" onclick="switchView('round')">회차별 풀이</button>
+        <button class="main-tab-btn" onclick="switchView('subject')">과목별 풀이</button>
+        <button class="main-tab-btn {% if active_tab == 'topic' %}active{% endif %}" onclick="switchView('topic')">주제별 학습</button>
     </div>
 
     <!-- Round View -->
-    <div class="view-container active" id="view-round">
+    <div class="view-container {% if active_tab == 'round' %}active{% endif %}" id="view-round">
         <div class="round-grid">
             {% for exam in exams %}
             <a href="{% url 'study:detail' exam.round_number %}" class="round-card">
@@ -381,11 +458,58 @@
             <div style="text-align: center; color: #888; grid-column: 1/-1;">등록된 과목이 없습니다.</div>
             {% endfor %}
         </div>
+    </div>
 
-        <!-- Hidden Round Selection Area (Removed/Hidden) -->
-        <div class="subject-round-selection" id="subject-round-area" style="display:none !important;">
-            <!-- No longer needed -->
+    <!-- Topic View -->
+    <div class="view-container {% if active_tab == 'topic' %}active{% endif %}" id="view-topic">
+        <div class="filter-bar">
+            <span class="filter-label">과목:</span>
+            <select class="filter-select" id="topicSubjectFilter" onchange="changeTopicSubject(this.value)">
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}" {% if selected_subject.id == subject.id %}selected{% endif %}>{{ subject.name }}</option>
+                {% endfor %}
+            </select>
         </div>
+
+        {% if topic_sets %}
+        <div style="overflow-x: auto;">
+            <table class="topic-table">
+                <thead>
+                    <tr>
+                        <th>제목</th>
+                        {% for r in rounds %}
+                        <th>{{ r }}회</th>
+                        {% endfor %}
+                        <th>합계</th>
+                        <th>액션</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for set in topic_sets %}
+                    <tr>
+                        <td class="title-cell">
+                            <a href="{% url 'study:topic_solve' set.id %}">{{ set.title }}</a>
+                        </td>
+                        {% for r in rounds %}
+                        <td class="count-cell {% if set.round_counts|get_item:r %}has-count{% endif %}">
+                            {% if set.round_counts|get_item:r %}{{ set.round_counts|get_item:r }}{% else %}-{% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="total-cell">{{ set.total }}</td>
+                        <td>
+                            <a href="{% url 'study:topic_solve' set.id %}" class="btn-solve">풀기</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; color: #888; padding: 60px; background: white; border-radius: 8px;">
+            <p style="font-size: 2rem; margin-bottom: 20px;">📭</p>
+            <p>해당 과목에 등록된 주제별 문제집이 없습니다.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -397,73 +521,73 @@
         document.querySelectorAll('.main-tab-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        event.target.classList.add('active'); // Assumes button text matching
-
-        // Using explicit index matching might be safer if text differs, but clean enough
-        // Fixing active state logic:
-        const btns = document.querySelectorAll('.main-tab-btn');
-        if (viewName === 'round') btns[0].classList.add('active');
-        if (viewName === 'subject') btns[1].classList.add('active');
+        
+        // Find the button that triggered this function (if called via click)
+        if (event && event.target) {
+            event.target.classList.add('active');
+        } else {
+            // Fallback finding by text content approx or index
+            // Simple logic: maintain consistency if called manually
+        }
 
         // Toggle Containers
         document.getElementById('view-round').classList.remove('active');
         document.getElementById('view-subject').classList.remove('active');
+        document.getElementById('view-topic').classList.remove('active');
 
         document.getElementById('view-' + viewName).classList.add('active');
     }
-
-    function goToSubjectStudy(subjectName) {
-        // Updated to use the new Subject_first view
-        const url = `/study/subject/${encodeURIComponent(subjectName)}/`;
-        window.location.href = url;
-
-        // Previous logic deprecated:
-        // const url = `/study/5/?subject=${encodeURIComponent(subjectName)}`;
+    
+    function changeTopicSubject(subjectId) {
+        location.href = '?tab=topic&subject=' + subjectId;
     }
 
-    // Deprecated selectSubject
-    function selectSubject(cardElement, subjectName, event) {
-        // No longer used
-    }
-
-    function goToSubjectDetail(roundNum) {
-        if (!currentSubject) {
-            alert('과목을 먼저 선택해주세요.');
-            return;
-        }
-        // Encode Subject just in case
-        const url = `/study/${roundNum}/?subject=${encodeURIComponent(currentSubject)}`;
-        window.location.href = url;
-    }
-
-    // Force remove global header
-    document.addEventListener("DOMContentLoaded", function () {
-        const header = document.querySelector('header');
-        if (header) {
-            header.style.display = 'none';
-            header.remove(); // Remove it entirely
-        }
-
-        // Also icon mapping
-        const iconMap = {
-            '수목병리학': 'pathology.png',
-            '수목해충학': 'entomology.png',
-            '수목생리학': 'physiology.png',
-            '산림토양학': 'soil.png',
-            '수목관리학': 'management.png',
-            '임업경영학': 'forestry.png'
-        };
-
-        document.querySelectorAll('.s-icon-img').forEach(img => {
-            const subj = img.getAttribute('data-subject');
-            const filename = iconMap[subj];
-            if (filename) {
-                img.src = `{% static 'img/icons/subject/' %}${filename}`;
+    // Move & Delete Functions (Staff Only)
+    function moveTopicSet(id, direction) {
+        const subjectId = document.getElementById('topicSubjectFilter').value;
+        
+        fetch('{% url "study:api_reorder_topic_set" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                set_id: id,
+                direction: direction,
+                subject_id: subjectId
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
             } else {
-                img.style.display = 'none'; // Hide if no icon found
+                alert('이동 실패: ' + (data.error || '오류'));
             }
         });
-    });
+    }
+
+    function deleteTopic(id, title) {
+        if (!confirm(`"${title}" 문제집을 삭제하시겠습니까?`)) return;
+        
+        fetch(`/study/topic-sets/${id}/delete/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('삭제되었습니다.');
+                location.reload();
+            } else {
+                alert('삭제 실패: ' + (data.error || '오류'));
+            }
+        });
+    }
+
 </script>
 {% endblock %}
-```

@@ -1,0 +1,523 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f8f6e6;
+        font-family: 'Noto Sans KR', sans-serif;
+        font-size: 0.85rem;
+    }
+    
+    header { display: none !important; }
+    
+    .create-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px 15px;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    
+    .page-header h1 { margin: 0; font-size: 1.1rem; }
+    
+    .content-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        align-items: end;
+    }
+    
+    .panel {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+    
+    .panel-header {
+        background: #f5f5f5;
+        padding: 10px 15px;
+        font-weight: bold;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 0.9rem;
+    }
+    
+    .panel-body {
+        padding: 12px;
+    }
+    
+    .form-group {
+        margin-bottom: 10px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 4px;
+        color: #333;
+        font-size: 0.8rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 6px 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 0.85rem;
+    }
+    
+    .form-control:focus {
+        border-color: #2d6a4f;
+        outline: none;
+    }
+    
+    .question-list {
+        max-height: 220px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        padding: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .question-item {
+        padding: 4px 6px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        font-size: 0.8rem;
+    }
+    
+    .question-item input[type="checkbox"] {
+        flex-shrink: 0;
+        margin-top: 2px;
+        width: 14px;
+    }
+    
+    .question-item span {
+        flex: 1;
+        line-height: 1.4;
+    }
+    
+    .question-item:hover {
+        background: #f5f5f5;
+    }
+    
+    .question-item.in-cart {
+        opacity: 0.5;
+        background: #e8f5e9;
+    }
+    
+    .cart-list {
+        max-height: 150px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+    
+    .cart-item {
+        padding: 4px 8px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.75rem;
+        gap: 10px;
+    }
+    
+    .cart-item span {
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .btn-remove {
+        background: none;
+        border: none;
+        color: #f44336;
+        cursor: pointer;
+        font-size: 0.9rem;
+        padding: 0 4px;
+    }
+    
+    .btn-move {
+        background: #e0e0e0;
+        border: none;
+        color: #333;
+        cursor: pointer;
+        font-size: 0.7rem;
+        padding: 2px 5px;
+        border-radius: 3px;
+    }
+    
+    .btn-move:disabled {
+        opacity: 0.3;
+        cursor: default;
+    }
+    
+    .btn-add {
+        background: #2d6a4f;
+        color: white;
+        padding: 6px 14px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+    
+    .btn-add:disabled {
+        background: #ccc;
+    }
+    
+    .btn-save {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    
+    .btn-save:disabled {
+        background: #ccc;
+    }
+    
+    .cart-count {
+        background: #2d6a4f;
+        color: white;
+        padding: 1px 8px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+    }
+    
+    .back-link {
+        display: inline-block;
+        margin-bottom: 10px;
+        color: #2d6a4f;
+        text-decoration: none;
+        font-size: 0.8rem;
+    }
+    
+    .select-all-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+        font-size: 0.8rem;
+    }
+</style>
+
+<div class="create-container">
+    <a href="{% url 'study:topic_set_list' %}" class="back-link">← 문제집 목록으로</a>
+    
+    <div class="page-header">
+        <h1>📝 주제별 문제집 만들기</h1>
+    </div>
+    
+    <div class="content-row">
+        <!-- 왼쪽: 문제집 정보 + 문제 찾기 -->
+        <div>
+            <!-- 문제집 정보 섹션 -->
+            <div class="panel" style="margin-bottom: 15px;">
+                <div class="panel-header">📄 문제집 정보</div>
+                <div class="panel-body">
+                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 6px; flex: 2;">
+                            <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px;">제목 <span style="color:red">*</span></label>
+                            <input type="text" class="form-control" id="titleInput" placeholder="예: 탄저병 관련 기출문제" style="flex: 1;">
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
+                            <label class="form-label" style="margin: 0; white-space: nowrap;">과목</label>
+                            <select class="form-control" id="subjectSelect" style="flex: 1;">
+                                <option value="">선택 안함</option>
+                                {% for subject in subjects %}
+                                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: flex-start; gap: 6px;">
+                        <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px; padding-top: 6px;">설명</label>
+                        <textarea class="form-control" id="descInput" rows="2" placeholder="선택사항" style="flex: 1; resize: none; overflow-y: auto; font-family: inherit; font-size: inherit;"></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 문제 찾기 섹션 -->
+            <div class="panel">
+                <div class="panel-header">📋 문제 찾기</div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label class="form-label">회차 선택</label>
+                        <select class="form-control" id="examSelect">
+                            <option value="">-- 회차를 선택하세요 --</option>
+                            {% for exam in exams %}
+                            <option value="{{ exam.id }}" data-round="{{ exam.round_number }}">{{ exam.round_number }}회</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="select-all-row">
+                        <label class="form-label" style="margin:0;">문제 목록</label>
+                        <label><input type="checkbox" id="selectAll"> 전체 선택</label>
+                    </div>
+                    
+                    <div class="question-list" id="questionList">
+                        <div style="text-align: center; color: #888; padding: 40px;">
+                            회차를 먼저 선택하세요
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: right;">
+                        <button type="button" class="btn-add" id="addBtn" disabled>
+                            선택한 문제 담기 →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 오른쪽: 담은 문제 목록 -->
+        <div class="panel" style="align-self: stretch; display: flex; flex-direction: column;">
+            <div class="panel-header">🛒 담은 문제 <span class="cart-count" id="cartCount">0문제</span></div>
+            <div class="panel-body" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="cart-list" id="cartList" style="flex: 1; max-height: none;">
+                    <div style="text-align: center; color: #888; padding: 30px;">
+                        왼쪽에서 문제를 선택하세요
+                    </div>
+                </div>
+                
+                <div style="text-align: right;">
+                    <button type="button" class="btn-add" id="saveBtn" disabled>
+                        💾 저장하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const cart = new Map();
+let currentQuestions = [];
+let currentRound = '';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const examSelect = document.getElementById('examSelect');
+    const questionList = document.getElementById('questionList');
+    const selectAll = document.getElementById('selectAll');
+    const addBtn = document.getElementById('addBtn');
+    const cartList = document.getElementById('cartList');
+    const cartCount = document.getElementById('cartCount');
+    const saveBtn = document.getElementById('saveBtn');
+    const titleInput = document.getElementById('titleInput');
+    
+    examSelect.addEventListener('change', function() {
+        const examId = this.value;
+        currentRound = this.options[this.selectedIndex].getAttribute('data-round') || '';
+        
+        if (!examId) {
+            questionList.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">회차를 먼저 선택하세요</div>';
+            return;
+        }
+        
+        questionList.innerHTML = '<div style="text-align: center; padding: 40px;">로딩 중...</div>';
+        
+        fetch(`{% url 'study:api_exam_questions' %}?exam_id=${examId}`)
+            .then(r => r.json())
+            .then(data => {
+                currentQuestions = data.questions;
+                renderQuestions();
+            });
+    });
+    
+    function renderQuestions() {
+        if (currentQuestions.length === 0) {
+            questionList.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">문제가 없습니다</div>';
+            return;
+        }
+        
+        let html = '';
+        currentQuestions.forEach(q => {
+            const inCart = cart.has(String(q.id));
+            const numStr = String(q.number).padStart(2, '0');
+            html += `<div class="question-item ${inCart ? 'in-cart' : ''}" data-id="${q.id}"><input type="checkbox" class="q-check" value="${q.id}" ${inCart ? 'disabled checked' : ''}><span>[${currentRound}/${numStr}] ${q.full_text.replace(/^\d+번\s*/, '')}</span>${inCart ? '<small style="color: green;">✓담김</small>' : ''}</div>`;
+        });
+        questionList.innerHTML = html;
+        updateAddBtn();
+        
+        // 체크박스 변경 시 버튼 업데이트
+        document.querySelectorAll('.q-check:not(:disabled)').forEach(cb => {
+            cb.addEventListener('change', updateAddBtn);
+        });
+        
+        // 문제 행 클릭 시 체크박스 토글
+        document.querySelectorAll('.question-item:not(.in-cart)').forEach(item => {
+            item.addEventListener('click', function(e) {
+                if (e.target.type === 'checkbox') return; // 체크박스 직접 클릭은 무시
+                const cb = this.querySelector('.q-check');
+                if (cb && !cb.disabled) {
+                    cb.checked = !cb.checked;
+                    updateAddBtn();
+                }
+            });
+        });
+    }
+    
+    selectAll.addEventListener('change', function() {
+        document.querySelectorAll('.q-check:not(:disabled)').forEach(cb => cb.checked = this.checked);
+        updateAddBtn();
+    });
+    
+    function updateAddBtn() {
+        const count = document.querySelectorAll('.q-check:checked:not(:disabled)').length;
+        addBtn.disabled = count === 0;
+        addBtn.textContent = `선택한 ${count}문제 담기 →`;
+    }
+    
+    addBtn.addEventListener('click', function() {
+        document.querySelectorAll('.q-check:checked:not(:disabled)').forEach(cb => {
+            const id = cb.value;
+            const q = currentQuestions.find(x => String(x.id) === id);
+            if (q) {
+                cart.set(id, { id: id, text: q.full_text.replace(/^\d+번\s*/, ''), round: currentRound, number: q.number });
+            }
+        });
+        selectAll.checked = false;
+        renderQuestions();
+        renderCart();
+    });
+    
+    function renderCart() {
+        cartCount.textContent = `${cart.size}문제`;
+        saveBtn.disabled = cart.size === 0;
+        
+        if (cart.size === 0) {
+            cartList.innerHTML = '<div style="text-align: center; color: #888; padding: 30px;">왼쪽에서 문제를 선택하세요</div>';
+            return;
+        }
+        
+        let html = '';
+        const keys = Array.from(cart.keys());
+        keys.forEach((id, idx) => {
+            const item = cart.get(id);
+            const numStr = String(item.number).padStart(2, '0');
+            html += `<div class="cart-item"><span>[${item.round}/${numStr}] ${item.text}</span><div style="display:flex;gap:2px;"><button class="btn-move" onclick="moveCart('${id}',-1)" ${idx === 0 ? 'disabled' : ''}>▲</button><button class="btn-move" onclick="moveCart('${id}',1)" ${idx === keys.length-1 ? 'disabled' : ''}>▼</button><button class="btn-remove" onclick="removeFromCart('${id}')">×</button></div></div>`;
+        });
+        cartList.innerHTML = html;
+    }
+    
+    window.removeFromCart = function(id) {
+        cart.delete(id);
+        renderQuestions();
+        renderCart();
+    };
+    
+    window.moveCart = function(id, dir) {
+        const keys = Array.from(cart.keys());
+        const idx = keys.indexOf(id);
+        if (idx < 0) return;
+        const newIdx = idx + dir;
+        if (newIdx < 0 || newIdx >= keys.length) return;
+        
+        // Swap
+        [keys[idx], keys[newIdx]] = [keys[newIdx], keys[idx]];
+        
+        // Rebuild cart
+        const entries = keys.map(k => [k, cart.get(k)]);
+        cart.clear();
+        entries.forEach(([k, v]) => cart.set(k, v));
+        renderCart();
+    };
+    
+    saveBtn.addEventListener('click', function() {
+        const title = titleInput.value.trim();
+        const description = document.getElementById('descInput').value.trim();
+        const subjectId = document.getElementById('subjectSelect').value || null;
+        
+        if (!title) {
+            alert('제목을 입력해주세요.');
+            titleInput.focus();
+            return;
+        }
+        
+        if (cart.size === 0) {
+            alert('문제를 선택해주세요.');
+            return;
+        }
+        
+        const questionIds = Array.from(cart.keys());
+        
+        const payload = {
+            title: title,
+            description: description,
+            subject_id: subjectId,
+            question_ids: questionIds
+        };
+        
+        {% if topic_set %}
+        payload.set_id = {{ topic_set.id }};
+        {% endif %}
+        
+        fetch('{% url "study:api_save_topic_set" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ 문제집이 저장되었습니다!');
+                window.location.href = '{% url "study:topic_set_list" %}';
+            } else {
+                alert('저장 실패: ' + (data.error || '오류'));
+            }
+        });
+    });
+    
+    // 초기 데이터 로드 (수정 모드)
+    {% if topic_set %}
+    titleInput.value = "{{ topic_set.title|escapejs }}";
+    document.getElementById('descInput').value = "{{ topic_set.description|escapejs }}";
+    const subjectSelect = document.getElementById('subjectSelect');
+    if (subjectSelect) {
+        subjectSelect.value = "{{ topic_set.subject.id|default:'' }}";
+    }
+    
+    {% if initial_cart_json %}
+    const initialCart = JSON.parse('{{ initial_cart_json|escapejs }}');
+    initialCart.forEach(item => {
+        cart.set(String(item.id), {
+            id: String(item.id),
+            text: item.text,
+            round: item.round,
+            number: item.number
+        });
+    });
+    renderCart();
+    {% endif %}
+    
+    document.querySelector('.page-header h1').textContent = '📝 주제별 문제집 수정하기';
+    saveBtn.textContent = '💾 수정하기';
+    {% endif %}
+});
+</script>
+{% endblock %}
