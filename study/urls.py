@@ -24,4 +24,6 @@ urlpatterns = [
     path("api/exam_questions/", views.api_exam_questions, name="api_exam_questions"),
     path("api/save_topic_set/", views.api_save_topic_set, name="api_save_topic_set"),
     path("api/reorder_topic_set/", views.api_reorder_topic_set, name="api_reorder_topic_set"),
+    # 기본서 학습문제 관리
+    path("practice-manage/", views.practice_manage, name="practice_manage"),
 ]

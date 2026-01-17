@@ -48,6 +48,10 @@ urlpatterns = [
     path("admin/practice-input/save/", views.practice_input_save, name="practice_input_save"),
     path("admin/practice-input/check-similarity/", views.practice_input_check_similarity, name="practice_input_check_similarity"),
     path("admin/practice-input/textbook-explanation/", views.practice_input_get_textbook_explanation, name="practice_input_get_textbook_explanation"),
+    # Practice Question Management (Edit/Delete)
+    path("admin/practice-input/questions/", views.practice_input_get_questions, name="practice_input_get_questions"),
+    path("admin/practice-input/update/", views.practice_input_update_question, name="practice_input_update_question"),
+    path("admin/practice-input/delete/", views.practice_input_delete_question, name="practice_input_delete_question"),
     # Chapter Tree Management
     path("admin/chapter-list/", views.chapter_list_api, name="chapter_list_api"),
     path("admin/chapter-create/", views.chapter_create, name="chapter_create"),

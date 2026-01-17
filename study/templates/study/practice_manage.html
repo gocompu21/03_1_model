@@ -1,0 +1,896 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기본서 학습문제 관리</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+            min-height: 100vh;
+        }
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .nav-links a, .nav-links span {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+        .nav-links a:hover { color: #b7e4c7; }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .content-section {
+            background: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        .content-section h1 {
+            color: #1b4332;
+            margin-bottom: 25px;
+            border-left: 5px solid #2d6a4f;
+            padding-left: 15px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+        .btn-primary {
+            background-color: #2d6a4f;
+            color: white;
+        }
+        .btn-primary:hover { background-color: #1b4332; }
+
+        /* Card Styles for Preview */
+        .preview-card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        .input-card {
+            background: white;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .input-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        .card-header {
+            background-color: #f1f8e9;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dcedc8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .card-number-badge {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(45, 106, 79, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .similarity-badge {
+            background-color: rgba(255,255,255,0.25);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: normal;
+            margin-left: 5px;
+        }
+        .similarity-badge.low { background-color: #a5d6a7; color: #1b5e20; }
+        .similarity-badge.medium { background-color: #fff59d; color: #f57f17; }
+        .similarity-badge.high { background-color: #ef9a9a; color: #b71c1c; }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .btn-delete {
+            background: white;
+            border: 1px solid #ffcdd2;
+            color: #e53935;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-delete:hover {
+            background-color: #ffebee;
+            border-color: #e57373;
+        }
+        .card-body {
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .custom-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+            font-size: 1rem;
+            line-height: 1.6;
+            transition: all 0.2s;
+            resize: none;
+            min-height: 50px;
+            font-family: inherit;
+            box-sizing: border-box;
+            overflow-y: hidden;
+        }
+        .custom-textarea:focus {
+            border-color: #2d6a4f;
+            background-color: white;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+            outline: none;
+        }
+        .choices-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #f1f3f5;
+        }
+        .choice-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .choice-number {
+            width: 32px;
+            height: 32px;
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #495057;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .choice-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .choice-input:focus {
+            border-color: #2d6a4f;
+            outline: none;
+            background-color: white;
+        }
+        .meta-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+            margin-top: 5px;
+            padding-top: 10px;
+            border-top: 1px dashed #e9ecef;
+        }
+        .meta-col-answer {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .meta-col-explanation {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .input-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+        .meta-col-explanation .input-label {
+            margin-bottom: 8px;
+            display: block;
+        }
+        .answer-input {
+            width: 80px;
+            padding: 8px;
+            border: 2px solid #aeb5bc;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2d6a4f;
+        }
+        .answer-input:focus {
+            border-color: #2d6a4f;
+            outline: none;
+        }
+        .btn-update {
+            background: white;
+            border: 1px solid #4dabf7;
+            color: #1971c2;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-update:hover {
+            background-color: #e7f5ff;
+            border-color: #339af0;
+        }
+        .btn-textbook {
+            background: white;
+            border: 1px solid #69db7c;
+            color: #2b8a3e;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-textbook:hover {
+            background-color: #ebfbee;
+            border-color: #40c057;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <nav class="nav-links">
+            {% if user.is_authenticated %}
+            <span>{{ user.username }}님</span>
+            {% if user.is_staff or user.is_superuser %}
+            <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">Dashboard</a>
+            {% endif %}
+            <a href="{% url 'study:index' %}">학습하기</a>
+            <a href="{% url 'mypage:index' %}">마이페이지</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="container">
+        <div id="practice-input-section" class="content-section">
+            <h1><i class="fas fa-edit" style="color: #17a2b8;"></i> 기본서 학습문제 입력</h1>
+            
+            <div style="margin-bottom: 25px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <label style="font-weight: bold; color: #2d6a4f;">교재</label>
+                        <select id="practice-book-select" onchange="updateChapterSelect()" 
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            <option value="">-- 교재 선택 --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-weight: bold; color: #2d6a4f;">목차</label>
+                        <select id="practice-chapter-select" onchange="loadExistingQuestions()"
+                            style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; margin-top: 5px;">
+                            <option value="">-- 목차 선택 --</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Existing Questions Section -->
+                <div id="existing-questions-section" style="display: none; margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 12px; border: 1px solid #e0e0e0;">
+                    <h3 style="color: #2d6a4f; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fas fa-list"></i> 저장된 문제 (<span id="existing-count">0</span>개)</span>
+                    </h3>
+                    <div id="existing-questions-list" class="preview-card-list">
+                        <!-- Existing questions will be loaded here -->
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="font-weight: bold; color: #2d6a4f;">탭(Tab) 구분 형식으로 문제 입력</label>
+                    <p style="color: #666; font-size: 0.9rem; margin: 5px 0 10px;">
+                        <i class="fas fa-info-circle"></i> 형식: <strong>문제번호</strong>[Tab]문제내용[Tab]선지1[Tab]선지2[Tab]선지3[Tab]선지4[Tab]선지5[Tab]정답(1-5)[Tab]해설
+                    </p>
+                    <textarea id="csv-input-textarea" rows="10" 
+                        placeholder="엑셀에서 복사-붙여넣기 하세요 (탭 구분)
+예시:
+1	다음 중 옳은 것은?	선택지A	선택지B	선택지C	선택지D	선택지E	3	C가 정답
+2	두번째 문제?	A	B	C	D	E	1	A가 정답"
+                        style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; font-family: inherit; resize: vertical; line-height: 1.6;"></textarea>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button onclick="parseCSVQuestions()" class="btn btn-primary" style="padding: 12px 30px;">
+                        <i class="fas fa-search"></i> 파싱하기
+                    </button>
+                    <button onclick="clearCSVInput()" class="btn" style="padding: 12px 30px; background-color: #6c757d; color: white; margin-left: 10px;">
+                        <i class="fas fa-eraser"></i> 비우기
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Preview Section (Card UI) -->
+            <div id="csv-preview-section" style="display: none; margin-top: 30px;">
+                <h2 style="color: #2d6a4f; border-bottom: 2px solid #2d6a4f; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fas fa-layer-group"></i> 문제 미리보기 (카드형)</span>
+                    <button id="save-questions-btn" type="button" class="btn" 
+                        style="padding: 8px 20px; background-color: #17a2b8; color: white; font-size: 0.9rem; border-radius: 20px;">
+                        <i class="fas fa-upload"></i> 전체 저장
+                    </button>
+                </h2>
+                
+                <div class="preview-card-list" id="preview-card-list">
+                    <!-- Cards will be injected here via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let parsedQuestions = [];
+        let booksData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPracticeBooks();
+            
+            const saveBtn = document.getElementById('save-questions-btn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', saveQuestions);
+            }
+        });
+
+        function loadPracticeBooks() {
+            const bookSelect = document.getElementById('practice-book-select');
+            if (!bookSelect) return;
+
+            fetch("{% url 'mypage:practice_input_get_books' %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        booksData = data.books;
+                        bookSelect.innerHTML = '<option value="">-- 교재 선택 --</option>';
+                        booksData.forEach(book => {
+                            bookSelect.innerHTML += `<option value="${book.id}">${book.subject} - ${book.name}</option>`;
+                        });
+                    } else {
+                        alert(data.error || '교재 로드 실패');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading books:', err);
+                    alert('교재 데이터를 불러오는 중 오류가 발생했습니다.');
+                });
+        }
+
+        function updateChapterSelect() {
+            const bookSelect = document.getElementById('practice-book-select');
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            const bookId = bookSelect.value;
+            
+            chapterSelect.innerHTML = '<option value="">-- 목차 선택 --</option>';
+            document.getElementById('existing-questions-section').style.display = 'none';
+            
+            if (!bookId) return;
+            
+            const book = booksData.find(b => b.id == bookId);
+            if (book && book.chapters) {
+                book.chapters.forEach(ch => {
+                    const indent = '　'.repeat((ch.level || 1) - 1);
+                    chapterSelect.innerHTML += `<option value="${ch.id}">${indent}${ch.code} ${ch.title}</option>`;
+                });
+            }
+        }
+        
+        let existingQuestions = [];
+        
+        function loadExistingQuestions() {
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            const section = document.getElementById('existing-questions-section');
+            
+            if (!chapterSelect.value) {
+                section.style.display = 'none';
+                return;
+            }
+            
+            fetch(`{% url 'mypage:practice_input_get_questions' %}?chapter_id=${chapterSelect.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        existingQuestions = data.questions;
+                        document.getElementById('existing-count').textContent = existingQuestions.length;
+                        if (existingQuestions.length > 0) {
+                            section.style.display = 'block';
+                            renderExistingQuestions();
+                        } else {
+                            section.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(err => console.error('Error loading questions:', err));
+        }
+        
+        function renderExistingQuestions() {
+            const container = document.getElementById('existing-questions-list');
+            container.innerHTML = '';
+            
+            existingQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'input-card';
+                card.id = `existing-card-${q.id}`;
+                
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-number-badge">
+                            <i class="fas fa-question-circle"></i> 문제 ${q.number}
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn-update" onclick="updateExistingQuestion(${q.id})">
+                                <i class="fas fa-save"></i> 수정 저장
+                            </button>
+                            <button class="btn-delete" onclick="deleteExistingQuestion(${q.id})">
+                                <i class="fas fa-trash-alt"></i> 삭제
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="input-label">문제 내용</label>
+                            <textarea class="custom-textarea" rows="1" data-field="content" data-id="${q.id}"
+                                oninput="autoResize(this)">${q.content}</textarea>
+                        </div>
+                        <div class="choices-container">
+                            ${[1,2,3,4,5].map(i => `
+                                <div class="choice-row">
+                                    <div class="choice-number">${i}</div>
+                                    <input type="text" class="choice-input" value="${q['choice'+i] || ''}"
+                                        data-field="choice${i}" data-id="${q.id}" placeholder="선택지 ${i}">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="meta-row">
+                            <div class="meta-col-answer">
+                                <label class="input-label">정답</label>
+                                <input type="number" min="1" max="5" class="answer-input" value="${q.answer}"
+                                    data-field="answer" data-id="${q.id}">
+                            </div>
+                            <div class="meta-col-explanation">
+                                <label class="input-label">해설</label>
+                                <textarea class="custom-textarea" rows="1" data-field="explanation" data-id="${q.id}"
+                                    oninput="autoResize(this)" placeholder="해설을 입력하세요">${q.explanation || ''}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            setTimeout(() => {
+                container.querySelectorAll('textarea.custom-textarea').forEach(textarea => {
+                    autoResize(textarea);
+                });
+            }, 0);
+        }
+        
+        function updateExistingQuestion(questionId) {
+            const card = document.getElementById(`existing-card-${questionId}`);
+            if (!card) return;
+            
+            const data = { id: questionId };
+            card.querySelectorAll('[data-field][data-id]').forEach(el => {
+                const field = el.dataset.field;
+                let value = el.value;
+                if (field === 'answer') value = parseInt(value);
+                data[field] = value;
+            });
+            
+            fetch("{% url 'mypage:practice_input_update_question' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('수정되었습니다.');
+                } else {
+                    alert('수정 실패: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Update Error:', err);
+                alert('수정 중 오류 발생: ' + err.message);
+            });
+        }
+        
+        function deleteExistingQuestion(questionId) {
+            if (!confirm('이 문제를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+            
+            fetch("{% url 'mypage:practice_input_delete_question' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ id: questionId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadExistingQuestions(); // Reload the list
+                } else {
+                    alert('삭제 실패: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Delete Error:', err);
+                alert('삭제 중 오류 발생: ' + err.message);
+            });
+        }
+
+        function clearCSVInput() {
+            document.getElementById('csv-input-textarea').value = '';
+            document.getElementById('csv-preview-section').style.display = 'none';
+            parsedQuestions = [];
+        }
+
+        function parseCSVQuestions() {
+            const csvText = document.getElementById('csv-input-textarea').value.trim();
+            const previewSection = document.getElementById('csv-preview-section');
+            
+            if (!csvText) {
+                alert('붙여넣은 엑셀 데이터가 없습니다.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('csv_text', csvText);
+
+            fetch("{% url 'mypage:practice_input_parse_csv' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    parsedQuestions = data.questions;
+                    checkSimilarity();
+                    renderPreviewCards();
+                    previewSection.style.display = 'block';
+                } else {
+                    alert(data.error || '파싱 실패');
+                }
+            })
+            .catch(err => {
+                console.error('Parse Error:', err);
+                alert('서버 통신 오류: ' + err.message);
+            });
+        }
+
+        function checkSimilarity() {
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            if (!chapterSelect.value) return;
+
+            fetch("{% url 'mypage:practice_input_check_similarity' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    chapter_id: chapterSelect.value,
+                    questions: parsedQuestions
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.similarities) {
+                    data.similarities.forEach((sim, index) => {
+                        if (parsedQuestions[index]) {
+                            parsedQuestions[index].content_sim = sim.content_sim;
+                            parsedQuestions[index].choices_sim = sim.choices_sim;
+                        }
+                    });
+                    renderPreviewCards();
+                }
+            })
+            .catch(err => console.error('Similarity check error:', err));
+        }
+
+        function renderPreviewCards() {
+            const container = document.getElementById('preview-card-list');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            parsedQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'input-card';
+
+                let simBadgeHtml = '';
+                if (q.content_sim !== undefined) {
+                    const maxSim = Math.max(q.content_sim, q.choices_sim);
+                    let simClass = 'low';
+                    if (maxSim >= 80) simClass = 'high';
+                    else if (maxSim >= 50) simClass = 'medium';
+                    simBadgeHtml = `<span class="similarity-badge ${simClass}">${q.content_sim}% / ${q.choices_sim}%</span>`;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-number-badge">
+                            <i class="fas fa-question-circle"></i> 문제 ${q.number} ${simBadgeHtml}
+                        </div>
+                        <div class="header-actions">
+                            <button class="btn-textbook" onclick="getTextbookExplanation(${index})">
+                                <i class="fas fa-book"></i> 기본서 해설
+                            </button>
+                            <button class="btn-update" onclick="saveSingleQuestion(${index})">
+                                <i class="fas fa-save"></i> 개별 저장
+                            </button>
+                            <button class="btn-delete" onclick="deleteQuestion(${index})">
+                                <i class="fas fa-trash-alt"></i> 삭제
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="input-label">문제 내용</label>
+                            <textarea class="custom-textarea" rows="1" data-field="content"
+                                oninput="autoResize(this)"
+                                onchange="updateQuestion(${index}, 'content', this.value)">${q.content}</textarea>
+                        </div>
+                        
+                        <div class="choices-container">
+                            ${[1,2,3,4,5].map(i => `
+                                <div class="choice-row">
+                                    <div class="choice-number">${i}</div>
+                                    <input type="text" class="choice-input" value="${q['choice'+i] || ''}"
+                                        data-field="choice${i}" onchange="updateQuestion(${index}, 'choice${i}', this.value)" placeholder="선택지 ${i}">
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="meta-row">
+                            <div class="meta-col-answer">
+                                <label class="input-label">정답</label>
+                                <input type="number" min="1" max="5" class="answer-input" value="${q.answer}"
+                                    data-field="answer" onchange="updateQuestion(${index}, 'answer', parseInt(this.value))">
+                            </div>
+                            <div class="meta-col-explanation">
+                                <label class="input-label">해설</label>
+                                <textarea class="custom-textarea" rows="1" data-field="explanation"
+                                    oninput="autoResize(this)"
+                                    onchange="updateQuestion(${index}, 'explanation', this.value)" placeholder="해설을 입력하세요">${q.explanation || ''}</textarea>
+                            </div>
+                        </div>
+                        ${q.error ? `<div style="color:#e53935; margin-top:10px; font-weight:bold;"><i class="fas fa-exclamation-triangle"></i> Warning: ${q.error}</div>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            setTimeout(() => {
+                container.querySelectorAll('textarea.custom-textarea').forEach(textarea => {
+                    autoResize(textarea);
+                });
+            }, 0);
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight + 10) + 'px';
+        }
+
+        function getTextbookExplanation(index) {
+            const question = parsedQuestions[index];
+            if (!question) return;
+
+            const btn = event.target.closest('.btn-textbook');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 조회중...';
+            btn.disabled = true;
+
+            fetch("{% url 'mypage:practice_input_get_textbook_explanation' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    content: question.content,
+                    choice1: question.choice1,
+                    choice2: question.choice2,
+                    choice3: question.choice3,
+                    choice4: question.choice4,
+                    choice5: question.choice5
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.explanation) {
+                    parsedQuestions[index].explanation = data.explanation;
+                    const cards = document.querySelectorAll('.input-card');
+                    if (cards[index]) {
+                        const textarea = cards[index].querySelector('textarea[data-field="explanation"]');
+                        if (textarea) {
+                            textarea.value = data.explanation;
+                            autoResize(textarea);
+                        }
+                    }
+                    btn.innerHTML = '<i class="fas fa-check"></i> 완료';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }, 1500);
+                } else {
+                    alert(data.error || '기본서 해설을 가져오는 데 실패했습니다.');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error('Textbook Error:', err);
+                alert('기본서 조회 중 오류 발생: ' + err.message);
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            });
+        }
+
+        function saveSingleQuestion(index) {
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            if (!chapterSelect.value) {
+                alert('목차를 선택해주세요.');
+                return;
+            }
+
+            const question = parsedQuestions[index];
+            if (!question) return;
+
+            fetch("{% url 'mypage:practice_input_save' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    chapter_id: chapterSelect.value,
+                    questions: [question]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('저장되었습니다.');
+                    deleteQuestionSilent(index);
+                } else {
+                    alert('저장 실패: ' + data.error);
+                }
+            })
+            .catch(err => {
+                console.error('Save Error:', err);
+                alert('저장 중 오류 발생: ' + err.message);
+            });
+        }
+
+        function updateQuestion(index, field, value) {
+            if (parsedQuestions[index]) {
+                parsedQuestions[index][field] = value;
+            }
+        }
+
+        function deleteQuestion(index) {
+            if (confirm('이 문제를 목록에서 제거하시겠습니까?')) {
+                deleteQuestionSilent(index);
+            }
+        }
+
+        function deleteQuestionSilent(index) {
+            parsedQuestions.splice(index, 1);
+            renderPreviewCards();
+        }
+
+        function saveQuestions(e) {
+            if (e && e.preventDefault) e.preventDefault();
+
+            const chapterSelect = document.getElementById('practice-chapter-select');
+            if (!chapterSelect.value) {
+                alert('목차를 선택해주세요.');
+                return;
+            }
+            if (parsedQuestions.length === 0) {
+                alert('저장할 문제가 없습니다.');
+                return;
+            }
+
+            fetch("{% url 'mypage:practice_input_save' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    chapter_id: chapterSelect.value,
+                    questions: parsedQuestions
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('저장되었습니다.');
+                    document.getElementById('csv-input-textarea').value = '';
+                    document.getElementById('csv-preview-section').style.display = 'none';
+                    parsedQuestions = [];
+                    loadExistingQuestions(); // Reload existing questions
+                } else {
+                    alert('저장 실패: ' + (data.error || JSON.stringify(data)));
+                }
+            })
+            .catch(err => {
+                console.error('Save Error:', err);
+                alert('저장 중 오류 발생: ' + err.message);
+            });
+        }
+    </script>
+</body>
+</html>

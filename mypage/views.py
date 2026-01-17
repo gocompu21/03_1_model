@@ -1544,6 +1544,101 @@ def practice_input_get_textbook_explanation(request):
         return JsonResponse({"success": False, "error": f"기본서 조회 오류: {str(e)}"})
 
 
+# --- Practice Question Management (Edit/Delete) ---
+
+@ajax_login_required
+def practice_input_get_questions(request):
+    """Get existing questions for a chapter."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    chapter_id = request.GET.get("chapter_id")
+    if not chapter_id:
+        return JsonResponse({"success": False, "error": "목차를 선택해주세요."})
+    
+    try:
+        questions = PracticeQuestion.objects.filter(chapter_id=chapter_id).order_by('number')
+        questions_data = [
+            {
+                "id": q.id,
+                "number": q.number,
+                "content": q.content,
+                "choice1": q.choice1,
+                "choice2": q.choice2,
+                "choice3": q.choice3,
+                "choice4": q.choice4,
+                "choice5": q.choice5,
+                "answer": q.answer,
+                "explanation": q.explanation or "",
+            }
+            for q in questions
+        ]
+        return JsonResponse({"success": True, "questions": questions_data})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@ajax_login_required
+@require_POST
+def practice_input_update_question(request):
+    """Update a single practice question."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        question_id = data.get("id")
+        
+        if not question_id:
+            return JsonResponse({"success": False, "error": "문제 ID가 필요합니다."})
+        
+        question = get_object_or_404(PracticeQuestion, id=question_id)
+        
+        # Update fields
+        question.number = data.get("number", question.number)
+        question.content = data.get("content", question.content)
+        question.choice1 = data.get("choice1", question.choice1)
+        question.choice2 = data.get("choice2", question.choice2)
+        question.choice3 = data.get("choice3", question.choice3)
+        question.choice4 = data.get("choice4", question.choice4)
+        question.choice5 = data.get("choice5", question.choice5)
+        question.answer = data.get("answer", question.answer)
+        question.explanation = data.get("explanation", question.explanation)
+        question.save()
+        
+        return JsonResponse({"success": True, "message": "문제가 수정되었습니다."})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@ajax_login_required
+@require_POST
+def practice_input_delete_question(request):
+    """Delete a single practice question."""
+    if not request.user.is_superuser:
+        return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        question_id = data.get("id")
+        
+        if not question_id:
+            return JsonResponse({"success": False, "error": "문제 ID가 필요합니다."})
+        
+        question = get_object_or_404(PracticeQuestion, id=question_id)
+        question.delete()
+        
+        return JsonResponse({"success": True, "message": "문제가 삭제되었습니다."})
+    
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
 # --- Chapter Tree Management Views ---
 
 @login_required

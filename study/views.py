@@ -900,3 +900,15 @@ def api_reorder_topic_set(request):
             
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ============================================================================
+# 기본서 학습문제 관리 (Practice Question Management)
+# ============================================================================
+from django.contrib.admin.views.decorators import staff_member_required
+
+@staff_member_required
+def practice_manage(request):
+    """기본서 학습문제 입력/수정 관리 페이지 (관리자 전용)"""
+    return render(request, 'study/practice_manage.html')
+
