@@ -1617,7 +1617,7 @@ def practice_input_update_question(request):
 @ajax_login_required
 @require_POST
 def practice_input_delete_question(request):
-    """Delete a single practice question."""
+    """Delete a single practice question and renumber remaining questions."""
     if not request.user.is_superuser:
         return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
     
@@ -1629,9 +1629,17 @@ def practice_input_delete_question(request):
             return JsonResponse({"success": False, "error": "문제 ID가 필요합니다."})
         
         question = get_object_or_404(PracticeQuestion, id=question_id)
+        chapter = question.chapter
         question.delete()
         
-        return JsonResponse({"success": True, "message": "문제가 삭제되었습니다."})
+        # Renumber remaining questions in the same chapter
+        remaining_questions = PracticeQuestion.objects.filter(chapter=chapter).order_by('number')
+        for idx, q in enumerate(remaining_questions, start=1):
+            if q.number != idx:
+                q.number = idx
+                q.save(update_fields=['number'])
+        
+        return JsonResponse({"success": True, "message": "문제가 삭제되고 번호가 재정렬되었습니다."})
     
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
