@@ -280,6 +280,13 @@
         justify-content: center;
         margin-bottom: 15px;
         font-size: 1.5rem;
+        overflow: hidden; /* Ensure image stays inside */
+    }
+
+    .s-icon-img {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
     }
     
     .subject-name {
@@ -516,6 +523,27 @@
 <script>
     let currentSubject = '';
 
+    document.addEventListener("DOMContentLoaded", function() {
+        const iconMap = {
+            '수목병리학': 'pathology.png',
+            '수목해충학': 'entomology.png',
+            '수목생리학': 'physiology.png',
+            '산림토양학': 'soil.png',
+            '수목관리학': 'management.png',
+            '임업경영학': 'forestry.png'
+        };
+
+        const imgs = document.querySelectorAll('.s-icon-img');
+        imgs.forEach(img => {
+            const subject = img.getAttribute('data-subject');
+            if (iconMap[subject]) {
+                img.src = "{% static 'img/icons/subject/' %}" + iconMap[subject];
+            } else {
+                img.style.display = 'none'; // Hide broken images if no icon found
+            }
+        });
+    });
+
     function switchView(viewName) {
         // Toggle Buttons
         document.querySelectorAll('.main-tab-btn').forEach(btn => {
@@ -587,6 +615,19 @@
                 alert('삭제 실패: ' + (data.error || '오류'));
             }
         });
+    }
+
+    function goToSubjectStudy(subjectName, round) {
+        // Navigate to subject detail page
+        // Ensure subjectName is URL encoded in case of special characters (though Korean usually works fine in modern browsers)
+        // Check if round is available, otherwise just go to subject
+        
+        // Using Django's URL pattern structure: /study/subject/<subject_name>/
+        // We can construct this manually or use a JS variable for the base URL if needed.
+        // Given existing pattern: path("subject/<str:subject_name>/", views.subject_detail, name="subject_detail")
+        
+        const baseUrl = "/study/subject/";
+        location.href = baseUrl + subjectName + "/";
     }
 
 </script>
