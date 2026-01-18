@@ -330,12 +330,41 @@ def content_create(request):
             author=request.user,
         )
         
+        # Calculate nearby chapters for sidebar
+        def natural_sort_key(ch):
+            if not ch.code:
+                return (999,)
+            parts = ch.code.split('.')
+            result = []
+            for p in parts:
+                try:
+                    result.append(int(p))
+                except ValueError:
+                    result.append(999)
+            return tuple(result)
+        
+        all_chapters = list(Chapter.objects.filter(book=chapter.book))
+        all_chapters.sort(key=natural_sort_key)
+        
+        current_index = None
+        for i, ch in enumerate(all_chapters):
+            if ch.id == chapter.id:
+                current_index = i
+                break
+        
+        if current_index is not None:
+            start_idx = max(0, current_index - 5)
+            end_idx = min(len(all_chapters), current_index + 6)
+            nearby_chapters = all_chapters[start_idx:end_idx]
+        else:
+            nearby_chapters = all_chapters[:11]
+        
         # 같은 페이지에서 저장 완료 표시 (다른 페이지로 메시지 전파 방지)
         return render(request, 'practice/chapter_detail.html', {
             'chapter': chapter,
             'content': chapter.content,
             'questions': PracticeQuestion.objects.filter(chapter=chapter).order_by('number'),
-            'siblings': [],
+            'siblings': nearby_chapters,
             'saved': True,
         })
     
@@ -362,12 +391,41 @@ def content_update(request, content_id):
         content.content = content_text
         content.save()
         
+        # Calculate nearby chapters for sidebar
+        def natural_sort_key(ch):
+            if not ch.code:
+                return (999,)
+            parts = ch.code.split('.')
+            result = []
+            for p in parts:
+                try:
+                    result.append(int(p))
+                except ValueError:
+                    result.append(999)
+            return tuple(result)
+        
+        all_chapters = list(Chapter.objects.filter(book=content.chapter.book))
+        all_chapters.sort(key=natural_sort_key)
+        
+        current_index = None
+        for i, ch in enumerate(all_chapters):
+            if ch.id == content.chapter.id:
+                current_index = i
+                break
+        
+        if current_index is not None:
+            start_idx = max(0, current_index - 5)
+            end_idx = min(len(all_chapters), current_index + 6)
+            nearby_chapters = all_chapters[start_idx:end_idx]
+        else:
+            nearby_chapters = all_chapters[:11]
+        
         # 같은 페이지에서 수정 완료 표시
         return render(request, 'practice/chapter_detail.html', {
             'chapter': content.chapter,
             'content': content,
             'questions': PracticeQuestion.objects.filter(chapter=content.chapter).order_by('number'),
-            'siblings': [],
+            'siblings': nearby_chapters,
             'saved': True,
         })
     

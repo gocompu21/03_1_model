@@ -540,17 +540,31 @@
                 },
                 body: JSON.stringify(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('세션이 만료되었습니다. 페이지를 새로고침 해주세요.');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     alert('수정되었습니다.');
+                } else if (data.login_required) {
+                    alert('세션이 만료되었습니다. 페이지를 새로고침 해주세요.');
+                    location.reload();
                 } else {
                     alert('수정 실패: ' + data.error);
                 }
             })
             .catch(err => {
                 console.error('Update Error:', err);
-                alert('수정 중 오류 발생: ' + err.message);
+                if (err.message.includes('세션')) {
+                    alert(err.message);
+                    location.reload();
+                } else {
+                    alert('수정 중 오류 발생: ' + err.message);
+                }
             });
         }
         
