@@ -472,6 +472,9 @@
                             <i class="fas fa-question-circle"></i> 문제 ${q.number}
                         </div>
                         <div class="header-actions">
+                            <button class="btn-textbook" onclick="getExistingTextbookExplanation(${q.id})">
+                                <i class="fas fa-book"></i> 기본서 해설
+                            </button>
                             <button class="btn-update" onclick="updateExistingQuestion(${q.id})">
                                 <i class="fas fa-save"></i> 수정 저장
                             </button>
@@ -565,6 +568,65 @@
                 } else {
                     alert('수정 중 오류 발생: ' + err.message);
                 }
+            });
+        }
+        
+        function getExistingTextbookExplanation(questionId) {
+            const card = document.getElementById(`existing-card-${questionId}`);
+            if (!card) return;
+            
+            const btn = event.target.closest('.btn-textbook');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 조회중...';
+            btn.disabled = true;
+            
+            // Extract data from the card
+            const content = card.querySelector('textarea[data-field="content"]').value;
+            const choices = [];
+            for(let i=1; i<=5; i++) {
+                choices.push(card.querySelector(`input[data-field="choice${i}"]`).value);
+            }
+            
+            fetch("{% url 'mypage:practice_input_get_textbook_explanation' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    content: content,
+                    choice1: choices[0],
+                    choice2: choices[1],
+                    choice3: choices[2],
+                    choice4: choices[3],
+                    choice5: choices[4]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.explanation) {
+                    const textarea = card.querySelector('textarea[data-field="explanation"]');
+                    if (textarea) {
+                        textarea.value = data.explanation;
+                        autoResize(textarea);
+                    }
+                    btn.innerHTML = '<i class="fas fa-check"></i> 완료';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }, 1500);
+                } else {
+                    alert(data.error || '기본서 해설을 가져오는 데 실패했습니다.');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error('Explanation Error:', err);
+                alert('해설 조회 중 오류 발생: ' + err.message);
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
             });
         }
         
