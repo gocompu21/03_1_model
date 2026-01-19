@@ -158,6 +158,16 @@ def session_heartbeat(request):
             if session:
                 session.save(update_fields=['last_activity'])
                 return JsonResponse({"success": True})
+            else:
+                # 세션 기록이 없는 경우 (DB 삭제 등) 복구 시도
+                UserSession.objects.create(
+                    user=request.user,
+                    session_key=request.session.session_key,
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+                    logout_time=None
+                )
+                return JsonResponse({"success": True, "info": "Session recovered"})
         except Exception:
             pass
     
