@@ -272,6 +272,7 @@
                         <th>최근 로그인</th>
                         <th>로그아웃</th>
                         <th>활동시각</th>
+                        <th>기기</th>
                         <th>활동내용</th>
                         <th>사용자</th>
                         <th>시험 응시</th>
@@ -306,6 +307,9 @@
                         <td style="font-size: 0.85rem;">
                             {{ user.last_activity|date:"m/d H:i"|default:"-" }}
                         </td>
+                        <td style="font-size: 0.85rem; text-align: center;" title="{{ user.device_type }}">
+                            <i class="{{ user.device_icon }}" style="color: #555;"></i>
+                        </td>
                         <td style="font-size: 0.85rem;">
                             <span style="color: #2d6a4f; font-weight: 500;">{{ user.last_page_name|default:"-" }}</span>
                         </td>
@@ -318,7 +322,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="11" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
+                        <td colspan="12" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

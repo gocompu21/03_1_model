@@ -76,3 +76,38 @@ class UserSession(models.Model):
             return f"{minutes}분 {secs}초"
         else:
             return f"{secs}초"
+    
+    @property
+    def device_type(self):
+        """User-Agent에서 기기 종류 파싱"""
+        ua = self.user_agent.lower()
+        if 'ipad' in ua:
+            return 'iPad'
+        elif 'iphone' in ua:
+            return 'iPhone'
+        elif 'android' in ua:
+            if 'mobile' in ua:
+                return 'Android폰'
+            else:
+                return 'Android태블릿'
+        elif 'macintosh' in ua or 'mac os' in ua:
+            return 'Mac'
+        elif 'windows' in ua:
+            return 'Windows'
+        else:
+            return '기타'
+    
+    @property
+    def device_icon(self):
+        """기기 종류에 맞는 Font Awesome 아이콘 클래스"""
+        device = self.device_type
+        icons = {
+            'iPad': 'fas fa-tablet-alt',
+            'iPhone': 'fas fa-mobile-alt',
+            'Android폰': 'fas fa-mobile-alt',
+            'Android태블릿': 'fas fa-tablet-alt',
+            'Mac': 'fas fa-laptop',
+            'Windows': 'fas fa-desktop',
+            '기타': 'fas fa-globe',
+        }
+        return icons.get(device, 'fas fa-globe')

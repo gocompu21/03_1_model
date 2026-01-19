@@ -73,6 +73,8 @@ def index(request):
             'last_activity': last_session.last_activity if last_session else None,
             'last_page_name': last_session.last_page_name if last_session else '',
             'last_activity_type': last_activity_type,
+            'device_type': last_session.device_type if last_session else '',
+            'device_icon': last_session.device_icon if last_session else 'fas fa-globe',
         })
     
     # Sort by total duration (descending)
