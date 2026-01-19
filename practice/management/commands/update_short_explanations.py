@@ -83,7 +83,16 @@ class Command(BaseCommand):
                         # If we got a valid response
                         q.explanation = response_text
                         q.save()
+                        
                         self.stdout.write(self.style.SUCCESS(f"  Saved! ({len(response_text)} chars)"))
+                        self.stdout.write("=" * 60)
+                        self.stdout.write(f"[{q.chapter.book.name}] {q.chapter.get_full_path()} - Q{q.number}")
+                        self.stdout.write("-" * 60)
+                        self.stdout.write(f"[문제]\n{q.content}")
+                        self.stdout.write("-" * 20)
+                        self.stdout.write(f"[해설]\n{response_text}")
+                        self.stdout.write("=" * 60 + "\n")
+                        
                         success = True
                         break 
                         
