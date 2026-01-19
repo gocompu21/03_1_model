@@ -87,31 +87,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="bbs-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 40px 10px; display: flex; gap: 15px;">
-
-    <!-- Sidebar -->
-    <aside class="sidebar" style="width: 140px; flex-shrink: 0;">
-        <!-- Search Form -->
-        <form method="get" action="{% url 'bbs:post_list' %}" style="display: flex; gap: 5px; margin-bottom: 20px;">
-            <input type="text" name="q" value="{{ query }}" placeholder="검색"
-                style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 100%; box-sizing: border-box; flex: 1;">
-            <button type="submit" class="btn-search"
-                style="padding: 0 15px; display: flex; align-items: center; justify-content: center;">🔍</button>
-        </form>
-        <ul style="list-style: none; padding: 0;">
-            <li><a href="{% url 'bbs:post_list' %}?category=ALL"
-                    class="sidebar-link {% if category == 'ALL' %}active{% endif %}">전체</a></li>
-            <li><a href="{% url 'bbs:post_list' %}?category=BOOK"
-                    class="sidebar-link {% if category == 'BOOK' %}active{% endif %}">기본서</a></li>
-            <li><a href="{% url 'bbs:post_list' %}?category=DOCTOR"
-                    class="sidebar-link {% if category == 'DOCTOR' %}active{% endif %}">주치의</a></li>
-            <li><a href="{% url 'bbs:post_list' %}?category=GENERAL"
-                    class="sidebar-link {% if category == 'GENERAL' %}active{% endif %}">일반 질의</a></li>
-        </ul>
-    </aside>
+<div class="bbs-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 5px 10px;">
 
     <!-- Main Content -->
-    <div class="bbs-content" style="flex: 1;">
+    <div class="bbs-content">
         <div class="bbs-container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
 
             <!-- Post Header -->
@@ -143,13 +122,9 @@
                 {{ post.content|markdown|safe }}
             </div>
 
-
-
             <!-- Comments Section -->
             <div id="comment-section"
                 style="background: #fafdfb; padding: 5px 20px 20px 20px; border-radius: 12px; border: 1px solid #e0e0e0;">
-
-
                 <!-- Comment List -->
                 <ul style="list-style: none; padding: 0; margin-bottom: 20px;">
                     {% for comment in post.comments.all %}
@@ -177,7 +152,6 @@
                             {% endif %}
                         </div>
                     </li>
-
                     {% endfor %}
                 </ul>
 
@@ -206,42 +180,42 @@
             <div
                 style="margin-top: 50px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid #e0e0e0;">
                 <h3
-                    style="padding: 15px 20px; margin: 0; font-size: 1rem; color: #333; border-bottom: 2px solid #2d6a4f; background: #f8f9fa;">
+                    style="padding: 10px 20px; margin: 0; font-size: 1rem; color: #333; border-bottom: 2px solid #2d6a4f; background: #f8f9fa;">
                     관련 게시글
                 </h3>
                 <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                     <thead>
-                        <tr style="background-color: #f0f7f4; border-bottom: 1px solid #ddd;">
-                            <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 50px;">번호</th>
-                            <th style="padding: 10px 2px; text-align: left; color: #2d6a4f;">제목</th>
-                            <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 80px;">작성자</th>
-                            <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 90px;">작성일</th>
-                            <th style="padding: 10px 2px; text-align: center; color: #2d6a4f; width: 50px;">조회</th>
+                        <tr style="background-color: #f0f7f4; border-bottom: 2px solid #2d6a4f;">
+                            <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 40px;">번호</th>
+                            <th style="padding: 4px 2px; text-align: center; color: #2d6a4f;">제목</th>
+                            <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 60px;">작성자</th>
+                            <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 50px;">작성일</th>
+                            <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 40px;">조회</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for related in related_posts %}
                         <tr
                             style="border-bottom: 1px solid #eee; {% if related.pk == post.pk %}background-color: #e6fcf5;{% endif %}">
-                            <td style="padding: 6px 2px; text-align: center; color: #888;">{{ related.pk }}</td>
-                            <td style="padding: 6px 2px;">
+                            <td style="padding: 2px 2px; text-align: center; color: #888;">{{ related.pk }}</td>
+                            <td style="padding: 2px 2px;">
                                 <a href="{% url 'bbs:post_detail' related.pk %}?category={{ category }}&q={{ query }}"
-                                    style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; {% if related.pk == post.pk %}font-weight: bold;{% endif %}">
-                                    {{ related.title|highlight_prefix }}
+                                    style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; {% if related.pk == post.pk %}font-weight: bold; color: #2d6a4f;{% endif %}">
+                                    {% if related.pk == post.pk %}▶ {% endif %}{{ related.title|highlight_prefix }}
                                     {% if related.comments.count > 0 %}
                                     <span
                                         style="color: #e63946; font-size: 0.9em; font-weight: normal;">[{{related.comments.count}}]</span>
                                     {% endif %}
                                 </a>
                             </td>
-                            <td style="padding: 6px 2px; text-align: center; color: #555;">
+                            <td style="padding: 2px 2px; text-align: center; color: #555;">
                                 {% if related.author.first_name %}{{ related.author.first_name }}
                                 {% else%}{{ related.author.username }}{% endif %}
                             </td>
-                            <td style="padding: 6px 2px; text-align: center; color: #888; font-size: 0.9em;">
-                                {{related.created_at|date:"Y/m/d" }}
+                            <td style="padding: 2px 2px; text-align: center; color: #888; font-size: 0.9em;">
+                                {{related.created_at|date:"m/d" }}
                             </td>
-                            <td style="padding: 6px 2px; text-align: center; color: #888;">{{ related.hits }}</td>
+                            <td style="padding: 2px 2px; text-align: center; color: #888;">{{ related.hits }}</td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -263,46 +237,65 @@
 </div>
 
 <style>
-    /* Sidebar Styles */
-    .btn-search {
-        background-color: #52b788;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: bold;
+    /* Overall font size reduction */
+    .bbs-wrapper {
+        font-size: 0.95rem;
+    }
+    
+    .bbs-wrapper table {
+        font-size: 0.9rem;
+    }
+    
+    .bbs-wrapper th {
+        font-size: 0.9rem;
+    }
+    
+    .bbs-wrapper td {
+        font-size: 0.9rem;
     }
 
-    .btn-search:hover {
-        background-color: #40916c;
+    /* Filter Buttons */
+    .category-filters {
+        display: flex;
+        gap: 5px;
     }
 
-    .sidebar-link {
-        display: block;
-        padding: 8px 10px;
-        color: #555;
+    .filter-btn {
+        padding: 6px 14px;
+        border-radius: 20px;
         text-decoration: none;
-        border-radius: 6px;
-        margin-bottom: 2px;
-        transition: all 0.2s;
+        color: #555;
+        background-color: #f0f7f4;
+        font-size: 0.85rem;
         font-weight: 500;
+        transition: all 0.2s;
         border: 1px solid transparent;
     }
 
-    .sidebar-link:hover {
-        background-color: #f0f7f4;
+    .filter-btn:hover {
+        background-color: #e2f1e9;
         color: #2d6a4f;
-        border-color: #d8eadd;
     }
 
-    .sidebar-link.active {
+    .filter-btn.active {
         background-color: #2d6a4f;
         color: white;
         font-weight: bold;
-        box-shadow: 0 2px 5px rgba(45, 106, 79, 0.2);
     }
 
+    /* Search Button */
+    .btn-search-icon {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0 5px;
+        transition: transform 0.2s;
+    }
+    
+    .btn-search-icon:hover {
+        transform: scale(1.1);
+    }
 
     .btn-action {
         display: inline-flex;
@@ -351,6 +344,11 @@
     .post-content img {
         max-width: 100%;
         height: auto;
+    }
+    
+    /* Rows hover */
+    tbody tr:hover {
+        background-color: #fafdfb;
     }
 </style>
 {% endblock %}
