@@ -23,3 +23,12 @@ def add_to_list(lst, value):
     if isinstance(lst, list):
         return lst + [value]
     return [lst, value]
+
+
+@register.filter
+def has_content(chapter):
+    """목차에 학습 컨텐츠가 있는지 확인"""
+    try:
+        return chapter.content is not None
+    except:
+        return False
