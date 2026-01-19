@@ -1477,14 +1477,27 @@ def practice_input_check_similarity(request):
         return JsonResponse({"success": False, "error": f"유사도 검사 오류: {str(e)}"})
 
 
-from fileSearchStore import GeminiStoreManager, SYSTEM_INSTRUCTION as TEXTBOOK_INSTRUCTION
-
 @ajax_login_required
 @require_POST
 def practice_input_get_textbook_explanation(request):
     """Get explanation from textbook using GeminiStoreManager."""
     if not request.user.is_superuser:
         return JsonResponse({"success": False, "error": "권한이 없습니다."}, status=403)
+    
+    try:
+        # Import dynamically to avoid top-level failures and handle path issues
+        try:
+            from fileSearchStore import GeminiStoreManager, SYSTEM_INSTRUCTION as TEXTBOOK_INSTRUCTION
+        except ImportError:
+            # Fallback: try adding project root to path
+            import sys
+            import os
+            from django.conf import settings
+            if str(settings.BASE_DIR) not in sys.path:
+                sys.path.append(str(settings.BASE_DIR))
+            from fileSearchStore import GeminiStoreManager, SYSTEM_INSTRUCTION as TEXTBOOK_INSTRUCTION
+    except Exception as e:
+         return JsonResponse({"success": False, "error": f"모듈 로드 오류: {str(e)}"})
     
     try:
         data = json.loads(request.body)
