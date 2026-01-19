@@ -1,5 +1,19 @@
 {% load practice_extras %}
 <div id="chapter-{{ chapter.id }}" class="chapter-item level-{{ chapter.level }}">
+    {% if chapter.children.all %}
+        {% if chapter.level < 2 %}
+        <span class="toggle-btn" onclick="toggleChapter('{{ chapter.id }}', this)" style="cursor: pointer; margin-right: 8px; color: #666; width: 14px; display: inline-block; text-align: center;">
+            <i class="fas fa-chevron-down"></i>
+        </span>
+        {% else %}
+        <span class="toggle-btn" onclick="toggleChapter('{{ chapter.id }}', this)" style="cursor: pointer; margin-right: 8px; color: #666; width: 14px; display: inline-block; text-align: center;">
+            <i class="fas fa-chevron-right"></i>
+        </span>
+        {% endif %}
+    {% else %}
+        <span style="width: 14px; margin-right: 8px; display: inline-block;"></span>
+    {% endif %}
+    
     <a href="{% url 'practice:chapter_detail' chapter.id %}" class="chapter-link">
         <span class="chapter-code">{{ chapter.code }}</span>&nbsp;&nbsp;
         <span class="chapter-title">
@@ -13,7 +27,11 @@
     <a href="{% url 'practice:practice_questions' chapter.id %}" class="chapter-count" style="text-decoration: none;">{{ chapter.questions.count }}문제</a>
     {% endif %}
 </div>
-{% for child in chapter.children.all %}
-    {% include 'practice/_chapter_item.html' with chapter=child %}
-{% endfor %}
+{% if chapter.children.all %}
+    <div id="children-{{ chapter.id }}" class="chapter-children" style="transition: all 0.3s ease; overflow: hidden; display: {% if chapter.level < 2 %}block{% else %}none{% endif %};">
+    {% for child in chapter.children.all %}
+        {% include 'practice/_chapter_item.html' with chapter=child %}
+    {% endfor %}
+    </div>
+{% endif %}
 

@@ -405,18 +405,7 @@
 </style>
 
 <div class="chapter-container">
-    <div class="breadcrumb">
-        <a href="{% url 'practice:book_list' %}">📚 교재 목록</a> &gt; 
-        <span>{{ book.name }}</span>
-    </div>
-    
-    <div class="page-header">
-        <h1 class="page-title">
-            <span class="tree-icon">🌲</span>
-            {{ book.name }}
-        </h1>
-        <p class="page-subtitle">Forest Pathology · 수목병리학 학습</p>
-    </div>
+    <!-- Header removed as per request -->
     
     <div class="chapter-tree">
         {% for chapter in root_chapters %}
@@ -426,4 +415,70 @@
         {% endfor %}
     </div>
 </div>
+<script>
+    const BOOK_ID = "{{ book.id }}";
+    const STATE_KEY = `chapter_state_book_${BOOK_ID}`;
+
+    document.addEventListener('DOMContentLoaded', loadState);
+
+    function toggleChapter(chapterId, btn) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const childrenContainer = document.getElementById(`children-${chapterId}`);
+        const icon = btn.querySelector('i');
+        
+        if (childrenContainer.style.display === 'none') {
+            childrenContainer.style.display = 'block';
+            icon.classList.remove('fa-chevron-right');
+            icon.classList.add('fa-chevron-down');
+        } else {
+            childrenContainer.style.display = 'none';
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-right');
+        }
+        saveState();
+    }
+
+    function saveState() {
+        const expandedIds = [];
+        document.querySelectorAll('.chapter-children').forEach(el => {
+            if (el.style.display !== 'none') {
+                const id = el.id.replace('children-', '');
+                expandedIds.push(id);
+            }
+        });
+        localStorage.setItem(STATE_KEY, JSON.stringify(expandedIds));
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem(STATE_KEY);
+        if (saved) {
+            try {
+                const expandedIds = JSON.parse(saved);
+                document.querySelectorAll('.chapter-children').forEach(el => {
+                    const id = el.id.replace('children-', '');
+                    const parentDiv = document.getElementById(`chapter-${id}`);
+                    const icon = parentDiv ? parentDiv.querySelector('.toggle-btn i') : null;
+                    
+                    if (expandedIds.includes(id)) {
+                        el.style.display = 'block';
+                        if (icon) {
+                            icon.classList.remove('fa-chevron-right');
+                            icon.classList.add('fa-chevron-down');
+                        }
+                    } else {
+                        el.style.display = 'none';
+                        if (icon) {
+                            icon.classList.remove('fa-chevron-down');
+                            icon.classList.add('fa-chevron-right');
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error('Error loading chapter state:', e);
+            }
+        }
+    }
+</script>
 {% endblock %}
