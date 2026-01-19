@@ -140,3 +140,25 @@ def password_reset_request(request):
             messages.error(request, "일치하는 회원 정보를 찾을 수 없습니다.")
 
     return render(request, "accounts/password_reset.html")
+
+
+from django.http import JsonResponse
+
+@login_required
+def session_heartbeat(request):
+    """iPad에서 세션 활동을 주기적으로 업데이트하기 위한 heartbeat 엔드포인트"""
+    if request.session.session_key:
+        try:
+            session = UserSession.objects.filter(
+                user=request.user,
+                session_key=request.session.session_key,
+                logout_time__isnull=True
+            ).first()
+            
+            if session:
+                session.save(update_fields=['last_activity'])
+                return JsonResponse({"success": True})
+        except Exception:
+            pass
+    
+    return JsonResponse({"success": False})

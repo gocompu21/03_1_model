@@ -65,5 +65,24 @@
         {% block content %}{% endblock %}
     </main>
 
+    {% if user.is_authenticated %}
+    <script>
+        // 모바일 기기 전용 세션 heartbeat (체류시간 정확도 향상)
+        (function() {
+            const isMobile = /iPad|iPhone|Android/i.test(navigator.userAgent) ||
+                             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            
+            if (isMobile) {
+                setInterval(function() {
+                    fetch('{% url "accounts:session_heartbeat" %}', {
+                        method: 'GET',
+                        credentials: 'same-origin'
+                    }).catch(function() {});
+                }, 60000);  // 1분마다
+            }
+        })();
+    </script>
+    {% endif %}
+
 </body>
 </html>
