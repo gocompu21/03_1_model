@@ -50,8 +50,20 @@ class Command(BaseCommand):
             prompt = f"{SYSTEM_INSTRUCTION}\n\n[문제]\n{prompt_content}"
             
             # Query Logic with Fallback
-            # Default to "수목관리학" then try fallbacks
+            # Determine the primary store from the book name
+            book_name = q.chapter.book.name  # Assuming book name matches store name e.g., "수목병리학"
+            
+            # Default list
             stores_to_try = ["수목관리학", "수목병리학", "수목생리학", "수목해충학", "산림토양학"]
+            
+            # Prioritize the book's subject if it exists in the list (or add it)
+            # Remove it if it's already there to avoid duplicates when re-inserting at front
+            cleaned_stores = [s for s in stores_to_try if s != book_name]
+            # specific mapping or logic can be added here if book names don't exactly match store names
+            
+            # Insert book name at the very beginning
+            stores_to_try = [book_name] + cleaned_stores
+            
             success = False
             
             for store_name in stores_to_try:
