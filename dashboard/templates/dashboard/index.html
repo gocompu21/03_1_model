@@ -17,7 +17,7 @@
         /* Header */
         header {
             background-color: #2d6a4f;
-            padding: 15px 40px;
+            padding: 10px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -46,120 +46,114 @@
         .dashboard-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        .page-title {
-            font-size: 1.8rem;
-            color: #2d6a4f;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 10px 20px;
         }
         
         /* Menu Grid - Top */
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 20px;
         }
         
         .menu-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px 15px;
+            border-radius: 8px;
+            padding: 10px 5px;
             text-align: center;
             text-decoration: none;
             color: #333;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
             border: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         
         .menu-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             border-color: #2d6a4f;
         }
         
         .menu-card i {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
             color: #2d6a4f;
         }
         
         .menu-card h3 {
-            font-size: 0.95rem;
-            margin-bottom: 5px;
+            font-size: 0.85rem;
+            margin-bottom: 0;
             color: #1b4332;
         }
         
         .menu-card p {
-            font-size: 0.8rem;
-            color: #888;
+            display: none; /* Hide description for minimal size */
         }
         
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
         }
         
         .stat-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 8px;
+            padding: 15px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
         }
         
         .stat-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             background: linear-gradient(135deg, #2d6a4f, #40916c);
             color: white;
         }
         
         .stat-info .stat-number {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #2d6a4f;
         }
         
         .stat-info .stat-label {
             color: #888;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         
         /* Section */
         .section {
             background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.07);
         }
         
         .section-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: #2d6a4f;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            border-bottom: 2px solid #d8f3dc;
-            padding-bottom: 12px;
+            gap: 8px;
+            border-bottom: 1px solid #d8f3dc;
+            padding-bottom: 8px;
         }
         
         /* Table */
@@ -169,10 +163,10 @@
         }
         
         .data-table th, .data-table td {
-            padding: 12px 10px;
+            padding: 6px 5px; /* Minimized padding */
             text-align: left;
             border-bottom: 1px solid #eee;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
         
         .data-table th {
@@ -196,48 +190,106 @@
     </header>
     
     <div class="dashboard-container">
-        <h1 class="page-title"><i class="fas fa-chart-line"></i> 관리자 대시보드</h1>
-        
-        <!-- Quick Links - Top -->
+        <!-- Quick Links - Top (Minimized) -->
         <div class="menu-grid">
             <a href="{% url 'mypage:prompt_generator' %}" class="menu-card">
                 <i class="fas fa-cog"></i>
-                <h3>기출문제 개별 관리</h3>
-                <p>기출문제 해설 생성</p>
+                <h3>기출문제 관리</h3>
             </a>
             <a href="{% url 'study:practice_manage' %}" class="menu-card">
                 <i class="fas fa-edit"></i>
                 <h3>내용이해 문제</h3>
-                <p>연습문제 등록/수정/삭제</p>
             </a>
             <a href="{% url 'mypage:index' %}?section=chapter_tree" class="menu-card">
                 <i class="fas fa-sitemap"></i>
                 <h3>목차 관리</h3>
-                <p>교재 목차 편집</p>
             </a>
             <a href="{% url 'glossary:term_list' %}" class="menu-card">
                 <i class="fas fa-book-open"></i>
-                <h3>찾아보기</h3>
-                <p>용어 사전 관리</p>
+                <h3>용어 사전</h3>
             </a>
             <a href="/admin/" class="menu-card">
                 <i class="fas fa-database"></i>
                 <h3>Django Admin</h3>
-                <p>전체 데이터 관리</p>
             </a>
             <a href="{% url 'dashboard:print_material' %}" class="menu-card">
                 <i class="fas fa-print"></i>
                 <h3>자료 인쇄</h3>
-                <p>교재/문제 PDF 출력</p>
             </a>
             <a href="{% url 'study:topic_set_list' %}" class="menu-card">
                 <i class="fas fa-layer-group"></i>
                 <h3>주제별 문제집</h3>
-                <p>나만의 문제집 관리</p>
             </a>
         </div>
         
-        <!-- Stats Cards -->
+        <!-- User Stats Table (Moved Up) -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-user-graduate"></i> 사용자별 학습 현황</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">상태</th>
+                        <th>사용자</th>
+                        <th>최근 로그인</th>
+                        <th>로그아웃</th>
+                        <th>활동시각</th>
+                        <th style="text-align: center;">기기</th>
+                        <th>활동내용</th>
+                        <th>시험</th>
+                        <th>기출</th>
+                        <th>복습</th>
+                        <th>오늘</th>
+                        <th>누적</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in admin_dashboard.user_stats %}
+                    <tr>
+                        <td>
+                            {% if user.is_online %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; color: #28a745; font-size: 0.8rem;">
+                                <span style="width: 6px; height: 6px; background: #28a745; border-radius: 50%; display: inline-block;"></span>
+                                접속
+                            </span>
+                            {% else %}
+                            <span style="display: inline-flex; align-items: center; gap: 5px; color: #aaa; font-size: 0.8rem;">
+                                <span style="width: 6px; height: 6px; background: #ccc; border-radius: 50%; display: inline-block;"></span>
+                                부재
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 500;">{{ user.first_name|default:user.username }}</td>
+                        <td style="font-size: 0.8rem; color: #666;">
+                            {{ user.last_login|date:"m/d H:i"|default:"-" }}
+                        </td>
+                        <td style="font-size: 0.8rem; color: #666;">
+                            {{ user.last_logout|date:"m/d H:i"|default:"-" }}
+                        </td>
+                        <td style="font-size: 0.8rem; color: #2d6a4f;">
+                            {{ user.last_activity|date:"m/d H:i"|default:"-" }}
+                        </td>
+                        <td style="text-align: center;" title="{{ user.device_type }}">
+                            <i class="{{ user.device_icon }}" style="color: #888; font-size: 0.9rem;"></i>
+                        </td>
+                        <td>
+                            <span style="color: #333;">{{ user.last_page_name|default:"-" }}</span>
+                        </td>
+                        <td>{{ user.exam_count }}</td>
+                        <td>{{ user.study_count }}</td>
+                        <td>{{ user.review_count }}</td>
+                        <td>{{ user.today_duration }}</td>
+                        <td>{{ user.total_duration }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="12" style="text-align: center; color: #888; padding: 20px;">데이터가 없습니다.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Stats Cards (Moved to Bottom) -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon"><i class="fas fa-users"></i></div>
@@ -260,73 +312,6 @@
                     <span class="stat-label">응시자 수</span>
                 </div>
             </div>
-        </div>
-        
-        <!-- User Stats Table -->
-        <div class="section">
-            <h2 class="section-title"><i class="fas fa-user-graduate"></i> 사용자별 학습 현황</h2>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>상태</th>
-                        <th>사용자</th>
-                        <th>최근 로그인</th>
-                        <th>로그아웃</th>
-                        <th>활동시각</th>
-                        <th>기기</th>
-                        <th>활동내용</th>
-                        <th>시험 응시</th>
-                        <th>기출학습</th>
-                        <th>복습 문제</th>
-                        <th>오늘 체류</th>
-                        <th>누적 체류</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for user in admin_dashboard.user_stats %}
-                    <tr>
-                        <td>
-                            {% if user.is_online %}
-                            <span style="display: inline-flex; align-items: center; gap: 5px; color: #28a745;">
-                                <span style="width: 8px; height: 8px; background: #28a745; border-radius: 50%; display: inline-block;"></span>
-                                접속중
-                            </span>
-                            {% else %}
-                            <span style="display: inline-flex; align-items: center; gap: 5px; color: #888;">
-                                <span style="width: 8px; height: 8px; background: #ccc; border-radius: 50%; display: inline-block;"></span>
-                                오프라인
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>{{ user.first_name|default:user.username }}</td>
-                        <td style="font-size: 0.85rem;">
-                            {{ user.last_login|date:"m/d H:i"|default:"-" }}
-                        </td>
-                        <td style="font-size: 0.85rem;">
-                            {{ user.last_logout|date:"m/d H:i"|default:"-" }}
-                        </td>
-                        <td style="font-size: 0.85rem;">
-                            {{ user.last_activity|date:"m/d H:i"|default:"-" }}
-                        </td>
-                        <td style="font-size: 0.85rem; text-align: center;" title="{{ user.device_type }}">
-                            <i class="{{ user.device_icon }}" style="color: #555;"></i>
-                        </td>
-                        <td style="font-size: 0.85rem;">
-                            <span style="color: #2d6a4f; font-weight: 500;">{{ user.last_page_name|default:"-" }}</span>
-                        </td>
-                        <td>{{ user.exam_count }}회</td>
-                        <td>{{ user.study_count }}회</td>
-                        <td>{{ user.review_count }}</td>
-                        <td>{{ user.today_duration }}</td>
-                        <td>{{ user.total_duration }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="12" style="text-align: center; color: #888; padding: 30px;">데이터가 없습니다.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
         </div>
     </div>
 </body>
