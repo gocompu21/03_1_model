@@ -43,3 +43,19 @@ class UserExamAttemptAdmin(admin.ModelAdmin):
 class UserQuestionResultAdmin(admin.ModelAdmin):
     list_display = ("attempt", "question", "selected_choice", "is_correct")
     list_filter = ("is_correct",)
+
+
+from .models import TopicQuestionSet, TopicQuestionSetItem
+
+class TopicQuestionSetItemInline(admin.TabularInline):
+    model = TopicQuestionSetItem
+    extra = 1
+    raw_id_fields = ('question',)
+
+@admin.register(TopicQuestionSet)
+class TopicQuestionSetAdmin(admin.ModelAdmin):
+    list_display = ("title", "subject", "created_by", "is_public", "order", "created_at")
+    list_filter = ("subject", "is_public", "created_by")
+    search_fields = ("title", "description")
+    inlines = [TopicQuestionSetItemInline]
+
