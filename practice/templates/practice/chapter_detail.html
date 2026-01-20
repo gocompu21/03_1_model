@@ -354,15 +354,15 @@
                 {% if content %}
                     {{ content.content|markdown|link_terms|safe }}
                 {% else %}
+                    {% if user.is_staff %}
                     <div class="empty-content">
                         <div class="icon">📝</div>
                         <p>아직 등록된 컨텐츠가 없습니다.</p>
-                        {% if user.is_staff %}
                         <a href="{% url 'practice:content_create' %}?chapter_id={{ chapter.id }}" class="btn btn-primary">
                             ✏️ 컨텐츠 작성하기
                         </a>
-                        {% endif %}
                     </div>
+                    {% endif %}
                 {% endif %}
             </div>
             
