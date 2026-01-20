@@ -94,6 +94,7 @@
     .title-cell {
         font-weight: 500;
         color: #2d6a4f;
+        text-align: left;
     }
     
     .title-link {
@@ -208,7 +209,7 @@
         <thead>
             <tr>
                 {% if user.is_staff %}<th style="width: 60px;">순서</th>{% endif %}
-                <th>제목</th>
+                <th style="min-width: 200px; text-align: left;">제목</th>
                 {% for r in rounds %}
                 <th>{{ r }}회</th>
                 {% endfor %}
