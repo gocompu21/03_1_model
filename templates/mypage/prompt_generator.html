@@ -663,11 +663,45 @@ ${explanation}
 
         function copyText(elementId) {
             const text = document.getElementById(elementId).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('클립보드에 복사되었습니다!');
-            }).catch(err => {
-                console.error('복사 실패:', err);
-            });
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('클립보드에 복사되었습니다!');
+                }).catch(err => {
+                    console.error('Async: Could not copy text: ', err);
+                    fallbackCopyTextToClipboard(text);
+                });
+            } else {
+                fallbackCopyTextToClipboard(text);
+            }
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+            var textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            // Avoid scrolling to bottom
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                var successful = document.execCommand('copy');
+                if (successful) {
+                    alert('클립보드에 복사되었습니다!');
+                } else {
+                    alert('복사에 실패했습니다. 브라우저 설정을 확인해주세요.');
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                alert('복사 중 오류가 발생했습니다: ' + err);
+            }
+
+            document.body.removeChild(textArea);
         }
 
         function queryAll() {
@@ -985,7 +1019,12 @@ ${explanation}
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text || response.statusText) });
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
@@ -1012,6 +1051,11 @@ ${explanation}
                 .catch(err => {
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
+                    const msgElement = document.getElementById('msg-infographic');
+                    msgElement.style.display = 'block';
+                    msgElement.innerText = '인포그래픽 생성 중 오류 발생: ' + err;
+                    msgElement.style.background = '#f8d7da';
+                    msgElement.style.color = '#721c24';
                     alert('인포그래픽 생성 중 오류 발생: ' + err);
                 });
         }
