@@ -1148,7 +1148,11 @@ def generate_infographic_api(request):
         
         # Determine file extension
         file_extension = mimetypes.guess_extension(mime_type) or ".png"
-        filename = f"infographic_{round_num}_{q_num}{file_extension}"
+        
+        # Add timestamp to filename to prevent browser caching issues
+        import time
+        timestamp = int(time.time())
+        filename = f"infographic_{round_num}_{q_num}_{timestamp}{file_extension}"
         
         # Delete existing infographic image if exists
         if question.infographic_image:
