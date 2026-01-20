@@ -42,6 +42,7 @@ urlpatterns = [
     path("admin/generate-tts/", views.generate_tts_api, name="generate_tts_api"),
     path("admin/get-existing-tts/", views.get_existing_tts_api, name="get_existing_tts_api"),
     path("admin/generate-infographic/", views.generate_infographic_api, name="generate_infographic_api"),
+    path("admin/save-infographic/", views.save_infographic_api, name="save_infographic_api"),
     # Practice Question Input (CSV)
     path("admin/practice-input/books/", views.practice_input_get_books, name="practice_input_get_books"),
     path("admin/practice-input/parse/", views.practice_input_parse_csv, name="practice_input_parse_csv"),

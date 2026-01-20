@@ -1154,22 +1154,85 @@ def generate_infographic_api(request):
         timestamp = int(time.time())
         filename = f"infographic_{round_num}_{q_num}_{timestamp}{file_extension}"
         
-        # Delete existing infographic image if exists
-        if question.infographic_image:
-            question.infographic_image.delete(save=False)
+        # Save to temporary folder instead of database
+        temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_infographics')
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_filepath = os.path.join(temp_dir, filename)
         
-        # Save to Question.infographic_image field
-        question.infographic_image.save(
-            filename,
-            ContentFile(image_data),
-            save=True
-        )
+        with open(temp_filepath, 'wb') as f:
+            f.write(image_data)
+        
+        # Generate URL for temporary file
+        temp_url = os.path.join(settings.MEDIA_URL, 'temp_infographics', filename).replace('\\', '/')
         
         return JsonResponse({
             "success": True,
             "message": f"인포그래픽 이미지 생성 완료: {filename}",
-            "image_url": question.infographic_image.url,
-            "filename": filename
+            "image_url": temp_url,
+            "temp_filename": filename,
+            "is_temp": True
+        })
+        
+    except Question.DoesNotExist:
+        return JsonResponse({"success": False, "error": "문제를 찾을 수 없습니다."})
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@staff_member_required
+def save_infographic_api(request):
+    """
+    AJAX endpoint to save temporary infographic image to Question.infographic_image field.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    question_id = request.POST.get("question_id")
+    temp_filename = request.POST.get("temp_filename")
+    
+    if not question_id or not temp_filename:
+        return JsonResponse({"error": "Missing question_id or temp_filename"}, status=400)
+
+    try:
+        import os
+        from django.core.files import File
+        
+        question = Question.objects.get(id=question_id)
+        
+        # Get temporary file path
+        temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_infographics')
+        temp_filepath = os.path.join(temp_dir, temp_filename)
+        
+        if not os.path.exists(temp_filepath):
+            return JsonResponse({
+                "success": False, 
+                "error": "임시 파일을 찾을 수 없습니다."
+            })
+        
+        # Delete existing infographic image if exists
+        if question.infographic_image:
+            question.infographic_image.delete(save=False)
+        
+        # Save temp file to Question.infographic_image field
+        with open(temp_filepath, 'rb') as f:
+            question.infographic_image.save(
+                temp_filename,
+                File(f),
+                save=True
+            )
+        
+        # Delete temporary file
+        try:
+            os.remove(temp_filepath)
+        except:
+            pass  # Ignore errors when deleting temp file
+        
+        return JsonResponse({
+            "success": True,
+            "message": "인포그래픽 이미지가 저장되었습니다.",
+            "image_url": question.infographic_image.url
         })
         
     except Question.DoesNotExist:
