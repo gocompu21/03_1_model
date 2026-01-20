@@ -389,6 +389,7 @@
             <div style="padding: 25px;">
                 <!-- 기본서 탭 -->
                 <div class="tab-content" id="panel-basic-book" style="display: block;">
+                    <div class="success-msg" id="msg-basic-book"></div>
                     <div style="display: flex; gap: 15px; align-items: flex-start;">
                         <div style="flex: 1;">
                             <div class="response-content" id="basic-book-text" style="border-color: #caf0f8;">
@@ -411,11 +412,11 @@
                             </button>
                         </div>
                     </div>
-                    <div class="success-msg" id="msg-basic-book"></div>
                 </div>
 
                 <!-- 나무주치의 탭 -->
                 <div class="tab-content" id="panel-tree-doctor" style="display: none;">
+                    <div class="success-msg" id="msg-tree-doctor"></div>
                     <div style="display: flex; gap: 15px; align-items: flex-start;">
                         <div style="flex: 1;">
                             <div class="response-content" id="tree-doctor-text" style="border-color: #f3e5f5;">
@@ -438,11 +439,12 @@
                             </button>
                         </div>
                     </div>
-                    <div class="success-msg" id="msg-tree-doctor"></div>
                 </div>
 
                 <!-- 나레이션 탭 -->
                 <div class="tab-content" id="panel-narration" style="display: none;">
+                    <div class="success-msg" id="msg-narration"></div>
+                    <div class="success-msg" id="msg-tts" style="background: #ede7f6; color: #512da8;"></div>
                     {% if selected_question.narration %}
                     <div style="background: #e8f5e9; color: #2e7d32; padding: 8px 15px; border-radius: 5px; margin-bottom: 15px; display: inline-block;">
                         <i class="fas fa-check"></i> 기존 나레이션 있음
@@ -483,12 +485,11 @@
                             <span id="tts-filename" style="color: #512da8; font-weight: bold;"></span>
                         </div>
                     </div>
-                    <div class="success-msg" id="msg-narration"></div>
-                    <div class="success-msg" id="msg-tts" style="background: #ede7f6; color: #512da8;"></div>
                 </div>
 
                 <!-- 인포그래픽 탭 -->
                 <div class="tab-content" id="panel-infographic" style="display: none;">
+                    <div class="success-msg" id="msg-infographic" style="background: #fff3e0; color: #e65100;"></div>
                     {% if selected_question.infographic_image %}
                     <!-- 기존 인포그래픽 이미지 -->
                     <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
@@ -534,7 +535,6 @@
                             <i class="fas fa-database"></i> DB에 저장
                         </button>
                     </div>
-                    <div class="success-msg" id="msg-infographic" style="background: #fff3e0; color: #e65100;"></div>
                 </div>
             </div>
         </div>
