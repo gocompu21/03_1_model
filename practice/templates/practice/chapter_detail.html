@@ -323,7 +323,10 @@
                 <div class="chapter-path">
                     <a href="{% url 'practice:book_list' %}">📚 교재 목록</a> &gt;
                     <a href="{% url 'practice:chapter_list' chapter.book.id %}">{{ chapter.book.name }}</a> &gt;
-                    <span>{{ chapter.get_full_path }}</span>
+                    {% for ancestor in chapter.get_ancestors %}
+                    <a href="{% url 'practice:chapter_detail' ancestor.id %}">{{ ancestor.title }}</a> &gt;
+                    {% endfor %}
+                    <span>{{ chapter.title }}</span>
                 </div>
                 <h1 class="chapter-title">
                     <span class="chapter-code">{{ chapter.code }}</span>

@@ -47,6 +47,15 @@ class Chapter(models.Model):
             path.insert(0, parent.title)
             parent = parent.parent
         return " > ".join(path)
+    
+    def get_ancestors(self):
+        """부모 목차들을 리스트로 반환 (최상위부터 순서대로, 자기 자신 제외)"""
+        ancestors = []
+        parent = self.parent
+        while parent:
+            ancestors.insert(0, parent)
+            parent = parent.parent
+        return ancestors
 
 
 class PracticeQuestion(models.Model):
