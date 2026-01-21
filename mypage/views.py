@@ -573,6 +573,16 @@ def analyze_attempt_wrong_answers(request, attempt_id):
 def delete_attempt(request, attempt_id):
     try:
         attempt = get_object_or_404(UserExamAttempt, id=attempt_id, user=request.user)
+        
+        # If this attempt was from a mock exam (round_number=0), also delete the MockExam
+        if attempt.exam and attempt.exam.round_number == 0:
+            from mock_exam.models import MockExam
+            # Find MockExam by matching end_time (created at same time as UserExamAttempt)
+            MockExam.objects.filter(
+                user=request.user,
+                end_time=attempt.end_time
+            ).delete()
+        
         attempt.delete()
         return JsonResponse({"status": "success", "message": "삭제되었습니다."})
     except Exception as e:
