@@ -619,14 +619,32 @@
                         <span style="font-size: 1.4em; margin-right: 8px;">🌳</span>
                         <span style="font-size: 1.1em;">나무의사 홈</span>
                     </a>
-                    <h3 style="margin: 0 0 10px 0; text-align: center;">채점 결과</h3>
-                    <div style="padding: 0 10px 10px 10px; text-align:center;">
-                        <div style="font-size:2em; font-weight:bold; color:red;">
-                            {{ mock_exam.score }}점
-                            <span style="font-size:0.5em; color:#666; font-weight:normal;">
-                                [ {{ questions.count }} 문제 ]
-                            </span>
-                        </div>
+                    <h3 style="margin: 0 0 10px 0; text-align: center;">📊 과목별 채점 결과</h3>
+                    <div style="padding: 0 10px 10px 10px;">
+                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">
+                            <thead>
+                                <tr style="background: #f3e6e9; border-bottom: 2px solid #d4879c;">
+                                    <th style="padding: 6px 4px; text-align: left;">과목</th>
+                                    <th style="padding: 6px 4px; text-align: center;">정답</th>
+                                    <th style="padding: 6px 4px; text-align: center;">점수</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in subject_results %}
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 5px 4px;">{{ s.name|truncatechars:6 }}</td>
+                                    <td style="padding: 5px 4px; text-align: center;">{{ s.correct }}/{{ s.total }}</td>
+                                    <td style="padding: 5px 4px; text-align: center; font-weight: bold; {% if s.score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">{{ s.score }}점</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr style="background: #ffeeba; border-top: 2px solid #d4879c;">
+                                    <td colspan="2" style="padding: 8px 4px; font-weight: bold;">평균</td>
+                                    <td style="padding: 8px 4px; text-align: center; font-weight: bold; font-size: 1.2em; {% if average_score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">{{ average_score }}점</td>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                     <div class="omr-header" style="border-top: 1px solid #d4879c; border-bottom: none;">
                         <div class="omr-header-num">문항</div>

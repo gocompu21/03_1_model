@@ -228,17 +228,52 @@ def submit_exam(request, pk):
 @login_required
 def result_exam(request, pk):
     """
-    Show exam result
+    Show exam result with subject-based scoring
+    Each subject: 25 questions × 4 points = 100 points max
+    Final score: Average of all subject scores
     """
     mock_exam = get_object_or_404(MockExam, pk=pk, user=request.user)
 
     if not mock_exam.is_completed:
         return redirect("mock_exam:take", pk=pk)
 
-    questions = mock_exam.questions.select_related("question").all()
+    questions = mock_exam.questions.select_related("question", "question__subject").all()
+    
+    # Calculate subject-based scores
+    subject_scores = {}
+    for mq in questions:
+        subject_name = mq.question.subject.name if mq.question.subject else "기타"
+        if subject_name not in subject_scores:
+            subject_scores[subject_name] = {"correct": 0, "total": 0}
+        subject_scores[subject_name]["total"] += 1
+        if mq.is_correct:
+            subject_scores[subject_name]["correct"] += 1
+    
+    # Calculate scores (4 points per question, 100 points max per subject)
+    subject_results = []
+    total_score_sum = 0
+    for subject_name in ["수목병리학", "수목해충학", "수목생리학", "산림토양학", "수목관리학"]:
+        if subject_name in subject_scores:
+            data = subject_scores[subject_name]
+            score = data["correct"] * 4  # 4 points per correct answer
+            subject_results.append({
+                "name": subject_name,
+                "correct": data["correct"],
+                "total": data["total"],
+                "score": score,
+            })
+            total_score_sum += score
+    
+    # Average score (if we have 5 subjects)
+    average_score = total_score_sum / len(subject_results) if subject_results else 0
 
     return render(
         request,
         "mock_exam/result.html",
-        {"mock_exam": mock_exam, "questions": questions},
+        {
+            "mock_exam": mock_exam, 
+            "questions": questions,
+            "subject_results": subject_results,
+            "average_score": round(average_score, 1),
+        },
     )
