@@ -309,24 +309,6 @@
 </style>
 
 <div class="detail-wrapper">
-    <!-- Sidebar -->
-    <aside class="detail-sidebar">
-        <div class="sidebar-card">
-            <h3 class="sidebar-title">📑 관련 목차</h3>
-            <ul class="sibling-list">
-                {% for sibling in siblings %}
-                <li>
-                    <a href="{% url 'practice:chapter_detail' sibling.id %}" 
-                       class="sibling-link {% if sibling.id == chapter.id %}active{% endif %}">
-                        <span class="sibling-code">{{ sibling.code }}</span>
-                        <span class="sibling-title">{{ sibling.title }}</span>
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-    </aside>
-    
     <!-- Main Content -->
     <div class="detail-main">
         {% if saved %}
