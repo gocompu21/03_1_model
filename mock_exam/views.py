@@ -10,12 +10,54 @@ import random
 @login_required
 def index(request):
     """
-    Mock Exam Dashboard
+    Mock Exam Dashboard with subject-based scoring
     """
-    recent_exams = MockExam.objects.filter(user=request.user).order_by("-start_time")[
-        :5
-    ]
-    return render(request, "mock_exam/index.html", {"recent_exams": recent_exams})
+    recent_exams = MockExam.objects.filter(user=request.user).order_by("-start_time")[:5]
+    
+    # Pre-calculate subject scores for each completed exam
+    exams_with_scores = []
+    for exam in recent_exams:
+        if exam.is_completed:
+            questions = exam.questions.select_related("question", "question__subject").all()
+            
+            # Calculate per-subject scores
+            subject_scores = {}
+            for mq in questions:
+                subject_name = mq.question.subject.name if mq.question.subject else "기타"
+                if subject_name not in subject_scores:
+                    subject_scores[subject_name] = {"correct": 0, "total": 0}
+                subject_scores[subject_name]["total"] += 1
+                if mq.is_correct:
+                    subject_scores[subject_name]["correct"] += 1
+            
+            # Calculate scores (4 points per question)
+            subject_results = []
+            total_score_sum = 0
+            for subject_name in ["수목병리학", "수목해충학", "수목생리학", "산림토양학", "수목관리학"]:
+                if subject_name in subject_scores:
+                    data = subject_scores[subject_name]
+                    score = data["correct"] * 4
+                    subject_results.append({
+                        "name": subject_name[:2],  # Short name for display
+                        "score": score,
+                    })
+                    total_score_sum += score
+            
+            average_score = round(total_score_sum / len(subject_results), 1) if subject_results else 0
+            
+            exams_with_scores.append({
+                "exam": exam,
+                "subject_results": subject_results,
+                "average_score": average_score,
+            })
+        else:
+            exams_with_scores.append({
+                "exam": exam,
+                "subject_results": None,
+                "average_score": None,
+            })
+    
+    return render(request, "mock_exam/index.html", {"exams_with_scores": exams_with_scores})
 
 
 @login_required

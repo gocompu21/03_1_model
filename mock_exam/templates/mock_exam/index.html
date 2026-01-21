@@ -232,28 +232,35 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for exam in recent_exams %}
+                    {% for item in exams_with_scores %}
                     <tr>
-                        <td>{{ exam.start_time|date:"Y-m-d H:i" }}</td>
+                        <td>{{ item.exam.start_time|date:"Y-m-d H:i" }}</td>
                         <td>
-                            {% if exam.score is not None %}
-                            {{ exam.score }}점
+                            {% if item.subject_results %}
+                            <div style="font-size: 0.85em;">
+                                {% for s in item.subject_results %}
+                                <span style="margin-right: 5px; {% if s.score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">{{ s.name }}:{{ s.score }}</span>
+                                {% endfor %}
+                            </div>
+                            <div style="font-weight: bold; margin-top: 3px;">
+                                <span style="{% if item.average_score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">평균: {{ item.average_score }}점</span>
+                            </div>
                             {% else %}
                             -
                             {% endif %}
                         </td>
                         <td>
-                            {% if exam.is_completed %}
+                            {% if item.exam.is_completed %}
                             <span class="badge badge-success">완료</span>
                             {% else %}
                             <span class="badge badge-warning">진행 중</span>
                             {% endif %}
                         </td>
                         <td>
-                            {% if exam.is_completed %}
-                            <a href="{% url 'mock_exam:result' exam.id %}" class="btn-sm btn-info">결과 보기</a>
+                            {% if item.exam.is_completed %}
+                            <a href="{% url 'mock_exam:result' item.exam.id %}" class="btn-sm btn-info">결과 보기</a>
                             {% else %}
-                            <a href="{% url 'mock_exam:take' exam.id %}" class="btn-sm btn-primary">계속하기</a>
+                            <a href="{% url 'mock_exam:take' item.exam.id %}" class="btn-sm btn-primary">계속하기</a>
                             {% endif %}
                         </td>
                     </tr>
