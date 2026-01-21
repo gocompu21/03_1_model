@@ -160,5 +160,5 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10485760
 
 # Session settings
-SESSION_COOKIE_AGE = 60 * 60  # 1 hour (3600 seconds)
+SESSION_COOKIE_AGE = 60 * 150  # 150 minutes (9000 seconds) - enough for 125-min exams
 SESSION_SAVE_EVERY_REQUEST = True  # Refresh session on every request
