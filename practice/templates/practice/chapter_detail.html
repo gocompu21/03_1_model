@@ -324,7 +324,11 @@
                     <a href="{% url 'practice:book_list' %}">📚 교재 목록</a> &gt;
                     <a href="{% url 'practice:chapter_list' chapter.book.id %}">{{ chapter.book.name }}</a> &gt;
                     {% for ancestor in chapter.get_ancestors %}
+                    {% if ancestor.has_content %}
                     <a href="{% url 'practice:chapter_detail' ancestor.id %}">{{ ancestor.title }}</a> &gt;
+                    {% else %}
+                    <span>{{ ancestor.title }}</span> &gt;
+                    {% endif %}
                     {% endfor %}
                     <span>{{ chapter.title }}</span>
                 </div>

@@ -56,6 +56,10 @@ class Chapter(models.Model):
             ancestors.insert(0, parent)
             parent = parent.parent
         return ancestors
+    
+    def has_content(self):
+        """챕터에 컨텐츠가 있는지 확인"""
+        return hasattr(self, 'content') and self.content is not None
 
 
 class PracticeQuestion(models.Model):
