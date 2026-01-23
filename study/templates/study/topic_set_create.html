@@ -492,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             if (data.success) {
                 alert('✅ 문제집이 저장되었습니다!');
-                window.location.href = '{% url "study:topic_set_list" %}';
+                window.location.href = '{% url "study:topic_set_list" %}?subject=' + subjectId;
             } else {
                 alert('저장 실패: ' + (data.error || '오류'));
             }
