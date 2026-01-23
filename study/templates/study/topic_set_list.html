@@ -55,11 +55,40 @@
     
     .filter-label { font-weight: bold; color: #333; }
     
-    .filter-select {
-        padding: 6px 12px;
+    .subject-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .subject-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
         border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 0.85rem;
+        border-radius: 20px;
+        background: white;
+        color: #555;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    .subject-btn:hover {
+        background: #f0f7f4;
+        border-color: #40916c;
+        color: #2d6a4f;
+    }
+    
+    .subject-btn.active {
+        background: #2d6a4f;
+        color: white;
+        border-color: #2d6a4f;
+        box-shadow: 0 2px 4px rgba(45, 106, 79, 0.3);
     }
     
     .topic-table {
@@ -196,12 +225,22 @@
     </div>
     
     <div class="filter-bar">
-        <span class="filter-label">과목:</span>
-        <select class="filter-select" id="subjectFilter" onchange="location.href='?subject='+this.value">
+        <span class="filter-label" style="display:none;">과목:</span>
+        <div class="subject-buttons">
             {% for subject in subjects %}
-            <option value="{{ subject.id }}" {% if selected_subject.id == subject.id %}selected{% endif %}>{{ subject.name }}</option>
+                {% if subject.name != '농약학' %}
+                <a href="?subject={{ subject.id }}" class="subject-btn {% if selected_subject.id == subject.id %}active{% endif %}" data-id="{{ subject.id }}">
+                    {% if '수목병리' in subject.name %}🍃
+                    {% elif '수목해충' in subject.name %}🐛
+                    {% elif '수목생리' in subject.name %}🌱
+                    {% elif '산림토양' in subject.name %}🏜️
+                    {% elif '수목관리' in subject.name %}🌳
+                    {% else %}📚{% endif %}
+                    {{ subject.name }}
+                </a>
+                {% endif %}
             {% endfor %}
-        </select>
+        </div>
     </div>
     
     {% if topic_sets %}
@@ -265,7 +304,7 @@
 
 <script>
 function moveTopicSet(id, direction) {
-    const subjectId = document.getElementById('subjectFilter').value;
+    const subjectId = '{{ selected_subject.id }}';
     
     fetch('{% url "study:api_reorder_topic_set" %}', {
         method: 'POST',

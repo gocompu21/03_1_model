@@ -283,43 +283,7 @@
 
 <div class="study-container">
     <!-- Tabs Header Container -->
-    <div class="tabs-header">
-        <div class="round-tabs-scroll">
-            {% for exam in exams %}
-            <a href="?round={{ exam.round_number }}"
-                class="tab-btn {% if exam.round_number == current_round %}active{% endif %}">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
-                </svg>
-                <span>{{ exam.round_number }}회</span>
-            </a>
-            {% endfor %}
-        </div>
 
-        <!-- Expand All Button -->
-        <button class="tab-btn" id="expand-all-btn" onclick="toggleAllExplanations()" style="background-color: #fff3cd; color: #856404;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span id="expand-all-text">전체 펼치기</span>
-        </button>
-
-        <!-- Fixed Back Button -->
-        <a href="{% url 'study:index' %}" class="tab-btn back-btn" style="background-color: #f7f7f7; color: #555;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5304 5.21071 21.0391 5.58579 21.4142C5.96086 21.7893 6.46957 22 7 22H17C17.5304 22 18.0391 21.7893 18.4142 21.4142C18.7893 21.0391 19 20.5304 19 20V10M19 10L21 12"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
-            <span>기출학습</span>
-        </a>
-    </div>
 
     <!-- Questions Content -->
     <div class="content-area">
