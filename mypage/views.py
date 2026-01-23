@@ -1777,6 +1777,28 @@ def chapter_list_api(request):
         return JsonResponse({"success": False, "error": str(e)})
 
 
+def reorder_chapter_codes(book_id, parent_id):
+    """
+    Recursively update codes of siblings and their descendants based on 'order'.
+    """
+    siblings = Chapter.objects.filter(book_id=book_id, parent_id=parent_id).order_by('order')
+    
+    parent_code = ""
+    if parent_id:
+        try:
+            parent = Chapter.objects.get(id=parent_id)
+            parent_code = parent.code
+        except Chapter.DoesNotExist:
+            return
+
+    for idx, chapter in enumerate(siblings, 1):
+        new_code = f"{parent_code}.{idx}" if parent_code else str(idx)
+        
+        if chapter.code != new_code:
+            chapter.code = new_code
+            chapter.save(update_fields=['code'])
+            reorder_chapter_codes(book_id, chapter.id)
+
 @login_required
 @require_POST
 def chapter_create(request):
@@ -1838,6 +1860,10 @@ def chapter_create(request):
             level=level,
             order=new_order
         )
+        
+        # Reorder codes to ensure consistency
+        reorder_chapter_codes(book.id, parent_id)
+        new_chapter.refresh_from_db()
         
         return JsonResponse({
             "success": True, 
@@ -1909,7 +1935,13 @@ def chapter_delete(request, chapter_id):
                 "error": f"이 목차에 {chapter.questions.count()}개의 문제가 있어 삭제할 수 없습니다."
             })
         
+        parent_id = chapter.parent_id
+        book_id = chapter.book_id
         chapter.delete()
+        
+        # Reorder remaining siblings
+        reorder_chapter_codes(book_id, parent_id)
+        
         return JsonResponse({"success": True, "message": "목차가 삭제되었습니다."})
     
     except Exception as e:
@@ -1953,6 +1985,9 @@ def chapter_move(request, chapter_id):
             swap_target.save()
         else:
             return JsonResponse({"success": False, "error": "더 이상 이동할 수 없습니다."})
+        
+        # Reorder codes
+        reorder_chapter_codes(chapter.book_id, chapter.parent_id)
         
         return JsonResponse({"success": True, "message": "순서가 변경되었습니다."})
     
