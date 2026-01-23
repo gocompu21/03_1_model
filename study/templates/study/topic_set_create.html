@@ -244,7 +244,7 @@
                         <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
                             <label class="form-label" style="margin: 0; white-space: nowrap;">과목</label>
                             <select class="form-control" id="subjectSelect" style="flex: 1;">
-                                <option value="">선택 안함</option>
+                                <option value="">과목 선택 (필수)</option>
                                 {% for subject in subjects %}
                                 <option value="{{ subject.id }}">{{ subject.name }}</option>
                                 {% endfor %}
@@ -453,6 +453,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!title) {
             alert('제목을 입력해주세요.');
             titleInput.focus();
+            return;
+        }
+
+        if (!subjectId) {
+            alert('과목을 선택해주세요.');
+            document.getElementById('subjectSelect').focus();
             return;
         }
         
