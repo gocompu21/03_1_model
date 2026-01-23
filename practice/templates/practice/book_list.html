@@ -91,7 +91,7 @@
     {% if books %}
     <div class="book-grid">
         {% for book in books %}
-        {% if book.subject == '수목병리학' %}
+        {% if book.chapters.count > 0 %}
         <a href="{% url 'practice:chapter_list' book.id %}" class="book-card">
             <span class="book-subject">{{ book.subject }}</span>
             <div class="book-name">{{ book.name }}</div>
