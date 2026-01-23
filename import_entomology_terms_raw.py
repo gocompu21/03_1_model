@@ -11,359 +11,653 @@ django.setup()
 from glossary.models import Term, Subject
 
 RAW_TEXT = """
-가동가시 
-가루깍지벌레과 
-가루이과 
-가슴진딧물 
-가운뎃가슴 
-가죽날개 
-각인 
-간접조사 
-갈색깍지벌레 
-갈색날개노린재 
-갈색날개매미충 
-감각계 
-감광표피 
-갑각류 
-강도래목 
-상모 
-개나리잎벌 
-거미강 
-거북밀깍지벌레 
-거위벌레과 
-검게 굳히기 
-겉입틀류 
-격발현상 
-견사샘 
-겹눈 
-경고색 
-경보페로몬 
-경절 
-경제적 피해수준 
-경제적 피해허용수준 
-경주지 
-경화 
-경화반응 
-고막기관 
-고시군 
-고전적 조건화 
-곤충강 
-곤충병원성 미생물 
-골격근육 
-골돌기 
-곰솔왕진딧물 
-곱추무당벌레 
-공깍지벌레 
-공생균기관 
-과립병바이러스 
-관건해충 
-관습화 
-관주법 
-관총채벌레과 
-광감각기 
-광릉긴나무좀 
-광식성 
-교감신경계 
-교차저항성 
-구기 
-구더기형 
-굴착지 
-굴파리과 
-굼벵이형 
-귀뚜라미붙이목 
-귤가루이 
-극동등에잎벌 
-기계감각기 
-기계적 방제 
-기관 
-기관소지 
-기문 
-기생성 천적 
-기저막 
-기절 
-기피제 
-긴나무좀아과 
-긴노린재과 
-길잡이페로몬 
-깍지벌레과 
-꼬리좀벌과 
-꼬마버들재주나방 
-꽃매미과 
-끈끈이트랩 
-나무이과 
-나무좀아과 
-나무주사법 
-나비목 
-나비유충형 
-나용 
-난각 
-난황막 
-난황형성 
-날개 
-날개가시형 
-날개갈고리형 
-날개걸이형 
-날개맥 
-날도래목 
-남방차주머니나방 
-남포잎벌 
-납작잎벌과 
-낫발이목 
-낱눈 
-내돌기 
-내배엽 
-내부기생자 
-내분비계 
-내성 
-내시류 
-내인성 동조 
-내장신경계 
-내충성 
-내한성 
-넓적마디 
-네레이스톡신계 살충제 
-네오니코티노이드계 살충제 
-노랑쐐기나방 
-노랑털알락나방 
-노린재과 
-노린재목 
-노린재아목 
-노린재형 
-녹강균 
-농약 
-느티나무벼룩바구미 
-느티나무알락진딧물 
-다듬이벌레목 
-다지류 
-다형현상 
-단식성 
-단위생식 
-대나무쐐기알락나방 
-대륙털진딧물 
-대벌레(류) 
-대벌레목 
-대벌레붙이목 
-대추애기잎말이나방 
-더듬이 
-도구적 학습 
-도랑 
-도래마디 
-도약지 
-도토리거위벌레 
-도포법 
-독나방(아과) 
-독샘 
-돈나무이 
-돌발해충 
-돌좀목 
-동물식성 
-동정 
-동조 
-동종기생자 
-두순 
-두점알벼룩잎벌레 
-두충밤나방 
-두텁날개 
-뒷가슴 
-뒷머리 
-등에잎벌과 
-등판 
-등혈관 
-등홉눈 
-딱정벌레목 
-딱지날개 
-땅강아지과 
-때죽납작진딧물 
-랙샘 
-루비깍지벌레 
-마크로라이드계 살충제 
-말레이즈트랩 
-말매미 
-말초신경계 
-말피기관 
-매몰법 
-매미과/아목 
-매미나방 
-매미충과 
-매실애기잎말이나방 
-머리덮개/샘 
-먹이트랩 
-메뚜기과/목/형 
-명나방과 
-모감주진사진딧물 
-모방 
-목화명나방/진딧물 
-무기살충제 
-무릎아래기관 
-무변태 
-무시아강 
-무정위운동 
-물리적 방제 
-물푸레면충/방패벌레 
-미각수용체 
-미국선녀벌레/흰불나방 
-미스트법 
-민벌레목 
-밀깍지벌레과 
-밑들이목/밑마디 
-바구미과 
-바다거미강 
-바퀴목 
-박각시나방과 
-박명박모성 
-박쥐나방(과) 
-박피법 
-반사궁 
-반초시 
-발목마디 
-발육영점온도 
-밤나무 해충 
-밤나무산누에나방/혹벌/혹응애 
-밤나방과/밤바구미 
-방아벌레형 
-방어샘 
-방패벌레과 
-배나무방패벌레 
-배롱나무알락진딧물 
-배반엽 
-배설계 
-배자발생 
-배판 
-백강균 
-버들잎벌레/재주나방 
-버즘나무방패벌레 
-벌레혹 
-벌목 
-범갑각류 
-법적 방제 
-벚나무깍지벌레/모시나방/사향하늘소/응애 
-벤조일페닐우레아계 살충제 
-벼룩목 
-변태 
-별박이자나방 
-병절 
-보호색 
-복숭아가루진딧물/명나방/유리나방/혹진딧물 
-복합저항성 
-볼록총채벌레 
-봉합선 
-부식성/부식자 
-부절 
-부채벌레목 
-북방수염하늘소 
-분무법/분산페로몬/분제살포법 
-불나방아과/불완전변태 
-붉나무혹응애/붉은테두리진딧물 
-비경제해충/비단벌레과/비선형모형 
-빠는형 입틀/뺨 
-뽕나무깍지벌레/명나방/이 
-뿌리혹벌레과 
-뿔나방과/뿔매미과/뿔밀깍지벌레 
-사마귀목 
-사사키잎혹진딧물/사철깍지벌레 
-사철나무혹파리 
-사회성 곤충/사회성기생자 
-산누에나방과/산란 
-살비제/살충제/살충제저항성위원회 
-상순/상표피 
-생명표/생물군집/생물농축/생물적 방제 
-생식계/생태적 방제 
-선녀벌레(과) 
-선충/선형모형 
-성페로몬/센털 
-소각법 
-소나무가루깍지벌레/굴깍지벌레/껍질깍지벌레/솜벌레/왕진딧물 
-소나무재선충병 매개충/방제특별법 
-소나무좀 
-소화계/소화중독제 
-속돌기/속입틀류 
-솔껍질깍지벌레/솔나방(과)/솔수염하늘소/솔잎벌(과)/솔잎혹파리 
-솜벌레과/송곳벌과 
-수간부 조사/수관부 조사 
-수목해충/수정(낭) 
-순환계 
-시냅스/시노몬/시맥 
-식나무깍지벌레/식물방역법/식물식성/식식자/식엽성 해충 
-신경계/신경분비세포/신경전달물질 
-신시군/신장수용기/신호물질/신호화학물질/실샘 
-쐐기나방과 
-쓸어잡기 
-씨살이좀벌과 
-씹는형 입틀 
-아까시잎혹파리/아랫입술 
-아세틸콜린/악취샘 
-알/알라타체/알락나방과/알락하늘소/알로몬/알형성 
-압력수용기/압력식 미량주입 
-앞가슴(샘)/앞가슴샘자극호르몬/앞털뭉뚝나무좀 
-야행성/약충/약해 
-엑디스테로이드 
-여과실/여치과 
-역상관교차저항성/연무법/연주리듬 
-옆판/옆홀눈 
-예찰 
-오리나무잎벌레/오리나무좀 
-왁스샘/왁스층 
-완전변태 
-왕바구미과 
-외골격/외배엽/외부기생자/외분비계 
-외시류/외인성 동조/외점애매미충/외줄면충/외표피 
-우화상/원격탐사/원표피/월주리듬 
-위용/윗머리/윗입술 
-유기살충제(계)/유기합성살충제 
-유리나방과/유살법/유생/유시아강/유아등/유약호르몬 
-유인목/유인샘/유인제 
-유충(기생자)/유효적산온도 
-육발이류/육식자/은폐색 
-이마(방패)/이목/이세리아깍지벌레/이종간 통신물질/이주 
-2차 해충/일반평형밀도 
-입제살포법/입틀 
-잎말이나방과/잎벌과/잎벌레과/잎응애과 
-자귀나무이/자귀뭉뚝날개나방/자나방과 
-작은턱/잠자리목/잠재학습/잠재해충/잡식자 
-잣나무넓적잎벌/잣나무별납작잎벌 
-장님노린재과/장미등에잎벌/장미흰깍지벌레 
-재주나방과/저장낭/적산온도모형 
-전구식/전나무잎말이진딧물/전나무잎응애/전사회성/전수조사/전장/전절/전흥 
-절지동물문 
-점박이응애/접촉제/정보화학물질/정위행동 
-제주집명나방/조록나무혹진딧물/조팝나무진딧물/존스턴기관 
-좀검정잎벌/좀목/좀붙이목/좀붙이형 
-종상감각기/종실 구과 해충/종아리마디 
-주둥무늬차색풍뎅이/주머니깍지벌레(과)/주머니나방과 
-주변신경계/주성/주요해충/주행성/주홍날개꽃매미 
-줄마디가지나방/줄솜깍지벌레 
-중배엽/중복기생자/중앙신경계/중장/중추신경계/중흥 
-쥐똥나무진딧물/쥐똥밀깍지벌레/쥐머리거품벌레과 
-지방체/직접조사/진달래방패벌레/진동법/진딧물과/진사진딧물/진사회성/진피 
-집게벌레목/집나방과/집합페로몬/짚신깍지벌레과 
-차단법/차독나방/차응애 
-참나무시들음병 매개충/참나무재주나방 
-채찍마디/천공성 해충/천연유기살충제/천적유지식물 
-철쭉띠띤애매미충/체벽/체표돌기/초시/촉각 
-총채벌레과/총채벌레목/축차조사/충영(형성 해충)/침투성 살충제 
-카디아카체/카바메이트계 살충제/카이로몬 
-큰날개매미충과/큰붉은잎밤나방/큰이십팔점박이무당벌레/큰턱/큰팽나무이 
-타감물질(작용)/탈피(선/호르몬) 
-털감각기/털날개나방과/털어잡기 
-테두리깍지벌레과/토양 조사/톡토기목/퇴구강/퇴절 
-파리목/파쇄·제재법/팽나무알락진딧물 
-페로몬(트랩)/편도세포/편절/평균곤 
-포살법/포식기생자/포식성 천적/포자형성세균류/포획지 
-표본조사/표지의태/풀잠자리목/풍뎅이과/피용 
-하구식/하늘소과/하루살이목/하인두/학명/함정트랩 
-합성 피레스로이드계 살충제/항객성/항공살포법/항생성 
-해충(종합관리)/핵다각체병바이러스/향나무하늘소/허리노린재과 
-헤엄지/현음기관/혈액 
-협각류/협식성/형태형성 
-호두나무잎벌레/호랑나비과/호리왕진딧물/호흡계 
-혹벌과/혹응애과/혹파리과/홈/홀눈 
-화학감각기/화학불임제/화학적 방제 
-황다리독나방/황색수반트랩 
-회양목명나방/회양목혹응애/회화나무이 
-후각수용체/후구식/후박나무굴깍지벌레/후박나무방패벌레/후장/후흥 
-훈증법(제)/휴면/흑화/흔들마디 
-흡즙성 해충/흡충기 
-흰개미류/흰개미붙이목/흰나비과
+Abies aphid 
+Acantholyda parki 
+acaricide 
+Aceria japonica 
+acetylcholine (Ach) 
+Acizzia jamatonica 
+Acrididae 
+Aculops chinonei 
+Adelgidae 
+Adoretus tenuimaculatus 
+Agelastica coerulea 
+aggregation pheromone 
+agricultural chemicals 
+Agromyzidae 
+alarm pheromone 
+Albizia psyllid 
+Aleyrodidae 
+allelochemical 
+allelopathy 
+allomone 
+Alnus ambrosia beetle 
+ametabolous 
+Amphitetranychus viennensis 
+Ancylis sativa 
+Anomis privata 
+Anomoneura mori 
+Anoplophora chinensis 
+antennae 
+anti-aggregation pheromone 
+antibiosis 
+antixenosis 
+Apareophora forsythiae 
+Aphididae 
+Aphis crinosa 
+Aphis gossypії 
+Aphis spiraecola 
+apodeme 
+apophyses 
+aposematic coloration 
+Apterygota 
+Arachnida 
+Archeognatha 
+Arctiinae 
+Arge pagana 
+Arge similis 
+Argidae 
+Argopistes biplagiatus 
+Armored scale 
+Aromia bungii 
+Arthropoda 
+Asterolecaniidae 
+Attelabidae 
+attractant 
+attractant gland 
+attractant trap logs 
+Aulacaspis rosae 
+autoparasite 
+Azaelea lace bug 
+Azalea argid sawfly 
+Bacillus thuringiensis 
+bait trap 
+Bamboo zygaenid 
+banker plants 
+basement membrane 
+batesian mimicry 
+beating 
+Beauveria bassiana 
+benzoylphenylurea insecticide 
+biocenose 
+biological concentration 
+biological control 
+Black locust midge 
+Black pine bast scale 
+Black-back prominent 
+blastoderm 
+Blattodea 
+Box-tree pyralid 
+brood parasite 
+Brown chafer 
+Brown winged green bug 
+Buprestidae 
+Cacopsylla tobirae 
+Californian maple aphid 
+Caligula japonica 
+Caliroa carinata 
+campaniform sensilla 
+campodeiform 
+carbamate insecticide 
+carnivore 
+Cecidomyiidae 
+Celtis shivaphis 
+Celtisaspis japonica 
+central nervous system 
+Cerambycidae 
+Ceratovacuna nekoashi 
+Cercopidae 
+Ceroplastes ceriferus 
+Ceroplastes japonicus 
+Ceroplastes rubens 
+Chaitophorus saliniger 
+chemical control 
+Chelicerata 
+chemoreceptor 
+chemosterilant 
+Cherry spider mite 
+Cherry tree borer 
+Chestnut curculio 
+Chestnut gall wasp 
+Chiasmia cinerearia 
+Chilli thrips 
+Chinese hairy aphid 
+chordotonal organ 
+chorion 
+Chrysomela vigintipunctata 
+Chrysomelidae 
+Chrysomphalus bifasciculatus 
+Cicadellidae 
+Cicadidae 
+Cinara pinidensiflorae 
+Cinara piniformosana 
+circalunar rhythm 
+circannual rhythm 
+circulatory system 
+Citrus whitefly 
+classical conditioning 
+clostera anachoreta 
+Clostera anastomosis 
+clypeus 
+coarctate 
+Coccidae 
+Coccinelloid flea beetle 
+Coleoptera 
+Collembola 
+complete metamorphosis 
+compound eye 
+Conogethes punctiferalis 
+contact insecticide 
+Coreidae 
+corpora allata 
+corpora cardiaca 
+Corythucha ciliata 
+Cotton aphid 
+Cotton leaf roller 
+Cottony cushion scale 
+coxa 
+Crape myrtle aphid 
+crepuscular 
+Crisicoccus pini 
+cross-resistance 
+Crustacea 
+cryptic coloration 
+Cryptotympana atrata 
+Curculio sikkimensis 
+Curculionidae 
+cursorial 
+Cyamophila willieti 
+Cyllorhynchites ursulus quercuphillus 
+Cymbidium scale 
+Cynipidae 
+darkening 
+Dendrolimus spectabilis 
+dermal light sense 
+Dermaptera 
+Dialeurodes citri 
+diapause 
+Diaspididae 
+digestive organ 
+Dinipponaphis autumna 
+Diplura 
+Diprionidae 
+Diptera 
+diurnal 
+dorsal ocelli 
+dorsal vessel 
+Dotted white geometrid 
+Dryocosmus kuriphilus 
+Dryophthoridae 
+ecdysial line 
+ecdysis 
+ecdysteroid 
+ecological control 
+economic injury level (EIL) 
+economic threshold (ET) 
+ectoderm 
+Ectognathous 
+ectoparasite 
+egg 
+elateriform 
+Elcysma westwoodi 
+elytra 
+Embioptera 
+embryogenesis 
+emergence box 
+Endoclyta excrescens 
+endoderm 
+endogenous entrainment 
+endoparasite 
+Endopterygota 
+Entognathous 
+entrainment 
+Ephemeroptera 
+epicranium 
+epicuticle 
+epidermis 
+Epilachna quadricollis 
+Ericerus pela 
+Eriococciidae 
+Eriococcus lagerstroemiae 
+Eriophyes buxis 
+Eriophyidae 
+Eriophyoid mite 
+eruciform 
+Eulachnus thunbergi 
+Eulecanium kunoense 
+Eumeta japonica 
+Euonymus gall midge 
+Euonymus scale 
+Euproctis pseudoconspersa 
+Euproctis subflava 
+Eurytomidae 
+eusocial 
+exarate 
+excretory system 
+exogenous entrainment 
+Exopterygota 
+exoskeleton 
+Fall webworm 
+False oleander scale 
+fat body 
+femur 
+fertilization 
+filter chamber 
+flagellum 
+Flatidae 
+flushing method 
+foregut 
+fossorial 
+frons 
+Frosted moth-bug 
+Fulgoridae 
+fumigant 
+Fuscartona funeralis 
+gall 
+gall-inducing pest 
+Gastrolina depressa 
+Geisha distinctissima 
+Gelechiidae 
+gena 
+general equilibrium position (GEP) 
+Geometridae 
+Giant bagworm 
+Giant silk moth 
+Glyphodes perspectalis 
+Glyphodes pyloalis 
+granulosis virus (GV) 
+Grape myrtile scale 
+Green broad-winged plant-hopper 
+Green peach aphid 
+Grylloblattodea 
+Gryllotalpidae 
+gustatory receptor 
+Gypsy moth 
+habituation 
+haemolymph 
+halteres 
+hardening 
+Haritalodes derogata 
+haustellate mouthparts 
+head capsule 
+hemelytra 
+hemimetabolous 
+Hemiptera 
+Hemipteroids 
+Henosepilachna vigintioctomaculata 
+Hepialidae 
+herbivore 
+Heteroptera 
+Hexapods 
+Hibiscus leaf caterpillar 
+hindgut 
+holometabolous 
+Homadaula anisocentra 
+Homoptera 
+Hyalopterus pruni 
+Hymenoptera 
+hyperparasite 
+Hyphantria cunea 
+hypognathous 
+hypopharynx 
+Icerya purchasi 
+identification 
+imprinting 
+incomplete metamorphosis 
+Indian wax scale 
+infochemical 
+inorganic insecticide 
+Insecta 
+insecticide 
+Insecticide Resistance Action Committee (IRAC) 
+instrumental learning 
+integrated pest management (IPM) 
+integument 
+Ivela auripes 
+Japanese alder leaf beetle 
+Japanese pine sawyer 
+Japanese red pine aphid 
+Japanese walking-stick 
+Japanese wax scale 
+Johnston's organ 
+Juniper bark borer 
+juvenile hormone (JH) 
+kairomone 
+key pests 
+kinesis 
+Korean blackish cicada 
+Korean pine webworm 
+labium 
+labrum 
+lac gland 
+Lantern fly 
+Large reddish blant-tipped moth 
+Larger potato lady beetle 
+larvae 
+Lasiocampidae 
+latent learning 
+lateral ocelli 
+leaf eating pest 
+legal control 
+Lepidoptera 
+Lepidosaphes pini 
+Lepidosaphes pinnaeformis 
+Leptoypha wuorentausi 
+light trap 
+Limacodidae 
+Lycorma delicatula 
+Lygaeidae 
+Lymantria dispar 
+Lymantrinae 
+macrolide insecticide 
+Macrophya timida 
+Malaise trap 
+Malpighian tubule 
+mandibles 
+Mantodea 
+Mantophasmatodea 
+Masakimyia pustulae 
+Matsucoccus matsumurae 
+Matsucoccus thunbergianae 
+maxillae 
+Mealy plum aphid 
+mechanical control 
+mechanoreceptor 
+Mecoptera 
+Membracidae 
+Merostomata 
+mesenteron 
+mesoderm 
+mesothorax 
+metamorphosis 
+Metarhizium anisopliae 
+metathorax 
+Metcalfa pruinosa 
+midgut 
+migration 
+mimesis 
+Mimosa webworm 
+Mindarus japonicus 
+Miridae 
+molting 
+molting hormone 
+Monema flavescens 
+Monochamus alternatus 
+Monochamus saltuarius 
+monophagous 
+Monophlebidae 
+morphogenesis 
+mouthparts 
+Mulberry sucker 
+multiple-resistance 
+mycetome 
+Myriapoda 
+Myzus persicae 
+naiad 
+Naratettix rubrovittatus 
+natatorial 
+Naxa seriaria 
+negative correlated cross-resistance 
+neonicotinoide insectide 
+Neoptera 
+nereistoxin insecticide 
+nervous system 
+Nesodiprion japonicus 
+Neuroptera 
+neurosecretory cell 
+neurotransmitter 
+Nipponaphis coreana 
+Noctuidae 
+nocturnal 
+Notodontidae 
+notum 
+nuclear polyhedrosis virus (NPV) 
+nymph 
+Oak nut weevil 
+Obolodiplosis robiniae 
+obtect 
+occiput 
+ocelli 
+Odonata 
+oenocyte 
+olfactory receptor 
+Oligonychus ununguis 
+oligophagous 
+ommatidium 
+omnivore 
+oogenesis 
+opisthognathous 
+Orchestes sanguinipes 
+organic insecticide 
+organochloride insecticide 
+organophosphorous insecticide 
+Oriental moth 
+Oriental tussock moth 
+Oriental woolly aphid 
+orientation behavior 
+Orthaga olivacea 
+Orthoperoids 
+Orthoptera 
+oviposition 
+Pagoda tree looper 
+Paleoptera 
+Pamphiliidae 
+Pancrustacea 
+Papilionidae 
+Paracolopha morrisoni 
+parasitoid 
+parthenogenesis 
+Peach pyralid moth 
+Pear lace bug 
+pedicel 
+Pellucid zygaenid 
+Pentatomidae 
+peripheral nervous system 
+Periphyllus californiensis 
+Periphyllus koelreuteriae 
+Phalera assimilis 
+Phasmatodea 
+pheromone 
+pheromone trap 
+Phlaeothripidae 
+photoreceptor 
+Phthiraptera 
+Phylloxeridae 
+physical control 
+phytophagy 
+phytotoxicity 
+Pieridae 
+Pine bark beetle 
+Pine caterpillar 
+Pine green sawfly 
+Pine mealybug 
+Pine needle gall midge 
+Pine oystershell scale 
+Pineus orientalis 
+pitfall trap 
+Platypodinae 
+Platypus koryoensis 
+Plautia stali 
+Plecoptera 
+pleuron 
+Plum globose scale 
+Pochazia shantungensis 
+poison gland 
+polymorphism 
+polyphagous 
+potential pest 
+presocial 
+pressure receptor 
+pressurized micro-injection method 
+Prociphilus oriens 
+proctodaeum 
+procuticle 
+prognathous 
+protective coloration 
+Protegira songi 
+prothoracic gland 
+prothoracicotropic hormone (PTTH) 
+prothorax 
+Protura 
+Pryeria sinica 
+Pseudaulacaspis cockerelli 
+Pseudaulacaspis pentagona 
+Pseudaulacaspis prunicola 
+Pseudococcidae 
+Psocoptera 
+scavenger 
+Psychidae 
+Psyllidae 
+scientific name 
+Pterophoridae 
+Pycnogonida 
+Pyralidae 
+Pyrrhalta humeralis 
+Ramulus irregulariterdentatus 
+raptorial 
+Red wax scale 
+Reddish-tipped prominent 
+Red-necked longicorn 
+reflex arc 
+repellent 
+repugnatorial gland 
+resurgence 
+Rhopalosiphum rufiabdominale 
+Rhopobota naevana 
+Rhus eriophyiid mite 
+Ricaniidae 
+Rice root aphid 
+Rose argid sawfly 
+Rose scale 
+Sakhalin pine longicorn beetle 
+Salix leaf beetle 
+saltatorial 
+saprophage 
+Sarucallis kahawaluokalani 
+Sasaki cherry aphid 
+scape 
+Scarabaeidae 
+scarabaeiform 
+Psocoptera 
+scavenger 
+Psychidae 
+scientific name 
+Pterophoridae 
+Pycnogonida 
+Pyrrhalta humeralis 
+Scirtothrips dorsalis 
+sclerotization 
+Scolytinae 
+Scolytus frontails 
+seed & cone pest 
+Semanotus bifasciatus 
+semiochemical 
+sensory organ 
+Sesiidae 
+seta 
+sex pheromone 
+Shivaphis celtis 
+silk gland 
+Singapora shinshana 
+Siphonaptera 
+Siricidae 
+social parasite 
+spermatheca 
+Sphingidae 
+spiracle 
+Spiraea aphid 
+spore forming bacteria 
+Spruce spider mite 
+spur 
+staturniidae 
+stemmata 
+Stephanitis fasciicarina 
+Stephanitis nashi 
+Stephanitis pyrioides 
+sternum 
+sticky trap 
+sting 
+stomach poison 
+stomodaeum 
+Strepsiptera 
+stretch receptor 
+String cottony scale 
+Styrax gall aphid 
+subgenual organ 
+sucking pest 
+sulcus 
+suture 
+sweeping 
+Swift moth 
+Sycamore lace bug 
+Synanthedon bicingulata 
+synapse 
+synomone 
+synthetic pyrethroid insectocide 
+systemic insecticide 
+Takahashia japonica 
+tanning 
+tarsus 
+taxis 
+Tea red spider mite 
+Tea tussock moth 
+tegmina 
+Tenthredinidae 
+Tetranychidae 
+Tetranychus kanzawai 
+Tetranychus urticae 
+Tettigoniidae 
+Thecodiplosis japonensis 
+Thripidae 
+Thysanoptera 
+Thysanura 
+tibia 
+Tingidae 
+Tinocallis zelkowae 
+Tobira sucker 
+tolerance 
+Tomicus piniperda 
+Tortricidae 
+Torymidae 
+trachea 
+suction trap 
+tracheole 
+trail pheromone 
+tree boring pests 
+trichoform sensilla 
+Trichoptera 
+trochanter 
+trunk injection 
+Tuberocephalus sasakii 
+Two-spotted spider mite 
+tympanal organ 
+Ume leaf roller 
+Unaspis euonymi 
+venation 
+vermiform 
+vertex 
+Viburnum leaf beetle 
+visceral nervous system 
+vitelline membrane 
+vitellogenesis 
+Walnut leaf beetle 
+wax gland 
+wax layer 
+White peach scale 
+White prunicola scale 
+White spotted longicorn beetle 
+White wax scale 
+Willow lace bug 
+Xylosandrus germanus 
+Yellow-legged tussock moth 
+yellow-pan trap 
+Yellow-tipped prominent 
+Yponomeutidae 
+Zelkova aphid 
+Zelkova jumping weevil 
+zoophagy 
+Zoraptera 
+Zygaenidae
 """
 
 def import_raw_terms():
@@ -401,21 +695,31 @@ def import_raw_terms():
     print(f"추출된 용어 수: {len(processed_terms)}개")
     
     created_count = 0
+    error_count = 0
+    
     for word in processed_terms:
-        # 이미 존재하는지 확인 (전체 용어 대상)
-        # 단, 다른 과목에만 있고 해충학에 없으면? -> 추가하고 과목 연결
-        term, created = Term.objects.get_or_create(word=word)
-        
-        # 해충학 과목 추가
-        if glossary_subject not in term.subjects.all():
-            term.subjects.add(glossary_subject)
+        try:
+            # 이미 존재하는지 확인 (전체 용어 대상)
+            # iexact로 대소문자 무시하고 중복 체크를 먼저 해볼 수도 있음
+            if Term.objects.filter(word__iexact=word).exists():
+                 term = Term.objects.filter(word__iexact=word).first()
+                 created = False
+            else:
+                 term = Term.objects.create(word=word)
+                 created = True
+            
+            # 해충학 과목 추가
+            if glossary_subject not in term.subjects.all():
+                term.subjects.add(glossary_subject)
+                
             if created:
                 created_count += 1
-            else:
-                # 이미 있는데 과목만 추가된 경우
-                pass
                 
-    print(f"처리 완료. 신규 등록: {created_count}개")
+        except Exception as e:
+            print(f"오류 ({word}): {e}")
+            error_count += 1
+                
+    print(f"처리 완료. 신규 등록: {created_count}개, 오류: {error_count}개")
 
 if __name__ == "__main__":
     import_raw_terms()
