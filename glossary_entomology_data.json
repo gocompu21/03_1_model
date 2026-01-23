@@ -14,20 +14,6 @@
     ]
   },
   {
-    "word": "5령 유충",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "Error querying: 429 You exceeded your current quota",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "GABA",
     "content": "",
     "subjects": [
@@ -35,238 +21,7 @@
     ]
   },
   {
-    "word": "head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_paid_tier_input_token_count",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "limit: 1000000",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 10.084076087s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 11.824060069s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 12.054994815s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 12.471748108s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 14.236489878s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 14.878921238s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 16.627405172s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 17.269937131s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 18.945863341s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 19.661816951s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 21.448683307s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 7.04654891s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 7.233589899s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 7.682364265s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 9.436951254s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "model: gemini-3-flash\nPlease retry in 9.622149848s. [links {\n  description: \"Learn more about Gemini API quotas\"\n  url: \"https://ai.google.dev/gemini-api/docs/rate-limits\"\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "please check your plan and billing details. For more information on this error",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 10\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 11\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 12\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 14\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 16\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 17\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 18\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 19\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 21\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 7\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "retry_delay {\n  seconds: 9\n}\n]",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "violations {\n  quota_metric: \"generativelanguage.googleapis.com/generate_content_paid_tier_input_token_count\"\n  quota_id: \"GenerateContentPaidTierInputTokensPerModelPerMinute\"\n  quota_dimensions {\n    key: \"model\"\n    value: \"gemini-3-flash\"\n  }\n  quota_dimensions {\n    key: \"location\"\n    value: \"global\"\n  }\n  quota_value: 1000000\n}",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "가루이류",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "가슴신경절",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -1085,13 +840,6 @@
     ]
   },
   {
-    "word": "매개 곤충",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "매몰",
     "content": "",
     "subjects": [
@@ -1198,13 +946,6 @@
   },
   {
     "word": "무변태",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "물리적 방제법",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -1373,13 +1114,6 @@
   },
   {
     "word": "방제",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "방패벌레과",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -1722,13 +1456,6 @@
     ]
   },
   {
-    "word": "생태적 방제",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "생태형",
     "content": "",
     "subjects": [
@@ -2045,13 +1772,6 @@
   },
   {
     "word": "아세틸콜린",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "아세틸콜린에스테라제",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -2401,13 +2121,6 @@
     ]
   },
   {
-    "word": "월동란",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "월동생태",
     "content": "",
     "subjects": [
@@ -2618,13 +2331,6 @@
     ]
   },
   {
-    "word": "이미다클로프리드 분산성액제",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "이세리아깍지벌레",
     "content": "",
     "subjects": [
@@ -2633,13 +2339,6 @@
   },
   {
     "word": "일반평형밀도",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "임업적 방제",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -2765,13 +2464,6 @@
     ]
   },
   {
-    "word": "전기적 신경연접",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "전기충격",
     "content": "",
     "subjects": [
@@ -2808,20 +2500,6 @@
   },
   {
     "word": "정소",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "제공된 기출문제 텍스트에서 '수목해충학 용어사전'에 등재할 만한 중요 전문 용어",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "제시된 수목해충학 기출문제 텍스트에서 추출한 주요 전문 용어",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -2871,13 +2549,6 @@
   },
   {
     "word": "종실",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "종실 가해",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -3017,13 +2688,6 @@
     ]
   },
   {
-    "word": "지표면 비닐 피복",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "지피물",
     "content": "",
     "subjects": [
@@ -3151,13 +2815,6 @@
   },
   {
     "word": "최성기",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "추출된 수목해충학 주요 전문 용어 및 개념은 다음과 같습니다.\n\n솔잎혹파리",
     "content": "",
     "subjects": [
       "수목해충학"
@@ -3430,20 +3087,6 @@
     ]
   },
   {
-    "word": "해충명 및 개념을 추출한 결과입니다.\n\n육상곤충",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "해충명 및 핵심 개념은 다음과 같습니다.\n\n발육률",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "해충발생밀도",
     "content": "",
     "subjects": [
@@ -3542,13 +3185,6 @@
     ]
   },
   {
-    "word": "환상 가해",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
     "word": "활동전위",
     "content": "",
     "subjects": [
@@ -3599,13 +3235,6 @@
   },
   {
     "word": "후대뇌",
-    "content": "",
-    "subjects": [
-      "수목해충학"
-    ]
-  },
-  {
-    "word": "후식",
     "content": "",
     "subjects": [
       "수목해충학"
