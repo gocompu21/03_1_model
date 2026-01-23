@@ -2630,11 +2630,11 @@
                 
                 node.innerHTML = `
                     <div class="node-content ${indentClass}">
-                        <div class="display-mode" style="display:flex; align-items:center; gap:10px; width:100%;">
-                            ${hasChildren ? '<i class="fas fa-caret-down" style="color:#6c757d; width:15px;"></i>' : '<span style="width:15px;"></span>'}
-                            <span class="ch-code" style="font-weight:bold; color:#2d6a4f; min-width:60px;">${chapter.code}</span>
-                            <span class="ch-title">${chapter.title}</span>
-                        </div>
+                    <div class="display-mode" style="display:flex; align-items:flex-start; gap:10px; width:100%;">
+                        ${hasChildren ? '<i class="fas fa-caret-down" style="color:#6c757d; width:15px; margin-top:5px;"></i>' : '<span style="width:15px;"></span>'}
+                        <span class="ch-code" style="font-weight:bold; color:#2d6a4f; min-width:60px; margin-top:2px;">${chapter.code}</span>
+                        <span class="ch-title" style="flex:1; word-break:keep-all; line-height:1.5;">${chapter.title}</span>
+                    </div>
                         <div class="edit-mode" style="display:none; align-items:center; gap:5px; width:100%;">
                             <input type="text" class="edit-code" value="${chapter.code}" style="width:80px;" placeholder="번호">
                             <input type="text" class="edit-title" value="${chapter.title}" style="flex:1;" placeholder="제목">
