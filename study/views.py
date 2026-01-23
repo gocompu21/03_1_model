@@ -796,12 +796,18 @@ def api_save_topic_set(request):
             TopicQuestionSetItem.objects.filter(question_set=topic_set).delete()
         else:
             # 생성 모드
+            # 생성 모드
+            from django.db.models import Max
+            max_order = TopicQuestionSet.objects.filter(subject=subject).aggregate(Max('order'))['order__max']
+            new_order = (max_order + 1) if max_order is not None else 0
+
             topic_set = TopicQuestionSet.objects.create(
                 title=title,
                 description=description,
                 subject=subject,
                 created_by=request.user,
-                is_public=True
+                is_public=True,
+                order=new_order
             )
         
         # 문제 추가 (순서 유지)
