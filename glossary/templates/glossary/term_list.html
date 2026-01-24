@@ -10,7 +10,7 @@
         {% if user.is_authenticated %}
         <span style="color: rgba(255,255,255,0.8);">{{ user.username }}님</span>
         {% if user.is_staff or user.is_superuser %}
-        <a href="{% url 'dashboard:index' %}" style="color: #ffc107; text-decoration: none; font-weight: 500;">Dashboard</a>
+        <a href="{% url 'dashboard:index' %}" style="color: #ffc107; text-decoration: none; font-weight: 500;">관리메뉴</a>
         {% endif %}
         <a href="{% url 'mypage:index' %}" style="color: white; text-decoration: none; font-weight: 500;">마이페이지</a>
         {% else %}
@@ -181,22 +181,7 @@
     <form class="filter-bar" method="get" style="padding: 12px 15px; margin-bottom: 15px;">
         <span style="font-size: 1.1rem; font-weight: 700; color: #2d6a4f; margin-right: 15px;">📖 찾아보기</span>
         <input type="text" name="q" placeholder="용어 검색..." value="{{ search_query }}" style="padding: 6px 12px; font-size: 0.9rem;">
-        <div class="subject-buttons">
-            <a href="?q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if not selected_subject %}active{% endif %}">
-                📚 전체
-            </a>
-            {% for subject in subjects %}
-            <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
-                {% if '병리' in subject.name %}🍃
-                {% elif '해충' in subject.name %}🐛
-                {% elif '생리' in subject.name %}🌱
-                {% elif '토양' in subject.name %}🏜️
-                {% elif '관리' in subject.name %}🌳
-                {% else %}📖{% endif %}
-                {{ subject.name }}
-            </a>
-            {% endfor %}
-        </div>
+
         <button type="submit" style="padding: 6px 15px; font-size: 0.9rem;">검색</button>
         {% if user.is_staff or user.is_superuser %}
         <a href="{% url 'glossary:term_create' %}" style="padding: 6px 15px; margin-left: auto; background: transparent; color: #2d6a4f; border: 1px solid #2d6a4f; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">+ 용어 등록</a>
@@ -208,7 +193,34 @@
     {% regroup terms by word|get_initial as grouped_terms %}
     
     <!-- Index Navigation (Multi-row Tabs Style) -->
-    <div style="display: flex; flex-wrap: wrap; border-bottom: 2px solid #2d6a4f; margin-bottom: 4px; padding: 0; gap: 2px;">
+    <div style="display: flex; flex-wrap: wrap; border-bottom: 2px solid #2d6a4f; margin-bottom: 4px; padding: 0; gap: 2px; align-items: center;">
+        <!-- Subject Filter Buttons (수목병리학, 수목해충학, 수목생리학, 전체 순서) -->
+        <div class="subject-buttons" style="margin-left: 0; margin-right: 15px;">
+            {% for subject in subjects %}
+                {% if '병리' in subject.name %}
+                <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
+                    🍃 {{ subject.name }}
+                </a>
+                {% endif %}
+            {% endfor %}
+            {% for subject in subjects %}
+                {% if '해충' in subject.name %}
+                <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
+                    🐛 {{ subject.name }}
+                </a>
+                {% endif %}
+            {% endfor %}
+            {% for subject in subjects %}
+                {% if '생리' in subject.name %}
+                <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
+                    🌱 {{ subject.name }}
+                </a>
+                {% endif %}
+            {% endfor %}
+            <a href="?q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if not selected_subject %}active{% endif %}">
+                📚 전체
+            </a>
+        </div>
         <style>
             .glossary-tab {
                 display: block; 
