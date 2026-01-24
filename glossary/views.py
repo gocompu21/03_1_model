@@ -15,8 +15,14 @@ def term_list(request):
     ).order_by('word')
     subjects = Subject.objects.all()
     
-    # 과목 필터
+    # 과목 필터 (기본값: 수목해충학)
     subject_id = request.GET.get('subject')
+    if subject_id is None:
+        # URL에 subject 파라미터가 없으면 수목해충학을 기본으로
+        default_subject = Subject.objects.filter(name__contains='수목해충학').first()
+        if default_subject:
+            subject_id = str(default_subject.id)
+    
     if subject_id:
         terms = terms.filter(subjects__id=subject_id)
     
