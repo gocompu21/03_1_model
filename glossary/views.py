@@ -9,7 +9,8 @@ from .models import Subject, Term, TermReference
 @login_required
 def term_list(request):
     """용어 목록"""
-    terms = Term.objects.prefetch_related('subjects', 'references').annotate(
+    # 성능 최적화: references는 prefetch하지 않음 (목록에서는 count만 필요)
+    terms = Term.objects.prefetch_related('subjects').annotate(
         reference_count=Count('references')
     ).order_by('word')
     subjects = Subject.objects.all()
