@@ -10,6 +10,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 from django.conf import settings
+from django.db.models import Q
+from django.db.models.functions import Length
 from glossary.models import Subject, Term
 try:
     from fileSearchStore import GeminiStoreManager
@@ -26,8 +28,12 @@ def generate_definitions():
         print("오류: '수목해충학' 과목을 찾을 수 없습니다.")
         return
 
-    # 2. 정의가 없는 용어 조회
-    terms = Term.objects.filter(subjects=subject).filter(content__exact='')
+    # 2. 정의가 없거나 100자 이하인 용어 조회
+    terms = Term.objects.filter(subjects=subject).annotate(
+        content_length=Length('content')
+    ).filter(
+        Q(content__exact='') | Q(content_length__lte=100)
+    )
     total_count = terms.count()
     print(f"정의 생성 대상 용어: {total_count}개")
     
