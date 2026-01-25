@@ -753,11 +753,12 @@ Key Concepts:
 {context}
 
 Requirements:
-1. Visual Style: Clean, modern, medical/scientific illustration style. High resolution.
+1. Visual Style: Cartoon and Watercolor style (artistic but accurate). High resolution.
 2. Layout: Organized, easy to follow flow.
 3. Content: Visualize the key concepts mentioned above (e.g., insect anatomy, lifecycle, classification).
-4. No text overload: Use icons, diagrams, and short labels rather than long text.
-5. Language: Korean (if possible) or English labels.
+4. Reference: If realistic details are required, reference real-world visual characteristics accurately but render them in the specified Cartoon/Watercolor style.
+5. No text overload: Use icons, diagrams, and short labels rather than long text.
+6. Language: Korean (if possible) or English labels.
 """
         
         # Gemini Client 설정
