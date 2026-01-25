@@ -494,7 +494,7 @@ def api_get_textbook_content(request):
    - 소제목: <h4 style="color:#2d3748; margin-top:12px; margin-bottom:2px; font-size:16px; letter-spacing:-0.3px;">소제목</h4>
    - 키워드: <strong style="color:#c53030;">중요한 용어</strong>
    - 리스트 컨테이너: <div style="margin-left:8px; margin-top:0px; line-height:1.4;">
-   - 박스: <div style="background:#ebf8ff; border-left:4px solid #3182ce; padding:8px 12px; margin:8px 0; border-radius:4px; font-size:14px; line-height:1.4;">
+   - 박스: <div style="background:#ebf8ff; border-left:4px solid #3182ce; padding:8px 12px; margin:8px 0 8px 60px; border-radius:4px; font-size:14px; line-height:1.4;">
 6. **LaTeX 및 영문 표기**:
    - 단순 영문 용어 및 단위(온도 등)는 LaTeX 쓰지 말고 일반 텍스트로 표기 (예: `(chitin)` O, `50°C` O)
    - LaTeX 사용 금지 예: `($\text{{chitin}}$)` X, `$50^\circ\text{{C}}$` X
