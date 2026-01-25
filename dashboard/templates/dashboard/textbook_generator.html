@@ -363,6 +363,9 @@
                 <button type="button" class="btn btn-info" onclick="generateImage()" style="background-color: #6f42c1; border-color: #6f42c1;">
                     <i class="fas fa-image"></i> 이미지 생성
                 </button>
+                <button type="button" class="btn btn-info" onclick="formatContent()" style="background-color: #fd7e14; border-color: #fd7e14;">
+                    <i class="fas fa-align-left"></i> 텍스트 포맷팅
+                </button>
                 <button type="button" class="btn btn-success" onclick="saveContent()">
                     <i class="fas fa-save"></i> 저장
                 </button>
@@ -671,6 +674,67 @@
                     alert('이미지가 생성되어 본문 상단에 추가되었습니다.');
                 } else {
                     alert('이미지 생성 실패: ' + data.error);
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                alert('통신 오류: ' + err.message);
+            });
+        }
+        
+        function formatContent() {
+            const chapterId = document.getElementById('chapter-select').value;
+            if (!chapterId) {
+                alert('목차를 먼저 선택해주세요.');
+                return;
+            }
+            
+            const content = $('#content-editor').summernote('code');
+            // 태그 제거 후 텍스트만 확인
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = content;
+            const textContent = tempDiv.textContent || tempDiv.innerText || "";
+            
+            if (!textContent.trim()) {
+                alert('포맷팅할 내용이 없습니다.');
+                return;
+            }
+            
+            if (!confirm('현재 내용을 지정된 기본서 스타일("~함"체, 번호 포맷 등)로 변경하시겠습니까?\n기존 내용은 덮어씌워집니다.')) {
+                return;
+            }
+            
+            showLoading('텍스트를 포맷팅하고 있습니다...');
+            
+            fetch('{% url "dashboard:api_format_textbook_content" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ 
+                    chapter_id: chapterId,
+                    content: textContent // HTML 태그 제외하고 보낼지, 포함해서 보낼지 고민. 
+                                         // 프롬프트가 Text reformatting이므로 텍스트만 보내는게 AI가 이해하기 쉬울 수 있음.
+                                         // 하지만 원본 구조를 유지하려면 HTML을 보내는게 나음.
+                                         // 여기서는 텍스트 내용의 전면 재구성을 요청하므로 textContent를 보내고 구조를 새로 잡게 함.
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    // Markdown -> HTML Helper needs (same as generateContent)
+                    let html = data.content
+                        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                        .replace(/\n\n/g, '<br><br>')
+                        .replace(/\n/g, '<br>');
+                    
+                    $('#content-editor').summernote('code', html);
+                    showToast('내용이 포맷팅되었습니다.', 'success');
+                } else {
+                    alert('포맷팅 실패: ' + data.error);
                 }
             })
             .catch(err => {

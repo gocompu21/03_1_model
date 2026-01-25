@@ -18,5 +18,6 @@ urlpatterns = [
     path('api/textbook/load-content/', views.api_load_content, name='api_load_content'),
     path('api/textbook/save-quiz/', views.api_save_quiz, name='api_save_quiz'),
     path('api/textbook/image/', views.api_generate_textbook_image, name='api_generate_textbook_image'),
+    path('api/textbook/format-content/', views.api_format_textbook_content, name='api_format_textbook_content'),
 ]
 

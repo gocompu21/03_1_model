@@ -824,3 +824,75 @@ Requirements:
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
 
+@login_required
+@staff_member_required
+def api_format_textbook_content(request):
+    """기본서 내용 텍스트 포맷팅 (AJAX)"""
+    from django.http import JsonResponse
+    from practice.models import Chapter
+    from django.conf import settings
+    from fileSearchStore import GeminiStoreManager
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get('chapter_id')
+        content = data.get('content', '')
+        
+        if not content.strip():
+            return JsonResponse({'success': False, 'error': '포맷팅할 내용이 없습니다.'})
+            
+        chapter = None
+        subject = "일반"
+        chapter_info = ""
+        
+        if chapter_id:
+            try:
+                chapter = Chapter.objects.select_related('book').get(id=chapter_id)
+                subject = chapter.book.subject
+                chapter_info = f"{chapter.code} {chapter.title}"
+            except Chapter.DoesNotExist:
+                pass
+        
+        # Gemini Client 설정
+        api_key = settings.GEMINI_API_KEY
+        manager = GeminiStoreManager(api_key=api_key)
+        # No need to sync stores for simple reformatting, but consistent with other views
+        
+        prompt = f"""
+다음 텍스트를 [{subject}] 과목의 기본서 내용으로 정리해줘.
+목차 정보: {chapter_info}
+
+[원본 텍스트]
+{content}
+
+[요구사항]
+1. 문체: 존대말을 쓰지 말고 "~함"으로 끝나는 개조식 문체를 사용해. (예: "특징은 다음과 같음.")
+2. 포맷: 
+   - 번호는 (1), (2), (3) 형식을 사용해.
+   - 중요한 키워드는 **굵게** 표시해.
+   - 머리기호(Bullet points)를 적절히 사용해.
+3. 제외 사항:
+   - 서적 페이지나 레퍼런스(참고문헌)에 대한 언급은 모두 제거해.
+   - "이 텍스트는..." 같은 서론이나 결론 멘트 없이 내용만 출력해.
+"""
+        
+        # Use generated content logic - query generic store or subject store if accessible
+        # Since we are reformatting provided text, we don't necessarily need RAG, 
+        # but using query_store is the standard way here. 
+        # We can use the subject name as store_name to valid RAG if needed, 
+        # or just "General"/system prompt if the class supports it.
+        # Assuming query_store handles the prompt efficiently.
+        
+        formatted_content = manager.query_store(subject, prompt)
+        
+        return JsonResponse({
+            'success': True,
+            'content': formatted_content
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
