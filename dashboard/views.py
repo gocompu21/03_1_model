@@ -496,7 +496,8 @@ def api_get_textbook_content(request):
    - 리스트 컨테이너: <div style="margin-left:8px; margin-top:0px; line-height:1.4;">
    - 박스: <div style="background:#ebf8ff; border-left:4px solid #3182ce; padding:8px 12px; margin:8px 0; border-radius:4px; font-size:14px; line-height:1.4;">
 6. **LaTeX 및 영문 표기**:
-   - 단순 영문 용어는 LaTeX 쓰지 말고 일반 텍스트로 표기 (예: `(chitin)` O, `($\text{{chitin}}$)` X)
+   - 단순 영문 용어 및 단위(온도 등)는 LaTeX 쓰지 말고 일반 텍스트로 표기 (예: `(chitin)` O, `50°C` O)
+   - LaTeX 사용 금지 예: `($\text{{chitin}}$)` X, `$50^\circ\text{{C}}$` X
    - 복잡한 화학식이나 수학 공식만 MathJax(LaTeX) 사용
 7. 전체 내용을 <div style="font-family:'Google Sans Text', 'Google Sans', sans-serif; font-size:14px; line-height:1.5; color:#303030; letter-spacing:-0.2px;">로 감싸기
 8. **제목 바로 아래 본문이 올 때 빈 줄 없이 바로 이어지도록 작성**
