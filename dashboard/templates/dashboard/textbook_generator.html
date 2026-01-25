@@ -565,6 +565,11 @@
             document.getElementById('selected-chapter-display').innerText = '선택된 목차: ' + selectedText;
             
             if (this.value) {
+                // Reset UI contents
+                generatedQuestions = [];
+                renderQuizCards();
+                $('#content-editor').summernote('code', '');
+
                 noteArea.style.display = 'block';
                 loadContent(this.value); // Load content when chapter selected
             } else {
