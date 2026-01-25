@@ -776,7 +776,7 @@ Requirements:
         
         generate_content_config = types.GenerateContentConfig(
             response_modalities=["IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio="16:9"),
+            image_config=types.ImageConfig(aspect_ratio="16:9", image_size="4K"),
         )
         
         # 이미지 생성 요청
