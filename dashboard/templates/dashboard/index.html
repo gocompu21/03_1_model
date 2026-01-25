@@ -192,17 +192,17 @@
     <div class="dashboard-container">
         <!-- Quick Links - Top (Minimized) -->
         <div class="menu-grid">
-            <a href="{% url 'mypage:prompt_generator' %}" class="menu-card">
-                <i class="fas fa-cog"></i>
-                <h3>기출문제 관리</h3>
+            <a href="{% url 'dashboard:textbook_generator' %}" class="menu-card">
+                <i class="fas fa-magic"></i>
+                <h3>기본서 생성</h3>
             </a>
             <a href="{% url 'study:practice_manage' %}" class="menu-card">
                 <i class="fas fa-edit"></i>
                 <h3>내용이해 문제</h3>
             </a>
-            <a href="{% url 'dashboard:textbook_generator' %}" class="menu-card">
-                <i class="fas fa-magic"></i>
-                <h3>기본서 생성</h3>
+            <a href="{% url 'mypage:prompt_generator' %}" class="menu-card">
+                <i class="fas fa-cog"></i>
+                <h3>기출문제 관리</h3>
             </a>
             <a href="{% url 'mypage:index' %}?section=chapter_tree" class="menu-card">
                 <i class="fas fa-sitemap"></i>
