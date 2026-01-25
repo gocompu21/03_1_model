@@ -747,7 +747,7 @@ def api_generate_textbook_image(request):
         # 이미지 생성 프롬프트 구성
         prompt = f"""
 Create a highly educational and visually appealing infographic for the following topic:
-Topic: {chapter.book.name} - {chapter.title} ({chapter.code})
+Topic: {chapter.title}
 
 Key Concepts:
 {context}
