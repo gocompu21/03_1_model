@@ -413,3 +413,412 @@ def delete_topic_set(request, set_id):
         return JsonResponse({'success': False, 'error': '문제집을 찾을 수 없습니다.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ============================================================================
+# 기본서 내용 생성 및 연습문제 자동 출제
+# ============================================================================
+
+@login_required
+@staff_member_required
+def textbook_generator(request):
+    """기본서 내용 생성 및 연습문제 자동 출제 메인 페이지"""
+    from practice.models import Book
+    
+    books = Book.objects.all().order_by('subject', 'name')
+    
+    return render(request, 'dashboard/textbook_generator.html', {
+        'books': books,
+        'page_title': '기본서 내용 생성',
+    })
+
+
+@login_required
+@staff_member_required
+def api_get_textbook_content(request):
+    """목차에서 기본서 내용 가져오기 (AJAX)"""
+    from django.http import JsonResponse
+    from practice.models import Chapter
+    from django.conf import settings
+    import json
+    
+    # Imports for image generation
+    try:
+        import os
+        import mimetypes
+        import time
+        from google import genai
+        from google.genai import types
+    except ImportError:
+        pass
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get('chapter_id')
+        
+        if not chapter_id:
+            return JsonResponse({'success': False, 'error': '목차를 선택해주세요.'})
+        
+        chapter = Chapter.objects.select_related('book').get(id=chapter_id)
+        
+        # 과목명 → 스토어 이름 매핑
+        subject_name = chapter.book.subject
+        store_name = subject_name  # 동일한 이름 사용
+        
+        # GeminiStoreManager로 내용 가져오기
+        from fileSearchStore import GeminiStoreManager
+        api_key = settings.GEMINI_API_KEY
+        manager = GeminiStoreManager(api_key=api_key)
+        manager.sync_all_stores()
+        
+        # 프롬프트 구성 (HTML 형식으로 요청)
+        prompt = f'''{chapter.code}에 대해 HTML 형식으로 자세히 정리해줘.
+
+[필수 규칙]
+1. **제목 표시 금지**: 결과물의 맨 처음에 대목차 제목(예: {chapter.code} {chapter.title})을 작성하지 마시오. 바로 하위 내용부터 시작하시오.
+2. 존대말 금지, "~함"체로 작성
+3. 서적 페이지나 레퍼런스 언급 금지
+4. **계층 구조 및 번호 매기기 규칙 (철저 준수)**:
+   - 대분류: <div style="margin-left:0px; margin-top:20px; font-weight:bold; font-size:16px;"><span style="font-weight:bold; color:#2b6cb0; margin-right:4px;">(1)</span> 제목</div>
+   - 중분류: <div style="margin-left:20px; margin-top:10px;"><span style="font-weight:bold; color:#2d3748; margin-right:4px;">가)</span> 내용</div>
+   - 소분류: <div style="margin-left:40px; margin-top:5px;"><span style="margin-right:4px;">1)</span> 내용</div>
+   - 예시:
+     <div style="margin-left:0px; margin-top:20px; font-weight:bold; font-size:16px;"><span ...>(1)</span> 대제목</div>
+     <div style="margin-left:20px; margin-top:10px;"><span ...>가)</span> 중제목 ...</div>
+     <div style="margin-left:40px; margin-top:5px;"><span ...>1)</span> 소내용 ...</div>
+5. **HTML 스타일 및 간격 (여백 최소화)**:
+   - 대제목: <h3 style="color:#2c5282; border-bottom:2px solid #4299e1; padding-bottom:2px; margin-top:20px; margin-bottom:4px; font-size:18px; letter-spacing:-0.5px;">제목</h3>
+   - 소제목: <h4 style="color:#2d3748; margin-top:12px; margin-bottom:2px; font-size:16px; letter-spacing:-0.3px;">소제목</h4>
+   - 키워드: <strong style="color:#c53030;">중요한 용어</strong>
+   - 리스트 컨테이너: <div style="margin-left:8px; margin-top:0px; line-height:1.4;">
+   - 박스: <div style="background:#ebf8ff; border-left:4px solid #3182ce; padding:8px 12px; margin:8px 0; border-radius:4px; font-size:14px; line-height:1.4;">
+6. **LaTeX 및 영문 표기**:
+   - 단순 영문 용어는 LaTeX 쓰지 말고 일반 텍스트로 표기 (예: `(chitin)` O, `($\text{{chitin}}$)` X)
+   - 복잡한 화학식이나 수학 공식만 MathJax(LaTeX) 사용
+7. 전체 내용을 <div style="font-family:'Google Sans Text', 'Google Sans', sans-serif; font-size:14px; line-height:1.5; color:#303030; letter-spacing:-0.2px;">로 감싸기
+8. **제목 바로 아래 본문이 올 때 빈 줄 없이 바로 이어지도록 작성**
+9. **줄간격 제약**: 문단 사이에도 빈 줄을 넣지 마십시오. 줄바꿈은 반드시 한 번만(`<br>`) 하십시오. (No double line breaks)
+'''
+        
+        result = manager.query_store(store_name, prompt)
+        
+        return JsonResponse({
+            'success': True,
+            'content': result,
+            'chapter_code': chapter.code,
+            'chapter_title': chapter.title,
+        })
+        
+    except Chapter.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '목차를 찾을 수 없습니다.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@staff_member_required
+def api_generate_quiz(request):
+    """목차 기반 퀴즈 문제 생성 (AJAX)"""
+    from django.http import JsonResponse
+    from practice.models import Chapter
+    from django.conf import settings
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get('chapter_id')
+        
+        if not chapter_id:
+            return JsonResponse({'success': False, 'error': '목차를 선택해주세요.'})
+        
+        chapter = Chapter.objects.select_related('book').get(id=chapter_id)
+        
+        # 과목명 → 스토어 이름 매핑
+        subject_name = chapter.book.subject
+        store_name = subject_name
+        
+        # GeminiStoreManager로 퀴즈 생성
+        from fileSearchStore import GeminiStoreManager
+        api_key = settings.GEMINI_API_KEY
+        manager = GeminiStoreManager(api_key=api_key)
+        manager.sync_all_stores()
+        
+        # 프롬프트 구성
+        prompt = f'''{chapter.code}에 대한 내용 이해 문제를 5지선다형(문제번호\t문제\t보기1\t보기2\t보기3\t보기4\t보기5\t정답\t해설)으로 중복없이 최대한 출제하고 csv 형태로 만들어 주되 분리자는 tab으로 해'''
+        
+        result = manager.query_store(store_name, prompt)
+        
+        # TSV 파싱
+        questions = []
+        lines = result.strip().split('\n')
+        for line in lines:
+            if not line.strip():
+                continue
+            parts = line.split('\t')
+            # 헤더 행 스킵
+            if parts[0].strip() == '문제번호':
+                continue
+            if len(parts) >= 8:
+                try:
+                    q = {
+                        'number': int(parts[0].strip()) if parts[0].strip().isdigit() else len(questions) + 1,
+                        'content': parts[1].strip() if len(parts) > 1 else '',
+                        'choice1': parts[2].strip() if len(parts) > 2 else '',
+                        'choice2': parts[3].strip() if len(parts) > 3 else '',
+                        'choice3': parts[4].strip() if len(parts) > 4 else '',
+                        'choice4': parts[5].strip() if len(parts) > 5 else '',
+                        'choice5': parts[6].strip() if len(parts) > 6 else '',
+                        'answer': int(parts[7].strip()) if len(parts) > 7 and parts[7].strip().isdigit() else 1,
+                        'explanation': parts[8].strip() if len(parts) > 8 else '',
+                    }
+                    questions.append(q)
+                except (ValueError, IndexError):
+                    continue
+        
+        return JsonResponse({
+            'success': True,
+            'questions': questions,
+            'raw_tsv': result,
+            'chapter_code': chapter.code,
+            'chapter_title': chapter.title,
+        })
+        
+    except Chapter.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '목차를 찾을 수 없습니다.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@staff_member_required
+def api_save_content(request):
+    """생성된 내용 저장 (AJAX)"""
+    from django.http import JsonResponse
+    from practice.models import Chapter, ChapterContent
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get('chapter_id')
+        content_text = data.get('content', '')
+        
+        if not chapter_id:
+            return JsonResponse({'success': False, 'error': '목차를 선택해주세요.'})
+        
+        chapter = Chapter.objects.get(id=chapter_id)
+        
+        # 기존 콘텐츠가 있으면 업데이트, 없으면 생성
+        content, created = ChapterContent.objects.update_or_create(
+            chapter=chapter,
+            defaults={
+                'content': content_text,
+                'author': request.user,
+            }
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'created': created,
+            'content_id': content.id,
+        })
+        
+    except Chapter.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '목차를 찾을 수 없습니다.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def api_load_content(request):
+    """지정된 목차의 저장된 내용 불러오기 (AJAX)"""
+    from django.http import JsonResponse
+    from practice.models import ChapterContent
+    
+    chapter_id = request.GET.get('chapter_id')
+    if not chapter_id:
+        return JsonResponse({'success': False, 'error': '목차를 선택해주세요.'})
+        
+    try:
+        content_obj = ChapterContent.objects.get(chapter_id=chapter_id)
+        return JsonResponse({
+            'success': True,
+            'content': content_obj.content,
+            'updated_at': content_obj.updated_at.strftime('%Y-%m-%d %H:%M')
+        })
+    except ChapterContent.DoesNotExist:
+        return JsonResponse({'success': True, 'content': '', 'message': '저장된 내용이 없습니다.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@staff_member_required
+def api_save_quiz(request):
+    """생성된 퀴즈 저장 (AJAX)"""
+    from django.http import JsonResponse
+    from practice.models import Chapter, PracticeQuestion
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get('chapter_id')
+        questions = data.get('questions', [])
+        
+        if not chapter_id:
+            return JsonResponse({'success': False, 'error': '목차를 선택해주세요.'})
+        
+        if not questions:
+            return JsonResponse({'success': False, 'error': '저장할 문제가 없습니다.'})
+        
+        chapter = Chapter.objects.get(id=chapter_id)
+        
+        # 마지막 문제 번호 확인
+        last_q = PracticeQuestion.objects.filter(chapter=chapter).order_by('-number').first()
+        next_number = (last_q.number + 1) if last_q else 1
+        
+        created_count = 0
+        for q in questions:
+            PracticeQuestion.objects.create(
+                chapter=chapter,
+                number=next_number,
+                content=q.get('content', ''),
+                choice1=q.get('choice1', ''),
+                choice2=q.get('choice2', ''),
+                choice3=q.get('choice3', ''),
+                choice4=q.get('choice4', ''),
+                choice5=q.get('choice5', ''),
+                answer=q.get('answer', 1),
+                explanation=q.get('explanation', ''),
+            )
+            next_number += 1
+            created_count += 1
+        
+        return JsonResponse({
+            'success': True,
+            'created_count': created_count,
+        })
+        
+    except Chapter.DoesNotExist:
+        return JsonResponse({'success': False, 'error': '목차를 찾을 수 없습니다.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@staff_member_required
+def api_generate_textbook_image(request):
+    """기본서 내용 기반 인포그래픽 이미지 생성 (AJAX)"""
+    from django.http import JsonResponse
+    from practice.models import Chapter
+    from django.conf import settings
+    import json
+    import os
+    import mimetypes
+    import time
+    from google import genai
+    from google.genai import types
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        chapter_id = data.get('chapter_id')
+        context = data.get('context', '')[:1000]  # 너무 길면 자름
+        
+        if not chapter_id:
+            return JsonResponse({'success': False, 'error': '목차를 선택해주세요.'})
+            
+        chapter = Chapter.objects.select_related('book').get(id=chapter_id)
+        
+        # 이미지 생성 프롬프트 구성
+        prompt = f"""
+Create a highly educational and visually appealing infographic for the following topic:
+Topic: {chapter.book.name} - {chapter.title} ({chapter.code})
+
+Key Concepts:
+{context}
+
+Requirements:
+1. Visual Style: Clean, modern, medical/scientific illustration style. High resolution.
+2. Layout: Organized, easy to follow flow.
+3. Content: Visualize the key concepts mentioned above (e.g., insect anatomy, lifecycle, classification).
+4. No text overload: Use icons, diagrams, and short labels rather than long text.
+5. Language: Korean (if possible) or English labels.
+"""
+        
+        # Gemini Client 설정
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        model = "gemini-3-pro-image-preview"
+        
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=prompt),
+                ],
+            ),
+        ]
+        
+        generate_content_config = types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(image_size="1K"),
+        )
+        
+        # 이미지 생성 요청
+        image_data = None
+        mime_type = None
+        
+        for chunk in client.models.generate_content_stream(
+            model=model,
+            contents=contents,
+            config=generate_content_config,
+        ):
+            if not chunk.candidates or not chunk.candidates[0].content.parts:
+                continue
+                
+            part = chunk.candidates[0].content.parts[0]
+            if part.inline_data and part.inline_data.data:
+                image_data = part.inline_data.data
+                mime_type = part.inline_data.mime_type
+                break
+        
+        if not image_data:
+            return JsonResponse({'success': False, 'error': '이미지 생성에 실패했습니다.'})
+            
+        # 임시 파일로 저장
+        file_extension = mimetypes.guess_extension(mime_type) or ".png"
+        timestamp = int(time.time())
+        filename = f"textbook_{chapter.id}_{timestamp}{file_extension}"
+        
+        temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_infographics')
+        os.makedirs(temp_dir, exist_ok=True)
+        temp_filepath = os.path.join(temp_dir, filename)
+        
+        with open(temp_filepath, 'wb') as f:
+            f.write(image_data)
+            
+        # URL 반환
+        image_url = os.path.join(settings.MEDIA_URL, 'temp_infographics', filename).replace('\\', '/')
+        
+        return JsonResponse({
+            'success': True,
+            'image_url': image_url,
+            'filename': filename
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+

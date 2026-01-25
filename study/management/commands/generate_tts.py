@@ -238,8 +238,8 @@ class Command(BaseCommand):
                     self.stdout.write(self.style.SUCCESS(f"  [{tab}] Saved: {cache_filename}"))
                     generated += 1
 
-                    # Rate limiting - wait between API calls (20s to avoid 429 errors)
-                    time.sleep(20)
+                    # Rate limiting - wait between API calls
+                    time.sleep(3)
 
                 except Exception as e:
                     self.stdout.write(self.style.ERROR(f"  [{tab}] Error: {str(e)}"))
