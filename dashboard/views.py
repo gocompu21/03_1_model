@@ -484,11 +484,11 @@ def api_get_textbook_content(request):
 4. **계층 구조 및 번호 매기기 규칙 (철저 준수)**:
    - 대분류: <div style="margin-left:0px; margin-top:20px; font-weight:bold; font-size:16px;"><span style="font-weight:bold; color:#2b6cb0; margin-right:4px;">(1)</span> 제목</div>
    - 중분류: <div style="margin-left:20px; margin-top:10px; font-weight:bold;"><span style="font-weight:bold; color:#2d3748; margin-right:4px;">가)</span> 내용</div>
-   - 소분류: <div style="margin-left:40px; margin-top:5px;"><span style="margin-right:4px;">1)</span> 내용</div>
+   - 소분류: <div style="margin-left:40px; margin-top:5px; padding-left:24px; text-indent:-24px;"><span style="margin-right:4px;">1)</span> 내용</div>
    - 예시:
      <div style="margin-left:0px; margin-top:20px; font-weight:bold; font-size:16px;"><span ...>(1)</span> 대제목</div>
      <div style="margin-left:20px; margin-top:10px; font-weight:bold;"><span ...>가)</span> 중제목 ...</div>
-     <div style="margin-left:40px; margin-top:5px;"><span ...>1)</span> 소내용 ...</div>
+     <div style="margin-left:40px; margin-top:5px; padding-left:24px; text-indent:-24px;"><span ...>1)</span> 소내용 ...</div>
 5. **HTML 스타일 및 간격 (여백 최소화)**:
    - 대제목: <h3 style="color:#2c5282; border-bottom:2px solid #4299e1; padding-bottom:2px; margin-top:20px; margin-bottom:4px; font-size:18px; letter-spacing:-0.5px;">제목</h3>
    - 소제목: <h4 style="color:#2d3748; margin-top:12px; margin-bottom:2px; font-size:16px; letter-spacing:-0.3px;">소제목</h4>
