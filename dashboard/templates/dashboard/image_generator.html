@@ -634,6 +634,14 @@
             reader.readAsDataURL(file);
         }
         
+        function viewImage(src) {
+            const image = new Image();
+            image.src = src;
+            const w = window.open("");
+            w.document.write(image.outerHTML);
+            w.document.close();
+        }
+
         function editImage() {
             if (!editPreviewImg.src) {
                 alert('이미지를 업로드해주세요.');
@@ -677,7 +685,8 @@
                 
                 if(data.success && data.image) {
                      console.log("Image received, rendering...");
-                     container.innerHTML = `<img id="imgEditResult" src="data:image/jpeg;base64,${data.image}" class="result-image" onclick="window.open(this.src)" style="width:100%; height:auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
+                     const imgSrc = `data:image/jpeg;base64,${data.image}`;
+                     container.innerHTML = `<img id="imgEditResult" src="${imgSrc}" class="result-image" onclick="viewImage(this.src)" style="width:100%; height:auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;">`;
                 } else {
                     console.error("Edit failed:", data.error);
                     container.innerHTML = `<div style="padding:20px; color:#d32f2f; text-align:center; background:#ffebee; border-radius:8px;">
