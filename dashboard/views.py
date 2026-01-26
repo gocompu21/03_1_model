@@ -980,7 +980,7 @@ def api_generate_image_variations(request):
         description = analysis_response.text
         
         # 2. Image Generation (Text-to-Image) for 3 styles (Removed Cartoon)
-        gen_model = "gemini-3-pro-image-preview"  # or imagen-3.0-generate-001
+        gen_model = "gemini-3-pro-image-preview"
         
         styles = {
             'watercolor': "Create a beautiful Watercolor painting of: ",
@@ -1000,7 +1000,7 @@ def api_generate_image_variations(request):
             try:
                 gen_config = types.GenerateContentConfig(
                     response_modalities=["IMAGE"],
-                    image_config=types.ImageConfig(aspect_ratio="1:1", image_size="1K"), # 1:1 for grid
+                    image_config=types.ImageConfig(aspect_ratio="16:9", image_size="1K"), # 16:9 for landscape
                 )
                 
                 # Check for 503 retry logic (Simple loop)
@@ -1079,38 +1079,49 @@ def api_generate_image_from_text(request):
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
         # Image Generation (Text-to-Image)
-        gen_model = "gemini-3-pro-image-preview"  # or imagen-3.0-generate-001
+        gen_model = "gemini-3-pro-image-preview"
         
         gen_config = types.GenerateContentConfig(
             response_modalities=["IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio="1:1"),
+            image_config=types.ImageConfig(aspect_ratio="16:9"),
         )
         
         generated_image_b64 = None
+        last_error = None
         
         # Retry logic for 503
         max_retries = 2
         for attempt in range(max_retries + 1):
             try:
-                response_stream = client.models.generate_content_stream(
+                response = client.models.generate_content(
                     model=gen_model,
                     contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
                     config=gen_config
                 )
                 
-                for chunk in response_stream:
-                    if chunk.candidates and chunk.candidates[0].content.parts:
-                        part = chunk.candidates[0].content.parts[0]
-                        if part.inline_data and part.inline_data.data:
-                            generated_image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
-                            break
-                
+                if response.candidates and response.candidates[0].content and response.candidates[0].content.parts:
+                    part = response.candidates[0].content.parts[0]
+                    if part.inline_data and part.inline_data.data:
+                        generated_image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
+                        
                 if generated_image_b64:
                     break
                 else:
-                    raise Exception("No image data in response")
+                    # Debug Info
+                    debug_info = "Response has no image data. "
+                    if response.candidates:
+                         debug_info += f"Candidates: {len(response.candidates)}. "
+                         if response.candidates[0].finish_reason:
+                             debug_info += f"Finish Reason: {response.candidates[0].finish_reason}. "
+                         if response.candidates[0].content and response.candidates[0].content.parts:
+                             debug_info += f"Part Text: {response.candidates[0].content.parts[0].text}. "
+                    else:
+                        debug_info += "No candidates. "
+                        
+                    raise Exception(f"{debug_info}")
                     
             except Exception as e:
+                last_error = str(e)
                 if "503" in str(e) or "Overloaded" in str(e):
                     if attempt < max_retries:
                         import time
@@ -1120,7 +1131,7 @@ def api_generate_image_from_text(request):
                 
                 # Check for safety filter refusal
                 if "finish_reason" in str(e) or "SAFETY" in str(e):
-                     return JsonResponse({'success': False, 'error': '안전 정책에 의해 이미지가 생성되지 않았습니다. 다른 프롬프트를 시도해주세요.'})
+                     return JsonResponse({'success': False, 'error': f'안전 정책에 의해 이미지가 생성되지 않았습니다: {str(e)}'})
                      
                 break
 
@@ -1130,7 +1141,7 @@ def api_generate_image_from_text(request):
                 'image': generated_image_b64
             })
         else:
-             return JsonResponse({'success': False, 'error': '이미지 생성에 실패했습니다. (모델 오류 또는 안전 정책)'})
+             return JsonResponse({'success': False, 'error': f'이미지 생성에 실패했습니다. 상세 오류: {last_error}'})
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
@@ -1187,7 +1198,7 @@ def api_edit_image(request):
         
         gen_config = types.GenerateContentConfig(
             response_modalities=["IMAGE"],
-            image_config=types.ImageConfig(aspect_ratio="1:1"),
+            image_config=types.ImageConfig(aspect_ratio="16:9"),
         )
         
         generated_image_b64 = None
