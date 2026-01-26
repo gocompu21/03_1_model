@@ -475,7 +475,7 @@ def api_get_textbook_content(request):
         manager.sync_all_stores()
         
         # 프롬프트 구성 (HTML 형식으로 요청)
-        prompt = f'''{chapter.code}에 대해 HTML 형식으로 자세히 정리해줘.
+        prompt = f'''{chapter.code} {chapter.title}에 대해 HTML 형식으로 자세히 정리해줘.
 
 [필수 규칙]
 1. **제목 표시 금지**: 결과물의 맨 처음에 대목차 제목(예: {chapter.code} {chapter.title})을 작성하지 마시오. 바로 하위 내용부터 시작하시오.
