@@ -551,7 +551,7 @@ def api_generate_quiz(request):
         manager.sync_all_stores()
         
         # 프롬프트 구성
-        prompt = f'''{chapter.code}에 대한 내용 이해 문제를 5지선다형(문제번호\t문제\t보기1\t보기2\t보기3\t보기4\t보기5\t정답\t해설)으로 중복없이 최대한 출제하고 csv 형태로 만들어 주되 분리자는 tab으로 해'''
+        prompt = f'''{chapter.code} {chapter.title}에 대한 내용 이해 문제를 5지선다형(문제번호\t문제\t보기1\t보기2\t보기3\t보기4\t보기5\t정답\t해설)으로 중복없이 최대한 출제하고 csv 형태로 만들어 주되 분리자는 tab으로 해'''
         
         result = manager.query_store(store_name, prompt)
         
