@@ -635,11 +635,43 @@
         }
         
         function viewImage(src) {
-            const image = new Image();
-            image.src = src;
-            const w = window.open("");
-            w.document.write(image.outerHTML);
-            w.document.close();
+            const w = window.open("", "_blank");
+            if (w) {
+                w.document.open();
+                w.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>이미지 크게 보기</title>
+                        <style>
+                            body {
+                                margin: 0;
+                                padding: 0;
+                                background-color: #222;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                height: 100vh;
+                                width: 100vw;
+                                overflow: hidden;
+                            }
+                            img {
+                                max-width: 100%;
+                                max-height: 100%;
+                                object-fit: contain;
+                                box-shadow: 0 0 20px rgba(0,0,0,0.5);
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${src}" alt="Full Size Image">
+                    </body>
+                    </html>
+                `);
+                w.document.close();
+            } else {
+                alert('팝업 차단을 해제해주세요.');
+            }
         }
 
         function editImage() {
