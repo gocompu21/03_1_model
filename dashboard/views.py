@@ -1190,6 +1190,7 @@ def api_edit_image(request):
         )
         
         generated_image_b64 = None
+        last_error = None
         
         # Retry logic
         max_retries = 2
@@ -1211,9 +1212,12 @@ def api_edit_image(request):
                 if generated_image_b64:
                     break
                 else:
-                    raise Exception("No image data in response")
+                    # Check finish reason if available
+                    last_error = "No image data returned. (Safety filter or model limitation)"
+                    raise Exception(last_error)
                     
             except Exception as e:
+                last_error = str(e)
                 if "503" in str(e) or "Overloaded" in str(e):
                     if attempt < max_retries:
                         import time
@@ -1223,7 +1227,7 @@ def api_edit_image(request):
                 
                  # Check for safety filter
                 if "finish_reason" in str(e) or "SAFETY" in str(e):
-                     return JsonResponse({'success': False, 'error': '안전 정책에 의해 이미지가 생성되지 않았습니다.'})
+                     return JsonResponse({'success': False, 'error': f'안전 정책 오류: {str(e)}'})
                      
                 break
 
@@ -1233,7 +1237,7 @@ def api_edit_image(request):
                 'image': generated_image_b64
             })
         else:
-             return JsonResponse({'success': False, 'error': '이미지 수정에 실패했습니다. (모델 오류 또는 안전 정책)'})
+             return JsonResponse({'success': False, 'error': f'이미지 수정 실패: {last_error}'})
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
