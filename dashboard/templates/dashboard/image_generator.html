@@ -462,13 +462,18 @@
             }
         });
         
-        // Paste Logic
+        // Paste Logic for Variation Tab
         document.addEventListener('paste', (e) => {
+            // Check if Variation tab is active (it's the default, so checking 'active' on others is safer, or check its own button)
+            const variationTabBtn = document.querySelector('.tab-btn[onclick="switchTab(\'variation\')"]');
+            if (!variationTabBtn.classList.contains('active')) return;
+
             const items = e.clipboardData.items;
             for(let item of items) {
                 if(item.type.indexOf('image') !== -1) {
                     const blob = item.getAsFile();
                     handleFile(blob);
+                    e.preventDefault(); // Prevent default behavior to avoid double pasting or other issues
                     break;
                 }
             }
