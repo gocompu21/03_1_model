@@ -644,9 +644,16 @@
                 return;
             }
             
-            document.getElementById('editResultsSection').style.display = 'block';
+            // Force display and show spinner
+            const resultsSection = document.getElementById('editResultsSection');
+            resultsSection.style.display = 'block';
+            
+            const container = document.getElementById('editResultContainer');
             document.getElementById('imgEditResult').src = '';
-            document.getElementById('editResultContainer').innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:300px;"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
+            container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:300px; flex-direction:column;"><i class="fas fa-spinner fa-spin fa-3x" style="color:#2d6a4f; margin-bottom:15px;"></i><span style="color:#666;">AI가 이미지를 수정 중입니다...</span></div>';
+            
+            // Scroll to results
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
             
             showLoading('이미지를 수정하고 있습니다...');
             
@@ -664,17 +671,26 @@
             .then(r => r.json())
             .then(data => {
                 hideLoading();
-                const container = document.getElementById('editResultContainer');
+                // Ensure section is still visible
+                resultsSection.style.display = 'block';
+                
                 if(data.success && data.image) {
-                     container.innerHTML = `<img id="imgEditResult" src="data:image/jpeg;base64,${data.image}" class="result-image" onclick="window.open(this.src)" style="width:100%; height:auto;">`;
+                     console.log("Image received, rendering...");
+                     container.innerHTML = `<img id="imgEditResult" src="data:image/jpeg;base64,${data.image}" class="result-image" onclick="window.open(this.src)" style="width:100%; height:auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">`;
                 } else {
-                    container.innerHTML = `<div style="padding:20px; color:#d32f2f;">수정 실패: ${data.error || '알 수 없는 오류'}</div>`;
+                    console.error("Edit failed:", data.error);
+                    container.innerHTML = `<div style="padding:20px; color:#d32f2f; text-align:center; background:#ffebee; border-radius:8px;">
+                        <i class="fas fa-exclamation-circle" style="font-size:2rem; margin-bottom:10px;"></i><br>
+                        <strong>수정 실패</strong><br>${data.error || '알 수 없는 오류'}
+                    </div>`;
                     alert('수정 실패: ' + (data.error || '알 수 없는 오류'));
                 }
             })
             .catch(err => {
                 hideLoading();
-                document.getElementById('editResultContainer').innerHTML = `<div style="padding:20px; color:#d32f2f;">통신 오류</div>`;
+                resultsSection.style.display = 'block';
+                console.error("Network error:", err);
+                container.innerHTML = `<div style="padding:20px; color:#d32f2f; text-align:center;">통신 오류 발생<br>${err.message}</div>`;
                 alert('통신 오류: ' + err.message);
             });
         }
