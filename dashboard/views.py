@@ -1134,3 +1134,106 @@ def api_generate_image_from_text(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+@staff_member_required
+def api_edit_image(request):
+    """이미지 + 텍스트 프롬프트로 이미지 수정 (Editing)"""
+    from django.http import JsonResponse
+    from django.conf import settings
+    import json
+    import base64
+    from google import genai
+    from google.genai import types
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        image_b64 = data.get('image')
+        prompt = data.get('prompt')
+        
+        if not image_b64:
+            return JsonResponse({'success': False, 'error': '이미지가 제공되지 않았습니다.'})
+        if not prompt:
+            return JsonResponse({'success': False, 'error': '수정 내용(프롬프트)이 제공되지 않았습니다.'})
+            
+        # Base64 Decoding
+        if 'base64,' in image_b64:
+            image_b64 = image_b64.split('base64,')[1]
+        
+        image_bytes = base64.b64decode(image_b64)
+        
+        # Gemini Client
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        # Use gemini-2.0-flash-exp for multimodal editing capabilities
+        model = "gemini-2.0-flash-exp"
+        
+        # Construct content for editing
+        # "Edit this image: [image] \n Instruction: [prompt]"
+        contents = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg"),
+                    types.Part.from_text(text=f"Edit this image based on the following instruction. Maintain the original composition and style where possible, only changing what is requested.\n\nInstruction: {prompt}")
+                ]
+            )
+        ]
+        
+        gen_config = types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(aspect_ratio="1:1"),
+        )
+        
+        generated_image_b64 = None
+        
+        # Retry logic
+        max_retries = 2
+        for attempt in range(max_retries + 1):
+            try:
+                response_stream = client.models.generate_content_stream(
+                    model=model,
+                    contents=contents,
+                    config=gen_config
+                )
+                
+                for chunk in response_stream:
+                    if chunk.candidates and chunk.candidates[0].content.parts:
+                        part = chunk.candidates[0].content.parts[0]
+                        if part.inline_data and part.inline_data.data:
+                            generated_image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
+                            break
+                
+                if generated_image_b64:
+                    break
+                else:
+                    raise Exception("No image data in response")
+                    
+            except Exception as e:
+                if "503" in str(e) or "Overloaded" in str(e):
+                    if attempt < max_retries:
+                        import time
+                        time.sleep(2 * (attempt + 1))
+                        continue
+                print(f"Failed to edit image: {e}")
+                
+                 # Check for safety filter
+                if "finish_reason" in str(e) or "SAFETY" in str(e):
+                     return JsonResponse({'success': False, 'error': '안전 정책에 의해 이미지가 생성되지 않았습니다.'})
+                     
+                break
+
+        if generated_image_b64:
+            return JsonResponse({
+                'success': True,
+                'image': generated_image_b64
+            })
+        else:
+             return JsonResponse({'success': False, 'error': '이미지 수정에 실패했습니다. (모델 오류 또는 안전 정책)'})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

@@ -270,13 +270,15 @@
 </head>
 <body>
     <header>
-        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-        <nav class="nav-links">
+        <a href="{% url 'dashboard:index' %}" class="logo">
+            <i class="fas fa-seedling"></i> 이미지 생성 연구소
+        </a>
+        <div class="nav-links">
+            <a href="{% url 'dashboard:index' %}">관리메뉴</a>
+            <a href="{% url 'main:index' %}">메인으로</a>
             <span>{{ user.username }}님</span>
-            <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">Dashboard</a>
-            <a href="{% url 'dashboard:textbook_generator' %}">교재 생성</a>
-            <a href="{% url 'dashboard:image_generator' %}" style="color: #b7e4c7; font-weight: bold;">이미지 생성</a>
-        </nav>
+            <a href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
     </header>
 
     <div class="container">
@@ -287,6 +289,7 @@
             <div class="tabs">
                 <div class="tab-btn active" onclick="switchTab('variation')">이미지 변형 (Image-to-Image)</div>
                 <div class="tab-btn" onclick="switchTab('textgen')">텍스트로 생성 (Text-to-Image)</div>
+                <div class="tab-btn" onclick="switchTab('edit')">이미지 에디팅 (Editing)</div>
             </div>
             
             <!-- Tab 1: Image Variation -->
@@ -326,6 +329,32 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Tab 3: Image Editing -->
+             <div id="tab-edit" class="tab-content">
+                <p style="margin-bottom: 20px; color: #666;">이미지를 업로드하고 수정할 내용을 입력하세요. (예: "고양이를 강아지로 바꿔줘")</p>
+                
+                <div class="upload-area" id="editUploadArea">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p>편집할 이미지를 드래그하거나 클릭하여 업로드</p>
+                    <small>또는 이미지를 복사(Ctrl+C)하고 여기에 붙여넣기(Ctrl+V) 하세요</small>
+                    <input type="file" id="editFileInput" accept="image/*" style="display: none;">
+                </div>
+                
+                <div class="preview-container" id="editPreviewContainer">
+                    <img id="editPreviewImg" class="preview-image" src="">
+                </div>
+                
+                <div class="action-container" id="editActionContainer">
+                    <div style="margin-bottom: 20px; text-align: left;">
+                        <label for="editPrompt" style="display: block; margin-bottom: 8px; font-weight: bold; color: #2d6a4f;">수정 내용 (필수):</label>
+                        <textarea id="editPrompt" class="form-control" rows="3" placeholder="어떻게 수정하고 싶은지 구체적으로 적어주세요.&#13;&#10;예: 배경을 밤하늘로 바꿔줘, 입고 있는 옷을 빨간색 드레스로 변경해줘" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-family: inherit; font-size: 1rem;"></textarea>
+                    </div>
+                    <button class="btn-generate" onclick="editImage()">
+                        <i class="fas fa-wand-magic-sparkles"></i> 이미지 수정하기
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div class="content-section" id="resultsSection" style="display: none;">
@@ -358,7 +387,19 @@
                     <div class="result-body">
                         <img id="imgVariant" class="result-image" alt="Variant">
                     </div>
+                    <!-- Edited Image Results -->
+        <div class="content-section" id="editResultsSection" style="display: none;">
+             <h2><i class="fas fa-check-circle"></i> 수정 완료</h2>
+             <div class="results-grid" style="grid-template-columns: 1fr;">
+                <div class="result-card">
+                    <div class="result-header">🖼️ 수정된 이미지</div>
+                    <div class="result-body" id="editResultContainer">
+                        <img id="imgEditResult" class="result-image" alt="Edited Image">
+                    </div>
                 </div>
+             </div>
+        </div>
+    </div>
             </div>
         </div>
         
@@ -513,23 +554,132 @@
             
             // Activate selected
             document.getElementById('tab-' + tabId).classList.add('active');
-            // Find button and make active (simple logic based on index or text content would work, but let's iterate)
-             // Simpler: pass `this` but inline onclick is standard.
-             // Let's re-select by onclick attribute text for simplicity or index
+            
+            // Set button active
              const btns = document.querySelectorAll('.tab-btn');
              if(tabId === 'variation') btns[0].classList.add('active');
-             else btns[1].classList.add('active');
+             else if(tabId === 'textgen') btns[1].classList.add('active');
+             else btns[2].classList.add('active');
              
-             // Hide results of other tab
-             if(tabId === 'variation') {
-                document.getElementById('textGenResultsSection').style.display = 'none';
-                if(document.getElementById('imgWatercolor').src) document.getElementById('resultsSection').style.display = 'block';
-             } else {
-                document.getElementById('resultsSection').style.display = 'none';
-                if(document.getElementById('imgTextGen').src) document.getElementById('textGenResultsSection').style.display = 'block';
+             // Hide results of other tabs
+             document.getElementById('resultsSection').style.display = 'none';
+             document.getElementById('textGenResultsSection').style.display = 'none';
+             document.getElementById('editResultsSection').style.display = 'none';
+
+             // Show relevant results if they exist
+             if(tabId === 'variation' && document.getElementById('imgWatercolor').src) {
+                document.getElementById('resultsSection').style.display = 'block';
+             } else if(tabId === 'textgen' && document.getElementById('imgTextGen').src) {
+                document.getElementById('textGenResultsSection').style.display = 'block';
+             } else if(tabId === 'edit' && document.getElementById('imgEditResult').src) {
+                 document.getElementById('editResultsSection').style.display = 'block';
              }
         }
         
+        // --- Edit Tab Image Upload Logic (Duplicated for simplicity) ---
+        const editUploadArea = document.getElementById('editUploadArea');
+        const editFileInput = document.getElementById('editFileInput');
+        const editPreviewContainer = document.getElementById('editPreviewContainer');
+        const editPreviewImg = document.getElementById('editPreviewImg');
+        const editActionContainer = document.getElementById('editActionContainer');
+        
+        editUploadArea.addEventListener('click', () => editFileInput.click());
+        
+        editUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            editUploadArea.style.borderColor = '#2d6a4f';
+            editUploadArea.style.background = '#e8f5e9';
+        });
+        
+        editUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            editUploadArea.style.borderColor = '#c5e1a5';
+            editUploadArea.style.background = '#f9fbe7';
+        });
+        
+        editUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            editUploadArea.style.borderColor = '#c5e1a5';
+            editUploadArea.style.background = '#f9fbe7';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleEditFile(files[0]);
+            }
+        });
+        
+        editFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleEditFile(e.target.files[0]);
+            }
+        });
+        
+         // Paste for Edit Tab (Needs global listener but filtered by visibility?)
+         // Simplified: Just assume if Edit tab is active, paste goes there.
+         // Let's rely on standard upload for now or add a document level paste handler that checks active tab.
+         
+        function handleEditFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('이미지 파일만 업로드할 수 있습니다.');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                editPreviewImg.src = e.target.result;
+                editUploadArea.style.display = 'none';
+                editPreviewContainer.style.display = 'block';
+                editActionContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        function editImage() {
+            if (!editPreviewImg.src) {
+                alert('이미지를 업로드해주세요.');
+                return;
+            }
+            const prompt = document.getElementById('editPrompt').value.trim();
+            if(!prompt) {
+                alert('수정 내용을 입력해주세요.');
+                return;
+            }
+            
+            document.getElementById('editResultsSection').style.display = 'block';
+            document.getElementById('imgEditResult').src = '';
+            document.getElementById('editResultContainer').innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:300px;"><i class="fas fa-spinner fa-spin fa-3x"></i></div>';
+            
+            showLoading('이미지를 수정하고 있습니다...');
+            
+            fetch('{% url "dashboard:api_edit_image" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    image: editPreviewImg.src,
+                    prompt: prompt
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                const container = document.getElementById('editResultContainer');
+                if(data.success && data.image) {
+                     container.innerHTML = `<img id="imgEditResult" src="data:image/jpeg;base64,${data.image}" class="result-image" onclick="window.open(this.src)" style="width:100%; height:auto;">`;
+                } else {
+                    container.innerHTML = `<div style="padding:20px; color:#d32f2f;">수정 실패: ${data.error || '알 수 없는 오류'}</div>`;
+                    alert('수정 실패: ' + (data.error || '알 수 없는 오류'));
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                document.getElementById('editResultContainer').innerHTML = `<div style="padding:20px; color:#d32f2f;">통신 오류</div>`;
+                alert('통신 오류: ' + err.message);
+            });
+        }
+
         function generateFromText() {
             const prompt = document.getElementById('textPrompt').value.trim();
             
