@@ -1169,8 +1169,9 @@ def api_edit_image(request):
         # Gemini Client
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
-        # Use gemini-2.0-flash-exp for multimodal editing capabilities
-        model = "gemini-2.0-flash-exp"
+        # Use gemini-3-pro-image-preview for Image-to-Image generation
+        # gemini-2.0-flash-exp does not support image output modality yet
+        model = "gemini-3-pro-image-preview"
         
         # Construct content for editing
         # "Edit this image: [image] \n Instruction: [prompt]"
