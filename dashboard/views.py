@@ -755,10 +755,10 @@ Key Concepts:
 {context}
 
 Requirements:
-1. Visual Style: Cartoon and Watercolor style (artistic but accurate). High resolution.
+1. Visual Style: Realistic style (highly detailed and accurate). High resolution.
 2. Layout: Organized, easy to follow flow.
 3. Content: Visualize the key concepts mentioned above (e.g., insect anatomy, lifecycle, classification).
-4. Reference: If realistic details are required, reference real-world visual characteristics accurately but render them in the specified Cartoon/Watercolor style.
+4. Reference: Reference real-world visual characteristics accurately.
 5. No text overload: Use icons, diagrams, and short labels rather than long text.
 6. Language: Korean (if possible) or English labels.
 """
