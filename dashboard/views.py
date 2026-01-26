@@ -511,6 +511,7 @@ def api_get_textbook_content(request):
             'content': result,
             'chapter_code': chapter.code,
             'chapter_title': chapter.title,
+            'prompt': prompt,
         })
         
     except Chapter.DoesNotExist:
@@ -588,6 +589,7 @@ def api_generate_quiz(request):
             'raw_tsv': result,
             'chapter_code': chapter.code,
             'chapter_title': chapter.title,
+            'prompt': prompt,
         })
         
     except Chapter.DoesNotExist:

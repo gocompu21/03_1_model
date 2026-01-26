@@ -377,6 +377,12 @@
             <div class="editor-container">
                 <textarea id="content-editor"></textarea>
             </div>
+            
+            <!-- 프롬프트 표시 영역 -->
+            <div id="content-prompt-box" style="display:none; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                <strong style="color: #495057; display: block; margin-bottom: 8px;">📋 사용된 프롬프트:</strong>
+                <pre id="content-prompt-text" style="white-space: pre-wrap; word-break: break-all; margin: 0; color: #666; font-size: 0.9rem; font-family: inherit;"></pre>
+            </div>
         </div>
         
         <!-- 퀴즈 생성 영역 -->
@@ -397,6 +403,12 @@
             
             <div class="quiz-card-list" id="quizCardList">
                 <p style="color: #888;">문제 생성 버튼을 클릭하여 연습문제를 자동 생성하세요.</p>
+            </div>
+            
+            <!-- 프롬프트 표시 영역 -->
+            <div id="quiz-prompt-box" style="display:none; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                <strong style="color: #495057; display: block; margin-bottom: 8px;">📋 사용된 프롬프트:</strong>
+                <pre id="quiz-prompt-text" style="white-space: pre-wrap; word-break: break-all; margin: 0; color: #666; font-size: 0.9rem; font-family: inherit;"></pre>
             </div>
         </div>
     </div>
@@ -499,6 +511,12 @@
                         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                         .replace(/\*(.+?)\*/g, '<em>$1</em>');
                     $('#content-editor').summernote('code', html);
+                    
+                    // 프롬프트 표시
+                    if (data.prompt) {
+                        document.getElementById('content-prompt-text').textContent = data.prompt;
+                        document.getElementById('content-prompt-box').style.display = 'block';
+                    }
                 } else {
                     alert('오류: ' + data.error);
                 }
@@ -578,6 +596,10 @@
                 generatedQuestions = [];
                 renderQuizCards();
                 $('#content-editor').summernote('code', '');
+
+                // 프롬프트 박스 숨기기
+                document.getElementById('content-prompt-box').style.display = 'none';
+                document.getElementById('quiz-prompt-box').style.display = 'none';
 
                 noteArea.style.display = 'block';
                 loadContent(this.value); // Load content when chapter selected
@@ -766,6 +788,12 @@
                 if (data.success) {
                     generatedQuestions = data.questions;
                     renderQuizCards();
+                    
+                    // 프롬프트 표시
+                    if (data.prompt) {
+                        document.getElementById('quiz-prompt-text').textContent = data.prompt;
+                        document.getElementById('quiz-prompt-box').style.display = 'block';
+                    }
                 } else {
                     alert('오류: ' + data.error);
                 }
