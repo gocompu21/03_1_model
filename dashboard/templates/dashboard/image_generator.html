@@ -484,6 +484,9 @@
             reader.onload = (e) => {
                 currentImageBase64 = e.target.result;
                 previewImg.src = currentImageBase64;
+                
+                // Hide upload area and show preview
+                uploadArea.style.display = 'none';
                 previewContainer.style.display = 'flex';
                 actionContainer.style.display = 'block';
             };
@@ -615,9 +618,24 @@
             }
         });
         
-         // Paste for Edit Tab (Needs global listener but filtered by visibility?)
-         // Simplified: Just assume if Edit tab is active, paste goes there.
-         // Let's rely on standard upload for now or add a document level paste handler that checks active tab.
+        // Paste for Edit Tab
+        document.addEventListener('paste', (e) => {
+             // Check if Edit tab is active
+             const editTab = document.getElementById('tab-edit');
+             if (!editTab.classList.contains('active')) return;
+             
+             if (e.clipboardData && e.clipboardData.items) {
+                 const items = e.clipboardData.items;
+                 for (let i = 0; i < items.length; i++) {
+                     if (items[i].type.indexOf('image') !== -1) {
+                         const file = items[i].getAsFile();
+                         handleEditFile(file);
+                         e.preventDefault(); // Prevent default paste behavior
+                         break;
+                     }
+                 }
+             }
+        });
          
         function handleEditFile(file) {
             if (!file.type.startsWith('image/')) {
