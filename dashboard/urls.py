@@ -23,5 +23,6 @@ urlpatterns = [
     # 이미지 생성 연구소 (Image Lab)
     path('image-lab/', views.image_generator, name='image_generator'),
     path('api/image-lab/generate/', views.api_generate_image_variations, name='api_generate_image_variations'),
+    path('api/image-lab/text-to-image/', views.api_generate_image_from_text, name='api_generate_image_from_text'),
 ]
 
