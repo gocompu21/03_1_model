@@ -487,11 +487,14 @@
             
             const reader = new FileReader();
             reader.onload = (e) => {
+                console.log("Image loaded, hiding uploadArea");
                 currentImageBase64 = e.target.result;
                 previewImg.src = currentImageBase64;
                 
-                // Hide upload area and show preview
-                uploadArea.style.display = 'none';
+                // Hide upload area and show preview (Forcefully)
+                const area = document.getElementById('uploadArea');
+                if(area) area.style.setProperty('display', 'none', 'important');
+                
                 previewContainer.style.display = 'flex';
                 actionContainer.style.display = 'block';
             };
@@ -797,7 +800,7 @@
                 hideLoading();
                 const container = document.getElementById('textGenResultContainer');
                 if(data.success && data.image) {
-                     container.innerHTML = `<img id="imgTextGen" src="data:image/jpeg;base64,${data.image}" class="result-image" onclick="window.open(this.src)" style="width:100%; height:auto;">`;
+                     container.innerHTML = `<img id="imgTextGen" src="data:image/jpeg;base64,${data.image}" class="result-image" onclick="viewImage(this.src)" style="width:100%; height:auto;">`;
                 } else {
                     container.innerHTML = `<div style="padding:20px; color:#d32f2f;">생성 실패: ${data.error || '알 수 없는 오류'}</div>`;
                     alert('생성 실패: ' + (data.error || '알 수 없는 오류'));
@@ -823,7 +826,7 @@
              const container = cards[index];
              
              if(base64Data) {
-                 container.innerHTML = `<img src="data:image/jpeg;base64,${base64Data}" class="result-image" onclick="window.open(this.src)">`;
+                 container.innerHTML = `<img src="data:image/jpeg;base64,${base64Data}" class="result-image" onclick="viewImage(this.src)">`;
              } else {
                  container.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100%; color:#d32f2f;">생성 실패</div>';
              }
