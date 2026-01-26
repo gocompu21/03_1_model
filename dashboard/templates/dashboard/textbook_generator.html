@@ -312,6 +312,7 @@
             {% if user.is_authenticated %}
             <span>{{ user.username }}님</span>
             <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">Dashboard</a>
+            <a href="{% url 'dashboard:image_generator' %}">이미지 생성</a>
             <a href="{% url 'study:index' %}">학습하기</a>
             {% endif %}
         </nav>

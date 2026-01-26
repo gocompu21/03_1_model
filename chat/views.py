@@ -40,7 +40,7 @@ def index(request):
                 response = model.generate_content(user_input)
 
                 # Convert Markdown to HTML for display
-                response_text = markdown.markdown(response.text)
+                response_text = markdown.markdown(response.text, extensions=['tables', 'fenced_code'])
                 is_success = True
 
             except Exception as e:
@@ -124,7 +124,7 @@ def chat_api(request):
             response = model.generate_content(user_input)
 
             # Convert Markdown to HTML
-            response_text = markdown.markdown(response.text)
+            response_text = markdown.markdown(response.text, extensions=['tables', 'fenced_code'])
             is_success = True
 
         except Exception as e:

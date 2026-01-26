@@ -898,3 +898,157 @@ def api_format_textbook_content(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+# ============================================================================
+# 이미지 생성 연구소 (Image Lab)
+# ============================================================================
+
+@login_required
+@staff_member_required
+def image_generator(request):
+    """이미지 생성 연구소 메인 페이지"""
+    return render(request, 'dashboard/image_generator.html', {
+        'page_title': '이미지 생성 연구소',
+    })
+
+
+@login_required
+@staff_member_required
+def api_generate_image_variations(request):
+    """이미지 분석 후 4가지 스타일 변형 생성 (AJAX)"""
+    from django.http import JsonResponse
+    from django.conf import settings
+    import json
+    import base64
+    from google import genai
+    from google.genai import types
+    from io import BytesIO
+    from PIL import Image
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        image_b64 = data.get('image')
+        user_description = data.get('user_description', '')
+        
+        if not image_b64:
+            return JsonResponse({'success': False, 'error': '이미지가 제공되지 않았습니다.'})
+            
+        # Base64 Decoding
+        if 'base64,' in image_b64:
+            image_b64 = image_b64.split('base64,')[1]
+        
+        image_bytes = base64.b64decode(image_b64)
+        image_part = types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+        
+        # Gemini Client
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        
+        # 1. Image Analysis (Image-to-Text)
+        # Using a vision capable model (gemini-2.0-flash-exp or gemini-1.5-pro)
+        vision_model = "gemini-2.0-flash-exp"
+        
+        analysis_prompt = """
+        Describe this image in extreme detail. Focus on:
+        1. Main subject and its appearance
+        2. Composition and layout
+        3. Colors and lighting
+        4. Mood and atmosphere
+        5. Key background elements
+        
+        Provide a concise but comprehensive description in English.
+        """
+        
+        if user_description:
+            analysis_prompt += f"\n\nContext/Additional Info provided by user: {user_description}\nPlease incorporate this context into the description if relevant."
+        
+        analysis_response = client.models.generate_content(
+            model=vision_model,
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        image_part,
+                        types.Part.from_text(text=analysis_prompt)
+                    ]
+                )
+            ]
+        )
+        
+        description = analysis_response.text
+        
+        # 2. Image Generation (Text-to-Image) for 3 styles (Removed Cartoon)
+        gen_model = "gemini-3-pro-image-preview"  # or imagen-3.0-generate-001
+        
+        styles = {
+            'watercolor': "Create a beautiful Watercolor painting of: ",
+            'realistic': "Create a Hyper-realistic, highly detailed photo of: ",
+            'variant': "Create a Creative artistic variation of: "
+        }
+        if user_description:
+             # User description affects the variant more directly? Or apply to all? 
+             # Let's append it to all prompts slightly or just rely on the enhanced description.
+             pass
+        
+        results = {}
+        
+        for style_key, prefix in styles.items():
+            gen_prompt = f"{prefix} {description}. High quality, detailed."
+            
+            try:
+                gen_config = types.GenerateContentConfig(
+                    response_modalities=["IMAGE"],
+                    image_config=types.ImageConfig(aspect_ratio="1:1", image_size="1K"), # 1:1 for grid
+                )
+                
+                # Check for 503 retry logic (Simple loop)
+                max_retries = 2
+                for attempt in range(max_retries + 1):
+                    try:
+                        response_stream = client.models.generate_content_stream(
+                            model=gen_model,
+                            contents=[types.Content(role="user", parts=[types.Part.from_text(text=gen_prompt)])],
+                            config=gen_config
+                        )
+                        
+                        generated_image_b64 = None
+                        for chunk in response_stream:
+                            if chunk.candidates and chunk.candidates[0].content.parts:
+                                part = chunk.candidates[0].content.parts[0]
+                                if part.inline_data and part.inline_data.data:
+                                    generated_image_b64 = base64.b64encode(part.inline_data.data).decode('utf-8')
+                                    break
+                        
+                        if generated_image_b64:
+                            results[style_key] = generated_image_b64
+                            break # Success
+                        else:
+                            raise Exception("No image data in response")
+                            
+                    except Exception as e:
+                        if "503" in str(e) or "Overloaded" in str(e):
+                            if attempt < max_retries:
+                                import time
+                                time.sleep(2 * (attempt + 1)) # Backoff
+                                continue
+                        # Other errors or max retries reached: skip this style or return placeholder handled by frontend
+                        print(f"Failed to generate {style_key}: {e}")
+                        results[style_key] = None
+                        break
+
+            except Exception as e:
+                 print(f"Error setup/gen {style_key}: {e}")
+                 results[style_key] = None
+
+        return JsonResponse({
+            'success': True,
+            'analysis': description,
+            'watercolor': results.get('watercolor'),
+            'realistic': results.get('realistic'),
+            'variant': results.get('variant'),
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

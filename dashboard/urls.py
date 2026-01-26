@@ -19,5 +19,9 @@ urlpatterns = [
     path('api/textbook/save-quiz/', views.api_save_quiz, name='api_save_quiz'),
     path('api/textbook/image/', views.api_generate_textbook_image, name='api_generate_textbook_image'),
     path('api/textbook/format-content/', views.api_format_textbook_content, name='api_format_textbook_content'),
+    
+    # 이미지 생성 연구소 (Image Lab)
+    path('image-lab/', views.image_generator, name='image_generator'),
+    path('api/image-lab/generate/', views.api_generate_image_variations, name='api_generate_image_variations'),
 ]
 
