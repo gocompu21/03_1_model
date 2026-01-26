@@ -9,6 +9,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 from django.conf import settings
+from django.db.models import Q
+from django.db.models.functions import Length
 from practice.models import Chapter, PracticeQuestion
 from fileSearchStore import GeminiStoreManager
 
@@ -16,29 +18,26 @@ from fileSearchStore import GeminiStoreManager
 api_key = settings.GEMINI_API_KEY
 manager = GeminiStoreManager(api_key=api_key)
 
-# Find chapter 2.3.1
-chapter = Chapter.objects.filter(code='2.3.1').first()
-if not chapter:
-    print('Chapter 2.3.1 not found!')
-    exit(1)
+# Get questions with short or empty explanations (<= 200 chars) across ALL chapters
+questions = PracticeQuestion.objects.select_related('chapter__book').annotate(
+    exp_len=Length('explanation')
+).filter(
+    Q(explanation__isnull=True) | Q(explanation='') | Q(exp_len__lte=200)
+).order_by('chapter', 'number')
 
-print(f'=== Processing Chapter: {chapter.code} {chapter.title} ===')
-print(f'Book: {chapter.book.name}')
-
-# Get questions
-questions = PracticeQuestion.objects.filter(chapter=chapter).order_by('number')
-print(f'Total questions: {questions.count()}')
-
-# Use the correct store name for 수목병리학
-STORE_NAME = "수목병리학"
-print(f'Using store: {STORE_NAME}')
+total_count = questions.count()
+print(f'Total target questions found: {total_count}')
 
 # Process each question
-for q in questions:
+for i, q in enumerate(questions):
     print(f'\n{"="*50}')
+    print(f'[{i+1}/{total_count}] Chapter: {q.chapter.code} ({q.chapter.book.subject})')
     print(f'Q{q.number} (ID: {q.id})')
     print(f'Content: {q.content}')
-    print(f'Answer: {q.answer}')
+    
+    # Correct Store Name from subject
+    STORE_NAME = q.chapter.book.subject
+    print(f'Using store: {STORE_NAME}')
     
     # Build query prompt for explanation
     query = f"""다음 나무의사 시험 문제에 대해 기본서 내용을 바탕으로 상세한 해설을 작성해주세요.
@@ -66,7 +65,6 @@ for q in questions:
     try:
         response = manager.query_store(STORE_NAME, query)
         print(f'Response length: {len(response) if response else 0}')
-        print(f'Preview: {response[:200] if response else "(empty)"}...')
         
         if response and len(response) > 100 and not response.startswith('Error') and not response.startswith('No valid') and not response.startswith('Store not found'):
             # Update explanation
@@ -74,15 +72,14 @@ for q in questions:
             q.save()
             print(f'✓ Explanation saved')
         else:
-            print(f'✗ Response invalid or too short')
+            print(f'✗ Response invalid or too short: "{response}"')
         
-        # Rate limiting
-        time.sleep(3)
+        # Rate limiting (60 seconds per user request)
+        print("Waiting 60 seconds...")
+        time.sleep(60)
         
     except Exception as e:
         print(f'✗ Error: {e}')
-        import traceback
-        traceback.print_exc()
-        time.sleep(5)
+        time.sleep(10)
 
-print('\n=== Done! ===')
+print('\n=== All target questions processed! ===')
