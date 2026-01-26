@@ -719,7 +719,14 @@
                 if(data.success && data.image) {
                      console.log("Image received, rendering...");
                      const imgSrc = `data:image/jpeg;base64,${data.image}`;
-                     container.innerHTML = `<img id="imgEditResult" src="${imgSrc}" class="result-image" onclick="viewImage(this.src)" style="width:100%; height:auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;">`;
+                     
+                     // Reset container style to allow auto height (remove fixed aspect ratio)
+                     container.style.paddingBottom = '0';
+                     container.style.height = 'auto';
+                     container.style.backgroundColor = 'transparent';
+                     
+                     // Use relative positioning and auto height for the image
+                     container.innerHTML = `<img id="imgEditResult" src="${imgSrc}" class="result-image" onclick="viewImage(this.src)" style="position: relative; width:100%; height:auto; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;">`;
                 } else {
                     console.error("Edit failed:", data.error);
                     container.innerHTML = `<div style="padding:20px; color:#d32f2f; text-align:center; background:#ffebee; border-radius:8px;">
