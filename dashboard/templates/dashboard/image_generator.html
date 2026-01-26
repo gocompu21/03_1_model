@@ -273,11 +273,10 @@
         <a href="{% url 'dashboard:index' %}" class="logo">
             <i class="fas fa-seedling"></i> 이미지 생성 연구소
         </a>
-        <div class="nav-links">
             <a href="{% url 'dashboard:index' %}">관리메뉴</a>
             <a href="{% url 'main:index' %}">메인으로</a>
             <span>{{ user.username }}님</span>
-            <a href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i></a>
+            <a href="{% url 'accounts:user_logout' %}"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </header>
 
