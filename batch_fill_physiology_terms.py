@@ -3,6 +3,7 @@ import os
 import sys
 import django
 import time
+import json
 
 # Django setup
 sys.path.append('.')
@@ -84,6 +85,10 @@ def main():
             processed_words = set()
     else:
         processed_words = set()
+
+    # 통계 변수 초기화
+    count_success = 0
+    count_fail = 0
 
     # iterator()를 사용하여 메모리 효율 개선
     for idx, term in enumerate(terms.iterator(), 1):
