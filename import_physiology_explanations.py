@@ -33,15 +33,15 @@ def import_explanations():
         # 여기서는 속도를 위해 바로 진행.
         
         for idx, item in enumerate(data, 1):
-            term_id = item.get('term_id')
+            word = item.get('word')
             content = item.get('content')
             
-            if not term_id or not content:
+            if not word or not content:
                 continue
                 
             try:
-                # Term 조회 (ID 기준)
-                term = Term.objects.get(id=term_id)
+                # Term 조회 (ID가 아닌 단어 기준 - 로컬/서버 ID 불일치 방지)
+                term = Term.objects.get(word=word)
                 
                 # 내용이 비어있거나 변경된 경우에만 업데이트
                 if term.content != content:
@@ -53,10 +53,10 @@ def import_explanations():
                     print(f"[{idx}/{len(data)}] 처리 중...")
                     
             except Term.DoesNotExist:
-                print(f"⚠️ Term ID {term_id} not found.")
+                print(f"⚠️ Term '{word}' not found.")
                 error_count += 1
             except Exception as e:
-                print(f"⚠️ Error updating Term {term_id}: {e}")
+                print(f"⚠️ Error updating Term '{word}': {e}")
                 error_count += 1
                 
         print("=" * 30)
