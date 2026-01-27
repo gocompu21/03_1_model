@@ -15,20 +15,28 @@ from glossary.models import Term, Subject
 from fileSearchStore import GeminiStoreManager
 
 def main():
-    print("=== 수목생리학 용어 설명 일괄 채우기 (Gemini API) ===")
+    print("=== 수목생리학 용어 설명 일괄 채우기 (Gemini API / No-Lock Version) ===")
     
     target_subject_name = "수목생리학"
     
-    # Check subject existence
+    # Check subject existence (Brief DB access)
     try:
         subject = Subject.objects.get(name=target_subject_name)
     except Subject.DoesNotExist:
         print(f"Error: Subject '{target_subject_name}' not found.")
         return
 
-    # 1. 대상 용어 조회 (수목생리학 과목이면서 content가 비어있는 것)
-    terms = Term.objects.filter(subjects=subject, content__exact='')
-    total = terms.count()
+    # 1. DB에서 필요한 데이터만 메모리로 로드 (Quick Fetch)
+    print(">>> DB에서 대상 용어 목록을 가져오는 중...")
+    # values()로 딕셔너리 리스트만 가져옴 -> DB 세션 즉시 종료 가능
+    terms_qs = Term.objects.filter(subjects=subject, content__exact='').values('id', 'word')
+    term_list = list(terms_qs)
+    
+    # DB 연결 강제 종료 (SQLite Lock 해제 핵심)
+    django.db.connections.close_all()
+    print(">>> DB 연결 해제됨 (Lock Free).")
+    
+    total = len(term_list)
     print(f"'{target_subject_name}' 과목의 설명 없는 용어: {total}개")
     
     if total == 0:
@@ -56,14 +64,11 @@ def main():
     # 타겟 스토어
     target_store = target_subject_name
     
-    # 스토어가 없을 때만 동기화
+    # 메모리에서 스토어 이름만 사용, DB 접근 안함
+    # (manager.stores는 로컬 파일 local_stores.json을 쓰므로 DB 아님)
     if target_store not in manager.stores or not manager.stores[target_store]:
         print(f"🔄 스토어 '{target_store}' 동기화 및 확인 중...")
         manager.sync_all_stores()
-        
-    if target_store not in manager.stores:
-         print(f"⚠️ Warning: Store '{target_store}' not found in Gemini stores. Using general query or creating new store may be needed.")
-         # Proceed anyway, query_store might handle it or fail gracefully
     
     print(f"✅ 스토어 준비 완료: {target_store}")
     print("=" * 50)
@@ -71,34 +76,35 @@ def main():
     # 결과 저장용 리스트
     results = []
     output_file = "physiology_explanations.json"
+    processed_words = set()
     
     # 기존 파일이 있다면 로드해서 이어서 작업
     if os.path.exists(output_file):
         try:
             with open(output_file, 'r', encoding='utf-8') as f:
                 results = json.load(f)
-            print(f"📂 기존 파일 로드됨: {len(results)}개 항목")
-            # 이미 처리된 용어는 건너뛰기 위한 집합
             processed_words = set(item['word'] for item in results)
+            print(f"📂 기존 파일 로드됨: {len(results)}개 항목")
         except Exception as e:
             print(f"⚠️ 기존 파일 로드 실패: {e}")
             processed_words = set()
-    else:
-        processed_words = set()
 
     # 통계 변수 초기화
     count_success = 0
     count_fail = 0
 
-    # iterator()를 사용하여 메모리 효율 개선
-    for idx, term in enumerate(terms.iterator(), 1):
-        if term.word in processed_words:
-            print(f"[{idx}/{total}] 이미 처리됨 (건너뜀): {term.word}")
+    # 메모리에 로드된 리스트로 반복 (DB 접속 없음)
+    for idx, term_data in enumerate(term_list, 1):
+        term_id = term_data['id']
+        term_word = term_data['word']
+        
+        if term_word in processed_words:
+            print(f"[{idx}/{total}] 이미 처리됨 (건너뜀): {term_word}")
             continue
 
         try:
-            prompt = f"'{term.word}'에 대해 수목생리학 관점에서 자세히 설명해줘."
-            print(f"[{idx}/{total}] 조회 중: {term.word}")
+            prompt = f"'{term_word}'에 대해 수목생리학 관점에서 자세히 설명해줘."
+            print(f"[{idx}/{total}] 조회 중: {term_word}")
             
             response_text = manager.query_store(target_store, prompt)
             
@@ -114,12 +120,12 @@ def main():
                 # 결과 리스트에 추가 (DB 저장 X)
                 explanation = f"{response_text}\n\n---\n### 기본서 발췌 ({target_store})"
                 result_item = {
-                    'term_id': term.id,
-                    'word': term.word,
+                    'term_id': term_id,   # ID도 저장하지만 Import시에는 word를 쓸 예정
+                    'word': term_word,
                     'content': explanation
                 }
                 results.append(result_item)
-                processed_words.add(term.word)
+                processed_words.add(term_word)
                 
                 # 중간 저장 (데이터 유실 방지)
                 with open(output_file, 'w', encoding='utf-8') as f:
