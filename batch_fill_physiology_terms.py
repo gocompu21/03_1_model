@@ -67,12 +67,30 @@ def main():
     print(f"✅ 스토어 준비 완료: {target_store}")
     print("=" * 50)
 
-    # 3. 처리
-    count_success = 0
-    count_fail = 0
+    # 결과 저장용 리스트
+    results = []
+    output_file = "physiology_explanations.json"
     
+    # 기존 파일이 있다면 로드해서 이어서 작업
+    if os.path.exists(output_file):
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                results = json.load(f)
+            print(f"📂 기존 파일 로드됨: {len(results)}개 항목")
+            # 이미 처리된 용어는 건너뛰기 위한 집합
+            processed_words = set(item['word'] for item in results)
+        except Exception as e:
+            print(f"⚠️ 기존 파일 로드 실패: {e}")
+            processed_words = set()
+    else:
+        processed_words = set()
+
     # iterator()를 사용하여 메모리 효율 개선
     for idx, term in enumerate(terms.iterator(), 1):
+        if term.word in processed_words:
+            print(f"[{idx}/{total}] 이미 처리됨 (건너뜀): {term.word}")
+            continue
+
         try:
             prompt = f"'{term.word}'에 대해 수목생리학 관점에서 자세히 설명해줘."
             print(f"[{idx}/{total}] 조회 중: {term.word}")
@@ -88,11 +106,22 @@ def main():
 
             # 기본 검증
             if "Error" not in response_text and len(response_text) > 50:
-                # 출처 표기 추가
-                term.content = f"{response_text}\n\n---\n### 기본서 발췌 ({target_store})"
-                term.save()
+                # 결과 리스트에 추가 (DB 저장 X)
+                explanation = f"{response_text}\n\n---\n### 기본서 발췌 ({target_store})"
+                result_item = {
+                    'term_id': term.id,
+                    'word': term.word,
+                    'content': explanation
+                }
+                results.append(result_item)
+                processed_words.add(term.word)
+                
+                # 중간 저장 (데이터 유실 방지)
+                with open(output_file, 'w', encoding='utf-8') as f:
+                    json.dump(results, f, ensure_ascii=False, indent=2)
+                    
                 count_success += 1
-                print(f"  -> 업데이트 완료 ({len(response_text)}자)")
+                print(f"  -> 파일 저장 완료 ({len(response_text)}자)")
             else:
                 count_fail += 1
                 print(f"  -> 오류/내용부족: {response_text[:50] if response_text else 'None'}...")
@@ -104,16 +133,13 @@ def main():
             print(f"  -> 예외: {e}")
             count_fail += 1
         
-        # API 할당량 초과 방지를 위한 대기 (안정성을 위해 15~20초 권장, 여기서는 기존대로 60초 유지하거나 조정)
-        # 15 RPM limits -> 60/15 = 4 seconds delay is minimum. To be safe, 10s.
-        # User's previous script had 60s. I will stick to a safer 10s if paid, but let's use 20s to be safe for free tier? 
-        # Actually previous script had 60s. I'll keep it fairly conservative but faster than 60s if possible.
-        # Let's use 15s.
+        # API 할당량 초과 방지를 위한 대기
         print(f"  -> 60초 대기...")
         time.sleep(60)
 
     print("=" * 50)
     print(f"작업 완료. 성공: {count_success}, 실패: {count_fail}")
+    print(f"결과 파일: {output_file}")
 
 if __name__ == "__main__":
     main()
