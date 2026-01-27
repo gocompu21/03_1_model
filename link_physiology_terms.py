@@ -53,12 +53,11 @@ def link_physiology_terms():
         found_questions = []
         
         for q in questions:
-            # 문제 내용, 보기, 해설에서 검색
+            # 문제 내용, 보기, 기본서 해설에서만 검색 (일반 해설 제외)
             search_texts = [
                 q.content or '',
                 q.choice1 or '', q.choice2 or '', q.choice3 or '', q.choice4 or '', q.choice5 or '',
-                q.general_chat or '', # 해설
-                q.textbook_chat or ''  # 기본서 해설 추가
+                q.textbook_chat or ''  # 기본서 해설만 포함
             ]
             
             # 용어가 포함된 문제 찾기
