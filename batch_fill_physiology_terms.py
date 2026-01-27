@@ -34,11 +34,14 @@ def main():
         print("업데이트할 용어가 없습니다.")
         return
 
-    # 사용자 확인
-    confirm = input(f"{total}개 용어에 대해 AI 설명을 생성하시겠습니까? (y/N): ")
-    if confirm.lower() != 'y':
-        print("취소되었습니다.")
-        return
+    # 사용자 확인 (자동 모드 지원)
+    if '--auto' in sys.argv:
+        print("⚡ 자동 모드: 사용자 확인을 건너뜁니다.")
+    else:
+        confirm = input(f"{total}개 용어에 대해 AI 설명을 생성하시겠습니까? (y/N): ")
+        if confirm.lower() != 'y':
+            print("취소되었습니다.")
+            return
 
     # 2. GeminiStoreManager 초기화
     api_key = settings.GEMINI_API_KEY
