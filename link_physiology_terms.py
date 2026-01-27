@@ -57,7 +57,8 @@ def link_physiology_terms():
             search_texts = [
                 q.content or '',
                 q.choice1 or '', q.choice2 or '', q.choice3 or '', q.choice4 or '', q.choice5 or '',
-                q.general_chat or '' # 해설도 포함
+                q.general_chat or '', # 해설
+                q.textbook_chat or ''  # 기본서 해설 추가
             ]
             
             # 용어가 포함된 문제 찾기
