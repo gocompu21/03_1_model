@@ -106,8 +106,8 @@ def main():
         # User's previous script had 60s. I will stick to a safer 10s if paid, but let's use 20s to be safe for free tier? 
         # Actually previous script had 60s. I'll keep it fairly conservative but faster than 60s if possible.
         # Let's use 15s.
-        print(f"  -> 15초 대기...")
-        time.sleep(15)
+        print(f"  -> 60초 대기...")
+        time.sleep(60)
 
     print("=" * 50)
     print(f"작업 완료. 성공: {count_success}, 실패: {count_fail}")
