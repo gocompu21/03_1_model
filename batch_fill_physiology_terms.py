@@ -108,6 +108,19 @@ def main():
             
             response_text = manager.query_store(target_store, prompt)
             
+            # Store Empty 오류 감지 및 자동 복구 (새벽 3시 재업로드 대응)
+            if "Store is empty" in response_text or "No valid" in response_text:
+                print("  -> ⚠️ 스토어가 비어있습니다. 파일 목록 재동기화 중...")
+                manager.sync_all_stores()
+                print("  -> 🔄 동기화 완료. 60초 후 재시도합니다...")
+                time.sleep(60)
+                # 재시도
+                response_text = manager.query_store(target_store, prompt)
+                if "Store is empty" in response_text or "No valid" in response_text:
+                    print("  -> ❌ 재시도 실패. 다음 용어로 넘어갑니다.")
+                    count_fail += 1
+                    continue
+            
             # 429 Resource Exhausted (Quota limit) check
             if "429" in response_text or "Resource has been exhausted" in response_text:
                 print("  -> ⚠️ Quota Exceeded (429). Waiting 5 minutes (300s) cooldown...")
