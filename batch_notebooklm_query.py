@@ -67,6 +67,8 @@ def query_notebooklm(question: str, notebook_id: str) -> str:
             # 불필요한 줄바꿈 정리 (터미널 너비로 인한 줄바꿈 제거)
             # 문단 구분(\n\n)은 유지, 마크다운 헤더(#), 리스트(*,-) 앞 줄바꿈도 유지
             import re
+            # \r (캐리지 리턴) 제거
+            result = result.replace('\r', '')
             # 먼저 \n\n을 임시 마커로 치환
             result = result.replace('\n\n', '<<PARA>>')
             # 마크다운 헤더/리스트 앞 줄바꿈 보호
