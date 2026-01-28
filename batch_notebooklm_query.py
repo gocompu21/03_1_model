@@ -62,7 +62,26 @@ def query_notebooklm(question: str, notebook_id: str) -> str:
             # 마지막 줄 (turn 정보) 제거
             lines = answer.split('\n')
             clean_lines = [l for l in lines if not l.strip().startswith('(venv)') and 'turn' not in l]
-            return '\n'.join(clean_lines).strip()
+            result = '\n'.join(clean_lines).strip()
+            
+            # 불필요한 줄바꿈 정리 (터미널 너비로 인한 줄바꿈 제거)
+            # 문단 구분(\n\n)은 유지, 마크다운 헤더(#), 리스트(*,-) 앞 줄바꿈도 유지
+            import re
+            # 먼저 \n\n을 임시 마커로 치환
+            result = result.replace('\n\n', '<<PARA>>')
+            # 마크다운 헤더/리스트 앞 줄바꿈 보호
+            result = re.sub(r'\n(#+\s)', r'<<PARA>>\1', result)  # 헤더
+            result = re.sub(r'\n(\*\s)', r'<<PARA>>\1', result)  # 리스트 *
+            result = re.sub(r'\n(-\s)', r'<<PARA>>\1', result)   # 리스트 -
+            result = re.sub(r'\n(\d+\.\s)', r'<<PARA>>\1', result)  # 번호 리스트
+            # 나머지 단일 줄바꿈은 공백으로 변환
+            result = result.replace('\n', ' ')
+            # 마커를 다시 줄바꿈으로 복원
+            result = result.replace('<<PARA>>', '\n\n')
+            # 연속 공백 정리
+            result = re.sub(r'  +', ' ', result)
+            
+            return result
         else:
             return f"Error: {output[:200]}"
             
