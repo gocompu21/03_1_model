@@ -92,14 +92,23 @@ def term_detail(request, pk):
     references = list(term.references.all())
     
     if subject_id and subject_id.isdigit():
+        # 해당 과목 ID로 필터링
+        target_subject_id = int(subject_id)
+        
+        # Exam 앱의 Question 모델 임포트 (Circular Import 방지 위해 함수 내부 임포트)
         try:
             from exam.models import Question
+            
             # Question 타입 참조만 필터링
             question_refs = [r for r in references if r.source_type == 'question']
             if question_refs:
                 question_ids = [r.source_id for r in question_refs]
+                
                 # 해당 과목의 문제 ID 조회
-                valid_ids = set(Question.objects.filter(id__in=question_ids, subject_id=subject_id).values_list('id', flat=True))
+                valid_ids = set(Question.objects.filter(
+                    id__in=question_ids, 
+                    subject_id=target_subject_id
+                ).values_list('id', flat=True))
                 
                 # 필터링: (질문이 아니거나) OR (질문이면서 유효한 과목인 경우)
                 references = [
@@ -107,7 +116,8 @@ def term_detail(request, pk):
                     if r.source_type != 'question' or r.source_id in valid_ids
                 ]
         except ImportError:
-            pass
+            # exam 앱을 찾을 수 없는 경우 등 예외 처리 (조용히 무시하지 않고 로깅하면 좋겠지만)
+            pass 
             
     context = {
         'term': term,
