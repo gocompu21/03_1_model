@@ -335,5 +335,24 @@
             </div>
         </div>
     </div>
+
+    <!-- Heartbeat Script (세션 유지) -->
+    <script>
+        // 2분마다 서버에 ping을 보내 세션을 유지하고 "접속" 상태를 유지
+        setInterval(function() {
+            fetch('{% url "dashboard:heartbeat" %}', {
+                method: 'GET',
+                credentials: 'same-origin'
+            }).then(response => response.json())
+              .then(data => console.log('Heartbeat:', data.timestamp))
+              .catch(err => console.log('Heartbeat failed:', err));
+        }, 120000);  // 2분 (120,000ms)
+        
+        // 페이지 로드 시 즉시 한 번 실행
+        fetch('{% url "dashboard:heartbeat" %}', {
+            method: 'GET',
+            credentials: 'same-origin'
+        });
+    </script>
 </body>
 </html>

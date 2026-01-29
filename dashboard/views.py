@@ -1253,3 +1253,21 @@ def api_edit_image(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ============================================================================
+# Heartbeat (세션 유지)
+# ============================================================================
+
+@login_required
+def heartbeat(request):
+    """대시보드 페이지 세션 유지를 위한 Heartbeat 엔드포인트
+    
+    이 엔드포인트에 요청이 들어오면 미들웨어에서 자동으로 
+    last_activity가 업데이트됩니다.
+    """
+    from django.http import JsonResponse
+    return JsonResponse({
+        'status': 'ok',
+        'timestamp': timezone.now().isoformat()
+    })
