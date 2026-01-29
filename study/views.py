@@ -385,11 +385,9 @@ def api_question(request, question_id):
     # 해설 마크다운을 HTML로 변환
     explanation_raw = question.textbook_chat or question.general_chat or ''
     
-    # \text{content} 패턴을 <em>content</em>로 변환 (LaTeX 스타일)
-    explanation_raw = re.sub(r'\\text\{([^}]+)\}', r'<em>\1</em>', explanation_raw)
-    
-    # $text$ 패턴을 <em>text</em>로 변환 (LaTeX 스타일 → HTML 이탤릭)
-    explanation_raw = re.sub(r'\$([^$]+)\$', r'<em>\1</em>', explanation_raw)
+    # LaTeX 보존을 위해 강제 변환 로직 제거 (MathJax 사용)
+    # explanation_raw = re.sub(r'\\text\{([^}]+)\}', r'<em>\1</em>', explanation_raw)
+    # explanation_raw = re.sub(r'\$([^$]+)\$', r'<em>\1</em>', explanation_raw)
     
     explanation_html = md.markdown(explanation_raw, extensions=['extra', 'nl2br', 'sane_lists'])
     
