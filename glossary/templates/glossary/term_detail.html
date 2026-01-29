@@ -358,8 +358,10 @@ function highlightTerm(htmlContent) {
             
             parts.forEach(part => {
                 if (part.startsWith('$') && part.endsWith('$')) {
-                    // LaTeX 수식 부분: 하이라이트 하지 않고 그대로 추가
-                    fragment.appendChild(document.createTextNode(part));
+                    // LaTeX 수식 부분: HTML span 대신 LaTeX \color 명령어로 하이라이트
+                    // 주의: 용어가 LaTeX 명령어(예: text)와 겹칠 경우 오동작할 수 있으나, 용어집 특성상 드묾.
+                    const newPart = part.replace(termRegex, (match) => `{\\color{#d93025}${match}}`);
+                    fragment.appendChild(document.createTextNode(newPart));
                 } else {
                     // 일반 텍스트 부분: 하이라이트 적용
                     let lastIdx = 0;
