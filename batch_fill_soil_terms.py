@@ -149,8 +149,9 @@ def main():
                 with open(output_file, 'w', encoding='utf-8') as f:
                     json.dump(results, f, ensure_ascii=False, indent=2)
                     
+                now_str = time.strftime("%H:%M:%S")
                 count_success += 1
-                print(f"  -> 저장 완료")
+                print(f"  -> [{now_str}] 저장 완료 ({len(response_text)}자)")
             else:
                 count_fail += 1
                 print(f"  -> 내용 부족/오류: {response_text[:30]}...")
