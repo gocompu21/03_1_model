@@ -20,6 +20,22 @@
 {% endblock %}
 
 {% block content %}
+<!-- MathJax for LaTeX rendering -->
+<script>
+MathJax = {
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+    },
+    startup: {
+        ready: function() {
+            MathJax.startup.defaultReady();
+        }
+    }
+};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
 <style>
     body {
         background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
