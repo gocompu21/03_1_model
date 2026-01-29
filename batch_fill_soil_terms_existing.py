@@ -142,8 +142,8 @@ def main():
             count_fail += 1
         
         # 딜레이 
-        print(f"  -> 20초 대기...")
-        time.sleep(20)
+        print(f"  -> 60초 대기...")
+        time.sleep(60)
 
     print("=" * 50)
     print(f"작업 완료. 성공: {count_success}, 실패: {count_fail}")

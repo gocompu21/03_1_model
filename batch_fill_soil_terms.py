@@ -163,8 +163,8 @@ def main():
             count_fail += 1
         
         # 딜레이 (리소스 보호) - 수목생리학은 60초였는데, 필요에 따라 조정 가능. 안전하게 20초로 설정.
-        print(f"  -> 20초 대기...")
-        time.sleep(20)
+        print(f"  -> 60초 대기...")
+        time.sleep(60)
 
     print("=" * 50)
     print(f"작업 완료. 성공: {count_success}, 실패: {count_fail}")
