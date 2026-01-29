@@ -157,7 +157,7 @@ MathJax = {
     }
     
     .term-content {
-        font-size: 1.0rem; /* 1.05rem -> 1.0rem 축소 */
+        font-size: 1.0rem;
         line-height: 1.6;
     }
     
@@ -168,6 +168,20 @@ MathJax = {
     
     .term-content li {
         margin-bottom: 0.4rem;
+    }
+    
+    /* Normalize superscript styling for chemical formulas */
+    .term-content sup {
+        font-size: 0.75em;
+        vertical-align: baseline;
+        position: relative;
+        top: -0.4em;
+        line-height: 0;
+    }
+    
+    /* MathJax 인라인 수식 폰트 크기 조정 */
+    .term-content .MathJax {
+        font-size: 1.0em !important;
     }
 
     /* Question Card Styles for Dynamic Content */
@@ -631,7 +645,8 @@ async function toggleAllQuestions() {
     /* 용어 강조 스타일 */
     .term-highlight {
         color: #d93025;
-        font-weight: bold;
+        font-size: inherit;
+        font-weight: inherit;
         animation: sparkle 1.5s ease-in-out infinite;
     }
     @keyframes sparkle {
