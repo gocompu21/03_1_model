@@ -71,7 +71,7 @@ def term_detail(request, pk):
     latex_formulas = []
     def save_latex(match):
         latex_formulas.append(match.group(0))
-        return f'<<LATEX_{len(latex_formulas)-1}>>'
+        return f'LATEXPLACEHOLDER{len(latex_formulas)-1}ENDLATEX'
     
     # $...$ 또는 $$...$$ 패턴 보호
     content = re.sub(r'\$\$[^$]+\$\$|\$[^$]+\$', save_latex, content)
@@ -84,8 +84,7 @@ def term_detail(request, pk):
     
     # LaTeX 수식 복원
     for i, formula in enumerate(latex_formulas):
-        rendered_content = rendered_content.replace(f'&lt;&lt;LATEX_{i}&gt;&gt;', formula)
-        rendered_content = rendered_content.replace(f'<<LATEX_{i}>>', formula)
+        rendered_content = rendered_content.replace(f'LATEXPLACEHOLDER{i}ENDLATEX', formula)
     
     context = {
         'term': term,
