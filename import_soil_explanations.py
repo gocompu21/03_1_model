@@ -40,12 +40,22 @@ def import_explanations():
                 # Term 조회 (단어 기준)
                 term = Term.objects.get(word=word)
                 
-                # 내용이 비어있거나 변경된 경우에만 업데이트
-                # (기존 내용이 있어도 덮어쓰기 원하면 조건문 제거)
-                # 여기서는 '비어있거나' 조건만 체크하는 게 안전할 수 있으나,
-                # batch_fill 스크립트 자체가 빈 것만 찾았으므로 그냥 덮어써도 무방함.
-                if term.content != content:
-                    term.content = content
+                # 내용 업데이트 로직
+                # 1. 기존 내용이 비어있으면 -> 그대로 저장
+                # 2. 기존 내용이 있고, 현재 내용과 다르면 -> [산림토양학적 관점] 헤더 추가하여 병합
+                
+                final_content = content
+                if term.content and term.content.strip():
+                    # 이미 내용이 있는 경우 중복 체크
+                    if content.strip() in term.content:
+                        # 이미 포함된 내용이면 건너뜀 (또는 업데이트)
+                        pass 
+                    else:
+                        # 기존 내용 뒤에 추가
+                        final_content = f"{term.content}\n\n<hr>\n\n### [산림토양학적 관점]\n\n{content}"
+                
+                if term.content != final_content:
+                    term.content = final_content
                     term.save()
                     updated_count += 1
                     
