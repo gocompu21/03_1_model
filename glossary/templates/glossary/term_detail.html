@@ -343,31 +343,63 @@ function highlightTerm(htmlContent) {
     function walk(node) {
         if (node.nodeType === 3) { // Text node
             const text = node.nodeValue;
-            // Escape regex special characters in currentTerm
+            if (!text.trim()) return;
+
             const escapedTerm = currentTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(`(${escapedTerm})`, 'gi');
+            const termRegex = new RegExp(`(${escapedTerm})`, 'gi');
             
-            if (regex.test(text)) {
-                const fragment = document.createDocumentFragment();
-                let lastIdx = 0;
-                text.replace(regex, (match, p1, offset) => {
-                    // Push preceding text matches
-                    fragment.appendChild(document.createTextNode(text.slice(lastIdx, offset)));
+            if (!termRegex.test(text)) return; // 검색어 없으면 패스
+
+            const fragment = document.createDocumentFragment();
+            
+            // $...$ 패턴을 기준으로 분리 (LaTeX 보호)
+            // 캡처 그룹 ()을 사용하여 구분자($...$)도 결과 배열에 포함
+            const parts = text.split(/(\$[^$]+\$)/g);
+            
+            parts.forEach(part => {
+                if (part.startsWith('$') && part.endsWith('$')) {
+                    // LaTeX 수식 부분: 하이라이트 하지 않고 그대로 추가
+                    fragment.appendChild(document.createTextNode(part));
+                } else {
+                    // 일반 텍스트 부분: 하이라이트 적용
+                    let lastIdx = 0;
+                    // reset regex lastIndex just in case (though not using 'g' loop here the same way)
+                    // 단순 replace logic 사용
                     
-                    // Push highlighted span
-                    const span = document.createElement('span');
-                    span.className = 'term-highlight';
-                    span.textContent = p1; // No extra characters added
-                    fragment.appendChild(span);
-                    
-                    lastIdx = offset + match.length;
-                    return match;
-                });
-                // Push remaining text
-                fragment.appendChild(document.createTextNode(text.slice(lastIdx)));
-                
-                node.parentNode.replaceChild(fragment, node);
-            }
+                    // part 내에서 검색어 찾기
+                    // matchAll이나 exec 루프 사용
+                    const matches = [...part.matchAll(termRegex)];
+                    if (matches.length === 0) {
+                        fragment.appendChild(document.createTextNode(part));
+                    } else {
+                        let cursor = 0;
+                        matches.forEach(match => {
+                            const matchStr = match[0];
+                            const idx = match.index;
+                            
+                            // 매치 앞부분 텍스트
+                            if (idx > cursor) {
+                                fragment.appendChild(document.createTextNode(part.slice(cursor, idx)));
+                            }
+                            
+                            // 매치된 부분 (하이라이트)
+                            const span = document.createElement('span');
+                            span.className = 'term-highlight';
+                            span.textContent = matchStr;
+                            fragment.appendChild(span);
+                            
+                            cursor = idx + matchStr.length;
+                        });
+                        // 나머지 뒷부분
+                        if (cursor < part.length) {
+                            fragment.appendChild(document.createTextNode(part.slice(cursor)));
+                        }
+                    }
+                }
+            });
+            
+            node.parentNode.replaceChild(fragment, node);
+            
         } else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
             // Traverse child nodes
             Array.from(node.childNodes).forEach(walk);
