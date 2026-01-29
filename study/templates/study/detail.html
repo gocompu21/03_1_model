@@ -648,6 +648,16 @@
                         cn.classList.add('correct');
                     }
                 });
+                if (window.MathJax) {
+                    // MathJax v3
+                    if (window.MathJax.typesetPromise) {
+                        window.MathJax.typesetPromise([el]).catch(err => console.log('MathJax error:', err));
+                    } 
+                    // MathJax v2
+                    else if (window.MathJax.typeset) {
+                        window.MathJax.typeset([el]);
+                    }
+                }
             } else if (card && !isHidden) {
                 // Hide correct answer circle when closing
                 const qChoices = card.querySelector('.q-choices');
@@ -690,6 +700,15 @@
             text.textContent = '전체 접기';
             btn.style.backgroundColor = '#d4edda';
             btn.style.color = '#155724';
+            
+            // Re-render MathJax for all visible explanations
+            if (window.MathJax) {
+                if (window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise().catch(err => console.log('MathJax error:', err));
+                } else if (window.MathJax.typeset) {
+                    window.MathJax.typeset();
+                }
+            }
         } else {
             text.textContent = '전체 펼치기';
             btn.style.backgroundColor = '#fff3cd';
