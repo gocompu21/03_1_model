@@ -83,13 +83,36 @@ def term_detail(request, pk):
     )
     
     # LaTeX 수식 복원
+    # LaTeX 수식 복원
     for i, formula in enumerate(latex_formulas):
         rendered_content = rendered_content.replace(f'LATEXPLACEHOLDER{i}ENDLATEX', formula)
     
+    # 과목 필터링 (기출문제 연결 시 타 과목 문제 제외)
+    subject_id = request.GET.get('subject')
+    references = list(term.references.all())
+    
+    if subject_id and subject_id.isdigit():
+        try:
+            from exam.models import Question
+            # Question 타입 참조만 필터링
+            question_refs = [r for r in references if r.source_type == 'question']
+            if question_refs:
+                question_ids = [r.source_id for r in question_refs]
+                # 해당 과목의 문제 ID 조회
+                valid_ids = set(Question.objects.filter(id__in=question_ids, subject_id=subject_id).values_list('id', flat=True))
+                
+                # 필터링: (질문이 아니거나) OR (질문이면서 유효한 과목인 경우)
+                references = [
+                    r for r in references 
+                    if r.source_type != 'question' or r.source_id in valid_ids
+                ]
+        except ImportError:
+            pass
+            
     context = {
         'term': term,
         'rendered_content': rendered_content,
-        'references': term.references.all(),
+        'references': references,
     }
     return render(request, 'glossary/term_detail.html', context)
 
