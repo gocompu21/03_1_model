@@ -62,13 +62,30 @@ def term_list(request):
 def term_detail(request, pk):
     """용어 상세 (ID로 조회)"""
     import markdown as md
+    import re
     term = get_object_or_404(Term.objects.prefetch_related('subjects', 'references'), pk=pk)
+    
+    content = term.content or ''
+    
+    # LaTeX 수식을 임시로 보호 (마크다운 변환에서 제외)
+    latex_formulas = []
+    def save_latex(match):
+        latex_formulas.append(match.group(0))
+        return f'<<LATEX_{len(latex_formulas)-1}>>'
+    
+    # $...$ 또는 $$...$$ 패턴 보호
+    content = re.sub(r'\$\$[^$]+\$\$|\$[^$]+\$', save_latex, content)
     
     # 마크다운을 HTML로 렌더링 (extra, nl2br, sane_lists 확장 사용)
     rendered_content = md.markdown(
-        term.content or '', 
+        content, 
         extensions=['extra', 'nl2br', 'sane_lists']
     )
+    
+    # LaTeX 수식 복원
+    for i, formula in enumerate(latex_formulas):
+        rendered_content = rendered_content.replace(f'&lt;&lt;LATEX_{i}&gt;&gt;', formula)
+        rendered_content = rendered_content.replace(f'<<LATEX_{i}>>', formula)
     
     context = {
         'term': term,
