@@ -1,0 +1,1168 @@
+가변전하
+가속침식
+가용성 유기물
+각괴
+각주상 구조
+간이토성분석법
+갈색화작용
+감식차표층
+감식표층
+강도요인
+강성
+강우인자
+개략토양조사
+개량토성삼각도
+건조연쇄현상
+견결성
+결정형 광물
+경반층
+계통분류
+고상
+Gouy-Chapman의 확산전기 이중층모델
+고정
+고정화작용
+공극
+공극률
+공극비
+공기충전공극률
+공생적 질소고정
+공생질소고정균
+과숙토
+관악통
+광물
+광합성자급영양세균
+괴상 구조
+교환산도
+교환성 나트륨퍼센트
+교환성 산도
+교환성 양이온
+교환성 염기
+구리
+구상 구조
+구조공극
+구토양분류법
+규소
+규소사면체
+규암
+균근균
+그린음악농법
+극소공극
+근권
+근류균
+금속산화물
+기계적 풍화과정
+기본토층
+기상
+기술적 구분
+기저유출
+기폭효과
+기후요소
+나트륨성 토양
+나트륨흡착비
+낙동통
+난분해성 유기오염물질
+내부유출
+내생균근
+농약
+능동적 흡수
+니켈
+다량영양소
+Darcy의 법칙
+다형태
+단생질소고정균
+단위무게당 수분함량
+단위무게당 에너지
+단위부피당 수분함량
+단위부피당 에너지
+단위질량당 에너지
+대공극
+대공극량
+대상시비
+대형동물군
+덕평통
+도시고형폐기물
+동력학
+동일교호접종군
+동적 평형
+동형치환
+등고선대상재배
+등고선재배
+등온흡착
+등온흡착식
+마그네슘
+마그네슘비료
+망간
+매트릭퍼텐셜
+먹이사슬
+먹이사슬축적
+면상침식
+명도
+모래
+모세관공극량
+모세관수
+모세관현상
+모암
+모암층
+모재
+모재층
+몰리브덴
+무기모재
+무기물표층
+무기태 인
+무기화작용
+무독화작용기작
+무정형 광물
+무형구조
+Munsell 명명법
+Munsell 토색첩
+물리적 붕괴과정
+물에 의한 침식
+물의 극성
+물이용효율
+미나마타병
+미량영양소
+미량영양원소
+미량영양원소비료
+미량원소
+미사
+미세공극
+미소동물군
+미숙토
+미호기성균
+바람에 의한 침식
+박리
+박리현상
+박테로이드
+반려암
+반숙토
+반응곡선
+반응비곡선
+반응비법칙
+방향족 화합물
+배위자교환
+배후습지
+백산통
+백색 알칼리토양
+범람원
+변두리전하
+변량률기술
+변성암
+변성작용
+보수점감의 법칙
+보조토층
+보호콜로이드
+Boltzmann 식
+봉계통
+부식
+부식집적작용
+부식화
+부영양화
+부착현상
+분변토
+불포화수리전도도
+붕소
+붕적퇴적
+붕적퇴적물
+Bragg의 법칙
+Bragg의 회절식
+비결정형 광물
+비결정형 점토광물
+비공생적 질소고정
+비모세관공극량
+BB비료
+비점오염원
+비중계법
+B층
+비특이흡착
+비팽창형 광물
+비표면적
+비혼합용액치환법
+빙력토평원
+빙하범람지
+빙하퇴토
+빙호점토
+뿌리차단
+사구
+사암
+산성 광산폐기물
+산소확산율
+산업적 질소고정
+산업폐기물
+산화
+산화반응
+산화작용
+산화환원반응
+산화환원전위
+삼각통
+3차소비자
+삼투퍼텐셜
+삼팔면체층
+상위한계농도
+색상
+생물공극
+생물농축
+생물인자
+생물적 풍화작용
+생물질소고정
+생물학적 질소고정
+생석회
+생육곡선
+석호
+석회석비료
+석회암
+석회질토양
+석회화작용
+선상지
+선상지퇴적물
+선단
+선앙
+선정(부)
+세계토양도
+세류간침식
+세류침식
+소공극
+소공극량
+소비용수
+소석회
+소성
+소성상한
+소성지수
+소성하한
+소성한계
+short-range order 광물
+수동적 흡수
+수리전도도
+수분수지
+수분퍼텐셜
+수분포화도
+수성표백작용
+수성표백층
+수액분석
+숙답화현상
+순무기화현상
+순부동화현상
+순양전하
+순음전하
+순전하량
+숨겨진 반쪽
+Stern의 전기이중층모델
+Stern 층
+Stokes의 법칙
+습윤연쇄현상
+승수로
+승수로설치재배
+C층
+식물규산체
+식물생장촉진 근권미생물
+식물영양
+식물체분석
+식잔사생물
+신불통
+신토양분류법
+실용분류
+실용적 분류
+쌀겨농법
+아각괴
+R층
+아연
+Atterberg 한계
+안정화/고형화처리기술
+알루미늄팔면체
+알칼리토양
+알칼리화작용
+암모니아생성균
+압력퍼텐셜
+액상
+액성한계
+액체비중계
+양이온교환
+양이온교환용량
+양적 요인
+A층
+X-선회절분석
+역암
+열역학
+열적 처리기술
+열전도도
+염교환산도
+염기용탈작용
+염기포화도
+염류나트륨성 토양
+염류집적작용
+염류토양
+염류화작용
+염소
+영구위조점
+영구전하
+영양소
+0차반응
+오리농법
+오븐건조수분
+오염토양복원기술
+이층
+온실기체
+완충곡선
+완충용량
+외생균근
+용적밀도
+용적수분함량
+용적열용량
+용탈
+용탈요구량
+우렁이농법
+운적모재
+원격탐사
+원주상 구조
+위성추적시스템
+위조점
+위해성 미량원소
+유거
+유거양수곡선
+유기농업
+유기모재
+유기물층
+유기염소계 화합물
+유기질 토양
+유기태 인
+유독성 유기물질
+유리화기술
+유문암
+유전상수
+유전자조작미생물
+유해 폐기물
+유효수분
+유효영양소
+유효태 영양소
+육안관찰
+융기해성토
+음이온고정
+음이온교환
+음이온교환용량
+음이온특이흡착
+음이온흡착
+응집현상
+응회암
+의사모래
+이따이이따이병
+이력현상
+이쇄성
+이중층모델
+2차광물
+2차반응
+2차소비자
+E층
+이탄집적작용
+이팔면체층
+인
+인산가용화균
+인산질비료
+인의 순환
+일시적 전하
+일시적 질소기아
+1차광물
+1차반응
+1차생산자
+1차소비자
+입경구분
+입경분석법
+입경분포도
+입단
+입상 구조
+입상 붕괴
+입자밀도
+자갈
+자살유전자
+자연농업
+자연정화
+자유수
+작물양분종합관리
+작부관리인자
+잔류산도
+잔적모재
+잔적무기모재
+잠산도
+잠재증발산
+잠재특이산성토
+재배시험
+적성등급구분
+전기이중층
+전기저항법
+전이층
+전토층
+절리면 분리
+점오염원
+점토
+점토광물
+점토생성작용
+점토의 기계적 이동작용
+점토판
+접촉교환학설
+정밀농업
+정밀분석법
+정밀토양조사
+제타퍼텐셜
+제한적 구분
+조류
+조부식층
+조암광물
+종속토층
+종퇴석
+주문형 배합비료
+주토층
+중간유출
+중공극
+중금속
+중량수분함량
+중력수
+중력퍼텐셜
+중상자수분측정기
+중성자법
+중형동물군
+증발
+증발산
+증산율
+지렁이농법
+지리정보체계
+지산통
+지속농업
+지질침식
+지하수포드졸화작용
+지형
+진토층
+질산화균
+질산화작용
+질소고정
+질소고정균
+질소기아현상
+질소의 순환
+질소인자
+질소질비료
+집단류
+집락형성수
+집적작용
+집적층
+채도
+천곡통
+철
+철결과
+철·알루미늄집적작용
+체분석법
+초기토양생성작용
+촉감법
+촉감분석법
+총수분퍼텐셜
+최대 용탈층
+최소양분율
+최적영농방안
+추락현상
+축산폐기물
+충적모재
+충적붕적모재
+충적토
+충적퇴적물
+충적평(탄)지
+친환경농업
+침투
+침투율
+칼륨
+칼리질비료
+칼슘
+칼슘비료
+코발트
+탄소순환
+탄질률
+탈염기작용
+탈염류화작용
+탈질
+탈질균
+탈질작용
+태평농법
+tensiometer 법
+토괴
+토성
+토성공극
+토성삼각도
+토양
+토양개량
+토양개량제
+토양검정
+토양공기
+토양관리기술
+토양교질물
+토양구조
+토양 내 통풍법
+토양단면
+토양단면기술
+토양단면만들기
+토양대군
+토양동물군
+토양모재
+토양목
+토양물리
+토양미생물
+토양미생물체량
+토양반응
+토양발달도
+토양방선균
+토양보전인자
+토양분류
+토양비옥도
+토양사상균
+토양색
+토양생물
+토양생성인자
+토양생성작용
+토양세균
+토양속
+토양수분
+토양수분보유곡선
+토양수분특성곡선
+토양수분함량
+토양오염
+토양오염기준
+토양오염원
+토양온도
+토양용액
+토양유기물
+토양유실예측공식
+토양의 견지성
+토양의 기능
+토양의 비열
+토양의 산도
+토양의 3상
+토양의 습윤성
+토양의 질
+토양조류
+토양조사
+토양조사보고서
+토양증기추출법
+토양진공추출법
+토양측정망
+토양침식
+토양침식성인자
+토양통
+토양트렌치공법
+토양해설
+토층
+통기
+통기성
+통성혐기성균
+퇴비화
+퇴적암
+퇴적유기모재
+투수
+특수공극
+특이산성토양
+TDR법
+T-E지수
+파쇄
+판상 구조
+팽창형 광물
+퍼텐셜에너지
+페돈
+편마암
+편성(절대)혐기성균
+편성(절대)호기성균
+편암
+평창통
+포괄적 분류체계
+포드졸화작용
+포장용수량
+포화수리전도도
+폴리페돈
+표면장력
+풍건수분
+풍식
+풍식예측공식
+풍화
+풍화용액
+pH의존전하
+P-E율
+P-E지수
+Fick의 법칙
+psychrometer 법
+피펫법
+피흡착제
+필수무기식물영양소
+필수식물영양소
+필수영양소
+하성충적모재
+하수슬러지
+하위한계농도
+하해혼성충적모재
+하해혼성퇴적지
+한계농도
+한국토양총설
+항생제 내성 유전자
+해설적 분류
+해성충적모재
+해안퇴적물
+Helmholtz 이중층
+현무암
+현장조사
+혈암
+협곡침식
+호산성균
+호성충적모재
+호알칼리성균
+호염성균
+호한발성균
+혼합층
+화강암
+화강편마암
+화성암
+화학적 풍화과정
+화학종속영양세균
+화학흡착
+확산
+확산이중충
+확산전기이중충
+확산층
+환경작용
+환경형성작용
+환원
+환원반응
+활산도
+황
+황비료
+황사
+황의 순환
+회색화작용
+회색화층
+휘산
+휴경관리
+흑색 알칼리토양
+흡습수
+흡착
+흡착제
+accelerated erosion
+acidic sulfate soil
+acidity
+acidophile
+actinomycetes
+active acidity
+adhesion
+adsorbate
+adsorbent
+adsorption
+AEC
+aeration
+air-dry water
+air filled porosity
+air phase
+akalophile
+akiochi
+Alfisol
+algae
+alkali soil
+alkalization
+allophane
+alluvial fan
+alluvial plain
+alluvium
+alluvium-colluvium parent material
+alternative agriculture
+aluminum octahedron
+American Standard Testing Method
+aminization
+ammonification
+amorphous materials
+amphibole
+angular block
+animal wastes
+anion exchange
+anion exchange capacity
+anion fixation
+anion specific adsorption
+apex
+argillation
+Aridisol
+ASTM
+autochthonous microorganism
+availability
+available nutrient
+bacteroid
+Baegsan series
+balance
+banding
+basalt
+base saturation percentage
+best management practice
+bioaccumulation
+bioconcentration
+biodegradation
+biological nitrogen fixation
+biomanipulation
+bioventing
+black alkali soil
+black mica
+blocky
+BMP
+Bonggye series
+boron
+braunification
+BSP
+buffer capacity
+bulk blended fertilizer
+calcification
+calcium
+calloids
+capillarity
+capillary water
+cation exchange
+cation exchange capacity
+CEC
+chemical reduction/oxidation
+chemisorption
+chemoautotroph
+Cheongog series
+chlorine
+chlorite
+chroma
+clay
+clay formation
+clay minerals
+clay pan
+climatic element
+C/N ratio
+cobalt
+coherence
+cohesion
+colluvial deposits
+colluvium
+colony forming units
+columnar
+conglomerate
+conservation practices factor
+consistence
+consumptive use
+consumptive use of water
+contact exchange
+contour cropping
+contour strip-cropping
+conventional agriculture
+copper
+critical concentration
+crop management factor
+cross inoculation group
+cryptopore
+DDL
+density
+Deogpyeong series
+desalinization
+detoxification mechanism
+detritivores
+diagnostic subsurface horizon
+diagnostic surface horizon
+dielectric constant
+diffuse double layer
+diffuse electric double layer
+diffuse layer
+diffusion
+dioctahedral sheet
+EC
+ectomycorrhizae
+edge charge
+Eh
+electric double layer
+electrical conductivity
+eluvial
+end moraine
+endomycorrhizae
+enhanced rhizosphere biodegradation
+Entisol
+epipedon
+ESP
+eutrophication
+exchangeable acidity
+exchangeable basic cation
+exchangeable cation
+exchangeable sodium percentage
+exfoliation
+facultative anaerobes
+fan base
+feldspar
+field capacity
+first-order reaction
+fixation
+flood plain
+food chain
+food chain accumulation
+free-living bacteria
+free water
+friability
+gabbro
+genetically engineered microorganisms
+geographic information system
+geological erosion
+gibbsite
+GIS
+glacial deposits
+glacio-fluviatile deposit
+gley horizon
+gleyzation
+global positioning system
+gneiss
+goethite
+GPS
+granite
+granite gneiss
+granular disintegration
+granule
+gravel
+gravimetric water content
+gravitational water
+gravitational water content
+great group
+greenhouse effect
+greenhouse gas
+groundwater podzolization
+growth curve
+gully erosion
+Gwanag series
+half-life
+halloysite
+halophile
+hard pan
+H-bonding
+heat conductivity
+heavy metals
+hectorite
+Helmholtz double layer
+hematite
+Histosol
+hue
+humus
+humus accumulation
+hydraulic conductivity
+hydraulic head
+hydrogen bonding
+hydrometer
+hydrometer method
+hydromorphous bleached horizon
+hydrous mica
+hygroscopic water
+hysteresis
+igneous rock
+illite
+illuvial horizon
+immiscible liquid displacement
+immobilization
+imogolite
+Inceptisol
+industrial nitrogen fixation
+industrial wastes
+infiltration
+infiltration rate
+initial soil formation
+INM
+in-situ soil venting
+integrated nutrient management
+intensity
+interpretative classification
+interrill erosion
+iron
+isomorphic substitution
+isothermal adsorption
+isothermal adsorption equation
+ISV
+Jisan series
+joint-block separation
+kalium
+kaolin
+kaolinite
+lagoon
+land cover
+land cover change
+landfarming
+land use
+laterite
+latosol
+law of minimum nutrient
+law of the diminishing return
+LCC
+leaching of bases
+leaching requirement
+leaf area index
+ligand exchange
+lime requirement
+lime stone
+limited grouping
+limiting factor
+liquid limit
+liquid phase
+lithosol
+lower critical concentration
+low input sustainable agriculture
+macrofauna
+macronutrient
+macropore
+magnesium
+manganese
+mass flow
+master horizon
+matric potential
+maturity of soil profile
+maximum leaching horizon
+mesofauna
+mesophile
+mesopore
+metamorphic rock
+metamorphism
+microaerophiles
+microbial biomass
+microfauna
+micronutrient
+micropore
+mid-fan
+mild humus
+mineralization
+moder
+Mollisol
+molybdenum
+montmorillonite
+mor
+moraine
+mucigel
+mull
+municipal solid wastes
+Munsell color chart
+muscovite
+mycorrhizae
+mycorrhizal fungi
+Nagdong series
+national geographic information system
+natural attenuation
+Nernst
+net charge
+net immobilization
+net mineralization
+net negative charge
+neutron moisture meter
+nickel
+nitrification
+nitrifying bacteria
+nitrite oxidizer
+nitrogen
+nitrogen factor
+nitrogen fixation
+nitrogen starvation
+nonspecific adsorption
+non-symbiotic nitrogen fixation
+nontronite
+nutrient
+Oxisol
+oxygen diffusion rate
+ODR
+OHP
+obligate aerobe
+obligate anaerobe
+organic agriculture
+organic horizon
+outer Helmholtz plane
+outwash plain
+oven-dry water
+oxidation
+oxidation reaction
+oxidation-reduction potential
+parent material layer
+parent rock
+particle density
+peat accumulation
+ped
+pedon
+permanent charge
+permanent wilting point
+pesticides
+pH-dependent charge
+phosphorus
+phyllite
+phytodegradation
+phytoextraction
+phytolith
+phytoremediation
+phytostabilization
+pipette method
+plant analysis
+plant-available water
+plant growth promoting rhizobacteria
+plant nutrition
+plasticity
+plastic index
+plastic limit
+platy
+pleomorphic
+plinthite
+podzolization
+polypedon
+pore space
+porosity
+potential acidity
+potential energy
+potential evapotranspiration
+potentially toxic trace element
+practical classification
+precision agriculture
+pressure plate extractor
+primary consumer
+primary minerals
+primary producer
+priming effect
+prismatic
+pseudo-sand
+psychrophile
+Pyeongchang series
+pyroxene
+quantity
+quartz
+quartzite
+rainfall erosivity factor
+rate curve
+rate law
+redox potential
+reduction
+reduction reaction
+remote sensing
+regolith
+response curve
+revised universal soil lose equation
+rhizosphere
+rhyolite
+rigidity
+rill erosion
+root interception
+root nodule
+RS
+runoff
+runoff hydrograph
+RUSLE
+saline-sodic soil
+saline soil
+salinization
+saltation
+Samgag series
+salt-replaceable acidity
+sand
+sand dune
+sand stone
+sap analysis
+saponite
+SAR
+schist
+secondary consumer
+secondary minerals
+second-order reaction
+sedimentary rock
+sewage sludge
+shale
+shattering
+sheet erosion
+silicate minerals
+silicon
+silicon tetrahedron
+silt
+Sinbul series
+single grained
+slope length and steepness factor
+smectite
+sodium adsorption ratio
+soil
+soil capability classification
+soil color
+soil creep
+soil erodibility factor
+soil erosion
+soil fauna
+soil fertility
+soil flushing
+soil function
+soil horizon
+soil interpretation
+soil moisture characteristic curve
+soil order
+soil quality
+soil reaction
+soil separate
+soil series
+Soil Taxonomy
+soil texture
+soil texture triangle
+soil vacum extraction
+soil vapor extraction technology
+soil wetness
+solid phase
+solonization
+solum
+specific adsorption effect
+specific heat
+spherical
+Spodosol
+stabilization/solidification technology
+structureless
+subangular block
+subordinate horizon
+suicide gene
+suitability grouping
+sulfur
+sulfuric horizon
+surface complex
+surface complexes
+surface crusting
+surface tension
+suspension
+sustainable agriculture
+sustainable agriculture system
+SVE
+symbiotic nitrogen fixation
+systematic classification
+TDR
+technical grouping
+temporary charge
+tensiometer
+terrace system
+tertiary consumer
+thermal technology
+thermophile
+till plain
+time domain reflectometry
+topmost mineral horizon
+total water potential
+trace element
+transpiration ratio
+transported parent material
+trioctahedral sheet
+tuff
+UCC
+Ultisol
+ultramicropore
+universal soil loss equation
+upper critical concentration
+USLE
+value
+variable charge
+variable-rate technology
+varved clay
+vermiculite
+Vertisol
+visual diagnosis
+vitrification
+void ratio
+volumetric heat capacity
+volumetric water content
+water erosion
+water erosion prediction project
+water potential
+water soluble organic compounds
+weathering solution
+WEPP
+wet bleaching
+white alkali soil
+white mica
+wilting point
+wind erosion
+wind erosion prediction equation
+xerophile
+X-ray diffraction analysis
+zero-order reaction
+zeta potential
+zinc
