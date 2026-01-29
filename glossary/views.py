@@ -44,10 +44,15 @@ def term_list(request):
     valid_question_ids = None
     if subject_id and subject_id.isdigit():
         try:
-            from exam.models import Question
+            # Glossary Subject ID -> Name -> Exam Subject ID 변환
+            g_subject = Subject.objects.get(id=int(subject_id))
+            
+            from exam.models import Question, Subject as ExamSubject
+            e_subject = ExamSubject.objects.get(name=g_subject.name)
+            
             # 해당 과목의 모든 문제 ID 가져오기
-            valid_question_ids = set(Question.objects.filter(subject_id=int(subject_id)).values_list('id', flat=True))
-        except ImportError:
+            valid_question_ids = set(Question.objects.filter(subject_id=e_subject.id).values_list('id', flat=True))
+        except (Subject.DoesNotExist, ImportError, Exception):
             pass
 
     # 2. Python 레벨 처리 (Reference 필터링 및 리스트 변환)
@@ -134,7 +139,11 @@ def term_detail(request, pk):
         
         # Exam 앱의 Question 모델 임포트 (Circular Import 방지 위해 함수 내부 임포트)
         try:
-            from exam.models import Question
+            # Glossary Subject ID -> Name -> Exam Subject ID 변환
+            g_subject = Subject.objects.get(id=target_subject_id)
+            
+            from exam.models import Question, Subject as ExamSubject
+            e_subject = ExamSubject.objects.get(name=g_subject.name)
             
             # Question 타입 참조만 필터링
             question_refs = [r for r in references if r.source_type == 'question']
@@ -144,7 +153,7 @@ def term_detail(request, pk):
                 # 해당 과목의 문제 ID 조회
                 valid_ids = set(Question.objects.filter(
                     id__in=question_ids, 
-                    subject_id=target_subject_id
+                    subject_id=e_subject.id
                 ).values_list('id', flat=True))
                 
                 # 필터링: (질문이 아니거나) OR (질문이면서 유효한 과목인 경우)
@@ -152,8 +161,7 @@ def term_detail(request, pk):
                     r for r in references 
                     if r.source_type != 'question' or r.source_id in valid_ids
                 ]
-        except ImportError:
-            # exam 앱을 찾을 수 없는 경우 등 예외 처리 (조용히 무시하지 않고 로깅하면 좋겠지만)
+        except (Subject.DoesNotExist, ImportError, Exception):
             pass 
             
     context = {
