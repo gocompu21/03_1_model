@@ -340,51 +340,121 @@ function highlightTerm(htmlContent) {
     tempDiv.innerHTML = htmlContent;
     
     // Recursive function to walk text nodes
+    // Check if we are inside a \text{...} command considering brace balance and $ mode
+    function isContextTextMode(text, index) {
+        let balance = 0;
+        let dollarCount = 0;
+        
+        // Scan backwards from index
+        for (let i = index - 1; i >= 0; i--) {
+            const char = text[i];
+            
+            if (char === '}') {
+                balance++;
+            } else if (char === '{') {
+                balance--;
+                if (balance < 0) {
+                    // Found an opening brace that encloses us
+                    const prefix = text.slice(0, i);
+                    // Check logic: find the command before the brace
+                    // We look for \text, \textbf, \textit, etc.
+                    // Simple regex for command at end of string: \\[a-zA-Z]+$
+                     if (/\\(text|textbf|textit|textrm|textsf)[a-zA-Z]*$/.test(prefix)) {
+                        // It is a text command.
+                        // Check if we are inside math delimiters $...$ within that text block
+                        // (Backward scan found dollarCount dollars)
+                        // If dollarCount is ODD, we are inside math mode.
+                        if (dollarCount % 2 !== 0) {
+                            return false; 
+                        }
+                        return true;
+                    }
+                    // Else: it's just a brace group, inherit parent mode (continue scanning)
+                    // e.g. \text{ { ... } } -> outer brace will trigger \text check
+                }
+            } else if (char === '$') {
+                 // Check for escaped \$
+                 if (i > 0 && text[i-1] === '\\') {
+                     // Escaped, ignore
+                 } else {
+                     dollarCount++;
+                 }
+            }
+        }
+        return false; // Default to Math Mode if no \text found
+    }
+
     function walk(node) {
         if (node.nodeType === 3) { // Text node
             const text = node.nodeValue;
             if (!text.trim()) return;
 
+            // Plain text check (stateless)
+            if (text.toLowerCase().indexOf(currentTerm.toLowerCase()) === -1) return;
+
+            const fragment = document.createDocumentFragment();
             const escapedTerm = currentTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const termRegex = new RegExp(`(${escapedTerm})`, 'gi');
             
-            if (!termRegex.test(text)) return; // 검색어 없으면 패스
-
-            const fragment = document.createDocumentFragment();
-            
-            // $...$ 패턴을 기준으로 분리 (LaTeX 보호)
-            // 캡처 그룹 ()을 사용하여 구분자($...$)도 결과 배열에 포함
+            // Split by LaTeX delimiters $...$ to process math regions separately
             const parts = text.split(/(\$[^$]+\$)/g);
             
             parts.forEach(part => {
                 if (part.startsWith('$') && part.endsWith('$')) {
-                    // LaTeX 수식 부분: HTML span 대신 LaTeX \color 명령어로 하이라이트
-                    // 주의: 용어가 LaTeX 명령어(예: text)와 겹칠 경우 오동작할 수 있으나, 용어집 특성상 드묾.
-                    const newPart = part.replace(termRegex, (match) => `{\\color{#d93025}${match}}`);
-                    fragment.appendChild(document.createTextNode(newPart));
-                } else {
-                    // 일반 텍스트 부분: 하이라이트 적용
-                    let lastIdx = 0;
-                    // reset regex lastIndex just in case (though not using 'g' loop here the same way)
-                    // 단순 replace logic 사용
+                    // LaTeX Part
+                    // We need to find all matches within this part and determine context for EACH match
+                    // Since replace() doesn't give us easy index access during iteration, using matchAll
                     
-                    // part 내에서 검색어 찾기
-                    // matchAll이나 exec 루프 사용
+                    let cursor = 0;
+                    let resultPart = "";
                     const matches = [...part.matchAll(termRegex)];
+                    
                     if (matches.length === 0) {
-                        fragment.appendChild(document.createTextNode(part));
+                        resultPart = part;
                     } else {
-                        let cursor = 0;
                         matches.forEach(match => {
                             const matchStr = match[0];
                             const idx = match.index;
                             
-                            // 매치 앞부분 텍스트
+                            // Append text before match
+                            if (idx > cursor) {
+                                resultPart += part.slice(cursor, idx);
+                            }
+                            
+                            // Check Context at this position (idx)
+                            if (isContextTextMode(part, idx)) {
+                                // Breakout Hack
+                                resultPart += `} {\\color{#d93025}\\text{${matchStr}}} \\text{`;
+                            } else {
+                                // Standard Math Mode
+                                resultPart += `{\\color{#d93025}${matchStr}}`;
+                            }
+                            
+                            cursor = idx + matchStr.length;
+                        });
+                        // Append remaining text
+                        if (cursor < part.length) {
+                            resultPart += part.slice(cursor);
+                        }
+                    }
+                    fragment.appendChild(document.createTextNode(resultPart));
+                    
+                } else {
+                    // Plain Text Part
+                    let cursor = 0;
+                    const matches = [...part.matchAll(termRegex)];
+                    
+                    if (matches.length === 0) {
+                         fragment.appendChild(document.createTextNode(part));
+                    } else {
+                        matches.forEach(match => {
+                            const matchStr = match[0];
+                            const idx = match.index;
+                            
                             if (idx > cursor) {
                                 fragment.appendChild(document.createTextNode(part.slice(cursor, idx)));
                             }
                             
-                            // 매치된 부분 (하이라이트)
                             const span = document.createElement('span');
                             span.className = 'term-highlight';
                             span.textContent = matchStr;
@@ -392,7 +462,6 @@ function highlightTerm(htmlContent) {
                             
                             cursor = idx + matchStr.length;
                         });
-                        // 나머지 뒷부분
                         if (cursor < part.length) {
                             fragment.appendChild(document.createTextNode(part.slice(cursor)));
                         }
@@ -403,7 +472,6 @@ function highlightTerm(htmlContent) {
             node.parentNode.replaceChild(fragment, node);
             
         } else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
-            // Traverse child nodes
             Array.from(node.childNodes).forEach(walk);
         }
     }

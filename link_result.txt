@@ -1,0 +1,9 @@
+=== 수목해충학 용어 - 기출문제 연결 스크립트 ===
+Traceback (most recent call last):
+  File "C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\link_pest_terms.py", line 140, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\gocom\Documents\Antigravity\Django_BaseCamp\03_1_model\link_pest_terms.py", line 58, in main
+    print("\u26a0\ufe0f  미리보기 모드 (실제 저장 안함)")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'cp949' codec can't encode character '\u26a0' in position 0: illegal multibyte sequence

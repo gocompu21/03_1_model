@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+    <h1>Fix Verification</h1>
+    <div id="result"></div>
+
+    <script>
+        const currentTerm = "CEC";
+        const content = "양이온교환용량($\\text{CEC}$)이 증가합니다. $\\text{pH}$는 무시.";
+
+        function highlightTerm(htmlContent) {
+            if (!currentTerm || !htmlContent) return htmlContent;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            
+            function walk(node) {
+                if (node.nodeType === 3) { // Text node
+                    const text = node.nodeValue;
+                    if (!text.trim()) return;
+
+                    const escapedTerm = currentTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const termRegex = new RegExp(`(${escapedTerm})`, 'gi');
+                    
+                    if (!termRegex.test(text)) return; 
+
+                    const fragment = document.createDocumentFragment();
+                    const parts = text.split(/(\$[^$]+\$)/g);
+                    
+                    parts.forEach(part => {
+                        if (part.startsWith('$') && part.endsWith('$')) {
+                             let newPart;
+                            // Check if we are likely inside a \text{...} block where \color doesn't work directly
+                            if (/^\$\\text\{.*\}\$$/.test(part)) {
+                                // "Breakout Hack"
+                                newPart = part.replace(termRegex, (match) => `} {\\color{#d93025}\\text{${match}}} \\text{`);
+                            } else {
+                                // Standard Math Mode
+                                newPart = part.replace(termRegex, (match) => `{\\color{#d93025}${match}}`);
+                            }
+                            fragment.appendChild(document.createTextNode(newPart));
+                        } else {
+                            // Text logic (simplified)
+                            fragment.appendChild(document.createTextNode(part));
+                        }
+                    });
+                    
+                    node.parentNode.replaceChild(fragment, node);
+                    
+                } else if (node.nodeType === 1) {
+                    Array.from(node.childNodes).forEach(walk);
+                }
+            }
+            
+            walk(tempDiv);
+            return tempDiv.innerHTML;
+        }
+
+        document.getElementById('result').innerHTML = highlightTerm(content);
+    </script>
+</body>
+</html>

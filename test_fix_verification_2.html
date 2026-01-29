@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .term-highlight {
+            color: #d93025;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fix Verification 2</h1>
+    <div id="result"></div>
+    <div id="debug"></div>
+
+    <script>
+        const currentTerm = "CEC";
+        // Case from User: "81. 양이온교환용량(CEC)을 증가시키는 요인이 아닌 것은?"
+        const content = "81. 양이온교환용량(CEC)을 증가시키는 요인이 아닌 것은?";
+
+        function highlightTerm(htmlContent) {
+            if (!currentTerm || !htmlContent) return htmlContent;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            
+            function walk(node) {
+                if (node.nodeType === 3) { // Text node
+                    const text = node.nodeValue;
+                    if (!text.trim()) return;
+
+                    const escapedTerm = currentTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const termRegex = new RegExp(`(${escapedTerm})`, 'gi');
+                    
+                    if (!termRegex.test(text)) return; 
+
+                    const fragment = document.createDocumentFragment();
+                    const parts = text.split(/(\$[^$]+\$)/g);
+                    
+                    parts.forEach(part => {
+                        if (part.startsWith('$') && part.endsWith('$')) {
+                             let newPart;
+                            if (/^\$\\text\{.*\}\$$/.test(part)) {
+                                newPart = part.replace(termRegex, (match) => `} {\\color{#d93025}\\text{${match}}} \\text{`);
+                            } else {
+                                newPart = part.replace(termRegex, (match) => `{\\color{#d93025}${match}}`);
+                            }
+                            fragment.appendChild(document.createTextNode(newPart));
+                        } else {
+                            // Text logic (Original)
+                             let cursor = 0;
+                             const matches = [...part.matchAll(termRegex)];
+                             
+                             if (matches.length === 0) {
+                                 fragment.appendChild(document.createTextNode(part));
+                             } else {
+                                matches.forEach(match => {
+                                    const matchStr = match[0];
+                                    const idx = match.index;
+                                    
+                                    if (idx > cursor) {
+                                        fragment.appendChild(document.createTextNode(part.slice(cursor, idx)));
+                                    }
+                                    
+                                    const span = document.createElement('span');
+                                    span.className = 'term-highlight';
+                                    span.textContent = matchStr;
+                                    fragment.appendChild(span);
+                                    
+                                    cursor = idx + matchStr.length;
+                                });
+                                if (cursor < part.length) {
+                                    fragment.appendChild(document.createTextNode(part.slice(cursor)));
+                                }
+                             }
+                        }
+                    });
+                    
+                    node.parentNode.replaceChild(fragment, node);
+                    
+                } else if (node.nodeType === 1) {
+                    Array.from(node.childNodes).forEach(walk);
+                }
+            }
+            
+            walk(tempDiv);
+            return tempDiv.innerHTML;
+        }
+
+        const resultHtml = highlightTerm(content);
+        document.getElementById('result').innerHTML = resultHtml;
+        document.getElementById('debug').textContent = resultHtml;
+    </script>
+</body>
+</html>

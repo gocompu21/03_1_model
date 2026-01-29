@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <h1>Complex Fix Verification</h1>
+    <div id="results"></div>
+
+    <script>
+        function isContextTextMode(text, index) {
+            let balance = 0;
+            let dollarCount = 0;
+            
+            // Scan backwards from index
+            for (let i = index - 1; i >= 0; i--) {
+                const char = text[i];
+                
+                if (char === '}') {
+                    balance++;
+                } else if (char === '{') {
+                    balance--;
+                    if (balance < 0) {
+                        // Found an opening brace that encloses us
+                        // Check command
+                        const prefix = text.slice(0, i);
+                        // Check for \text, \textbf, etc. (basic heuristic)
+                        if (/\\text[a-zA-Z]*$/.test(prefix)) {
+                            // It is a text command.
+                            // Check dollars since then
+                            if (dollarCount % 2 !== 0) {
+                                return false; // Inside math mode via $
+                            }
+                            return true;
+                        }
+                        // Continue scanning (inherit parent mode)
+                        // Reset balance for the next scope up?
+                        // No, balance is now -1. The loop naturally continues to find the NEXT enclosing brace (which will bring balance to -2).
+                        // e.g. \text{ { CEC } }
+                        // Inner {: bal becomes -1. Not \text.
+                        // Outer {: bal becomes -2. \text found. -> True.
+                    }
+                } else if (char === '$') {
+                    // Check for escaped \$
+                    if (i > 0 && text[i-1] === '\\') {
+                        // Escaped, ignore
+                    } else {
+                        dollarCount++;
+                    }
+                }
+            }
+            return false;
+        }
+
+        const testCases = [
+            { id: 1, text: "$\\text{CEC}$", term: "CEC", expectText: true },
+            { id: 2, text: "$CEC$", term: "CEC", expectText: false },
+            { id: 3, text: "$\\text{Value is CEC}$", term: "CEC", expectText: true },
+            { id: 4, text: "$\\frac{\\text{CEC}}{2}$", term: "CEC", expectText: true },
+            { id: 5, text: "$\\frac{A}{CEC}$", term: "CEC", expectText: false },
+            { id: 6, text: "$\\text{A $CEC$}$", term: "CEC", expectText: false }, // Math in Text
+            { id: 7, text: "$\\text{A { B { CEC } } }$", term: "CEC", expectText: true },
+            { id: 8, text: "$ \\text{Foo} + CEC $", term: "CEC", expectText: false }
+        ];
+
+        let resultsHtml = "";
+        testCases.forEach(tc => {
+            const index = tc.text.indexOf(tc.term);
+            if (index === -1) return;
+            
+            const result = isContextTextMode(tc.text, index);
+            const pass = result === tc.expectText;
+            
+            resultsHtml += `<div>Case ${tc.id}: ${pass ? "PASS" : "FAIL"} (Got ${result}, Expected ${tc.expectText}) - ${tc.text}</div>`;
+        });
+
+        document.getElementById('results').innerHTML = resultsHtml;
+    </script>
+</body>
+</html>

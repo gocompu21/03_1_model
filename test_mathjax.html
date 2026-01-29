@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+    };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+</head>
+<body>
+    <h1>MathJax Test</h1>
+    
+    <p>Case 1: Standard color</p>
+    $$ \color{#d93025}{CEC} $$
+
+    <p>Case 2: Color inside text</p>
+    $$ \text{\color{#d93025}{CEC}} $$
+
+    <p>Case 3: Color inside text with braces</p>
+    $$ \text{{\color{#d93025}CEC}} $$
+    
+    <p>Case 4: Class inside text</p>
+    $$ \text{\class{term-highlight}{CEC}} $$
+
+    <div class="term-highlight">CSS Red</div>
+    <style>
+        .term-highlight { color: #d93025; font-weight: bold; }
+    </style>
+</body>
+</html>
