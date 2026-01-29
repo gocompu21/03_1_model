@@ -359,22 +359,22 @@
             {% for term in group.list %}
             {% if not forloop.first %}</tr><tr>{% endif %}
             <td style="padding: 4px 10px; border-bottom: 1px solid #eee; width: 200px;">
-                <a href="{% url 'glossary:term_detail' term.pk %}" style="color: #2d6a4f; text-decoration: none; font-weight: 500;">
+                <a href="{% url 'glossary:term_detail' term.pk %}?subject={{ selected_subject|default:'' }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" style="color: #2d6a4f; text-decoration: none; font-weight: 500;">
                     {{ term.word }}
                 </a>
             </td>
             <td style="padding: 4px 0px; border-bottom: 1px solid #eee; width: 20px; text-align: center;">
                 {% if term.content and term.content|length > 100 %}
-                <a href="{% url 'glossary:term_detail' term.pk %}" style="text-decoration: none;">
+                <a href="{% url 'glossary:term_detail' term.pk %}?subject={{ selected_subject|default:'' }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" style="text-decoration: none;">
                     <span style="font-size: 0.8rem; cursor: pointer;" title="설명 있음">📝</span>
                 </a>
                 {% endif %}
             </td>
             <td style="padding: 4px 6px; border-bottom: 1px solid #eee; text-align: center; width: 40px; color: #666;">
-                {{ term.reference_count|default:0 }}회
+                {{ term.filtered_ref_count|default:0 }}회
             </td>
             <td style="padding: 4px 10px; border-bottom: 1px solid #eee;">
-                {% for ref in term.references.all %}
+                {% for ref in term.filtered_references %}
                 <span class="round-badge" data-round="{{ ref.source_title|slice:':2'|cut:'회' }}" style="display: inline-block; color: white; padding: 1px 6px; border-radius: 10px; font-size: 0.65rem; margin: 1px;">{{ ref.source_title }}</span>
                 {% empty %}
                 <span style="color: #ccc; font-size: 0.7rem;">-</span>

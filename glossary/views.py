@@ -9,51 +9,88 @@ from .models import Subject, Term, TermReference
 @login_required
 def term_list(request):
     """용어 목록"""
-    # 성능 최적화: references를 prefetch하여 N+1 문제 해결
-    terms = Term.objects.prefetch_related('subjects', 'references').annotate(
-        reference_count=Count('references')
-    ).order_by('word')
+    from glossary.templatetags.glossary_tags import get_initial
+    
+    # 1. 쿼리셋 기본 준비 (Prefetch 필수)
+    terms_qs = Term.objects.prefetch_related('subjects', 'references').order_by('word')
     subjects = Subject.objects.all()
     
     # 과목 필터 (기본값: 수목해충학)
     subject_id = request.GET.get('subject')
     if subject_id is None:
-        # URL에 subject 파라미터가 없으면 수목해충학을 기본으로
         default_subject = Subject.objects.filter(name__contains='수목해충학').first()
         if default_subject:
             subject_id = str(default_subject.id)
     
+    # 과목 필터링 (DB 레벨)
     if subject_id:
-        terms = terms.filter(subjects__id=subject_id)
+        terms_qs = terms_qs.filter(subjects__id=subject_id)
     
-    # 검색
+    # 검색 (DB 레벨)
     search = request.GET.get('q')
     if search:
-        terms = terms.filter(word__icontains=search)
-        
-    # 기출 위주 필터 (기본값: on)
+        terms_qs = terms_qs.filter(word__icontains=search)
+
+    # 기출 필터 설정
     exam_only = request.GET.get('exam_only', 'on')
-    # 만약 URL이 ?exam_only= (빈 값)으로 오면 'on'으로 처리하거나 'off'로 처리?
-    # 보통 빈 값은 False로 하지만, 사용자가 '기본은 기출'이라고 했으므로 아예 없거나 'on'이면 켠다.
-    # 명시적으로 'off'일 때만 해제.
-    if exam_only != 'off':
-        terms = terms.filter(reference_count__gt=0)
-        exam_only = 'on'
-    else:
+    # off가 아니면 on으로 취급
+    is_exam_only = (exam_only != 'off')
+    if not is_exam_only: 
         exam_only = 'off'
+    else:
+        exam_only = 'on'
+
+    # 과목별 문제 ID 캐싱 (필터링용)
+    valid_question_ids = None
+    if subject_id and subject_id.isdigit():
+        try:
+            from exam.models import Question
+            # 해당 과목의 모든 문제 ID 가져오기
+            valid_question_ids = set(Question.objects.filter(subject_id=int(subject_id)).values_list('id', flat=True))
+        except ImportError:
+            pass
+
+    # 2. Python 레벨 처리 (Reference 필터링 및 리스트 변환)
+    final_terms = []
     
-    # 정렬: DB 정렬 후 Python에서 이니셜 그룹별로 확실히 재정렬
-    # (regroup 템플릿 태그가 연속된 그룹을 제대로 묶으려면 리스트가 그룹별로 정렬되어 있어야 함)
-    from glossary.templatetags.glossary_tags import get_initial
-    terms = list(terms)
-    terms.sort(key=lambda t: (get_initial(t.word), t.word))
+    # QuerySet 실행
+    for term in terms_qs:
+        all_refs = list(term.references.all())
+        filtered_refs = []
+        
+        if valid_question_ids is not None:
+            for ref in all_refs:
+                if ref.source_type == 'question':
+                    # 해당 과목의 문제인 경우만 포함
+                    if ref.source_id in valid_question_ids:
+                        filtered_refs.append(ref)
+                else:
+                    # 챕터 등 다른 참조는 포함
+                    filtered_refs.append(ref)
+        else:
+            # 전체 보기 모드: 모든 참조 포함
+            filtered_refs = all_refs
+            
+        # 템플릿에서 사용할 속성 설정
+        term.filtered_references = filtered_refs
+        term.filtered_ref_count = len(filtered_refs)
+        
+        # 기출문제가 있는 것만 보기 필터
+        if is_exam_only:
+            if term.filtered_ref_count > 0:
+                final_terms.append(term)
+        else:
+            final_terms.append(term)
+    
+    # 정렬: 초성 기준 (Python Sort)
+    final_terms.sort(key=lambda t: (get_initial(t.word), t.word))
 
     context = {
-        'terms': terms,
+        'terms': final_terms,
         'subjects': subjects,
         'selected_subject': subject_id,
         'search_query': search or '',
-        'exam_only': exam_only == 'on',
+        'exam_only': is_exam_only,
     }
     return render(request, 'glossary/term_list.html', context)
 
