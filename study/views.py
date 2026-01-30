@@ -417,6 +417,7 @@ def api_question(request, question_id):
         "choice5": question.choice5,
         "answer": question.answer,
         "explanation": explanation_html,
+        "image": question.image.url if question.image else None,
     }
     return JsonResponse(data)
 

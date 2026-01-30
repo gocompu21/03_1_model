@@ -554,6 +554,7 @@ async function toggleAllQuestions() {
                         <div class="q-content">
                             ${data.number}. ${highlightTerm(data.content.replace(/\n/g, '<br>'))}
                         </div>
+                        ${data.image ? `<div style="text-align:center; margin-bottom: 20px;"><img src="${data.image}" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #eee;"></div>` : ''}
                     </div>
                     <div class="q-choices">${choicesHtml}</div>
                     <div class="explanation-section">
