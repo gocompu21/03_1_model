@@ -178,15 +178,7 @@
 </style>
 
 <div class="glossary-container" style="padding-top: 5px;">
-    <form class="filter-bar" method="get" style="padding: 12px 15px; margin-bottom: 15px;">
-        <span style="font-size: 1.1rem; font-weight: 700; color: #2d6a4f; margin-right: 15px;">📖 찾아보기</span>
-        <input type="text" name="q" placeholder="용어 검색..." value="{{ search_query }}" style="padding: 6px 12px; font-size: 0.9rem;">
-
-        <button type="submit" style="padding: 6px 15px; font-size: 0.9rem;">검색</button>
-        {% if user.is_staff or user.is_superuser %}
-        <a href="{% url 'glossary:term_create' %}" style="padding: 6px 15px; margin-left: auto; background: transparent; color: #2d6a4f; border: 1px solid #2d6a4f; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">+ 용어 등록</a>
-        {% endif %}
-    </form>
+    <!-- Search Bar Removed -->
     
     
     {% if terms %}
@@ -224,9 +216,7 @@
                 </a>
                 {% endif %}
             {% endfor %}
-            <a href="?q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if not selected_subject %}active{% endif %}">
-                📚 전체
-            </a>
+
         </div>
         <style>
             .glossary-tab {

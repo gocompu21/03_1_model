@@ -87,8 +87,14 @@ def term_list(request):
         else:
             final_terms.append(term)
     
-    # 정렬: 초성 기준 (Python Sort)
-    final_terms.sort(key=lambda t: (get_initial(t.word), t.word))
+    # 정렬: 한글 우선 -> 초성 기준
+    def sort_key(t):
+        init = get_initial(t.word)
+        # 한글이면 0 (우선), 그 외(영어/숫자)는 1 (나중)
+        rank = 0 if '가' <= init <= '힣' else 1
+        return (rank, init, t.word)
+
+    final_terms.sort(key=sort_key)
 
     context = {
         'terms': final_terms,
