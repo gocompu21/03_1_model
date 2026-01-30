@@ -20,23 +20,16 @@
 {% endblock %}
 
 {% block content %}
-<!-- MathJax for LaTeX rendering -->
-<script>
-MathJax = {
-    tex: {
-        inlineMath: [['$', '$'], ['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']]
-    },
-    startup: {
-        ready: function() {
-            MathJax.startup.defaultReady();
-        }
-    }
-};
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
 
 <style>
+    /* Specific override for Term Content to be larger */
+    .term-content mjx-container,
+    .term-content .MathJax,
+    .term-content mjx-math {
+        font-size: 140% !important;
+    }
+
     body {
         background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
         min-height: 100vh;
@@ -179,9 +172,35 @@ MathJax = {
         line-height: 0;
     }
     
-    /* MathJax 인라인 수식 폰트 크기 조정 */
+    /* MathJax 인라인 수식 폰트 크기 및 스타일 조정 */
     .term-content .MathJax {
         font-size: 1.0em !important;
+    }
+    
+    /* MathJax 화학식 스타일 - 주변 폰트와 조화 */
+    .term-content mjx-container[jax="CHTML"] {
+        font-size: inherit !important;
+        vertical-align: baseline;
+    }
+    
+    .term-content mjx-container[jax="CHTML"][display="true"] {
+        font-size: 1.1em !important;
+    }
+    
+    /* 인라인 수식이 텍스트 흐름에 자연스럽게 맞도록 */
+    .term-content mjx-math {
+        font-size: inherit !important;
+    }
+    
+    /* 상하첨자가 너무 작지 않도록 조정 */
+    .term-content mjx-script {
+        font-size: 0.7em !important;
+    }
+    
+    /* 해설 영역의 MathJax 스타일 */
+    .exp-text mjx-container[jax="CHTML"],
+    .explanation-section mjx-container[jax="CHTML"] {
+        font-size: inherit !important;
     }
 
     /* Question Card Styles for Dynamic Content */

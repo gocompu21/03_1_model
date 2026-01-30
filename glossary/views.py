@@ -109,14 +109,22 @@ def term_detail(request, pk):
     
     content = term.content or ''
     
+    # JSON에서 가져온 데이터의 이중 이스케이프 수정 (\\text -> \text)
+    # 데이터베이스에 \\text로 저장되어 있으므로 \text로 변환해야 MathJax가 인식함
+    # lambda 함수를 사용하면 replacement 이스케이프 문제를 피할 수 있음
+    content = re.sub(r'\\\\', lambda m: chr(92), content)  # \\ -> \ 변환 (chr(92) = \)
+    
     # LaTeX 수식을 임시로 보호 (마크다운 변환에서 제외)
     latex_formulas = []
     def save_latex(match):
         latex_formulas.append(match.group(0))
         return f'LATEXPLACEHOLDER{len(latex_formulas)-1}ENDLATEX'
     
-    # $...$ 또는 $$...$$ 패턴 보호
-    content = re.sub(r'\$\$[^$]+\$\$|\$[^$]+\$', save_latex, content)
+    # $...$ 또는 $$...$$ 패턴 보호 (non-greedy, 멀티라인 지원)
+    # Display math: $$...$$ (먼저 처리해야 인라인 매칭에 방해받지 않음)
+    content = re.sub(r'\$\$(.+?)\$\$', save_latex, content, flags=re.DOTALL)
+    # Inline math: $...$ (줄바꿈 없이)
+    content = re.sub(r'\$([^\$\n]+?)\$', save_latex, content)
     
     # 마크다운을 HTML로 렌더링 (extra, nl2br, sane_lists 확장 사용)
     rendered_content = md.markdown(
@@ -124,7 +132,6 @@ def term_detail(request, pk):
         extensions=['extra', 'nl2br', 'sane_lists']
     )
     
-    # LaTeX 수식 복원
     # LaTeX 수식 복원
     for i, formula in enumerate(latex_formulas):
         rendered_content = rendered_content.replace(f'LATEXPLACEHOLDER{i}ENDLATEX', formula)

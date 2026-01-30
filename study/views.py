@@ -385,11 +385,25 @@ def api_question(request, question_id):
     # 해설 마크다운을 HTML로 변환
     explanation_raw = question.textbook_chat or question.general_chat or ''
     
-    # LaTeX 보존을 위해 강제 변환 로직 제거 (MathJax 사용)
-    # explanation_raw = re.sub(r'\\text\{([^}]+)\}', r'<em>\1</em>', explanation_raw)
-    # explanation_raw = re.sub(r'\$([^$]+)\$', r'<em>\1</em>', explanation_raw)
+    # JSON에서 가져온 데이터의 이중 이스케이프 수정 (\\text -> \text)
+    explanation_raw = explanation_raw.replace('\\\\', '\\')
+    
+    # LaTeX 수식을 임시로 보호 (마크다운 변환에서 제외)
+    latex_formulas = []
+    def save_latex(match):
+        latex_formulas.append(match.group(0))
+        return f'LATEXPLACEHOLDER{len(latex_formulas)-1}ENDLATEX'
+    
+    # Display math: $$...$$ (먼저 처리)
+    explanation_raw = re.sub(r'\$\$(.+?)\$\$', save_latex, explanation_raw, flags=re.DOTALL)
+    # Inline math: $...$
+    explanation_raw = re.sub(r'\$([^\$\n]+?)\$', save_latex, explanation_raw)
     
     explanation_html = md.markdown(explanation_raw, extensions=['extra', 'nl2br', 'sane_lists'])
+    
+    # LaTeX 수식 복원
+    for i, formula in enumerate(latex_formulas):
+        explanation_html = explanation_html.replace(f'LATEXPLACEHOLDER{i}ENDLATEX', formula)
     
     data = {
         "id": question.id,

@@ -4,6 +4,8 @@
 {% load glossary_tags %}
 
 {% block content %}
+
+
 <style>
     /* Global Background */
     body {
@@ -278,6 +280,30 @@
         font-size: 40px;
         font-weight: bold;
         cursor: pointer;
+    }
+    
+    /* MathJax 화학식 스타일 - 주변 폰트와 조화 */
+    mjx-container[jax="CHTML"] {
+        font-size: inherit !important;
+        vertical-align: baseline;
+    }
+    
+    mjx-container[jax="CHTML"][display="true"] {
+        font-size: 1.1em !important;
+    }
+    
+    mjx-math {
+        font-size: inherit !important;
+    }
+    
+    mjx-script {
+        font-size: 0.7em !important;
+    }
+    
+    .exp-text mjx-container[jax="CHTML"],
+    .explanation-section mjx-container[jax="CHTML"],
+    .markdown-content mjx-container[jax="CHTML"] {
+        font-size: inherit !important;
     }
 </style>
 

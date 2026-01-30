@@ -11,7 +11,12 @@
             padding: 0;
         }
 
-
+        /* Force MathJax to be larger only slightly globally */
+        mjx-container {
+            font-size: 105% !important;
+        }
+        
+        /* Adjust global header links */
         header {
             background: #333;
             color: white;
@@ -32,19 +37,51 @@
             max-width: 1000px;
             margin: 0 auto;
         }
+        
+        /* Unified Highlight Style for Terms */
+        /* Targets spans with red color (common in explanations) */
+        span[style*="color:red"],
+        span[style*="color: red"],
+        span[style*="color:#ff0000"],
+        span[style*="color: #ff0000"],
+        span[style*="rgb(255, 0, 0)"] {
+            background-color: #fff9c4 !important; /* Light Yellow */
+            color: #d32f2f !important; /* Deep Red */
+            padding: 0;
+            /* border-radius: 0; */
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
     </style>
+    <!-- MathJax Configuration -->
     <!-- MathJax Configuration -->
     <script>
         window.MathJax = {
             tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']]
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                packages: {'[+]': ['ams', 'mhchem', 'newcommand']},
+                processEscapes: true
             },
-            svg: {
-                fontCache: 'global'
+            loader: {
+                load: ['[tex]/ams', '[tex]/mhchem', '[tex]/newcommand']
+            },
+            chtml: {
+                scale: 1.25,
+                matchFontHeight: false,
+                mtextInheritFont: true
+            },
+            startup: {
+                ready: function() {
+                    MathJax.startup.defaultReady();
+                    MathJax.typesetPromise().catch(function(err) {
+                        console.error('MathJax typeset error:', err);
+                    });
+                }
             }
         };
     </script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -77,6 +114,43 @@
                 }).catch(function() {});
             }, 60000);  // 1분마다
         })();
+
+        // Unify Term Highlighting (Red text -> Yellow background)
+        function applyHighlightToRedText() {
+            const targets = document.querySelectorAll('.markdown-content, .card-text, .exp-text, .term-content');
+            targets.forEach(container => {
+                const elements = container.querySelectorAll('*');
+                elements.forEach(el => {
+                    // Skip if already highlighted by us
+                    if (el.dataset.highlighted) return;
+
+                    const computed = window.getComputedStyle(el);
+                    const color = computed.color;
+                    
+                    // Parse RGB
+                    const match = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+                    if (match) {
+                        const r = parseInt(match[1]);
+                        const g = parseInt(match[2]);
+                        const b = parseInt(match[3]);
+                        
+                        // Check if Red is dominant (standard red is roughly 255,0,0 usually, or d32f2f which is 211,47,47)
+                        // Heuristic: R > 150, R > G+50, R > B+50
+                        if (r > 150 && r > g + 40 && r > b + 40) {
+                            el.style.backgroundColor = '#fff9c4'; // Light Yellow
+                            // el.style.padding = '0'; // User requested no side padding
+                            // el.style.borderRadius = '0';
+                            el.style.boxDecorationBreak = 'clone';
+                            el.style.webkitBoxDecorationBreak = 'clone';
+                            el.dataset.highlighted = 'true';
+                        }
+                    }
+                });
+            });
+        }
+
+        // Run periodically to catch dynamic content (MathJax updates, Tab switches)
+        setInterval(applyHighlightToRedText, 1000);
     </script>
     {% endif %}
 
