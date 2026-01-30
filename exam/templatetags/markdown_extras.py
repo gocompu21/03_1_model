@@ -33,6 +33,19 @@ def markdown_format(text):
         text = text.replace(r"\div", r"\\div")
         # Add other common commands as needed, or use regex for \[a-zA-Z] if safe
 
+        # 5. Remove list markers (*, -) at the start of lines (handling leading whitespace)
+        #    Fixes issue where asterisks appear in text when markdown list parsing fails (e.g. no blank line)
+        #    or simply forces the "no bullet" style by flattening lists to text.
+        text = re.sub(r'(?m)^\s*[\*\-]\s+', '', text)
+
+        # 6. Wrap lines starting with circled numbers (①-⑳) in a div with hanging-indent class.
+        #    This ensures that multi-line text aligns correctly (hanging indent).
+        #    Unicode range: \u2460 (①) to \u2473 (⑳)
+        #    We match optional leading whitespace (^\s*) but do not capture it, effectively stripping it.
+        #    ALSO: We must handle cases where the number is bolded (**①**) which becomes <strong>①...
+        #    So we match optional <strong> tag at the start of the line.
+        text = re.sub(r'(?m)^\s*((?:<strong>\s*)?[\u2460-\u2473].*)$', r'<div class="hanging-indent">\1</div>', text)
+
     # Convert markdown to HTML
     html = md.markdown(text, extensions=["extra", "nl2br"])
     # If it's a single paragraph, strip the <p> tags to avoid unwanted margins if user requests
