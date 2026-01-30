@@ -102,7 +102,7 @@ class GeminiStoreManager:
                 "수목관리학": ["수목관리학", "조경수", "식재관리", "농약학"],
             }
 
-            print(f"DEBUG: Found {len(cloud_files)} cloud files.")
+            logging.info(f"Found {len(cloud_files)} cloud files.")
             for subject, keywords in subject_mappings.items():
                 new_stores[subject] = []
 
@@ -110,21 +110,15 @@ class GeminiStoreManager:
                     if f["state"] == "ACTIVE":
                         norm_name = unicodedata.normalize("NFC", f["display_name"])
 
-                        # Special Debug for target subject
-                        if subject == "수목해충학":
-                            print(
-                                f"DEBUG: Checking '{norm_name}' against keywords {keywords}"
-                            )
-
                         # Check if ANY keyword matches
                         if any(k in norm_name for k in keywords):
                             new_stores[subject].append(f["name"])
-                            print(f"DEBUG: Mapped '{norm_name}' to '{subject}'")
+                            logging.info(f"Mapped file to '{subject}'")
 
             # Apply update
             self.stores = new_stores
             self.save_local_stores()
-            logging.info(f"Synced stores: {self.stores}")
+            logging.info(f"Synced stores: {list(self.stores.keys())}")
             return self.stores
         except Exception as e:
             logging.error(f"Sync failed: {e}")
@@ -229,7 +223,24 @@ class GeminiStoreManager:
                 self.save_local_stores()
 
             if not files:
-                return "No valid (ACTIVE) files found in this store."
+                # If we had files but none were ACTIVE, or all 403ed, 
+                # let's try a quick sync for this store only
+                logging.info(f"No active files for {store_name}, attempting re-sync...")
+                self.sync_all_stores()
+                
+                # Retry once
+                file_names = self.stores.get(store_name, [])
+                files = []
+                for name in file_names:
+                    try:
+                        f = genai.get_file(name)
+                        if f.state.name == "ACTIVE":
+                            files.append(f)
+                    except:
+                        continue
+                
+                if not files:
+                    return "No valid (ACTIVE) files found in this store after re-sync."
 
             # "gemini-2.5-flash","gemini-3-flash-preview" 이 모델이 정상적으로 된다.
 

@@ -118,13 +118,15 @@ def main():
             response_text = manager.query_store(target_store, prompt)
             
             # 오류 감지 및 자동 복구
-            if "Store is empty" in response_text or "No valid" in response_text:
-                print("  -> ⚠️ 스토어가 비어있거나 응답 없음. 재시도 로직 실행...")
+            if "Store is empty" in response_text or "No valid" in response_text or "Store not found" in response_text:
+                print("  -> ⚠️ 스토어 문제 발생. 전체 동기화 시도 중...")
+                manager.sync_all_stores()
                 time.sleep(5)
                 # 단순 재시도
+                print(f"  -> [{term_word}] 재시도 중...")
                 response_text = manager.query_store(target_store, prompt)
-                if "Store is empty" in response_text:
-                    print("  -> ❌ 재시도 실패.")
+                if "Store is empty" in response_text or "No valid" in response_text:
+                    print("  -> ❌ 재시도 실패. 건너뜁니다.")
                     count_fail += 1
                     continue
             
