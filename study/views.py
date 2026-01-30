@@ -83,16 +83,50 @@ def detail(request, round_number):
     exam = Exam.objects.filter(round_number=round_number).first()
 
     # Get all questions
-    questions = Question.objects.filter(exam__round_number=round_number).order_by(
+    questions = Question.objects.filter(exam__round_number=round_number).select_related('subject', 'exam').order_by(
         "number"
     )
 
     # Log study page view for authenticated users
     if request.user.is_authenticated:
-        from .models import StudyViewLog
-        StudyViewLog.objects.create(user=request.user, exam_round=round_number)
+        try:
+            from .models import StudyViewLog
+            StudyViewLog.objects.create(user=request.user, exam_round=round_number)
+        except ImportError:
+            pass
 
-    context = {"round_number": round_number, "exam": exam, "questions": questions}
+    # [Optimization] Batch process relevant terms for all questions to avoid per-question tags
+    from glossary.utils import get_terms_pattern
+    subject_patterns = {}
+    
+    # Materialize questions list if we are going to modify them
+    question_list = list(questions)
+    
+    for q in question_list:
+        s_name = q.subject.name
+        if s_name not in subject_patterns:
+            subject_patterns[s_name] = get_terms_pattern(s_name)
+        
+        pattern, term_map = subject_patterns[s_name]
+        if pattern:
+            # Combine all searchable text for the question
+            search_text = " ".join(filter(None, [
+                q.content, q.choice1, q.choice2, q.choice3, q.choice4, q.choice5,
+                q.general_chat, q.textbook_chat, q.narration
+            ]))
+            
+            found_terms = []
+            found_ids = set()
+            for match in pattern.finditer(search_text):
+                term = term_map.get(match.group(0))
+                if term and term.id not in found_ids:
+                    found_terms.append(term)
+                    found_ids.add(term.id)
+            q.relevant_terms = sorted(found_terms, key=lambda t: t.word)
+        else:
+            q.relevant_terms = []
+
+    context = {"round_number": round_number, "exam": exam, "questions": question_list}
     return render(request, "study/detail.html", context)
 
 

@@ -98,10 +98,10 @@ def autolink_terms(content, subject_name=None):
         
     def replace_func(match):
         word = match.group(0)
-        term_id = term_map.get(word)
-        if term_id:
+        term = term_map.get(word)
+        if term:
             # target="glossary_popup"으로 설정하여 하나의 창만 재사용
-            return f'<a href="/glossary/term/{term_id}/" class="glossary-link" target="glossary_popup" title="용어: {word}">{word}</a>'
+            return f'<a href="/glossary/term/{term.id}/" class="glossary-link" target="glossary_popup" title="용어: {word}">{word}</a>'
         return word
         
     # 이미 링크된 태그 내부나 HTML 속성 등을 제외하고 텍스트만 치환하도록 복잡하게 짜는 대신,
@@ -158,23 +158,22 @@ def get_relevant_terms(content, subject_name=None):
     if not pattern:
         return []
         
+    found_terms = []
     found_term_ids = set()
     
     # 텍스트에서 모든 매칭 찾기
     for match in pattern.finditer(search_text):
-        term_id = term_map.get(match.group(0))
-        if term_id:
-            found_term_ids.add(term_id)
+        term = term_map.get(match.group(0))
+        if term and term.id not in found_term_ids:
+            found_terms.append(term)
+            found_term_ids.add(term.id)
             
-    if not found_term_ids:
+    if not found_terms:
         return []
         
-    # 용어 객체 조회 (정렬)
-    from glossary.models import Term
-    from django.db.models import Count
-    return Term.objects.filter(id__in=found_term_ids).annotate(
-        reference_count=Count('references')
-    ).order_by('word')
+    # 용어 객체 반환 (이미 정렬되어 있음 - utils.py에서 정렬됨? 아니, utils.py는 길이순 정렬됨)
+    # 이름순 정렬 필요하면 여기서 정렬
+    return sorted(found_terms, key=lambda t: t.word)
 
 
 @register.filter(name='get_initial')

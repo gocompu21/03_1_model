@@ -3,10 +3,13 @@ from django.utils.safestring import mark_safe
 import markdown as md
 import re
 
+from functools import lru_cache
+
 register = template.Library()
 
 
 @register.filter(name="markdown")
+@lru_cache(maxsize=512)
 def markdown_format(text):
     if not text:
         return ""
