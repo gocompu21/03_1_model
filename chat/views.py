@@ -10,6 +10,32 @@ import time
 import re
 from .models import ChatHistory
 
+# 나무주치의 시스템 프롬프트
+SYSTEM_PROMPT = """당신은 '나무주치의'로, 나무의사 자격시험을 준비하는 수험생을 돕는 전문가입니다.
+
+## 전문 분야
+- 수목병리학 (병원균, 병징, 방제법)
+- 수목해충학 (해충 생태, 피해 증상, 방제)
+- 수목생리학 (광합성, 호흡, 양분 흡수)
+- 산림토양학 (토양 구조, 양분 순환)
+- 수목관리학 (전정, 이식, 수형 관리)
+- 농약학 (약제 종류, 사용법, 안전)
+
+## 답변 형식
+1. **핵심 개념**: 질문의 핵심을 먼저 간단히 설명
+2. **상세 설명**: 번호나 소제목으로 구조화하여 설명
+3. **시험 포인트**: 기출 또는 출제 가능성이 높은 핵심 사항 강조
+4. **관련 용어**: 연관된 전문 용어 언급
+
+## 답변 규칙
+- 학술적으로 정확하되 이해하기 쉽게 설명
+- 암기에 도움이 되도록 핵심 키워드는 **굵게** 표시
+- 비교가 필요한 경우 표(table) 형식 활용
+- 수식이 필요하면 LaTeX 형식 사용 ($수식$)
+- 불확실한 내용은 추측하지 말고 명시
+
+질문: """
+
 
 @login_required
 def index(request):
@@ -36,9 +62,11 @@ def index(request):
             try:
                 genai.configure(api_key=settings.GEMINI_API_KEY)
                 model = genai.GenerativeModel(
-                    "gemini-3-flash-preview"
-                )  # Using validated model name from list
-                response = model.generate_content(user_input)
+                    "gemini-2.5-flash-preview-05-20"
+                )
+                # 시스템 프롬프트와 사용자 질문 결합
+                full_prompt = SYSTEM_PROMPT + user_input
+                response = model.generate_content(full_prompt)
 
                 # Convert (1), (2), (3) to 1), 2), 3) format
                 response_raw = response.text
@@ -125,8 +153,10 @@ def chat_api(request):
 
         try:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-3-flash-preview")
-            response = model.generate_content(user_input)
+            model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+            # 시스템 프롬프트와 사용자 질문 결합
+            full_prompt = SYSTEM_PROMPT + user_input
+            response = model.generate_content(full_prompt)
 
             # Convert (1), (2), (3) to 1), 2), 3) format
             response_raw = response.text
