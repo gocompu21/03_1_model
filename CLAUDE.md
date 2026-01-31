@@ -64,6 +64,7 @@ python manage.py collectstatic
 
 - 커밋 메시지는 **한글**로 작성
 - 예시: `성능 개선: 용어 매칭 AJAX 지연 로딩 구현`
+- **커밋 시 항상 push까지 함께 실행**
 
 ## Korean Language Context
 
