@@ -33,7 +33,7 @@ def post_list(request):
             | Q(author__username__icontains=query)
         )
 
-    paginator = Paginator(posts, 15)
+    paginator = Paginator(posts, 20)
     page_obj = paginator.get_page(page_number)
 
     return render(
