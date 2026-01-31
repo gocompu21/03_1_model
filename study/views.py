@@ -95,38 +95,9 @@ def detail(request, round_number):
         except ImportError:
             pass
 
-    # [Optimization] Batch process relevant terms for all questions to avoid per-question tags
-    from glossary.utils import get_terms_pattern
-    subject_patterns = {}
-    
-    # Materialize questions list if we are going to modify them
-    question_list = list(questions)
-    
-    for q in question_list:
-        s_name = q.subject.name
-        if s_name not in subject_patterns:
-            subject_patterns[s_name] = get_terms_pattern(s_name)
-        
-        pattern, term_map = subject_patterns[s_name]
-        if pattern:
-            # Combine all searchable text for the question
-            search_text = " ".join(filter(None, [
-                q.content, q.choice1, q.choice2, q.choice3, q.choice4, q.choice5,
-                q.general_chat, q.textbook_chat, q.narration
-            ]))
-            
-            found_terms = []
-            found_ids = set()
-            for match in pattern.finditer(search_text):
-                term = term_map.get(match.group(0))
-                if term and term.id not in found_ids:
-                    found_terms.append(term)
-                    found_ids.add(term.id)
-            q.relevant_terms = sorted(found_terms, key=lambda t: t.word)
-        else:
-            q.relevant_terms = []
+    # Note: Term matching moved to AJAX endpoint (api_question_terms) for performance
 
-    context = {"round_number": round_number, "exam": exam, "questions": question_list}
+    context = {"round_number": round_number, "exam": exam, "questions": questions}
     return render(request, "study/detail.html", context)
 
 
@@ -454,6 +425,45 @@ def api_question(request, question_id):
         "image": question.image.url if question.image else None,
     }
     return JsonResponse(data)
+
+
+@login_required
+def api_question_terms(request, question_id):
+    """API: 문제의 관련 용어 반환 (AJAX 지연 로딩용)"""
+    from glossary.utils import get_terms_pattern
+
+    try:
+        question = Question.objects.select_related('subject').get(id=question_id)
+    except Question.DoesNotExist:
+        return JsonResponse({"error": "Question not found"}, status=404)
+
+    # 해당 과목의 용어 패턴 가져오기
+    pattern, term_map = get_terms_pattern(question.subject.name)
+
+    terms_data = []
+    if pattern:
+        # 검색 대상 텍스트 결합
+        search_text = " ".join(filter(None, [
+            question.content, question.choice1, question.choice2,
+            question.choice3, question.choice4, question.choice5,
+            question.general_chat, question.textbook_chat, question.narration
+        ]))
+
+        found_ids = set()
+        for match in pattern.finditer(search_text):
+            term = term_map.get(match.group(0))
+            if term and term.id not in found_ids:
+                found_ids.add(term.id)
+                terms_data.append({
+                    "id": term.id,
+                    "word": term.word,
+                    "reference_count": getattr(term, 'reference_count', 0)
+                })
+
+        # 단어순 정렬
+        terms_data.sort(key=lambda t: t['word'])
+
+    return JsonResponse({"terms": terms_data})
 
 
 # ============================================================================

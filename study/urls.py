@@ -9,6 +9,7 @@ urlpatterns = [
     path("subject/<str:subject_name>/", views.subject_detail, name="subject_detail"),
     path("tts/", views.tts_generate, name="tts_generate"),
     path("api/question/<int:question_id>/", views.api_question, name="api_question"),
+    path("api/question/<int:question_id>/terms/", views.api_question_terms, name="api_question_terms"),
     # 기출분석 URLs
     path("analysis/", views.analysis_index, name="analysis_index"),
     path("analysis/<int:subject_id>/", views.analysis_subject, name="analysis_subject"),
