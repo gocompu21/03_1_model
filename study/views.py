@@ -403,9 +403,27 @@ def api_question(request, question_id):
     explanation_raw = re.sub(r'\$\$(.+?)\$\$', save_latex, explanation_raw, flags=re.DOTALL)
     # Inline math: $...$
     explanation_raw = re.sub(r'\$([^\$\n]+?)\$', save_latex, explanation_raw)
-    
+
+    # 선지별 답변의 "* ①" 패턴에서 불필요한 * 제거
+    explanation_raw = re.sub(r'^\*\s+([①②③④⑤])', r'\1', explanation_raw, flags=re.MULTILINE)
+    # "* **① 내용:**" 패턴에서 *, ** 모두 제거 (볼드 마크다운 포함)
+    explanation_raw = re.sub(r'^\*\s+\*\*([①②③④⑤][^*]*)\*\*', r'\1', explanation_raw, flags=re.MULTILINE)
+
     explanation_html = md.markdown(explanation_raw, extensions=['extra', 'nl2br', 'sane_lists'])
-    
+
+    # 선지별 답변(①②③④⑤로 시작하는 줄)을 별도 p 태그로 분리하고 번호를 span으로 감싸기
+    explanation_html = re.sub(
+        r'<br />\n([①②③④⑤])',
+        r'</p>\n<p class="choice-explanation"><span class="choice-num">\1</span>',
+        explanation_html
+    )
+    # 빈 줄 후 새 문단으로 시작하는 선지도 처리
+    explanation_html = re.sub(
+        r'<p>([①②③④⑤])',
+        r'<p class="choice-explanation"><span class="choice-num">\1</span>',
+        explanation_html
+    )
+
     # LaTeX 수식 복원
     for i, formula in enumerate(latex_formulas):
         explanation_html = explanation_html.replace(f'LATEXPLACEHOLDER{i}ENDLATEX', formula)

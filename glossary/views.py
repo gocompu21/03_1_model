@@ -131,13 +131,42 @@ def term_detail(request, pk):
     content = re.sub(r'\$\$(.+?)\$\$', save_latex, content, flags=re.DOTALL)
     # Inline math: $...$ (줄바꿈 없이)
     content = re.sub(r'\$([^\$\n]+?)\$', save_latex, content)
-    
+
+    # 선지별 답변의 "* ①" 패턴에서 불필요한 * 제거
+    content = re.sub(r'^\*\s+([①②③④⑤])', r'\1', content, flags=re.MULTILINE)
+    # "* **① 내용:**" 패턴에서 *, ** 모두 제거 (볼드 마크다운 포함)
+    content = re.sub(r'^\*\s+\*\*([①②③④⑤][^*]*)\*\*', r'\1', content, flags=re.MULTILINE)
+    # 일반 마크다운 리스트 "* "를 글머리표로 통일
+    # 2단계 들여쓰기 (4칸 공백)는 - 로 변환
+    content = re.sub(r'^(\s{4,})\*\s+', r'&emsp;&emsp;- ', content, flags=re.MULTILINE)
+    # 1단계 (들여쓰기 없음)
+    content = re.sub(r'^\*\s+', r'• ', content, flags=re.MULTILINE)
+
     # 마크다운을 HTML로 렌더링 (extra, nl2br, sane_lists 확장 사용)
     rendered_content = md.markdown(
-        content, 
+        content,
         extensions=['extra', 'nl2br', 'sane_lists']
     )
-    
+
+    # 글머리표 줄에 hanging indent CSS 클래스 추가
+    # 2단계 들여쓰기 (&emsp;&emsp;-)
+    rendered_content = re.sub(
+        r'<br />\n&emsp;&emsp;(-)',
+        r'</p>\n<p class="bullet-item bullet-indent"><span class="bullet">\1</span>',
+        rendered_content
+    )
+    # 1단계 글머리표 (•)
+    rendered_content = re.sub(
+        r'<br />\n(•)',
+        r'</p>\n<p class="bullet-item"><span class="bullet">\1</span>',
+        rendered_content
+    )
+    rendered_content = re.sub(
+        r'<p>(•)',
+        r'<p class="bullet-item"><span class="bullet">\1</span>',
+        rendered_content
+    )
+
     # LaTeX 수식 복원
     for i, formula in enumerate(latex_formulas):
         rendered_content = rendered_content.replace(f'LATEXPLACEHOLDER{i}ENDLATEX', formula)
