@@ -62,7 +62,7 @@ def index(request):
             try:
                 genai.configure(api_key=settings.GEMINI_API_KEY)
                 model = genai.GenerativeModel(
-                    "gemini-2.5-flash-preview-05-20"
+                    "gemini-3-flash-preview"
                 )
                 # 시스템 프롬프트와 사용자 질문 결합
                 full_prompt = SYSTEM_PROMPT + user_input
@@ -153,7 +153,7 @@ def chat_api(request):
 
         try:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-2.5-flash-preview-05-20")
+            model = genai.GenerativeModel("gemini-3-flash-preview")
             # 시스템 프롬프트와 사용자 질문 결합
             full_prompt = SYSTEM_PROMPT + user_input
             response = model.generate_content(full_prompt)
