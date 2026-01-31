@@ -401,10 +401,24 @@
         .ai-message ol {
             padding-left: 1.5em;
             margin: 10px 0;
+            list-style-type: decimal;
         }
         .ai-message ol li {
             margin-bottom: 8px;
             line-height: 1.6;
+        }
+        /* 중첩된 ol은 1), 2), 3) 형식 */
+        .ai-message ol ol {
+            list-style-type: none;
+            counter-reset: nested-counter;
+        }
+        .ai-message ol ol li {
+            counter-increment: nested-counter;
+        }
+        .ai-message ol ol li::before {
+            content: counter(nested-counter) ") ";
+            font-weight: bold;
+            color: #2d6a4f;
         }
         .ai-message ul {
             padding-left: 1.5em;
