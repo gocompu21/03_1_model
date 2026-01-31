@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 import google.generativeai as genai
 import markdown
 import time
+import re
 from .models import ChatHistory
 
 
@@ -39,8 +40,12 @@ def index(request):
                 )  # Using validated model name from list
                 response = model.generate_content(user_input)
 
+                # Convert (1), (2), (3) to 1), 2), 3) format
+                response_raw = response.text
+                response_raw = re.sub(r'\((\d+)\)', r'\1)', response_raw)
+
                 # Convert Markdown to HTML for display
-                response_text = markdown.markdown(response.text, extensions=['tables', 'fenced_code'])
+                response_text = markdown.markdown(response_raw, extensions=['tables', 'fenced_code'])
                 is_success = True
 
             except Exception as e:
@@ -123,8 +128,12 @@ def chat_api(request):
             model = genai.GenerativeModel("gemini-3-flash-preview")
             response = model.generate_content(user_input)
 
+            # Convert (1), (2), (3) to 1), 2), 3) format
+            response_raw = response.text
+            response_raw = re.sub(r'\((\d+)\)', r'\1)', response_raw)
+
             # Convert Markdown to HTML
-            response_text = markdown.markdown(response.text, extensions=['tables', 'fenced_code'])
+            response_text = markdown.markdown(response_raw, extensions=['tables', 'fenced_code'])
             is_success = True
 
         except Exception as e:

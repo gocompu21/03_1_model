@@ -169,21 +169,21 @@
 </div>
 
 <style>
-    /* Overall font size reduction */
+    /* Overall font size */
     .bbs-wrapper {
-        font-size: 0.95rem; /* Increased from 0.9rem */
+        font-size: 1.0rem;
     }
-    
+
     .bbs-wrapper table {
-        font-size: 0.9rem; /* Increased from 0.85rem */
+        font-size: 1.0rem;
     }
-    
+
     .bbs-wrapper th {
-        font-size: 0.9rem; /* Increased from 0.85rem */
+        font-size: 1.0rem;
     }
-    
+
     .bbs-wrapper td {
-        font-size: 0.9rem; /* Increased from 0.85rem */
+        font-size: 1.0rem;
     }
 
     /* Filter Buttons */
@@ -269,9 +269,18 @@
         border-color: #2d6a4f;
     }
 
+    /* Striped rows (인터레이스드) */
+    tbody tr:nth-child(odd) {
+        background-color: white;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f8faf9;
+    }
+
     /* Rows hover */
     tbody tr:hover {
-        background-color: #fafdfb;
+        background-color: #e8f5e9 !important;
     }
 </style>
 {% endblock %}

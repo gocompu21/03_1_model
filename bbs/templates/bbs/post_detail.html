@@ -159,12 +159,12 @@
                 {% if user.is_authenticated %}
                 <form method="post" action="{% url 'bbs:comment_create' post.pk %}">
                     {% csrf_token %}
-                    <div style="position: relative;">
-                        <textarea name="content" class="form-control" rows="2" placeholder="댓글을 남겨주세요"
-                            style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; resize: vertical; box-sizing: border-box;"
+                    <div style="display: flex; gap: 8px; align-items: flex-start;">
+                        <textarea name="content" rows="2" placeholder="댓글을 남겨주세요"
+                            style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; font-size: 0.95rem;"
                             required></textarea>
                         <button type="submit"
-                            style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: #2d6a4f; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.9em;">등록</button>
+                            style="background: #2d6a4f; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 0.95rem; white-space: nowrap;">등록</button>
                     </div>
                 </form>
                 {% else %}

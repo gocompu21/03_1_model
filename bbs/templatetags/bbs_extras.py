@@ -19,11 +19,17 @@ def highlight_prefix(title):
     elif title.startswith("[주치의]"):
         # 5 chars for "[주치의]"
         rest = title[5:]
-        return mark_safe(f'<span style="color: #1e88e5;">[주치의]</span>{rest}')
+        return mark_safe(f'<span style="color: #1e88e5; font-weight: bold;">[주치의]</span>{rest}')
     elif title.startswith("[나무주치의]"):
         # Legacy support
         rest = title[7:]
-        return mark_safe(f'<span style="color: #1e88e5;">[나무주치의]</span>{rest}')
+        return mark_safe(f'<span style="color: #1e88e5; font-weight: bold;">[나무주치의]</span>{rest}')
+    elif title.startswith("[생리학]"):
+        rest = title[5:]
+        return mark_safe(f'<span style="color: #2d6a4f; font-weight: bold;">[생리학]</span>{rest}')
+    elif title.startswith("[해충학]"):
+        rest = title[5:]
+        return mark_safe(f'<span style="color: #dc2626; font-weight: bold;">[해충학]</span>{rest}')
     return title
 
 
