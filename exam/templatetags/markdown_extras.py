@@ -30,16 +30,20 @@ def markdown_format(text):
         # 4. Manually process bold text (**...**) to handle cases inside HTML blocks (div/span)
         #    Python-Markdown ignores markdown inside HTML blocks by default.
         text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
-            
-        text = text.replace(r"\text", r"\\text")
-        text = text.replace(r"\times", r"\\times")
-        text = text.replace(r"\div", r"\\div")
-        # Add other common commands as needed, or use regex for \[a-zA-Z] if safe
+
+        # 4.5. Convert $\text{...}$ to plain text (avoid MathJax rendering issues)
+        #      \text{} is just for displaying text, no math formatting needed
+        text = re.sub(r'\$\\text\{([^}]+)\}\$', r'\1', text)
 
         # 5. Remove list markers (*, -) at the start of lines (handling leading whitespace)
         #    Fixes issue where asterisks appear in text when markdown list parsing fails (e.g. no blank line)
         #    or simply forces the "no bullet" style by flattening lists to text.
         text = re.sub(r'(?m)^\s*[\*\-]\s+', '', text)
+
+        # 5.5. Remove leading 4-space indentation that causes code block rendering
+        #      This prevents explanation text from being wrapped in <pre><code> tags
+        #      which breaks MathJax rendering
+        text = re.sub(r'(?m)^    ', '', text)
 
         # 6. Wrap lines starting with circled numbers (①-⑳) in a div with hanging-indent class.
         #    This ensures that multi-line text aligns correctly (hanging indent).
