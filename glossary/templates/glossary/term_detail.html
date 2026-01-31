@@ -675,15 +675,29 @@ async function toggleAllQuestions() {
     /* 글머리표 hanging indent */
     .bullet-item {
         position: relative;
-        padding-left: 1.2em;
+        padding-left: 1.1em;
+        margin-top: 0.8em;
         margin-bottom: 0.3em;
     }
     .bullet-item .bullet {
         position: absolute;
         left: 0;
+        font-weight: bold;
+    }
+    .bullet-level1 {
+        margin-left: 1em;
+        margin-top: 0.5em;
+    }
+    .bullet-level2 {
+        margin-left: 2em;
+        margin-top: 0.2em;
+        margin-bottom: 0.2em;
+    }
+    .bullet-level2 .bullet {
+        font-weight: normal;
     }
     .bullet-indent {
-        margin-left: 2em;
+        margin-left: 4em;
     }
     /* 용어 강조 스타일 */
     .term-highlight {

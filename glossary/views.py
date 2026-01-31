@@ -136,11 +136,37 @@ def term_detail(request, pk):
     content = re.sub(r'^\*\s+([①②③④⑤])', r'\1', content, flags=re.MULTILINE)
     # "* **① 내용:**" 패턴에서 *, ** 모두 제거 (볼드 마크다운 포함)
     content = re.sub(r'^\*\s+\*\*([①②③④⑤][^*]*)\*\*', r'\1', content, flags=re.MULTILINE)
-    # 일반 마크다운 리스트 "* "를 글머리표로 통일
-    # 2단계 들여쓰기 (4칸 공백)는 - 로 변환
-    content = re.sub(r'^(\s{4,})\*\s+', r'&emsp;&emsp;- ', content, flags=re.MULTILINE)
-    # 1단계 (들여쓰기 없음)
-    content = re.sub(r'^\*\s+', r'• ', content, flags=re.MULTILINE)
+
+    # 마크다운 리스트를 번호 리스트로 변환
+    # 1단계: 1), 2), 3)... (들여쓰기 포함)
+    # 2단계: - (들여쓰기 포함)
+    def convert_to_numbered_list(text):
+        lines = text.split('\n')
+        result = []
+        counter1 = 0  # 1단계 카운터
+        prev_was_list = False
+
+        for line in lines:
+            # 2단계 리스트 (4칸 이상 들여쓰기 + *)
+            if re.match(r'^\s{4,}\*\s+', line):
+                line = re.sub(r'^\s{4,}\*\s+', r'&emsp;&emsp;- ', line)
+                prev_was_list = True
+            # 1단계 리스트 (* 로 시작) - 들여쓰기 없음
+            elif re.match(r'^\*\s+', line):
+                counter1 += 1
+                line = re.sub(r'^\*\s+', f'{counter1}) ', line)
+                prev_was_list = True
+            # 빈 줄이나 다른 내용
+            elif not line.strip() or (not prev_was_list and line.strip()):
+                if not re.match(r'^\s{4,}', line):  # 들여쓰기가 아니면 카운터 리셋
+                    counter1 = 0
+                prev_was_list = False
+
+            result.append(line)
+
+        return '\n'.join(result)
+
+    content = convert_to_numbered_list(content)
 
     # 마크다운을 HTML로 렌더링 (extra, nl2br, sane_lists 확장 사용)
     rendered_content = md.markdown(
@@ -148,22 +174,22 @@ def term_detail(request, pk):
         extensions=['extra', 'nl2br', 'sane_lists']
     )
 
-    # 글머리표 줄에 hanging indent CSS 클래스 추가
-    # 2단계 들여쓰기 (&emsp;&emsp;-)
+    # 번호 리스트 줄에 hanging indent CSS 클래스 추가
+    # 2단계 리스트 (2칸 들여쓰기 + -)
     rendered_content = re.sub(
         r'<br />\n&emsp;&emsp;(-)',
-        r'</p>\n<p class="bullet-item bullet-indent"><span class="bullet">\1</span>',
+        r'</p>\n<p class="bullet-item bullet-level2"><span class="bullet">\1</span>',
         rendered_content
     )
-    # 1단계 글머리표 (•)
+    # 1단계 번호 (1칸 들여쓰기)
     rendered_content = re.sub(
-        r'<br />\n(•)',
-        r'</p>\n<p class="bullet-item"><span class="bullet">\1</span>',
+        r'<br />\n(\d+\))',
+        r'</p>\n<p class="bullet-item bullet-level1"><span class="bullet">\1</span>',
         rendered_content
     )
     rendered_content = re.sub(
-        r'<p>(•)',
-        r'<p class="bullet-item"><span class="bullet">\1</span>',
+        r'<p>(\d+\))',
+        r'<p class="bullet-item bullet-level1"><span class="bullet">\1</span>',
         rendered_content
     )
 
