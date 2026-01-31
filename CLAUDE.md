@@ -60,6 +60,11 @@ python manage.py collectstatic
 - `generate_*`: 인포그래픽, 나레이션, HTML 해설 생성
 - `check_*`, `debug_*`: 데이터 검증 및 디버깅
 
+## Git Conventions
+
+- 커밋 메시지는 **한글**로 작성
+- 예시: `성능 개선: 용어 매칭 AJAX 지연 로딩 구현`
+
 ## Korean Language Context
 
 모든 UI와 데이터는 한국어. 과목 예시:

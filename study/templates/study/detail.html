@@ -751,7 +751,40 @@
             text.textContent = '전체 접기';
             btn.style.backgroundColor = '#d4edda';
             btn.style.color = '#155724';
-            
+
+            // Lazy load related terms for all questions via AJAX
+            document.querySelectorAll('.terms-container').forEach(termsContainer => {
+                if (termsContainer.getAttribute('data-loaded') === 'false') {
+                    const questionId = termsContainer.getAttribute('data-question-id');
+                    fetch(`/study/api/question/${questionId}/terms/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.terms && data.terms.length > 0) {
+                                let html = '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">';
+                                html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>';
+                                html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+                                data.terms.forEach(term => {
+                                    let borderStyle = 'border: 1px solid #2d6a4f;';
+                                    if (term.reference_count > 0) {
+                                        let borderColor = '#1976d2';
+                                        if (term.reference_count >= 10) borderColor = '#d32f2f';
+                                        else if (term.reference_count >= 5) borderColor = '#f57c00';
+                                        borderStyle = `border: 1px solid #2d6a4f; border-right-width: 5px; border-right-color: ${borderColor};`;
+                                    }
+                                    html += `<a href="/glossary/term/${term.id}/" target="glossary_popup"
+                                        style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
+                                        ${term.word}</a>`;
+                                });
+                                html += '</div></div>';
+                                termsContainer.innerHTML = html;
+                                termsContainer.style.display = 'block';
+                            }
+                            termsContainer.setAttribute('data-loaded', 'true');
+                        })
+                        .catch(err => console.log('Terms fetch error:', err));
+                }
+            });
+
             // Re-render MathJax for all visible explanations
             if (window.MathJax) {
                 if (window.MathJax.typesetPromise) {
