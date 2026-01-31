@@ -55,13 +55,38 @@ class UserSession(models.Model):
     
     @classmethod
     def get_user_today_duration(cls, user):
-        """사용자의 오늘 체류시간 (초)"""
+        """사용자의 오늘 체류시간 (초)
+
+        오늘 활동이 있는 모든 세션에서 오늘에 해당하는 시간만 계산.
+        - 어제 로그인 → 오늘 활동: 오늘 자정부터 마지막 활동까지만 계산
+        - 오늘 로그인: 로그인 시간부터 계산
+        """
+        import datetime
         today = timezone.now().date()
-        sessions = cls.objects.filter(
-            user=user,
-            login_time__date=today
+        today_start = timezone.make_aware(
+            datetime.datetime.combine(today, datetime.time.min)
         )
-        total = sum(s.duration_seconds for s in sessions)
+        now = timezone.now()
+
+        # 오늘 활동이 있는 세션: 오늘 로그인했거나, 마지막 활동이 오늘인 경우
+        sessions = cls.objects.filter(user=user).filter(
+            models.Q(login_time__date=today) |
+            models.Q(last_activity__date=today)
+        )
+
+        total = 0
+        for s in sessions:
+            # 시작 시간: 로그인 시간 또는 오늘 자정 중 더 늦은 시간
+            start = max(s.login_time, today_start)
+            # 종료 시간: 로그아웃 시간 또는 마지막 활동 시간
+            end = s.logout_time or s.last_activity
+
+            # 오늘 범위 내의 시간만 계산
+            if end >= today_start:
+                duration = (end - start).total_seconds()
+                if duration > 0:
+                    total += duration
+
         return total
     
     @classmethod
