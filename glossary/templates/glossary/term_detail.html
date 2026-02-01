@@ -9,7 +9,7 @@
         {% if user.is_authenticated %}
         <span style="color: rgba(255,255,255,0.8);">{{ user.username }}님</span>
         {% if user.is_staff or user.is_superuser %}
-        <a href="{% url 'dashboard:index' %}" style="color: #ffc107; text-decoration: none; font-weight: 500;">대쉬보드</a>
+        <a href="{% url 'dashboard:index' %}" style="color: #ffc107; text-decoration: none; font-weight: 500;">관리메뉴</a>
         {% endif %}
         <a href="{% url 'mypage:index' %}" style="color: white; text-decoration: none; font-weight: 500;">마이페이지</a>
         {% else %}
