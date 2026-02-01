@@ -216,6 +216,13 @@
                 </a>
                 {% endif %}
             {% endfor %}
+            {% for subject in subjects %}
+                {% if '관리' in subject.name %}
+                <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
+                    💊 {{ subject.name }}
+                </a>
+                {% endif %}
+            {% endfor %}
 
         </div>
         <style>
