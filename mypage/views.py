@@ -1148,6 +1148,10 @@ def generate_infographic_api(request):
         project_root = settings.BASE_DIR
         manage_py = os_module.path.join(project_root, 'manage.py')
 
+        # Log file for debugging
+        log_file = os_module.path.join(status_dir, f'{job_id}_log.txt')
+        log_f = open(log_file, 'w')
+
         subprocess.Popen(
             [
                 sys.executable,
@@ -1157,10 +1161,11 @@ def generate_infographic_api(request):
                 f'--prompt_file={prompt_file}',
                 f'--status_file={status_file}'
             ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            stdout=log_f,
+            stderr=subprocess.STDOUT,
             cwd=project_root
         )
+        # Note: log_f will be closed when subprocess finishes
 
         return JsonResponse({
             "success": True,
