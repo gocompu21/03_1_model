@@ -282,7 +282,7 @@ def tts_generate(request):
         # Initialize Gemini client
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-        model = "gemini-2.5-flash-preview-tts"
+        model = "gemini-2.5-pro-preview-tts"
         contents = [
             types.Content(
                 role="user",

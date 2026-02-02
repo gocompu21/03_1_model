@@ -81,12 +81,12 @@ def generate_tts_audio(
     model: str = "gemini-2.5-pro-preview-tts"
 ) -> dict:
     """Generate TTS audio from text using Gemini API.
-    
+
     Args:
         text: Text to convert to speech
         output_filepath: Full path to save the MP3 file
         voice_name: Voice to use (default: "Orus")
-        model: TTS model name (default: "gemini-2.5-flash-preview-tts")
+        model: TTS model name (default: "gemini-2.5-pro-preview-tts")
     
     Returns:
         dict with keys:
