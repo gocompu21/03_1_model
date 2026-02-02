@@ -11,6 +11,7 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from functools import wraps
 import json
+import time
 
 from exam.models import UserQuestionResult, UserExamAttempt
 from notebook.models import NotebookHistory
