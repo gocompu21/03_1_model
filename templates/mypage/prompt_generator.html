@@ -508,7 +508,6 @@
 
                 <!-- 인포그래픽 탭 -->
                 <div class="tab-content" id="panel-infographic" style="display: none;">
-                    <div class="success-msg" id="msg-infographic" style="background: #fff3e0; color: #e65100;"></div>
                     {% if selected_question.infographic_image %}
                     <!-- 기존 인포그래픽 이미지 -->
                     <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px;">
@@ -530,7 +529,9 @@
                     
                     <p style="color: #666; margin-bottom: 15px;">아래 프롬프트를 기반으로 인포그래픽을 생성합니다. (기본서 답변 기준)</p>
                     <div class="prompt-output" id="infographic-prompt" contenteditable="true" style="background: #fff3e0; outline: none; cursor: text; min-height: 200px;">대기 중... 먼저 AI 답변을 생성하세요.</div>
-                    
+
+                    <div class="success-msg" id="msg-infographic" style="background: #fff3e0; color: #e65100; margin-top: 15px;"></div>
+
                     <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
                         <button type="button" id="btn-generate-infographic" onclick="generateInfographic()" style="padding: 12px 24px; background: linear-gradient(135deg, #ff9800, #f44336); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                             <i class="fas fa-magic"></i> 인포그래픽 이미지 생성
