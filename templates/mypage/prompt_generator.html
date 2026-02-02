@@ -286,6 +286,20 @@
             color: #b7e4c7;
         }
 
+        .nav-btn {
+            background: #40916c;
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #52b788;
+        }
+
         .success-msg {
             background: #d4edda;
             color: #155724;
@@ -305,12 +319,12 @@
 <body>
     <header>
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-        <div style="display: flex; gap: 20px;">
-            <a href="{% url 'mypage:batch_job_page' %}" class="nav-link">
-                <i class="fas fa-cogs"></i> 배치작업
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <a href="{% url 'mypage:batch_job_page' %}" class="nav-btn">
+                <i class="fas fa-cogs"></i> 문제관리(배치)
             </a>
-            <a href="{% url 'mypage:index' %}" class="nav-link">
-                <i class="fas fa-arrow-left"></i> 마이페이지로
+            <a href="{% url 'admin:index' %}" class="nav-link">
+                <i class="fas fa-tools"></i> 관리자
             </a>
         </div>
     </header>
