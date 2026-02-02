@@ -25,8 +25,12 @@ class Command(BaseCommand):
         parser.add_argument(
             '--prompt',
             type=str,
-            required=True,
-            help='Prompt for infographic generation',
+            help='Prompt for infographic generation (direct)',
+        )
+        parser.add_argument(
+            '--prompt_file',
+            type=str,
+            help='Path to file containing the prompt (for long prompts)',
         )
         parser.add_argument(
             '--status_file',
@@ -39,8 +43,24 @@ class Command(BaseCommand):
         from google.genai import types
 
         question_id = options['question_id']
-        prompt = options['prompt']
+        prompt = options.get('prompt')
+        prompt_file = options.get('prompt_file')
         status_file = options.get('status_file')
+
+        # Read prompt from file if provided
+        if prompt_file and os.path.exists(prompt_file):
+            try:
+                with open(prompt_file, 'r', encoding='utf-8') as f:
+                    prompt = f.read()
+                # Clean up prompt file after reading
+                os.remove(prompt_file)
+            except Exception as e:
+                self._update_status(status_file, 'error', error=f'프롬프트 파일 읽기 실패: {str(e)}')
+                raise CommandError(f'Failed to read prompt file: {e}')
+
+        if not prompt:
+            self._update_status(status_file, 'error', error='프롬프트가 제공되지 않았습니다.')
+            raise CommandError('No prompt provided. Use --prompt or --prompt_file')
 
         if not settings.GEMINI_API_KEY:
             self._update_status(status_file, 'error', error='GEMINI_API_KEY is not set')

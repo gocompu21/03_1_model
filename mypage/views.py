@@ -1134,6 +1134,11 @@ def generate_infographic_api(request):
         os_module.makedirs(status_dir, exist_ok=True)
         status_file = os_module.path.join(status_dir, f'{job_id}.json')
 
+        # Write prompt to a file (to avoid command line length limits)
+        prompt_file = os_module.path.join(status_dir, f'{job_id}_prompt.txt')
+        with open(prompt_file, 'w', encoding='utf-8') as f:
+            f.write(prompt)
+
         # Write initial status
         import json
         with open(status_file, 'w', encoding='utf-8') as f:
@@ -1149,7 +1154,7 @@ def generate_infographic_api(request):
                 manage_py,
                 'generate_infographic',
                 f'--question_id={question_id}',
-                f'--prompt={prompt}',
+                f'--prompt_file={prompt_file}',
                 f'--status_file={status_file}'
             ],
             stdout=subprocess.DEVNULL,
@@ -2335,6 +2340,11 @@ def batch_job_process(request):
             os_module.makedirs(status_dir, exist_ok=True)
             status_file = os_module.path.join(status_dir, f'{job_id}.json')
 
+            # Write prompt to a file (to avoid command line length limits)
+            prompt_file = os_module.path.join(status_dir, f'{job_id}_prompt.txt')
+            with open(prompt_file, 'w', encoding='utf-8') as f:
+                f.write(infographic_prompt)
+
             # Write initial status
             with open(status_file, 'w', encoding='utf-8') as f:
                 json.dump({'status': 'starting', 'message': '인포그래픽 생성 시작...'}, f, ensure_ascii=False)
@@ -2349,7 +2359,7 @@ def batch_job_process(request):
                     manage_py,
                     'generate_infographic',
                     f'--question_id={question_id}',
-                    f'--prompt={infographic_prompt}',
+                    f'--prompt_file={prompt_file}',
                     f'--status_file={status_file}'
                 ],
                 stdout=subprocess.DEVNULL,
@@ -2362,8 +2372,7 @@ def batch_job_process(request):
                 "processing": True,
                 "job_id": job_id,
                 "message": f"{round_num}회 {q_num}번: 인포그래픽 생성 시작됨 (백그라운드)",
-                "task": "infographic",
-                "image_url": question.infographic_image.url
+                "task": "infographic"
             })
 
         else:
