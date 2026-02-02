@@ -2244,7 +2244,7 @@ def batch_job_process(request):
             else:
                 return JsonResponse({
                     "success": False,
-                    "error": result.get("error", "TTS 생성 실패"),
+                    "error": result.get("message", "TTS 생성 실패"),
                     "task": "tts"
                 })
 
