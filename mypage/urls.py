@@ -43,6 +43,7 @@ urlpatterns = [
     path("admin/get-existing-tts/", views.get_existing_tts_api, name="get_existing_tts_api"),
     path("admin/generate-infographic/", views.generate_infographic_api, name="generate_infographic_api"),
     path("admin/save-infographic/", views.save_infographic_api, name="save_infographic_api"),
+    path("admin/check-infographic-status/", views.check_infographic_status_api, name="check_infographic_status_api"),
     # Batch Job for Exam Questions
     path("admin/batch-job/", views.batch_job_page, name="batch_job_page"),
     path("admin/batch-job/questions/", views.batch_job_get_questions, name="batch_job_get_questions"),

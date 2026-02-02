@@ -1104,105 +1104,66 @@ def get_existing_tts_api(request):
 def generate_infographic_api(request):
     """
     AJAX endpoint to generate infographic image using Gemini API.
-    Uses gemini-3-pro-image-preview model for image generation.
+    Uses background process to avoid Nginx timeout.
+    Returns a job_id for status polling.
     """
     if request.method != "POST":
         return JsonResponse({"error": "POST required"}, status=405)
 
     question_id = request.POST.get("question_id")
     prompt = request.POST.get("prompt")
-    
+
     if not question_id or not prompt:
         return JsonResponse({"error": "Missing question_id or prompt"}, status=400)
 
     try:
-        import os
-        import mimetypes
-        from google import genai
-        from google.genai import types
-        from django.core.files.base import ContentFile
-        
+        import subprocess
+        import sys
+        import uuid
+        import os as os_module
+
         question = Question.objects.get(id=question_id)
         round_num = question.exam.round_number
         q_num = question.number
-        
-        # Configure Gemini client
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        
-        model = "gemini-3-pro-image-preview"
-        contents = [
-            types.Content(
-                role="user",
-                parts=[
-                    types.Part.from_text(text=prompt),
-                ],
-            ),
-        ]
-        generate_content_config = types.GenerateContentConfig(
-            response_modalities=[
-                "IMAGE",
-                "TEXT",
+
+        # Generate unique job ID
+        job_id = str(uuid.uuid4())[:8]
+
+        # Create status file path
+        status_dir = os_module.path.join(settings.MEDIA_ROOT, 'infographic_status')
+        os_module.makedirs(status_dir, exist_ok=True)
+        status_file = os_module.path.join(status_dir, f'{job_id}.json')
+
+        # Write initial status
+        import json
+        with open(status_file, 'w', encoding='utf-8') as f:
+            json.dump({'status': 'starting', 'message': '인포그래픽 생성 시작...'}, f, ensure_ascii=False)
+
+        # Start background process
+        project_root = settings.BASE_DIR
+        manage_py = os_module.path.join(project_root, 'manage.py')
+
+        subprocess.Popen(
+            [
+                sys.executable,
+                manage_py,
+                'generate_infographic',
+                f'--question_id={question_id}',
+                f'--prompt={prompt}',
+                f'--status_file={status_file}'
             ],
-            image_config=types.ImageConfig(
-                image_size="1K",
-            ),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            cwd=project_root
         )
-        
-        # Generate image
-        image_data = None
-        mime_type = None
-        
-        for chunk in client.models.generate_content_stream(
-            model=model,
-            contents=contents,
-            config=generate_content_config,
-        ):
-            if (
-                chunk.candidates is None
-                or chunk.candidates[0].content is None
-                or chunk.candidates[0].content.parts is None
-            ):
-                continue
-            
-            part = chunk.candidates[0].content.parts[0]
-            if part.inline_data and part.inline_data.data:
-                image_data = part.inline_data.data
-                mime_type = part.inline_data.mime_type
-                break  # Got the image, stop
-        
-        if not image_data:
-            return JsonResponse({
-                "success": False, 
-                "error": "이미지 생성에 실패했습니다. 다시 시도해주세요."
-            })
-        
-        # Determine file extension
-        file_extension = mimetypes.guess_extension(mime_type) or ".png"
-        
-        # Add timestamp to filename to prevent browser caching issues
-        import time
-        timestamp = int(time.time())
-        filename = f"infographic_{round_num}_{q_num}_{timestamp}{file_extension}"
-        
-        # Save to temporary folder instead of database
-        temp_dir = os.path.join(settings.MEDIA_ROOT, 'temp_infographics')
-        os.makedirs(temp_dir, exist_ok=True)
-        temp_filepath = os.path.join(temp_dir, filename)
-        
-        with open(temp_filepath, 'wb') as f:
-            f.write(image_data)
-        
-        # Generate URL for temporary file
-        temp_url = os.path.join(settings.MEDIA_URL, 'temp_infographics', filename).replace('\\', '/')
-        
+
         return JsonResponse({
             "success": True,
-            "message": f"인포그래픽 이미지 생성 완료: {filename}",
-            "image_url": temp_url,
-            "temp_filename": filename,
-            "is_temp": True
+            "processing": True,
+            "job_id": job_id,
+            "message": f"{round_num}회 {q_num}번: 인포그래픽 생성 시작됨 (백그라운드)"
         })
-        
+
     except Question.DoesNotExist:
         return JsonResponse({"success": False, "error": "문제를 찾을 수 없습니다."})
     except Exception as e:
@@ -1271,6 +1232,42 @@ def save_infographic_api(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({"success": False, "error": str(e)})
+
+
+@staff_member_required
+def check_infographic_status_api(request):
+    """
+    AJAX endpoint to check infographic generation status.
+    Polls this endpoint to check if background generation is complete.
+    """
+    import json
+    import os as os_module
+
+    job_id = request.GET.get("job_id")
+    if not job_id:
+        return JsonResponse({"error": "Missing job_id"}, status=400)
+
+    status_dir = os_module.path.join(settings.MEDIA_ROOT, 'infographic_status')
+    status_file = os_module.path.join(status_dir, f'{job_id}.json')
+
+    if not os_module.path.exists(status_file):
+        return JsonResponse({"status": "not_found", "error": "작업을 찾을 수 없습니다."})
+
+    try:
+        with open(status_file, 'r', encoding='utf-8') as f:
+            status_data = json.load(f)
+
+        # If completed or error, clean up status file
+        if status_data.get('status') in ['completed', 'error']:
+            try:
+                os_module.remove(status_file)
+            except:
+                pass
+
+        return JsonResponse(status_data)
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "error": str(e)})
 
 
 # --- Practice Question Input Views (CSV Upload) ---
@@ -2276,7 +2273,7 @@ def batch_job_process(request):
             })
 
         elif task_type == "infographic":
-            # Generate infographic image
+            # Generate infographic image using background process
             if not question.textbook_chat:
                 return JsonResponse({
                     "success": False,
@@ -2326,73 +2323,45 @@ def batch_job_process(request):
 ４） 나무 병해 관련 시각 요소
 ５） 최상단칸은 "({subject_name}) {round_num}-{q_num}. {clean_content[:30]}..." 왼쪽 정렬해"""
 
-            from google import genai as genai_new
-            from google.genai import types
-            import mimetypes
-            from django.core.files import File
+            import uuid
+            import json
+            import os as os_module
 
-            client = genai_new.Client(api_key=settings.GEMINI_API_KEY)
+            # Generate unique job ID
+            job_id = str(uuid.uuid4())[:8]
 
-            # Use same model and config as generate_infographic_api
-            model = "gemini-3-pro-image-preview"
-            contents = [
-                types.Content(
-                    role="user",
-                    parts=[types.Part.from_text(text=infographic_prompt)],
-                ),
-            ]
-            generate_content_config = types.GenerateContentConfig(
-                response_modalities=["IMAGE", "TEXT"],
-                image_config=types.ImageConfig(image_size="1K"),
-            )
+            # Create status file path
+            status_dir = os_module.path.join(settings.MEDIA_ROOT, 'infographic_status')
+            os_module.makedirs(status_dir, exist_ok=True)
+            status_file = os_module.path.join(status_dir, f'{job_id}.json')
 
-            # Generate image using streaming (same as generate_infographic_api)
-            image_data = None
-            mime_type = None
-            for chunk in client.models.generate_content_stream(
-                model=model,
-                contents=contents,
-                config=generate_content_config,
-            ):
-                if (
-                    chunk.candidates is None
-                    or chunk.candidates[0].content is None
-                    or chunk.candidates[0].content.parts is None
-                ):
-                    continue
-                part = chunk.candidates[0].content.parts[0]
-                if part.inline_data and part.inline_data.data:
-                    image_data = part.inline_data.data
-                    mime_type = part.inline_data.mime_type
-                    break
+            # Write initial status
+            with open(status_file, 'w', encoding='utf-8') as f:
+                json.dump({'status': 'starting', 'message': '인포그래픽 생성 시작...'}, f, ensure_ascii=False)
 
-            if not image_data:
-                return JsonResponse({
-                    "success": False,
-                    "error": f"{round_num}회 {q_num}번: 인포그래픽 이미지 생성 실패",
-                    "task": "infographic"
-                })
+            # Start background process
+            project_root = settings.BASE_DIR
+            manage_py = os_module.path.join(project_root, 'manage.py')
 
-            # Save directly to Question.infographic_image
-            file_extension = mimetypes.guess_extension(mime_type) or ".png"
-            timestamp = int(time.time())
-            filename = f"infographic_{round_num}_{q_num}_{timestamp}{file_extension}"
-
-            # Delete existing if present
-            if question.infographic_image:
-                question.infographic_image.delete(save=False)
-
-            # Save new image
-            import io
-            question.infographic_image.save(
-                filename,
-                File(io.BytesIO(image_data)),
-                save=True
+            subprocess.Popen(
+                [
+                    sys.executable,
+                    manage_py,
+                    'generate_infographic',
+                    f'--question_id={question_id}',
+                    f'--prompt={infographic_prompt}',
+                    f'--status_file={status_file}'
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                cwd=project_root
             )
 
             return JsonResponse({
                 "success": True,
-                "message": f"{round_num}회 {q_num}번: 인포그래픽 저장 완료",
+                "processing": True,
+                "job_id": job_id,
+                "message": f"{round_num}회 {q_num}번: 인포그래픽 생성 시작됨 (백그라운드)",
                 "task": "infographic",
                 "image_url": question.infographic_image.url
             })

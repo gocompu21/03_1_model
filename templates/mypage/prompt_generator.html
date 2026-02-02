@@ -1013,7 +1013,9 @@ ${explanation}
         // Infographic Generation
         const generateInfographicUrl = '{% url "mypage:generate_infographic_api" %}';
         const saveInfographicUrl = '{% url "mypage:save_infographic_api" %}';
+        const checkInfographicStatusUrl = '{% url "mypage:check_infographic_status_api" %}';
         let currentTempFilename = null;
+        let infographicPollInterval = null;
 
         function generateInfographic() {
             if (!questionId) {
@@ -1030,7 +1032,7 @@ ${explanation}
             // Show loading state
             const btn = document.getElementById('btn-generate-infographic');
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 이미지 생성 중... (약 30초 소요)';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 이미지 생성 중... (약 1-2분 소요)';
             document.getElementById('msg-infographic').style.display = 'none';
             document.getElementById('generated-infographic-container').style.display = 'none';
 
@@ -1050,41 +1052,103 @@ ${explanation}
                     return response.json();
                 })
                 .then(data => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
+                    if (data.success && data.processing) {
+                        // Background processing started - begin polling
+                        const msgElement = document.getElementById('msg-infographic');
+                        msgElement.style.display = 'block';
+                        msgElement.innerText = '백그라운드에서 생성 중... 잠시만 기다려주세요.';
+                        msgElement.style.background = '#e3f2fd';
+                        msgElement.style.color = '#1565c0';
 
-                    const msgElement = document.getElementById('msg-infographic');
-                    msgElement.style.display = 'block';
-
-                    if (data.success) {
-                        // Store temp filename for later save
-                        currentTempFilename = data.temp_filename;
-                        
-                        msgElement.innerText = data.message + ' (미리보기)';
-                        msgElement.style.background = '#fff3e0';
-                        msgElement.style.color = '#e65100';
-
-                        // Show generated image
-                        document.getElementById('generated-infographic-container').style.display = 'block';
-                        document.getElementById('generated-infographic-message').innerText = '미리보기 - DB에 저장하려면 아래 버튼을 클릭하세요';
-                        document.getElementById('generated-infographic-img').src = data.image_url;
-                        document.getElementById('generated-infographic-link').href = data.image_url;
+                        pollInfographicStatus(data.job_id);
+                    } else if (data.success) {
+                        // Direct success (shouldn't happen with new implementation)
+                        handleInfographicSuccess(data);
                     } else {
-                        msgElement.innerText = '오류: ' + (data.error || 'Unknown error');
-                        msgElement.style.background = '#f8d7da';
-                        msgElement.style.color = '#721c24';
+                        handleInfographicError(data.error || 'Unknown error');
                     }
                 })
                 .catch(err => {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
-                    const msgElement = document.getElementById('msg-infographic');
-                    msgElement.style.display = 'block';
-                    msgElement.innerText = '인포그래픽 생성 중 오류 발생: ' + err;
-                    msgElement.style.background = '#f8d7da';
-                    msgElement.style.color = '#721c24';
-                    alert('인포그래픽 생성 중 오류 발생: ' + err);
+                    handleInfographicError(err);
                 });
+        }
+
+        function pollInfographicStatus(jobId) {
+            // Clear any existing poll interval
+            if (infographicPollInterval) {
+                clearInterval(infographicPollInterval);
+            }
+
+            let pollCount = 0;
+            const maxPolls = 60;  // 60 * 3s = 3 minutes max
+
+            infographicPollInterval = setInterval(() => {
+                pollCount++;
+
+                if (pollCount > maxPolls) {
+                    clearInterval(infographicPollInterval);
+                    handleInfographicError('생성 시간 초과 (3분). 다시 시도해주세요.');
+                    return;
+                }
+
+                fetch(`${checkInfographicStatusUrl}?job_id=${jobId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'completed') {
+                            clearInterval(infographicPollInterval);
+                            handleInfographicSuccess({
+                                message: data.message,
+                                image_url: data.image_url,
+                                temp_filename: data.temp_filename
+                            });
+                        } else if (data.status === 'error') {
+                            clearInterval(infographicPollInterval);
+                            handleInfographicError(data.error);
+                        } else if (data.status === 'not_found') {
+                            clearInterval(infographicPollInterval);
+                            handleInfographicError('작업을 찾을 수 없습니다.');
+                        }
+                        // 'starting' or 'processing' - continue polling
+                    })
+                    .catch(err => {
+                        // Don't stop polling on network errors
+                        console.error('Poll error:', err);
+                    });
+            }, 3000);  // Poll every 3 seconds
+        }
+
+        function handleInfographicSuccess(data) {
+            const btn = document.getElementById('btn-generate-infographic');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
+
+            const msgElement = document.getElementById('msg-infographic');
+            msgElement.style.display = 'block';
+
+            // Store temp filename for later save
+            currentTempFilename = data.temp_filename;
+
+            msgElement.innerText = data.message + ' (미리보기)';
+            msgElement.style.background = '#fff3e0';
+            msgElement.style.color = '#e65100';
+
+            // Show generated image
+            document.getElementById('generated-infographic-container').style.display = 'block';
+            document.getElementById('generated-infographic-message').innerText = '미리보기 - DB에 저장하려면 아래 버튼을 클릭하세요';
+            document.getElementById('generated-infographic-img').src = data.image_url;
+            document.getElementById('generated-infographic-link').href = data.image_url;
+        }
+
+        function handleInfographicError(err) {
+            const btn = document.getElementById('btn-generate-infographic');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-magic"></i> 인포그래픽 이미지 생성';
+
+            const msgElement = document.getElementById('msg-infographic');
+            msgElement.style.display = 'block';
+            msgElement.innerText = '인포그래픽 생성 중 오류 발생: ' + err;
+            msgElement.style.background = '#f8d7da';
+            msgElement.style.color = '#721c24';
         }
 
         function saveInfographic() {

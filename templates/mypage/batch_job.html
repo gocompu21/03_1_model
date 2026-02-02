@@ -401,10 +401,6 @@
                         <div class="label">나레이션</div>
                     </div>
                     <div class="stat-item">
-                        <div class="number" id="stat-tts">0</div>
-                        <div class="label">TTS</div>
-                    </div>
-                    <div class="stat-item">
                         <div class="number" id="stat-infographic">0</div>
                         <div class="label">인포</div>
                     </div>
@@ -459,11 +455,6 @@
                             <input type="checkbox" id="task-narration" checked>
                             <label for="task-narration"><i class="fas fa-microphone" style="color: #e91e63;"></i> 나레이션</label>
                             <span class="delay">5초</span>
-                        </div>
-                        <div class="task-option">
-                            <input type="checkbox" id="task-tts" checked>
-                            <label for="task-tts"><i class="fas fa-volume-up" style="color: #673ab7;"></i> TTS 음성</label>
-                            <span class="delay">15초</span>
                         </div>
                         <div class="task-option">
                             <input type="checkbox" id="task-infographic" checked>
@@ -568,7 +559,6 @@
                         <span class="status-badge ${q.has_textbook ? 'active' : 'inactive'}">TB</span>
                         <span class="status-badge ${q.has_general ? 'active' : 'inactive'}">GC</span>
                         <span class="status-badge ${q.has_narration ? 'active' : 'inactive'}">N</span>
-                        <span class="status-badge ${q.has_tts ? 'active' : 'inactive'}">TTS</span>
                         <span class="status-badge ${q.has_infographic ? 'active' : 'inactive'}">IG</span>
                     </td>
                 </tr>
@@ -582,7 +572,6 @@
             document.getElementById('stat-textbook').textContent = questionsData.filter(q => q.has_textbook).length;
             document.getElementById('stat-general').textContent = questionsData.filter(q => q.has_general).length;
             document.getElementById('stat-narration').textContent = questionsData.filter(q => q.has_narration).length;
-            document.getElementById('stat-tts').textContent = questionsData.filter(q => q.has_tts).length;
             document.getElementById('stat-infographic').textContent = questionsData.filter(q => q.has_infographic).length;
         }
 
@@ -618,7 +607,6 @@
             if (document.getElementById('task-textbook').checked) tasks.push({ type: 'textbook', delay: 10 });
             if (document.getElementById('task-general').checked) tasks.push({ type: 'general', delay: 5 });
             if (document.getElementById('task-narration').checked) tasks.push({ type: 'narration', delay: 5 });
-            if (document.getElementById('task-tts').checked) tasks.push({ type: 'tts', delay: 15 });
             if (document.getElementById('task-infographic').checked) tasks.push({ type: 'infographic', delay: 30 });
             return tasks;
         }
@@ -684,7 +672,6 @@
                         'textbook': '기본서 해설',
                         'general': '일반 해설',
                         'narration': '나레이션',
-                        'tts': 'TTS 음성',
                         'infographic': '인포그래픽'
                     }[task.type];
 
@@ -704,7 +691,6 @@
                                 if (task.type === 'textbook') q.has_textbook = true;
                                 if (task.type === 'general') q.has_general = true;
                                 if (task.type === 'narration') q.has_narration = true;
-                                if (task.type === 'tts') q.has_tts = true;
                                 if (task.type === 'infographic') q.has_infographic = true;
                             }
                             updateStats();
@@ -748,6 +734,8 @@
             addLog('배치 작업 완료', 'success');
         }
 
+        const checkInfographicStatusUrl = '{% url "mypage:check_infographic_status_api" %}';
+
         async function processTask(questionId, taskType) {
             const formData = new FormData();
             formData.append('question_id', questionId);
@@ -778,6 +766,69 @@
                     success: false,
                     error: '서버에서 잘못된 응답을 반환했습니다.'
                 };
+            }
+
+            const result = await response.json();
+
+            // If infographic is processing in background, poll for completion
+            if (result.processing && result.job_id) {
+                return await pollInfographicStatus(result.job_id, questionId);
+            }
+
+            return result;
+        }
+
+        async function pollInfographicStatus(jobId, questionId) {
+            const maxPolls = 60;  // 60 * 3s = 3 minutes max
+            let pollCount = 0;
+
+            while (pollCount < maxPolls) {
+                if (stopRequested) {
+                    return { success: false, error: '사용자 요청으로 중단됨' };
+                }
+
+                await sleep(3000);  // Wait 3 seconds between polls
+                pollCount++;
+
+                try {
+                    const response = await fetch(`${checkInfographicStatusUrl}?job_id=${jobId}`);
+                    const data = await response.json();
+
+                    if (data.status === 'completed') {
+                        // Infographic completed - now save it to the question
+                        if (data.temp_filename) {
+                            const saveResult = await saveInfographicToQuestion(questionId, data.temp_filename);
+                            return saveResult;
+                        }
+                        return { success: true, message: data.message };
+                    } else if (data.status === 'error') {
+                        return { success: false, error: data.error };
+                    } else if (data.status === 'not_found') {
+                        return { success: false, error: '작업을 찾을 수 없습니다.' };
+                    }
+                    // 'starting' or 'processing' - continue polling
+                } catch (err) {
+                    console.error('Poll error:', err);
+                    // Continue polling on network errors
+                }
+            }
+
+            return { success: false, error: '인포그래픽 생성 시간 초과 (3분)' };
+        }
+
+        async function saveInfographicToQuestion(questionId, tempFilename) {
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('temp_filename', tempFilename);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            const response = await fetch('{% url "mypage:save_infographic_api" %}', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                return { success: false, error: '인포그래픽 저장 실패' };
             }
 
             return await response.json();
