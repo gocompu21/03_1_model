@@ -996,28 +996,47 @@ def generate_tts_api(request):
         return JsonResponse({"error": "Missing question_id or narration_text"}, status=400)
 
     try:
+        import hashlib
+        import re
+
         question = Question.objects.get(id=question_id)
         round_num = question.exam.round_number
         q_num = question.number
-        
+
         # Use shared TTS generator
         from utils.tts_generator import generate_tts_audio
         import os
-        import uuid
-        
-        # Generate filename and path
+
+        # Clean text for hash (same as study/views.py)
+        clean_text = narration_text
+        clean_text = re.sub(r'\*\*([^*]+)\*\*', r'\1', clean_text)
+        clean_text = re.sub(r'\*([^*]+)\*', r'\1', clean_text)
+        clean_text = re.sub(r'^#+\s+', '', clean_text, flags=re.MULTILINE)
+        clean_text = re.sub(r'^[\*\-]\s+', '', clean_text, flags=re.MULTILINE)
+
+        # Generate filename using text hash (compatible with study/views.py)
         tts_dir = os.path.join(settings.MEDIA_ROOT, "tts")
-        unique_id = uuid.uuid4().hex[:6]
-        filename = f"round{round_num}_q{q_num}_narration_{unique_id}.mp3"
+        text_hash = hashlib.md5(clean_text.encode()).hexdigest()[:8]
+        filename = f"round{round_num}_q{q_num}_narration_{text_hash}.mp3"
         filepath = os.path.join(tts_dir, filename)
-        
+
+        # Check if already exists (cache)
+        if os.path.exists(filepath):
+            file_url = f"{settings.MEDIA_URL}tts/{filename}"
+            return JsonResponse({
+                "success": True,
+                "message": f"TTS 캐시 사용: {filename}",
+                "file_url": file_url,
+                "filename": filename
+            })
+
         # Generate TTS using shared module
         result = generate_tts_audio(narration_text, filepath)
-        
+
         if result["success"]:
             file_url = f"{settings.MEDIA_URL}tts/{filename}"
             return JsonResponse({
-                "success": True, 
+                "success": True,
                 "message": f"TTS 생성 완료: {filename}",
                 "file_url": file_url,
                 "filename": filename
@@ -1053,7 +1072,7 @@ def get_existing_tts_api(request):
         
         # Search for existing TTS files
         tts_dir = os.path.join(settings.MEDIA_ROOT, "tts")
-        pattern = os.path.join(tts_dir, f"round{round_num}_q{q_num}_*narration*.mp3")
+        pattern = os.path.join(tts_dir, f"round{round_num}_q{q_num}_narration_*.mp3")
         files = glob.glob(pattern)
         
         if files:
@@ -1985,13 +2004,398 @@ def chapter_move(request, chapter_id):
             swap_target.save()
         else:
             return JsonResponse({"success": False, "error": "더 이상 이동할 수 없습니다."})
-        
+
         # Reorder codes
         reorder_chapter_codes(chapter.book_id, chapter.parent_id)
-        
+
         return JsonResponse({"success": True, "message": "순서가 변경되었습니다."})
-    
+
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "잘못된 요청 형식입니다."})
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})
+
+
+# --- Batch Job for Exam Questions ---
+
+@staff_member_required
+def batch_job_page(request):
+    """
+    Batch job page for processing multiple exam questions.
+    Allows selection of questions by round/range and batch processing of:
+    - Textbook explanation (기본서 해설)
+    - General explanation (일반 해설)
+    - Narration (나레이션)
+    - TTS audio (TTS 음성)
+    - Infographic image (인포그래픽)
+    """
+    from exam.models import Exam
+    exams = Exam.objects.exclude(round_number=0).order_by("round_number")
+    return render(request, "mypage/batch_job.html", {"exams": exams})
+
+
+@staff_member_required
+def batch_job_get_questions(request):
+    """
+    AJAX endpoint to get questions for batch processing.
+    Returns question list with current status of each field.
+    """
+    from exam.models import Question
+    import os
+    import glob
+
+    round_number = request.GET.get("round_number")
+    start_number = request.GET.get("start_number", 1)
+    end_number = request.GET.get("end_number", 140)
+
+    if not round_number:
+        return JsonResponse({"success": False, "error": "회차를 선택해주세요."})
+
+    try:
+        start_number = int(start_number)
+        end_number = int(end_number)
+
+        questions = Question.objects.filter(
+            exam__round_number=round_number,
+            number__gte=start_number,
+            number__lte=end_number
+        ).select_related('exam', 'subject').order_by('number')
+
+        questions_data = []
+        for q in questions:
+            # Check TTS file existence
+            tts_pattern = os.path.join(
+                settings.MEDIA_ROOT, 'tts',
+                f'round{round_number}_q{q.number}_*.mp3'
+            )
+            tts_exists = len(glob.glob(tts_pattern)) > 0
+
+            questions_data.append({
+                "id": q.id,
+                "round": q.exam.round_number,
+                "number": q.number,
+                "subject": q.subject.name if q.subject else "",
+                "content_preview": q.content[:50] + "..." if len(q.content) > 50 else q.content,
+                "has_textbook": bool(q.textbook_chat),
+                "has_general": bool(q.general_chat),
+                "has_narration": bool(q.narration),
+                "has_tts": tts_exists,
+                "has_infographic": bool(q.infographic_image),
+            })
+
+        return JsonResponse({
+            "success": True,
+            "questions": questions_data,
+            "count": len(questions_data)
+        })
+
+    except ValueError:
+        return JsonResponse({"success": False, "error": "잘못된 번호 형식입니다."})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+@staff_member_required
+def batch_job_process(request):
+    """
+    AJAX endpoint to process a single task for a single question.
+    Called sequentially from frontend for each question/task combination.
+
+    task_type: textbook, general, narration, tts, infographic
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    from exam.models import Question
+    import google.generativeai as genai
+    import time
+    import os
+
+    question_id = request.POST.get("question_id")
+    task_type = request.POST.get("task_type")
+
+    if not question_id or not task_type:
+        return JsonResponse({
+            "success": False,
+            "error": "question_id와 task_type이 필요합니다."
+        })
+
+    try:
+        question = Question.objects.select_related('exam', 'subject').get(id=question_id)
+        round_num = question.exam.round_number
+        q_num = question.number
+        subject_name = question.subject.name if question.subject else ""
+
+        # Build prompt for AI queries
+        answer_map = {1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤"}
+        if isinstance(question.answer, list):
+            correct_answer = ", ".join([answer_map.get(a, str(a)) for a in question.answer])
+        else:
+            correct_answer = answer_map.get(question.answer, str(question.answer))
+
+        base_prompt = f"""다음은 나무의사 시험 제{round_num}회 {subject_name} 문제입니다.
+
+문제: {question.content}
+①번. {question.choice1}
+②번. {question.choice2}
+③번. {question.choice3}
+④번. {question.choice4}
+⑤번. {question.choice5}
+
+정답: {correct_answer}
+
+위 문제에 대해 다음 형식으로 자세하고 전문적인 해설을 작성해주세요:
+
+1. **정답 해설**: 왜 {correct_answer}이 정답인지 전체적으로 설명
+
+2. **선지별 분석**:
+   - ①번 {question.choice1}: (옳음/그름) 이유 설명
+   - ②번 {question.choice2}: (옳음/그름) 이유 설명
+   - ③번 {question.choice3}: (옳음/그름) 이유 설명
+   - ④번 {question.choice4}: (옳음/그름) 이유 설명
+   - ⑤번 {question.choice5}: (옳음/그름) 이유 설명
+
+전문적이고 교육적인 해설을 작성해주세요."""
+
+        # Process based on task type
+        if task_type == "textbook":
+            # Query textbook (FileSearch API)
+            from fileSearchStore import GeminiStoreManager
+            manager = GeminiStoreManager(api_key=settings.GEMINI_API_KEY)
+            response_text = manager.query_store(subject_name, base_prompt)
+            question.textbook_chat = response_text
+            question.save(update_fields=['textbook_chat'])
+
+            return JsonResponse({
+                "success": True,
+                "message": f"{round_num}회 {q_num}번: 기본서 해설 저장 완료",
+                "task": "textbook"
+            })
+
+        elif task_type == "general":
+            # Query general AI (Gemini)
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel("gemini-3-flash-preview")
+            response = model.generate_content(base_prompt)
+            response_text = response.text
+            question.general_chat = response_text
+            question.save(update_fields=['general_chat'])
+
+            return JsonResponse({
+                "success": True,
+                "message": f"{round_num}회 {q_num}번: 일반 해설 저장 완료",
+                "task": "general"
+            })
+
+        elif task_type == "narration":
+            # Generate narration from textbook_chat
+            if not question.textbook_chat:
+                return JsonResponse({
+                    "success": False,
+                    "error": f"{round_num}회 {q_num}번: 기본서 해설이 없어 나레이션을 생성할 수 없습니다.",
+                    "task": "narration",
+                    "skip": True
+                })
+
+            narration_prompt = NARRATION_PROMPT.format(
+                question_content=question.content,
+                choice1=question.choice1,
+                choice2=question.choice2,
+                choice3=question.choice3,
+                choice4=question.choice4,
+                choice5=question.choice5,
+                answer=question.answer[0] if isinstance(question.answer, list) else question.answer,
+                textbook_chat=question.textbook_chat
+            )
+
+            genai.configure(api_key=settings.GEMINI_API_KEY)
+            model = genai.GenerativeModel("gemini-3-flash-preview")
+            response = model.generate_content(narration_prompt)
+            question.narration = response.text
+            question.save(update_fields=['narration'])
+
+            return JsonResponse({
+                "success": True,
+                "message": f"{round_num}회 {q_num}번: 나레이션 저장 완료",
+                "task": "narration"
+            })
+
+        elif task_type == "tts":
+            # Generate TTS audio
+            if not question.narration:
+                return JsonResponse({
+                    "success": False,
+                    "error": f"{round_num}회 {q_num}번: 나레이션이 없어 TTS를 생성할 수 없습니다.",
+                    "task": "tts",
+                    "skip": True
+                })
+
+            from utils.tts_generator import generate_tts_for_question
+            result = generate_tts_for_question(question, tab="narration")
+
+            if result.get("success"):
+                return JsonResponse({
+                    "success": True,
+                    "message": f"{round_num}회 {q_num}번: TTS 음성 생성 완료",
+                    "task": "tts",
+                    "file_url": result.get("file_url")
+                })
+            else:
+                return JsonResponse({
+                    "success": False,
+                    "error": result.get("error", "TTS 생성 실패"),
+                    "task": "tts"
+                })
+
+        elif task_type == "infographic":
+            # Generate infographic image
+            if not question.textbook_chat:
+                return JsonResponse({
+                    "success": False,
+                    "error": f"{round_num}회 {q_num}번: 기본서 해설이 없어 인포그래픽을 생성할 수 없습니다.",
+                    "task": "infographic",
+                    "skip": True
+                })
+
+            # Clean HTML tags from content (same as JavaScript cleanHtmlForPrompt)
+            import re
+            def clean_html(text):
+                if not text:
+                    return ""
+                text = re.sub(r'<br\s*/?>', '\n', text, flags=re.IGNORECASE)
+                text = re.sub(r'<div[^>]*>', '', text, flags=re.IGNORECASE)
+                text = re.sub(r'</div>', '\n', text, flags=re.IGNORECASE)
+                text = re.sub(r'<[^>]+>', '', text)  # Remove remaining tags
+                text = text.replace('&nbsp;', ' ')
+                text = text.replace('&lt;', '<')
+                text = text.replace('&gt;', '>')
+                text = text.replace('&amp;', '&')
+                text = re.sub(r'\n\s*\n', '\n', text)  # Remove duplicate newlines
+                return text.strip()
+
+            clean_content = clean_html(question.content)
+            clean_choice1 = clean_html(question.choice1)
+            clean_choice2 = clean_html(question.choice2)
+            clean_choice3 = clean_html(question.choice3)
+            clean_choice4 = clean_html(question.choice4)
+            clean_choice5 = clean_html(question.choice5)
+
+            # Build infographic prompt
+            infographic_prompt = f"""({subject_name}) {round_num}-{q_num}. {clean_content}
+① {clean_choice1}
+② {clean_choice2}
+③ {clean_choice3}
+④ {clean_choice4}
+⑤ {clean_choice5}
+
+{question.textbook_chat}
+
+위 내용으로 인포그래픽을 만들어 줘
+요구사항：
+１） １６：９ 비율
+２） 한국어 텍스트 포함
+３） 전문적이고 교육적인 스타일
+４） 나무 병해 관련 시각 요소
+５） 최상단칸은 "({subject_name}) {round_num}-{q_num}. {clean_content[:30]}..." 왼쪽 정렬해"""
+
+            from google import genai as genai_new
+            from google.genai import types
+            import mimetypes
+            from django.core.files import File
+
+            client = genai_new.Client(api_key=settings.GEMINI_API_KEY)
+
+            # Use same model and config as generate_infographic_api
+            model = "gemini-3-pro-image-preview"
+            contents = [
+                types.Content(
+                    role="user",
+                    parts=[types.Part.from_text(text=infographic_prompt)],
+                ),
+            ]
+            generate_content_config = types.GenerateContentConfig(
+                response_modalities=["IMAGE", "TEXT"],
+                image_config=types.ImageConfig(image_size="1K"),
+            )
+
+            # Generate image using streaming (same as generate_infographic_api)
+            image_data = None
+            mime_type = None
+            for chunk in client.models.generate_content_stream(
+                model=model,
+                contents=contents,
+                config=generate_content_config,
+            ):
+                if (
+                    chunk.candidates is None
+                    or chunk.candidates[0].content is None
+                    or chunk.candidates[0].content.parts is None
+                ):
+                    continue
+                part = chunk.candidates[0].content.parts[0]
+                if part.inline_data and part.inline_data.data:
+                    image_data = part.inline_data.data
+                    mime_type = part.inline_data.mime_type
+                    break
+
+            if not image_data:
+                return JsonResponse({
+                    "success": False,
+                    "error": f"{round_num}회 {q_num}번: 인포그래픽 이미지 생성 실패",
+                    "task": "infographic"
+                })
+
+            # Save directly to Question.infographic_image
+            file_extension = mimetypes.guess_extension(mime_type) or ".png"
+            timestamp = int(time.time())
+            filename = f"infographic_{round_num}_{q_num}_{timestamp}{file_extension}"
+
+            # Delete existing if present
+            if question.infographic_image:
+                question.infographic_image.delete(save=False)
+
+            # Save new image
+            import io
+            question.infographic_image.save(
+                filename,
+                File(io.BytesIO(image_data)),
+                save=True
+            )
+
+            return JsonResponse({
+                "success": True,
+                "message": f"{round_num}회 {q_num}번: 인포그래픽 저장 완료",
+                "task": "infographic",
+                "image_url": question.infographic_image.url
+            })
+
+        else:
+            return JsonResponse({
+                "success": False,
+                "error": f"알 수 없는 작업 유형: {task_type}"
+            })
+
+    except Question.DoesNotExist:
+        return JsonResponse({
+            "success": False,
+            "error": "문제를 찾을 수 없습니다."
+        })
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        error_msg = str(e)
+
+        # Check for rate limit error
+        if "429" in error_msg or "Resource has been exhausted" in error_msg:
+            return JsonResponse({
+                "success": False,
+                "error": f"Rate Limit 발생. 잠시 후 재시도하세요.",
+                "rate_limit": True,
+                "task": task_type
+            })
+
+        return JsonResponse({
+            "success": False,
+            "error": f"{task_type} 처리 중 오류: {error_msg}",
+            "task": task_type
+        })

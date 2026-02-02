@@ -198,14 +198,17 @@ def generate_tts_audio(
 
 def generate_tts_for_question(question, tab: str = "narration") -> dict:
     """Generate TTS for a specific question.
-    
+
     Args:
         question: Question model instance
         tab: Content tab to use ("narration", "textbook", "explanation")
-    
+
     Returns:
         dict with success status, message, and file info
     """
+    import hashlib
+    import re
+
     # Select text based on tab
     if tab == "narration" and question.narration:
         text = question.narration
@@ -220,22 +223,40 @@ def generate_tts_for_question(question, tab: str = "narration") -> dict:
             "filepath": None,
             "filename": None
         }
-    
-    # Generate filename
+
+    # Clean text for hash calculation (same as study/views.py)
+    clean_text = text
+    clean_text = re.sub(r'\*\*([^*]+)\*\*', r'\1', clean_text)
+    clean_text = re.sub(r'\*([^*]+)\*', r'\1', clean_text)
+    clean_text = re.sub(r'^#+\s+', '', clean_text, flags=re.MULTILINE)
+    clean_text = re.sub(r'^[\*\-]\s+', '', clean_text, flags=re.MULTILINE)
+
+    # Generate filename using text hash (compatible with study/views.py)
     round_num = question.exam.round_number
     q_num = question.number
-    unique_id = uuid.uuid4().hex[:6]
-    filename = f"round{round_num}_q{q_num}_{tab}_{unique_id}.mp3"
-    
+    text_hash = hashlib.md5(clean_text.encode()).hexdigest()[:8]
+    filename = f"round{round_num}_q{q_num}_{tab}_{text_hash}.mp3"
+
     # Build output path
     tts_dir = os.path.join(settings.MEDIA_ROOT, "tts")
     filepath = os.path.join(tts_dir, filename)
-    
+
+    # Check if file already exists (cache hit)
+    if os.path.exists(filepath):
+        return {
+            "success": True,
+            "message": "TTS 캐시 사용",
+            "filepath": filepath,
+            "filename": filename,
+            "file_url": f"{settings.MEDIA_URL}tts/{filename}",
+            "cached": True
+        }
+
     # Generate TTS
     result = generate_tts_audio(text, filepath)
-    
+
     if result["success"]:
         result["filename"] = filename
         result["file_url"] = f"{settings.MEDIA_URL}tts/{filename}"
-    
+
     return result

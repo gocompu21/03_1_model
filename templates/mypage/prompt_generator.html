@@ -305,9 +305,14 @@
 <body>
     <header>
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-        <a href="{% url 'mypage:index' %}" class="nav-link">
-            <i class="fas fa-arrow-left"></i> 마이페이지로
-        </a>
+        <div style="display: flex; gap: 20px;">
+            <a href="{% url 'mypage:batch_job_page' %}" class="nav-link">
+                <i class="fas fa-cogs"></i> 배치작업
+            </a>
+            <a href="{% url 'mypage:index' %}" class="nav-link">
+                <i class="fas fa-arrow-left"></i> 마이페이지로
+            </a>
+        </div>
     </header>
 
     <div class="container">

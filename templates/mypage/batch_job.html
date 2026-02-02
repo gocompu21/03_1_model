@@ -1,0 +1,778 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기출문제 배치작업</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+        }
+
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .header-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            color: #b7e4c7;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            color: #1b4332;
+            margin: 0 0 20px 0;
+            border-bottom: 2px solid #d8f3dc;
+            padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #1b4332;
+            white-space: nowrap;
+        }
+
+        .form-group select,
+        .form-group input {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .form-group input[type="number"] {
+            width: 80px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #2d6a4f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #1b4332;
+        }
+
+        .btn-danger {
+            background-color: #e63946;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c1121f;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Two column layout */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 1000px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Question list */
+        .question-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .question-list table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .question-list th,
+        .question-list td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .question-list th {
+            background: #f8f9fa;
+            position: sticky;
+            top: 0;
+            font-weight: bold;
+            color: #1b4332;
+        }
+
+        .question-list tr:hover {
+            background: #f0f7f4;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 3px;
+        }
+
+        .status-badge.active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Task checkboxes */
+        .task-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .task-option:hover {
+            background: #e9ecef;
+        }
+
+        .task-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .task-option label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .task-option .delay {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        /* Progress section */
+        .progress-section {
+            margin-top: 20px;
+        }
+
+        .progress-bar-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 25px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .current-task {
+            padding: 10px 15px;
+            background: #d8f3dc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #1b4332;
+        }
+
+        /* Log area */
+        .log-area {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+        }
+
+        .log-entry.success {
+            color: #4caf50;
+        }
+
+        .log-entry.error {
+            color: #f44336;
+        }
+
+        .log-entry.warning {
+            color: #ff9800;
+        }
+
+        .log-entry .time {
+            color: #9e9e9e;
+            margin-right: 10px;
+        }
+
+        /* Summary stats */
+        .stats-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-item .number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d6a4f;
+        }
+
+        .stat-item .label {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <div class="header-links">
+            <a href="{% url 'mypage:prompt_generator' %}" class="nav-link">
+                <i class="fas fa-magic"></i> 개별 문제 처리
+            </a>
+            <a href="{% url 'mypage:index' %}" class="nav-link">
+                <i class="fas fa-arrow-left"></i> 마이페이지
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-cogs" style="color: #ff9800;"></i> 기출문제 배치작업</h2>
+
+            <!-- Question Selection -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-list-ol"></i> 회차</label>
+                    <select id="round_number">
+                        <option value="">-- 선택 --</option>
+                        {% for exam in exams %}
+                        <option value="{{ exam.round_number }}">제{{ exam.round_number }}회</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>시작</label>
+                    <input type="number" id="start_number" value="1" min="1" max="140">
+                </div>
+                <div class="form-group">
+                    <label>끝</label>
+                    <input type="number" id="end_number" value="140" min="1" max="140">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="loadQuestions()">
+                    <i class="fas fa-search"></i> 문제 조회
+                </button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Left: Question List -->
+            <div class="card">
+                <h2><i class="fas fa-list"></i> 문제 목록 <span id="question-count" style="font-weight: normal; color: #6c757d;"></span></h2>
+
+                <div class="stats-row" id="stats-row" style="display: none;">
+                    <div class="stat-item">
+                        <div class="number" id="stat-total">0</div>
+                        <div class="label">전체</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="stat-textbook">0</div>
+                        <div class="label">기본서</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="stat-general">0</div>
+                        <div class="label">일반</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="stat-narration">0</div>
+                        <div class="label">나레이션</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="stat-tts">0</div>
+                        <div class="label">TTS</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="number" id="stat-infographic">0</div>
+                        <div class="label">인포</div>
+                    </div>
+                </div>
+
+                <div class="question-list" id="question-list">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
+                                <th style="width: 60px;">번호</th>
+                                <th>과목</th>
+                                <th style="width: 180px;">상태</th>
+                            </tr>
+                        </thead>
+                        <tbody id="question-tbody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: #6c757d; padding: 40px;">
+                                    회차를 선택하고 문제 조회를 클릭하세요.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button type="button" class="btn btn-secondary" onclick="selectMissing('textbook')">
+                        기본서 없는 것 선택
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="selectMissing('all')">
+                        미완료 선택
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: Task Options & Controls -->
+            <div>
+                <div class="card">
+                    <h2><i class="fas fa-tasks"></i> 작업 선택</h2>
+                    <div class="task-options">
+                        <div class="task-option">
+                            <input type="checkbox" id="task-textbook" checked>
+                            <label for="task-textbook"><i class="fas fa-book" style="color: #0077b6;"></i> 기본서 해설</label>
+                            <span class="delay">10초</span>
+                        </div>
+                        <div class="task-option">
+                            <input type="checkbox" id="task-general" checked>
+                            <label for="task-general"><i class="fas fa-tree" style="color: #9c27b0;"></i> 일반 해설</label>
+                            <span class="delay">5초</span>
+                        </div>
+                        <div class="task-option">
+                            <input type="checkbox" id="task-narration" checked>
+                            <label for="task-narration"><i class="fas fa-microphone" style="color: #e91e63;"></i> 나레이션</label>
+                            <span class="delay">5초</span>
+                        </div>
+                        <div class="task-option">
+                            <input type="checkbox" id="task-tts">
+                            <label for="task-tts"><i class="fas fa-volume-up" style="color: #673ab7;"></i> TTS 음성</label>
+                            <span class="delay">15초</span>
+                        </div>
+                        <div class="task-option">
+                            <input type="checkbox" id="task-infographic">
+                            <label for="task-infographic"><i class="fas fa-image" style="color: #ff9800;"></i> 인포그래픽</label>
+                            <span class="delay">30초</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-play-circle"></i> 실행</h2>
+                    <div style="margin-bottom: 15px;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 8px;">
+                            기본 딜레이 (초)
+                        </label>
+                        <input type="number" id="base-delay" value="5" min="1" max="120" style="padding: 8px 12px; border: 2px solid #e0e0e0; border-radius: 6px; width: 80px;">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn btn-primary" id="btn-start" onclick="startBatchJob()" style="flex: 1;">
+                            <i class="fas fa-play"></i> 배치 시작
+                        </button>
+                        <button type="button" class="btn btn-danger" id="btn-stop" onclick="stopBatchJob()" disabled style="flex: 1;">
+                            <i class="fas fa-stop"></i> 중단
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="card progress-section" id="progress-section" style="display: none;">
+            <h2><i class="fas fa-spinner fa-spin" id="progress-icon"></i> 진행 상태</h2>
+
+            <div class="current-task" id="current-task">
+                대기 중...
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar" style="width: 0%;">0%</div>
+            </div>
+
+            <div class="log-area" id="log-area">
+                <div class="log-entry"><span class="time">[시작]</span> 배치 작업 로그</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const csrfToken = '{{ csrf_token }}';
+        const getQuestionsUrl = '{% url "mypage:batch_job_get_questions" %}';
+        const processUrl = '{% url "mypage:batch_job_process" %}';
+
+        let questionsData = [];
+        let isRunning = false;
+        let stopRequested = false;
+
+        function loadQuestions() {
+            const roundNumber = document.getElementById('round_number').value;
+            const startNumber = document.getElementById('start_number').value;
+            const endNumber = document.getElementById('end_number').value;
+
+            if (!roundNumber) {
+                alert('회차를 선택해주세요.');
+                return;
+            }
+
+            const url = `${getQuestionsUrl}?round_number=${roundNumber}&start_number=${startNumber}&end_number=${endNumber}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        questionsData = data.questions;
+                        renderQuestionList();
+                        updateStats();
+                    } else {
+                        alert(data.error || '문제 조회 실패');
+                    }
+                })
+                .catch(err => {
+                    alert('오류: ' + err);
+                });
+        }
+
+        function renderQuestionList() {
+            const tbody = document.getElementById('question-tbody');
+            document.getElementById('question-count').textContent = `(${questionsData.length}개)`;
+
+            if (questionsData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #6c757d; padding: 40px;">
+                    조회된 문제가 없습니다.
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = questionsData.map(q => `
+                <tr data-id="${q.id}">
+                    <td><input type="checkbox" class="question-checkbox" value="${q.id}"></td>
+                    <td>${q.round}회 ${q.number}번</td>
+                    <td>${q.subject}</td>
+                    <td>
+                        <span class="status-badge ${q.has_textbook ? 'active' : 'inactive'}">TB</span>
+                        <span class="status-badge ${q.has_general ? 'active' : 'inactive'}">GC</span>
+                        <span class="status-badge ${q.has_narration ? 'active' : 'inactive'}">N</span>
+                        <span class="status-badge ${q.has_tts ? 'active' : 'inactive'}">TTS</span>
+                        <span class="status-badge ${q.has_infographic ? 'active' : 'inactive'}">IG</span>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('stats-row').style.display = 'flex';
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').textContent = questionsData.length;
+            document.getElementById('stat-textbook').textContent = questionsData.filter(q => q.has_textbook).length;
+            document.getElementById('stat-general').textContent = questionsData.filter(q => q.has_general).length;
+            document.getElementById('stat-narration').textContent = questionsData.filter(q => q.has_narration).length;
+            document.getElementById('stat-tts').textContent = questionsData.filter(q => q.has_tts).length;
+            document.getElementById('stat-infographic').textContent = questionsData.filter(q => q.has_infographic).length;
+        }
+
+        function toggleSelectAll() {
+            const checked = document.getElementById('select-all').checked;
+            document.querySelectorAll('.question-checkbox').forEach(cb => {
+                cb.checked = checked;
+            });
+        }
+
+        function selectMissing(type) {
+            document.querySelectorAll('.question-checkbox').forEach((cb, idx) => {
+                const q = questionsData[idx];
+                if (type === 'textbook') {
+                    cb.checked = !q.has_textbook;
+                } else if (type === 'all') {
+                    cb.checked = !q.has_textbook || !q.has_general || !q.has_narration;
+                }
+            });
+        }
+
+        function getSelectedQuestions() {
+            const selected = [];
+            document.querySelectorAll('.question-checkbox:checked').forEach(cb => {
+                const q = questionsData.find(q => q.id == cb.value);
+                if (q) selected.push(q);
+            });
+            return selected;
+        }
+
+        function getSelectedTasks() {
+            const tasks = [];
+            if (document.getElementById('task-textbook').checked) tasks.push({ type: 'textbook', delay: 10 });
+            if (document.getElementById('task-general').checked) tasks.push({ type: 'general', delay: 5 });
+            if (document.getElementById('task-narration').checked) tasks.push({ type: 'narration', delay: 5 });
+            if (document.getElementById('task-tts').checked) tasks.push({ type: 'tts', delay: 15 });
+            if (document.getElementById('task-infographic').checked) tasks.push({ type: 'infographic', delay: 30 });
+            return tasks;
+        }
+
+        function addLog(message, type = 'info') {
+            const logArea = document.getElementById('log-area');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<span class="time">[${time}]</span> ${message}`;
+            logArea.appendChild(entry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function updateProgress(current, total, currentTask) {
+            const percent = Math.round((current / total) * 100);
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = `${percent}% (${current}/${total})`;
+            document.getElementById('current-task').textContent = currentTask;
+        }
+
+        async function startBatchJob() {
+            const questions = getSelectedQuestions();
+            const tasks = getSelectedTasks();
+            const baseDelay = parseInt(document.getElementById('base-delay').value) || 5;
+
+            if (questions.length === 0) {
+                alert('처리할 문제를 선택해주세요.');
+                return;
+            }
+
+            if (tasks.length === 0) {
+                alert('실행할 작업을 선택해주세요.');
+                return;
+            }
+
+            // UI state
+            isRunning = true;
+            stopRequested = false;
+            document.getElementById('btn-start').disabled = true;
+            document.getElementById('btn-stop').disabled = false;
+            document.getElementById('progress-section').style.display = 'block';
+            document.getElementById('progress-icon').className = 'fas fa-spinner fa-spin';
+            document.getElementById('progress-icon').style.color = '';
+            document.getElementById('log-area').innerHTML = '';
+
+            addLog(`배치 작업 시작: ${questions.length}개 문제, ${tasks.length}개 작업`, 'info');
+
+            const totalSteps = questions.length * tasks.length;
+            let currentStep = 0;
+
+            for (const question of questions) {
+                if (stopRequested) {
+                    addLog('사용자 요청으로 중단됨', 'warning');
+                    break;
+                }
+
+                for (const task of tasks) {
+                    if (stopRequested) break;
+
+                    const taskLabel = {
+                        'textbook': '기본서 해설',
+                        'general': '일반 해설',
+                        'narration': '나레이션',
+                        'tts': 'TTS 음성',
+                        'infographic': '인포그래픽'
+                    }[task.type];
+
+                    // Show "처리 중" with current progress (before increment)
+                    updateProgress(currentStep, totalSteps, `${question.round}회 ${question.number}번 - ${taskLabel} 처리 중...`);
+
+                    try {
+                        const result = await processTask(question.id, task.type);
+                        currentStep++;  // Increment after task completes
+
+                        if (result.success) {
+                            addLog(result.message, 'success');
+                            updateProgress(currentStep, totalSteps, `${question.round}회 ${question.number}번 - ${taskLabel} 완료`);
+                            // Update local data
+                            const q = questionsData.find(q => q.id === question.id);
+                            if (q) {
+                                if (task.type === 'textbook') q.has_textbook = true;
+                                if (task.type === 'general') q.has_general = true;
+                                if (task.type === 'narration') q.has_narration = true;
+                                if (task.type === 'tts') q.has_tts = true;
+                                if (task.type === 'infographic') q.has_infographic = true;
+                            }
+                            updateStats();
+                        } else if (result.skip) {
+                            addLog(result.error, 'warning');
+                        } else if (result.rate_limit) {
+                            addLog(`Rate Limit 발생, 60초 대기 후 재시도...`, 'warning');
+                            await sleep(60000);
+                            // Retry
+                            const retryResult = await processTask(question.id, task.type);
+                            if (retryResult.success) {
+                                addLog(retryResult.message, 'success');
+                            } else {
+                                addLog(retryResult.error, 'error');
+                            }
+                        } else {
+                            addLog(result.error, 'error');
+                        }
+
+                        // Delay between tasks
+                        const delay = Math.max(baseDelay, task.delay) * 1000;
+                        await sleep(delay);
+
+                    } catch (err) {
+                        addLog(`오류: ${err}`, 'error');
+                    }
+                }
+
+                // Update row in table
+                renderQuestionList();
+            }
+
+            // Complete
+            isRunning = false;
+            document.getElementById('btn-start').disabled = false;
+            document.getElementById('btn-stop').disabled = true;
+            document.getElementById('btn-stop').innerHTML = '<i class="fas fa-stop"></i> 중단';
+            document.getElementById('progress-icon').className = 'fas fa-check-circle';
+            document.getElementById('progress-icon').style.color = '#4caf50';
+            updateProgress(totalSteps, totalSteps, '완료!');
+            addLog('배치 작업 완료', 'success');
+        }
+
+        async function processTask(questionId, taskType) {
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('task_type', taskType);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            const response = await fetch(processUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            return await response.json();
+        }
+
+        function stopBatchJob() {
+            stopRequested = true;
+            document.getElementById('btn-stop').disabled = true;
+            document.getElementById('btn-stop').innerHTML = '<i class="fas fa-spinner fa-spin"></i> 중단 중...';
+            addLog('중단 요청됨...', 'warning');
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+
+</html>

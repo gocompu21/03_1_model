@@ -244,11 +244,11 @@ def tts_generate(request):
     text_hash = hashlib.md5(text.encode()).hexdigest()[:8]
     round_num = question.exam.round_number
     q_num = question.number
-    
+
     # Check for MP3 cache first (preferred)
     mp3_filename = f"round{round_num}_q{q_num}_narration_{text_hash}.mp3"
     mp3_filepath = tts_cache_dir / mp3_filename
-    
+
     if mp3_filepath.exists():
         with open(mp3_filepath, "rb") as f:
             mp3_data = f.read()
@@ -256,11 +256,11 @@ def tts_generate(request):
         response["Content-Disposition"] = f'inline; filename="{mp3_filename}"'
         response["X-TTS-Cache"] = "HIT"
         return response
-    
+
     # Fallback to WAV cache
     wav_filename = f"round{round_num}_q{q_num}_narration_{text_hash}.wav"
     wav_filepath = tts_cache_dir / wav_filename
-    
+
     if wav_filepath.exists():
         with open(wav_filepath, "rb") as f:
             wav_data = f.read()
