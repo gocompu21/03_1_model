@@ -2222,7 +2222,7 @@ def batch_job_process(request):
             })
 
         elif task_type == "tts":
-            # Generate TTS audio using management command (avoids Nginx timeout)
+            # Generate TTS audio using management command in background
             if not question.narration:
                 return JsonResponse({
                     "success": False,
@@ -2234,39 +2234,46 @@ def batch_job_process(request):
             import subprocess
             import sys
             import os as os_module
+            import hashlib
+            import re
 
-            # Get project root directory
+            # Check if TTS file already exists (cache check)
+            narration_text = question.narration
+            clean_text = narration_text
+            clean_text = re.sub(r'\*\*(.+?)\*\*', r'\1', clean_text)
+            clean_text = re.sub(r'__(.+?)__', r'\1', clean_text)
+            clean_text = re.sub(r'\*(.+?)\*', r'\1', clean_text)
+            clean_text = re.sub(r'_(.+?)_', r'\1', clean_text)
+            clean_text = re.sub(r'^#+\s+', '', clean_text, flags=re.MULTILINE)
+            clean_text = re.sub(r'^[\*\-]\s+', '', clean_text, flags=re.MULTILINE)
+
+            text_hash = hashlib.md5(clean_text.encode()).hexdigest()[:8]
+            tts_filename = f"round{round_num}_q{q_num}_narration_{text_hash}.mp3"
+            tts_filepath = os_module.path.join(settings.MEDIA_ROOT, "tts", tts_filename)
+
+            if os_module.path.exists(tts_filepath):
+                return JsonResponse({
+                    "success": True,
+                    "message": f"{round_num}회 {q_num}번: TTS 캐시 사용",
+                    "task": "tts"
+                })
+
+            # Run management command in background (don't wait)
             project_root = settings.BASE_DIR
             manage_py = os_module.path.join(project_root, "manage.py")
 
-            # Run management command
-            result = subprocess.run(
+            subprocess.Popen(
                 [sys.executable, manage_py, "generate_tts", f"--question_id={question.id}"],
-                capture_output=True,
-                text=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
                 cwd=project_root
             )
 
-            if result.returncode == 0:
-                return JsonResponse({
-                    "success": True,
-                    "message": f"{round_num}회 {q_num}번: TTS 음성 생성 완료",
-                    "task": "tts"
-                })
-            else:
-                error_msg = result.stderr or result.stdout or "TTS 생성 실패"
-                # Check if it was skipped (already cached)
-                if "Skipped" in result.stdout:
-                    return JsonResponse({
-                        "success": True,
-                        "message": f"{round_num}회 {q_num}번: TTS 캐시 사용",
-                        "task": "tts"
-                    })
-                return JsonResponse({
-                    "success": False,
-                    "error": f"{round_num}회 {q_num}번: {error_msg[:200]}",
-                    "task": "tts"
-                })
+            return JsonResponse({
+                "success": True,
+                "message": f"{round_num}회 {q_num}번: TTS 생성 시작됨 (백그라운드)",
+                "task": "tts"
+            })
 
         elif task_type == "infographic":
             # Generate infographic image
