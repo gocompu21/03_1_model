@@ -2222,7 +2222,7 @@ def batch_job_process(request):
             })
 
         elif task_type == "tts":
-            # Generate TTS audio
+            # Generate TTS audio using management command (avoids Nginx timeout)
             if not question.narration:
                 return JsonResponse({
                     "success": False,
@@ -2231,20 +2231,40 @@ def batch_job_process(request):
                     "skip": True
                 })
 
-            from utils.tts_generator import generate_tts_for_question
-            result = generate_tts_for_question(question, tab="narration")
+            import subprocess
+            import sys
+            import os as os_module
 
-            if result.get("success"):
+            # Get project root directory
+            project_root = settings.BASE_DIR
+            manage_py = os_module.path.join(project_root, "manage.py")
+
+            # Run management command
+            result = subprocess.run(
+                [sys.executable, manage_py, "generate_tts", f"--question_id={question.id}"],
+                capture_output=True,
+                text=True,
+                cwd=project_root
+            )
+
+            if result.returncode == 0:
                 return JsonResponse({
                     "success": True,
                     "message": f"{round_num}회 {q_num}번: TTS 음성 생성 완료",
-                    "task": "tts",
-                    "file_url": result.get("file_url")
+                    "task": "tts"
                 })
             else:
+                error_msg = result.stderr or result.stdout or "TTS 생성 실패"
+                # Check if it was skipped (already cached)
+                if "Skipped" in result.stdout:
+                    return JsonResponse({
+                        "success": True,
+                        "message": f"{round_num}회 {q_num}번: TTS 캐시 사용",
+                        "task": "tts"
+                    })
                 return JsonResponse({
                     "success": False,
-                    "error": result.get("message", "TTS 생성 실패"),
+                    "error": f"{round_num}회 {q_num}번: {error_msg[:200]}",
                     "task": "tts"
                 })
 
