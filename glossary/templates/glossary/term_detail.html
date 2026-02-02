@@ -571,12 +571,13 @@ async function toggleAllQuestions() {
     container.innerHTML = allHtml || '<p style="color: #666;">연결된 문제가 없습니다.</p>';
     questionsLoaded = true;
     
-    // MathJax 수식 렌더링 (동적 콘텐츠)
+    // MathJax 수식 렌더링 (동적 콘텐츠) - typesetClear로 중복 방지
     if (window.MathJax) {
         // MathJax v3
-        if (window.MathJax.typesetPromise) {
+        if (window.MathJax.typesetClear && window.MathJax.typesetPromise) {
+            window.MathJax.typesetClear([container]);
             window.MathJax.typesetPromise([container]).catch(err => console.log('MathJax error:', err));
-        } 
+        }
         // MathJax v2
         else if (window.MathJax.typeset) {
             window.MathJax.typeset([container]);

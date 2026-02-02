@@ -332,32 +332,7 @@
         margin-bottom: 0.5em;
     }
     
-    /* MathJax 화학식 스타일 - 주변 폰트와 조화 */
-    mjx-container[jax="CHTML"] {
-        font-size: inherit !important;
-        vertical-align: baseline;
-    }
-    
-    mjx-container[jax="CHTML"][display="true"] {
-        font-size: 1.1em !important;
-    }
-    
-    /* 인라인 수식이 텍스트 흐름에 자연스럽게 맞도록 */
-    mjx-math {
-        font-size: inherit !important;
-    }
-    
-    /* 상하첨자가 너무 작지 않도록 조정 */
-    mjx-script {
-        font-size: 0.7em !important;
-    }
-    
-    /* 해설 영역의 MathJax 스타일 */
-    .exp-text mjx-container[jax="CHTML"],
-    .explanation-section mjx-container[jax="CHTML"],
-    .markdown-content mjx-container[jax="CHTML"] {
-        font-size: inherit !important;
-    }
+    /* MathJax 스타일 - 기본값 사용 */
 
     /* Hanging indent for lines starting with circled numbers */
     .hanging-indent {
@@ -710,16 +685,7 @@
                         .catch(err => console.log('Terms fetch error:', err));
                 }
 
-                if (window.MathJax) {
-                    // MathJax v3
-                    if (window.MathJax.typesetPromise) {
-                        window.MathJax.typesetPromise([el]).catch(err => console.log('MathJax error:', err));
-                    }
-                    // MathJax v2
-                    else if (window.MathJax.typeset) {
-                        window.MathJax.typeset([el]);
-                    }
-                }
+                // MathJax is handled automatically on page load, no manual call needed
             } else if (card && !isHidden) {
                 // Hide correct answer circle when closing
                 const qChoices = card.querySelector('.q-choices');
@@ -796,14 +762,7 @@
                 }
             });
 
-            // Re-render MathJax for all visible explanations
-            if (window.MathJax) {
-                if (window.MathJax.typesetPromise) {
-                    window.MathJax.typesetPromise().catch(err => console.log('MathJax error:', err));
-                } else if (window.MathJax.typeset) {
-                    window.MathJax.typeset();
-                }
-            }
+            // MathJax is handled automatically on page load, no manual call needed
         } else {
             text.textContent = '전체 펼치기';
             btn.style.backgroundColor = '#fff3cd';

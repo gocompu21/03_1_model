@@ -436,8 +436,11 @@
             div.innerHTML = html;
         });
 
-        // Force MathJax typeset if available
-        if (window.MathJax && window.MathJax.typesetPromise) {
+        // Force MathJax typeset if available (clear first to prevent duplication)
+        if (window.MathJax && window.MathJax.typesetClear && window.MathJax.typesetPromise) {
+            window.MathJax.typesetClear();
+            window.MathJax.typesetPromise();
+        } else if (window.MathJax && window.MathJax.typesetPromise) {
             window.MathJax.typesetPromise();
         }
     });

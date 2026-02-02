@@ -11,9 +11,9 @@
             padding: 0;
         }
 
-        /* Force MathJax to be larger only slightly globally */
-        mjx-container {
-            font-size: 105% !important;
+        /* Hide any assistive/duplicate MathJax elements */
+        mjx-assistive-mml {
+            display: none !important;
         }
         
         /* Adjust global header links */
@@ -67,17 +67,12 @@
                 load: ['[tex]/ams', '[tex]/mhchem', '[tex]/newcommand']
             },
             chtml: {
-                scale: 1.25,
-                matchFontHeight: false,
-                mtextInheritFont: true
+                scale: 1,
+                matchFontHeight: true
             },
-            startup: {
-                ready: function() {
-                    MathJax.startup.defaultReady();
-                    MathJax.typesetPromise().catch(function(err) {
-                        console.error('MathJax typeset error:', err);
-                    });
-                }
+            options: {
+                enableAssistiveMml: false,
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'mjx-container']
             }
         };
     </script>
