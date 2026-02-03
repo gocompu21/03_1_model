@@ -206,7 +206,7 @@
     /* Question Card Styles for Dynamic Content */
     .box {
         border: 1px solid #333;
-        padding: 5px 15px; 
+        padding: 5px 15px;
         margin: 5px 0 15px 15px; /* Margin-left ensures spacing if floated */
         background-color: #fff;
         max-width: 100%;
@@ -217,6 +217,158 @@
         line-height: 1.6;
         margin-bottom: 20px;
         font-weight: bold;
+    }
+
+    /* 모바일 반응형 */
+    @media (max-width: 480px) {
+        /* 헤더 숨김 */
+        header {
+            display: none !important;
+        }
+
+        /* 녹색 배경 제거 */
+        body {
+            background: white !important;
+        }
+
+        main.container {
+            padding: 0;
+        }
+
+        .term-container {
+            padding: 0;
+        }
+
+        .term-card {
+            padding: 15px;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .term-header {
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* 헤더 내부 레이아웃 - 세로 배치 */
+        .term-header > div {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+        }
+
+        /* 용어명 + 과목 태그 영역 */
+        .term-header > div > div:first-child {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            width: 100%;
+        }
+
+        .term-word {
+            font-size: 1.2rem;
+        }
+
+        .term-subjects {
+            gap: 5px;
+        }
+
+        .subject-tag {
+            font-size: 0.5rem;
+            padding: 0px 5px;
+        }
+
+        /* 버튼 영역 - 가로 스크롤 */
+        .term-header > div > div:last-child {
+            width: 100%;
+            overflow-x: auto;
+            flex-wrap: nowrap !important;
+            gap: 6px !important;
+            padding-bottom: 5px;
+        }
+
+        .term-header > div > div:last-child a,
+        .term-header > div > div:last-child button {
+            font-size: 0.7rem !important;
+            padding: 4px 8px !important;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* 본문 내용 */
+        .term-content {
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* 기출문제 섹션 */
+        .references-section {
+            margin-top: 20px;
+            padding-top: 15px;
+        }
+
+        .references-title {
+            font-size: 1rem !important;
+        }
+
+        .view-qs-btn {
+            font-size: 0.75rem !important;
+            padding: 3px 10px !important;
+        }
+
+        .round-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+        }
+
+        /* 문제 카드 스타일 */
+        .question-card {
+            padding: 15px 12px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .q-badge {
+            font-size: 0.8em;
+            padding: 3px 8px;
+        }
+
+        .q-content {
+            font-size: 1rem !important;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .q-choices {
+            padding-left: 10px;
+            margin-bottom: 15px;
+        }
+
+        .choice-item {
+            font-size: 0.95rem;
+            padding: 4px;
+            margin-bottom: 4px;
+        }
+
+        .explanation-section {
+            padding: 12px;
+            margin-top: 15px;
+        }
+
+        .exp-title {
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .exp-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .term-meta {
+            font-size: 0.8rem;
+            margin-top: 15px;
+        }
     }
 </style>
 
