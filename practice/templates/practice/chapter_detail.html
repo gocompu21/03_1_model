@@ -165,6 +165,42 @@
         height: auto;
         border-radius: 8px;
     }
+
+    /* 이미지 확대 버튼 */
+    .img-zoom-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .img-zoom-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .img-zoom-wrapper:hover .img-zoom-btn {
+        opacity: 1;
+    }
+
+    .img-zoom-btn:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .img-zoom-btn svg {
+        width: 20px;
+        height: 20px;
+    }
     
     .empty-content {
         text-align: center;
@@ -585,4 +621,40 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // content-body 내의 모든 이미지에 확대 버튼 추가
+    const images = document.querySelectorAll('.content-body img');
+
+    images.forEach(function(img) {
+        // 이미지를 wrapper로 감싸기
+        const wrapper = document.createElement('div');
+        wrapper.className = 'img-zoom-wrapper';
+        img.parentNode.insertBefore(wrapper, img);
+        wrapper.appendChild(img);
+
+        // 확대 버튼 생성
+        const zoomBtn = document.createElement('button');
+        zoomBtn.className = 'img-zoom-btn';
+        zoomBtn.title = '새 창에서 보기';
+        zoomBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <polyline points="9 21 3 21 3 15"></polyline>
+                <line x1="21" y1="3" x2="14" y2="10"></line>
+                <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+        `;
+
+        // 클릭 시 새 탭에서 이미지 열기
+        zoomBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.open(img.src, '_blank');
+        });
+
+        wrapper.appendChild(zoomBtn);
+    });
+});
+</script>
 {% endblock %}
