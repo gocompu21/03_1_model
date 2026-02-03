@@ -23,9 +23,6 @@
             {% endif %}
         </span>
     </a>
-    {% if chapter.questions.count > 0 %}
-    <a href="{% url 'practice:practice_questions' chapter.id %}" class="chapter-count" style="text-decoration: none;">{{ chapter.questions.count }}문제</a>
-    {% endif %}
 </div>
 {% if chapter.children.all %}
     <div id="children-{{ chapter.id }}" class="chapter-children" style="transition: all 0.3s ease; overflow: hidden; display: {% if chapter.level < 2 %}block{% else %}none{% endif %};">
