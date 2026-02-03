@@ -226,9 +226,10 @@
             display: none !important;
         }
 
-        /* 녹색 배경 제거 */
+        /* 배경 - 은은한 그라데이션 */
         body {
-            background: white !important;
+            background: linear-gradient(180deg, #f0f7f4 0%, #ffffff 100%) !important;
+            min-height: 100vh;
         }
 
         main.container {
@@ -236,143 +237,186 @@
         }
 
         .term-container {
-            padding: 0;
+            padding: 12px;
         }
 
+        /* 메인 카드 */
         .term-card {
-            padding: 15px;
-            border-radius: 0;
-            box-shadow: none;
+            padding: 20px 16px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(45, 106, 79, 0.08);
+            border: 1px solid rgba(45, 106, 79, 0.1);
         }
 
+        /* 헤더 영역 */
         .term-header {
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            padding-bottom: 16px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e8f5e9;
         }
 
-        /* 뒤로 버튼 숨김 */
-        .back-btn {
+        /* 목록/관리 버튼 숨김 */
+        .back-btn,
+        .term-header > div > div:last-child {
             display: none !important;
         }
 
-        /* 헤더 내부 레이아웃 - 세로 배치 */
+        /* 헤더 레이아웃 */
         .term-header > div {
             flex-direction: column !important;
             align-items: flex-start !important;
-            gap: 12px !important;
+            gap: 0 !important;
         }
 
-        /* 용어명 + 과목 태그 영역 */
+        /* 용어명 + 과목 태그 - 가로 배치 */
         .term-header > div > div:first-child {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 8px !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 12px !important;
             width: 100%;
+            flex-wrap: wrap;
         }
 
         .term-word {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
+            color: #1b4332;
+            letter-spacing: -0.5px;
         }
 
         .term-subjects {
-            gap: 5px;
+            gap: 6px;
         }
 
         .subject-tag {
-            font-size: 0.5rem;
-            padding: 0px 5px;
-        }
-
-        /* 버튼 영역 - 가로 스크롤 */
-        .term-header > div > div:last-child {
-            width: 100%;
-            overflow-x: auto;
-            flex-wrap: nowrap !important;
-            gap: 6px !important;
-            padding-bottom: 5px;
-        }
-
-        .term-header > div > div:last-child a,
-        .term-header > div > div:last-child button {
-            font-size: 0.7rem !important;
-            padding: 4px 8px !important;
-            white-space: nowrap;
-            flex-shrink: 0;
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            background: #e8f5e9;
+            color: #2d6a4f;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
         }
 
         /* 본문 내용 */
         .term-content {
-            font-size: 0.9rem;
-            line-height: 1.5;
+            font-size: 0.95rem;
+            line-height: 1.75;
+            color: #333;
+        }
+
+        .term-content p {
+            margin-bottom: 12px;
+        }
+
+        .term-content ul,
+        .term-content ol {
+            padding-left: 18px;
+            margin-bottom: 12px;
+        }
+
+        .term-content li {
+            margin-bottom: 6px;
         }
 
         /* 기출문제 섹션 */
         .references-section {
-            margin-top: 20px;
-            padding-top: 15px;
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 1px dashed #c8e6c9;
         }
 
         .references-title {
             font-size: 1rem !important;
+            color: #2d6a4f;
         }
 
         .view-qs-btn {
             font-size: 0.75rem !important;
-            padding: 3px 10px !important;
+            padding: 5px 12px !important;
+            border-radius: 16px !important;
         }
 
         .round-badge {
             font-size: 0.7rem;
-            padding: 2px 6px;
+            padding: 3px 8px;
+            border-radius: 10px;
         }
 
         /* 문제 카드 스타일 */
         .question-card {
-            padding: 15px 12px;
-            margin-bottom: 15px;
-            border-radius: 8px;
+            padding: 16px 14px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
         }
 
         .q-badge {
-            font-size: 0.8em;
-            padding: 3px 8px;
+            font-size: 0.75em;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: #2d6a4f;
+            color: white;
         }
 
         .q-content {
             font-size: 1rem !important;
-            line-height: 1.5;
-            margin-bottom: 10px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #1a1a1a;
         }
 
         .q-choices {
-            padding-left: 10px;
-            margin-bottom: 15px;
+            padding-left: 8px;
+            margin-bottom: 16px;
         }
 
         .choice-item {
-            font-size: 0.95rem;
-            padding: 4px;
-            margin-bottom: 4px;
+            font-size: 0.9rem;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+
+        .choice-item.correct {
+            background: #e8f5e9;
+            border-left: 3px solid #2d6a4f;
         }
 
         .explanation-section {
-            padding: 12px;
-            margin-top: 15px;
+            padding: 14px;
+            margin-top: 16px;
+            background: #fffbf0;
+            border: 1px dashed #f0c14b;
+            border-radius: 10px;
         }
 
         .exp-title {
-            font-size: 1rem;
+            font-size: 0.95rem;
             margin-bottom: 10px;
+            color: #c87137;
         }
 
         .exp-text {
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: #444;
         }
 
+        /* 메타 정보 */
         .term-meta {
-            font-size: 0.8rem;
-            margin-top: 15px;
+            font-size: 0.75rem;
+            margin-top: 20px;
+            color: #999;
+            text-align: right;
+        }
+
+        /* 용어 강조 애니메이션 */
+        .term-highlight {
+            background: linear-gradient(120deg, #fff9c4 0%, #ffecb3 100%);
+            padding: 0 2px;
+            border-radius: 2px;
         }
     }
 </style>
@@ -405,9 +449,9 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 5px; align-items: center;">
-                    <a href="#" onclick="history.back(); return false;" class="back-btn"
-                       style="padding: 4px 10px; background: transparent; color: #333; border: 1px solid #333; text-decoration: none; border-radius: 4px; font-size: 0.75rem; font-weight: 500; cursor: pointer;">
-                        ← 뒤로
+                    <a href="{% url 'glossary:term_list' %}" class="back-btn"
+                       style="padding: 4px 10px; background: transparent; color: #333; border: 1px solid #333; text-decoration: none; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">
+                        ← 목록
                     </a>
                     {% if user.is_staff or user.is_superuser %}
                     <a href="{% url 'glossary:term_edit' term.pk %}" 
