@@ -85,6 +85,15 @@
     }
 
     /* Responsive Styles */
+    /* Tablet: 2 columns */
+    @media (max-width: 1024px) {
+        .book-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+    }
+
+    /* Mobile landscape / small tablet: 2 columns, smaller padding */
     @media (max-width: 768px) {
         .practice-container {
             margin: 20px auto;
@@ -97,16 +106,16 @@
         }
 
         .book-grid {
-            grid-template-columns: 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
         }
 
         .book-card {
-            padding: 20px;
+            padding: 18px 15px;
         }
 
         .book-name {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
         }
 
         .book-subject {
@@ -119,12 +128,26 @@
         }
     }
 
+    /* Mobile portrait: 1 column */
     @media (max-width: 480px) {
         .practice-container {
             padding: 10px;
         }
 
         .page-title {
+            font-size: 1.1rem;
+        }
+
+        .book-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .book-card {
+            padding: 20px;
+        }
+
+        .book-name {
             font-size: 1.1rem;
         }
     }
