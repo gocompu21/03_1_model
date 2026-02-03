@@ -340,10 +340,269 @@
         text-indent: -1.4em;
         margin-bottom: 5px; /* Add some spacing between items */
     }
+
+    /* 햄버거 메뉴 기본 숨김 (데스크탑) */
+    .hamburger-menu {
+        display: none;
+    }
+
+    .mobile-menu-overlay,
+    .mobile-menu {
+        display: none;
+    }
+
+    /* 반응형 - 모바일 */
+    @media (max-width: 480px) {
+        .study-container {
+            height: auto;
+            min-height: 100vh;
+        }
+
+        .tabs-header {
+            padding: 10px;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            padding: 6px 10px;
+            font-size: 0.8em;
+        }
+
+        .tab-btn span {
+            display: none;
+        }
+
+        .tab-btn img {
+            width: 24px;
+            height: 24px;
+        }
+
+        #expand-all-btn span,
+        .back-btn span {
+            display: inline;
+            font-size: 0.8em;
+        }
+
+        .content-area {
+            padding: 0;
+        }
+
+        .question-card {
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            padding: 20px 12px;
+            margin-bottom: 8px;
+        }
+
+        .q-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 5px;
+            padding-left: 1.2em;
+            text-indent: -1.2em;
+        }
+
+        .q-choices {
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+
+        .choice-item {
+            font-size: 1rem;
+            padding: 4px 6px 4px 1.8em;
+            margin-bottom: 2px;
+            position: relative;
+        }
+
+        .choice-item .choice-num {
+            position: absolute;
+            left: 6px;
+        }
+
+        .explanation-section {
+            padding: 15px 12px;
+            margin-top: 15px;
+        }
+
+        .exp-title {
+            font-size: 1rem;
+        }
+
+        .exp-text {
+            font-size: 0.95rem;
+        }
+
+        .exp-tabs {
+            gap: 5px !important;
+        }
+
+        .exp-tab-btn {
+            padding: 6px 10px !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* TTS 버튼 영역 조정 */
+        .question-card > div[style*="text-align: right"] {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        /* 속도 선택기 숨김 */
+        .tts-speed-selector {
+            display: none !important;
+        }
+
+        /* 해설 듣기/보기 버튼 아이콘만 표시 */
+        .tts-btn .tts-text,
+        .toggle-btn .btn-text {
+            display: none !important;
+        }
+
+        .tts-btn,
+        .toggle-btn {
+            padding: 8px !important;
+        }
+
+        .tts-btn svg,
+        .toggle-btn svg {
+            width: 24px !important;
+            height: 24px !important;
+        }
+
+        /* 과목 배지 숨김 */
+        .q-badge {
+            display: none;
+        }
+
+        /* 햄버거 메뉴 - 과목탭 숨김 */
+        .subject-tabs-scroll {
+            display: none !important;
+        }
+
+        .hamburger-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #2c5f2d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .hamburger-menu svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .mobile-menu-overlay {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .mobile-menu {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 70%;
+            max-width: 280px;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        .mobile-menu-header {
+            padding: 15px;
+            background: #2c5f2d;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .mobile-menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mobile-menu-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .mobile-menu-item:hover,
+        .mobile-menu-item.active {
+            background: #f0f7f4;
+        }
+
+        .mobile-menu-item.active {
+            color: #2c5f2d;
+            font-weight: bold;
+        }
+
+        .mobile-menu-item img {
+            width: 28px;
+            height: 28px;
+        }
+    }
 </style>
 
 <div class="study-container">
     <div class="tabs-header">
+        <!-- 모바일 햄버거 메뉴 버튼 -->
+        <button class="hamburger-menu" id="hamburger-btn" onclick="toggleMobileMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+            <span id="current-subject-name">과목 선택</span>
+        </button>
+
         <div class="subject-tabs-scroll" id="subject-tabs">
             <!-- Tabs will be generated by JS -->
         </div>
@@ -439,7 +698,7 @@
                 </select>
                 
                 <!-- View Explanation Button -->
-                <button type="button" onclick="toggleExplanation('exp-{{ q.id }}')"
+                <button type="button" class="toggle-btn" onclick="toggleExplanation('exp-{{ q.id }}')"
                     style="background:none; border:none; cursor:pointer; color:#555; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -449,7 +708,7 @@
                         <line x1="11" y1="8" x2="11" y2="14"></line>
                         <line x1="8" y1="11" x2="14" y2="11"></line>
                     </svg>
-                    해설 보기
+                    <span class="btn-text">해설 보기</span>
                 </button>
             </div>
 
@@ -521,6 +780,18 @@
     </div>
 </div>
 
+<!-- 모바일 메뉴 오버레이 -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+<div class="mobile-menu" id="mobile-menu">
+    <div class="mobile-menu-header">
+        <span>과목 선택</span>
+        <button class="mobile-menu-close" onclick="toggleMobileMenu()">&times;</button>
+    </div>
+    <ul class="mobile-menu-list" id="mobile-menu-list">
+        <!-- Menu items will be generated by JS -->
+    </ul>
+</div>
+
 <!-- Modal -->
 <div id="imgModal" class="modal">
     <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -556,7 +827,11 @@
             '임업경영학': 'forestry.png'
         };
 
+        // Build desktop tabs and mobile menu
+        const mobileMenuList = document.getElementById('mobile-menu-list');
+
         sortedSubjects.forEach(subj => {
+            // Desktop tab
             const btn = document.createElement('button');
             btn.className = 'tab-btn';
 
@@ -573,6 +848,27 @@
 
             btn.onclick = () => filterSubject(subj);
             tabContainer.appendChild(btn);
+
+            // Mobile menu item
+            const menuItem = document.createElement('li');
+            menuItem.className = 'mobile-menu-item';
+            menuItem.setAttribute('data-subject', subj);
+
+            if (iconMap[subj]) {
+                const menuImg = document.createElement('img');
+                menuImg.src = `{% static 'img/icons/subject/' %}${iconMap[subj]}`;
+                menuItem.appendChild(menuImg);
+            }
+
+            const menuSpan = document.createElement('span');
+            menuSpan.innerText = subj;
+            menuItem.appendChild(menuSpan);
+
+            menuItem.onclick = () => {
+                filterSubject(subj);
+                toggleMobileMenu();
+            };
+            mobileMenuList.appendChild(menuItem);
         });
 
         // 3. Highlight Text Logic
@@ -596,7 +892,7 @@
     });
 
     function filterSubject(subject) {
-        // Update Tabs
+        // Update desktop tabs
         const buttons = document.querySelectorAll('.tab-btn');
         buttons.forEach(btn => {
             if (btn.innerText.includes(subject)) {
@@ -605,6 +901,19 @@
                 btn.classList.remove('active');
             }
         });
+
+        // Update mobile menu items
+        const menuItems = document.querySelectorAll('.mobile-menu-item');
+        menuItems.forEach(item => {
+            if (item.getAttribute('data-subject') === subject) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Update hamburger button text
+        document.getElementById('current-subject-name').textContent = subject;
 
         // Filter Questions
         const cards = document.querySelectorAll('.question-card');
@@ -619,6 +928,14 @@
         // Scroll to top
         const contentArea = document.querySelector('.content-area');
         if (contentArea) contentArea.scrollTop = 0;
+    }
+
+    // 모바일 메뉴 토글
+    function toggleMobileMenu() {
+        const overlay = document.getElementById('mobile-menu-overlay');
+        const menu = document.getElementById('mobile-menu');
+        overlay.classList.toggle('active');
+        menu.classList.toggle('active');
     }
 
     // Select Choice
