@@ -6,6 +6,7 @@
         justify-content: space-between;
         align-items: center;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        flex-wrap: wrap;
     }
 
     .custom-header .logo {
@@ -34,10 +35,74 @@
         color: rgba(255, 255, 255, 0.9);
         font-size: 0.95rem;
     }
+
+    /* Mobile Menu Toggle Button */
+    .custom-header .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    /* Responsive Styles for Header */
+    @media (max-width: 768px) {
+        .custom-header {
+            padding: 12px 20px;
+        }
+
+        .custom-header .logo {
+            font-size: 1.2rem;
+        }
+
+        .custom-header .menu-toggle {
+            display: block;
+        }
+
+        .custom-header .nav-links {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-top: 15px;
+            gap: 12px;
+        }
+
+        .custom-header .nav-links.active {
+            display: flex;
+        }
+
+        .custom-header .nav-links a {
+            margin-left: 0;
+            padding: 8px 0;
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-header .nav-links span {
+            padding: 8px 0;
+            display: block;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .custom-header .nav-links form {
+            width: 100%;
+        }
+
+        .custom-header .nav-links form button {
+            padding: 8px 0 !important;
+            margin-left: 0 !important;
+            text-align: left;
+        }
+    }
 </style>
 <header class="custom-header">
     <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-    <nav class="nav-links">
+    <button class="menu-toggle" onclick="togglePracticeMenu()" aria-label="메뉴 열기">☰</button>
+    <nav class="nav-links" id="practiceNavLinks">
         {% if user.is_authenticated %}
         <span>{{ user.username }}님 환영합니다</span>
         <a href="{% url 'mypage:index' %}">마이페이지</a>
@@ -52,3 +117,9 @@
         {% endif %}
     </nav>
 </header>
+<script>
+    function togglePracticeMenu() {
+        const navLinks = document.getElementById('practiceNavLinks');
+        navLinks.classList.toggle('active');
+    }
+</script>

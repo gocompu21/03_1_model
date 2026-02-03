@@ -83,6 +83,51 @@
     .upload-link:hover {
         background: #1b4332;
     }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .practice-container {
+            margin: 20px auto;
+            padding: 15px;
+        }
+
+        .page-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .book-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .book-card {
+            padding: 20px;
+        }
+
+        .book-name {
+            font-size: 1.1rem;
+        }
+
+        .book-subject {
+            font-size: 0.8em;
+            padding: 4px 10px;
+        }
+
+        .book-stats {
+            font-size: 0.85em;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .practice-container {
+            padding: 10px;
+        }
+
+        .page-title {
+            font-size: 1.1rem;
+        }
+    }
 </style>
 
 <div class="practice-container">

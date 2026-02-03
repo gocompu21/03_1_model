@@ -155,13 +155,155 @@
             background-color: #40916c;
             color: white;
         }
+
+        /* Mobile Menu Toggle Button */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Welcome text styling */
+        .nav-links span {
+            color: rgba(255, 255, 255, 0.8);
+            margin-right: 15px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            /* Header / Navbar */
+            header {
+                padding: 12px 20px;
+                flex-wrap: wrap;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                padding-top: 15px;
+                gap: 12px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links a {
+                margin-left: 0;
+                padding: 8px 0;
+                width: 100%;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .nav-links span {
+                margin-right: 0;
+                padding: 8px 0;
+                display: block;
+                width: 100%;
+                font-size: 0.9rem;
+            }
+
+            .nav-links form {
+                width: 100%;
+            }
+
+            .nav-links form button {
+                padding: 8px 0 !important;
+                margin-left: 0 !important;
+                text-align: left;
+            }
+
+            /* Hero Section */
+            .hero {
+                height: 280px;
+                padding: 20px;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+
+            .hero p {
+                font-size: 1rem;
+                margin-bottom: 20px;
+                padding: 0 10px;
+            }
+
+            /* Container & Cards */
+            .container {
+                margin: -30px auto 30px;
+                padding: 0 15px;
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .card {
+                padding: 20px 15px;
+            }
+
+            .icon {
+                font-size: 1.5rem;
+                width: 45px;
+                height: 45px;
+                line-height: 45px;
+            }
+
+            .card h3 {
+                font-size: 1rem;
+            }
+
+            .card p {
+                font-size: 0.85rem;
+                margin-bottom: 12px;
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .hero {
+                height: 220px;
+            }
+
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero p {
+                font-size: 0.9rem;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+        }
     </style>
 </head>
 
 <body>
     <header>
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-        <nav class="nav-links">
+        <button class="menu-toggle" onclick="toggleMenu()" aria-label="메뉴 열기">☰</button>
+        <nav class="nav-links" id="navLinks">
 
             {% if user.is_authenticated %}
             <span>{{ user.username }}님 환영합니다</span>
@@ -261,6 +403,13 @@
         </div>
 
     </div>
+
+    <script>
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+    </script>
 </body>
 
 </html>
