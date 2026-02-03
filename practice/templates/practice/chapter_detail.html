@@ -306,6 +306,175 @@
         gap: 15px;
         margin-top: 30px;
     }
+
+    /* 반응형 - 태블릿 */
+    @media (max-width: 768px) {
+        main.container {
+            padding: 0;
+        }
+
+        .detail-wrapper {
+            flex-direction: column;
+            padding: 10px 5px;
+            gap: 10px;
+        }
+
+        .detail-sidebar {
+            width: 100%;
+            display: none;
+        }
+
+        .content-card {
+            padding: 20px 15px;
+            border-radius: 12px;
+        }
+
+        .chapter-title {
+            font-size: 1.5rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chapter-code {
+            font-size: 1rem;
+            padding: 4px 12px;
+        }
+
+        .chapter-path {
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        .content-body {
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .content-meta {
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .questions-card {
+            padding: 20px 15px;
+            border-radius: 12px;
+        }
+
+        .questions-title {
+            font-size: 1.1rem;
+        }
+
+        .question-count {
+            font-size: 0.9rem;
+            padding: 4px 12px;
+        }
+
+        .bottom-nav {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            font-size: 0.95rem;
+        }
+    }
+
+    /* 반응형 - 모바일 */
+    @media (max-width: 480px) {
+        body {
+            font-size: 1rem;
+        }
+
+        main.container {
+            padding: 0;
+        }
+
+        .detail-wrapper {
+            padding: 5px 0;
+            gap: 5px;
+        }
+
+        .content-card,
+        .questions-card {
+            border-radius: 0;
+        }
+
+        .content-card {
+            padding: 15px 12px;
+        }
+
+        .chapter-title {
+            font-size: 1.3rem;
+        }
+
+        .chapter-code {
+            font-size: 0.9rem;
+            padding: 3px 10px;
+        }
+
+        .chapter-path {
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .content-header {
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .content-body {
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .questions-card {
+            padding: 15px 12px;
+        }
+
+        .questions-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .questions-title {
+            font-size: 1rem;
+        }
+
+        .question-item {
+            padding: 8px 10px;
+        }
+
+        .question-number {
+            font-size: 0.85rem;
+        }
+
+        .question-preview {
+            font-size: 0.85rem;
+        }
+
+        .bottom-nav {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .btn {
+            justify-content: center;
+            padding: 12px 16px;
+            font-size: 1rem;
+        }
+
+        /* 관련 용어 섹션 */
+        .content-card > div[style*="margin-top: 40px"] h3 {
+            font-size: 1rem !important;
+        }
+
+        .content-card > div[style*="margin-top: 40px"] a {
+            font-size: 0.85rem !important;
+            padding: 5px 10px !important;
+        }
+    }
 </style>
 
 <div class="detail-wrapper">
