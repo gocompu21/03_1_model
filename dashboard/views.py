@@ -6,6 +6,7 @@ from django.db.models import Count, Avg, Case, When, IntegerField
 from django.utils import timezone
 
 from exam.models import UserQuestionResult, UserExamAttempt, Subject
+from .models import SiteSettings
 
 
 @login_required
@@ -1262,8 +1263,8 @@ def api_edit_image(request):
 @login_required
 def heartbeat(request):
     """대시보드 페이지 세션 유지를 위한 Heartbeat 엔드포인트
-    
-    이 엔드포인트에 요청이 들어오면 미들웨어에서 자동으로 
+
+    이 엔드포인트에 요청이 들어오면 미들웨어에서 자동으로
     last_activity가 업데이트됩니다.
     """
     from django.http import JsonResponse
@@ -1271,3 +1272,54 @@ def heartbeat(request):
         'status': 'ok',
         'timestamp': timezone.now().isoformat()
     })
+
+
+# ============================================================================
+# 환경설정 (Site Settings)
+# ============================================================================
+
+@login_required
+@staff_member_required
+def settings_page(request):
+    """환경설정 페이지"""
+    settings_obj = SiteSettings.get_settings()
+
+    return render(request, 'dashboard/settings.html', {
+        'settings': settings_obj,
+        'model_choices': SiteSettings.GEMINI_MODEL_CHOICES,
+        'page_title': '환경설정',
+    })
+
+
+@login_required
+@staff_member_required
+def api_save_settings(request):
+    """환경설정 저장 (AJAX)"""
+    from django.http import JsonResponse
+    import json
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST method required'}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        chat_model = data.get('chat_model')
+        textbook_model = data.get('textbook_model')
+
+        settings_obj = SiteSettings.get_settings()
+
+        if chat_model:
+            settings_obj.chat_model = chat_model
+        if textbook_model:
+            settings_obj.textbook_model = textbook_model
+
+        settings_obj.save()
+
+        return JsonResponse({
+            'success': True,
+            'chat_model': settings_obj.chat_model,
+            'textbook_model': settings_obj.textbook_model,
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

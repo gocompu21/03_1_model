@@ -18,6 +18,7 @@ from notebook.models import NotebookHistory
 from chat.models import ChatHistory
 from bbs.models import Post
 from .models import ReviewSchedule
+from dashboard.models import SiteSettings
 
 
 def ajax_login_required(view_func):
@@ -458,7 +459,8 @@ def analyze_questions(request):
 
         # Call Gemini API
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-3-flash-preview")
+        textbook_model_name = SiteSettings.get_textbook_model()
+        model = genai.GenerativeModel(textbook_model_name)
         response = model.generate_content(prompt)
 
         # Convert Markdown to HTML
@@ -522,7 +524,8 @@ def _generate_exam_analysis(attempt):
 
         # Call Gemini API
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-2.0-flash-exp")
+        textbook_model_name = SiteSettings.get_textbook_model()
+        model = genai.GenerativeModel(textbook_model_name)
         response = model.generate_content(prompt)
 
         # Convert Markdown to HTML
@@ -865,7 +868,8 @@ def query_ai_api(request):
             response_text = manager.query_store(subject_name, prompt)
         else:  # tree_doctor
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-3-flash-preview")
+            textbook_model_name = SiteSettings.get_textbook_model()
+            model = genai.GenerativeModel(textbook_model_name)
             response = model.generate_content(prompt)
             response_text = response.text
 
@@ -944,10 +948,11 @@ def generate_narration_api(request):
         
         # Call Gemini API
         genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel("gemini-3-flash-preview")
+        textbook_model_name = SiteSettings.get_textbook_model()
+        model = genai.GenerativeModel(textbook_model_name)
         response = model.generate_content(prompt)
         narration_text = response.text
-        
+
         return JsonResponse({"success": True, "response": narration_text})
 
     except Question.DoesNotExist:
@@ -2183,7 +2188,8 @@ def batch_job_process(request):
         elif task_type == "general":
             # Query general AI (Gemini)
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-3-flash-preview")
+            textbook_model_name = SiteSettings.get_textbook_model()
+            model = genai.GenerativeModel(textbook_model_name)
             response = model.generate_content(base_prompt)
             response_text = response.text
             question.general_chat = response_text
@@ -2217,7 +2223,8 @@ def batch_job_process(request):
             )
 
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-3-flash-preview")
+            textbook_model_name = SiteSettings.get_textbook_model()
+            model = genai.GenerativeModel(textbook_model_name)
             response = model.generate_content(narration_prompt)
             question.narration = response.text
             question.save(update_fields=['narration'])

@@ -28,5 +28,9 @@ urlpatterns = [
     
     # Heartbeat (세션 유지)
     path('api/heartbeat/', views.heartbeat, name='heartbeat'),
+
+    # 환경설정
+    path('settings/', views.settings_page, name='settings'),
+    path('api/settings/save/', views.api_save_settings, name='api_save_settings'),
 ]
 

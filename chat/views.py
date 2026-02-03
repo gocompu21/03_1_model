@@ -9,6 +9,7 @@ import markdown
 import time
 import re
 from .models import ChatHistory
+from dashboard.models import SiteSettings
 
 # 나무주치의 시스템 프롬프트
 SYSTEM_PROMPT = """당신은 '나무주치의'로, 나무의사 자격시험을 준비하는 수험생을 돕는 전문가입니다.
@@ -83,9 +84,8 @@ def index(request):
 
             try:
                 genai.configure(api_key=settings.GEMINI_API_KEY)
-                model = genai.GenerativeModel(
-                    "gemini-3-flash-preview"
-                )
+                chat_model_name = SiteSettings.get_chat_model()
+                model = genai.GenerativeModel(chat_model_name)
                 # 시스템 프롬프트와 사용자 질문 결합
                 full_prompt = SYSTEM_PROMPT + user_input
                 response = model.generate_content(full_prompt)
@@ -175,7 +175,8 @@ def chat_api(request):
 
         try:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            model = genai.GenerativeModel("gemini-3-flash-preview")
+            chat_model_name = SiteSettings.get_chat_model()
+            model = genai.GenerativeModel(chat_model_name)
             # 시스템 프롬프트와 사용자 질문 결합
             full_prompt = SYSTEM_PROMPT + user_input
             response = model.generate_content(full_prompt)
