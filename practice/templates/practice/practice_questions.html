@@ -134,6 +134,8 @@
         line-height: 1.6;
         margin-bottom: 20px;
         font-weight: bold;
+        padding-left: 1.3em;
+        text-indent: -1.3em;
     }
 
     .q-choices {
@@ -148,6 +150,17 @@
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.2s;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .choice-num {
+        flex-shrink: 0;
+        width: 1.5em;
+    }
+
+    .choice-text {
+        flex: 1;
     }
 
     .choice-item:hover {
@@ -253,6 +266,149 @@
         padding: 60px 20px;
         color: #888;
     }
+
+    /* 반응형 - 태블릿 */
+    @media (max-width: 768px) {
+        main.container {
+            padding: 0;
+        }
+
+        .practice-container {
+            height: auto;
+            min-height: 100vh;
+        }
+
+        .tabs-header {
+            padding: 10px 12px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header-title {
+            flex: 1 1 100%;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .tab-btn {
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+
+        .content-area {
+            padding: 10px;
+        }
+
+        .question-card {
+            padding: 20px 15px;
+            margin-bottom: 15px;
+        }
+
+        .q-content {
+            font-size: 1.1em;
+        }
+
+        .choice-item {
+            font-size: 1em;
+            padding: 10px 8px;
+        }
+
+        .explanation-section {
+            padding: 15px;
+        }
+
+        .exp-text {
+            font-size: 0.95em;
+        }
+    }
+
+    /* 반응형 - 모바일 */
+    @media (max-width: 480px) {
+        main.container {
+            padding: 0;
+        }
+
+        .tabs-header {
+            padding: 12px;
+            gap: 8px;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            flex: 1 1 100%;
+            font-size: 1rem;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 8px;
+            font-size: 0.85em;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .tab-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .tab-btn span {
+            display: inline;
+            font-size: 0.85em;
+        }
+
+        .content-area {
+            padding: 5px;
+        }
+
+        .question-card {
+            padding: 15px 12px;
+            margin-bottom: 10px;
+            border-radius: 0;
+        }
+
+        .q-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .q-choices {
+            padding-left: 10px;
+            margin-bottom: 12px;
+        }
+
+        .choice-item {
+            font-size: 1rem;
+            padding: 6px;
+            margin-bottom: 2px;
+        }
+
+        .choice-num {
+            font-size: 1rem;
+        }
+
+        .explanation-section {
+            padding: 12px;
+        }
+
+        .exp-title {
+            font-size: 1rem;
+        }
+
+        .exp-text {
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .toggle-btn {
+            font-size: 0.85em;
+        }
+    }
 </style>
 
 <div class="practice-container">
@@ -309,19 +465,19 @@
 
                 <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                     <div class="choice-item" onclick="selectChoice(this, 1)">
-                        <span class="choice-num" data-choice="1">①</span> {{ q.choice1|safe }}
+                        <span class="choice-num" data-choice="1">①</span><span class="choice-text">{{ q.choice1|safe }}</span>
                     </div>
                     <div class="choice-item" onclick="selectChoice(this, 2)">
-                        <span class="choice-num" data-choice="2">②</span> {{ q.choice2|safe }}
+                        <span class="choice-num" data-choice="2">②</span><span class="choice-text">{{ q.choice2|safe }}</span>
                     </div>
                     <div class="choice-item" onclick="selectChoice(this, 3)">
-                        <span class="choice-num" data-choice="3">③</span> {{ q.choice3|safe }}
+                        <span class="choice-num" data-choice="3">③</span><span class="choice-text">{{ q.choice3|safe }}</span>
                     </div>
                     <div class="choice-item" onclick="selectChoice(this, 4)">
-                        <span class="choice-num" data-choice="4">④</span> {{ q.choice4|safe }}
+                        <span class="choice-num" data-choice="4">④</span><span class="choice-text">{{ q.choice4|safe }}</span>
                     </div>
                     <div class="choice-item" onclick="selectChoice(this, 5)">
-                        <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5|safe }}
+                        <span class="choice-num" data-choice="5">⑤</span><span class="choice-text">{{ q.choice5|safe }}</span>
                     </div>
                 </div>
 
