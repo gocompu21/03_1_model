@@ -93,89 +93,6 @@
             overflow: hidden;
         }
 
-        /* Sidebar Styles */
-        .sidebar {
-            width: 300px;
-            background-color: #1b4332;
-            color: white;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #2d6a4f;
-        }
-
-        .sidebar h2 {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #40916c;
-            padding-bottom: 10px;
-        }
-
-        .history-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            flex-grow: 1;
-        }
-
-        .history-item {
-            margin-bottom: 2px;
-        }
-
-        .history-link {
-            display: block;
-            padding: 6px 10px;
-            color: #d8f3dc;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background-color 0.2s;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .history-link:hover {
-            background-color: #2d6a4f;
-            color: white;
-        }
-
-        .history-link.active {
-            background-color: #40916c;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Removed history-meta styles */
-
-        .new-chat-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #52b788;
-            color: #081c15;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            transition: background-color 0.3s;
-        }
-
-        .new-chat-btn:hover {
-            background-color: #40916c;
-            color: white;
-        }
-
-        .home-link-sidebar {
-            margin-top: 20px;
-            color: #95d5b2;
-            text-decoration: none;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
         /* Main Content Styles */
         .main-content {
             flex-grow: 1;
@@ -446,6 +363,240 @@
             margin-right: 0.5em;
         }
 
+        /* Welcome Message Style */
+        .welcome-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+            font-size: 1.1rem;
+            background: transparent;
+            border: none;
+        }
+
+        .welcome-message .welcome-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.7;
+        }
+
+        .welcome-message .welcome-text {
+            color: #52796f;
+            font-weight: 500;
+        }
+
+        .welcome-message .welcome-hint {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #95a5a6;
+        }
+
+        /* ========== Mobile Responsive Styles ========== */
+        @media screen and (max-width: 768px) {
+            /* Header */
+            .main-header {
+                padding: 12px 15px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .main-header .logo {
+                font-size: 1.2rem;
+            }
+
+            .main-header .nav-links {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .main-header .nav-links span {
+                display: none;
+            }
+
+            .main-header .nav-links a {
+                margin-left: 10px;
+                font-size: 0.85rem;
+            }
+
+            .main-header button {
+                margin-left: 8px;
+                font-size: 0.85rem;
+            }
+
+            /* Main Content */
+            .main-content {
+                padding: 15px 10px;
+            }
+
+            .chat-container {
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+
+            /* Chat Box */
+            .chat-box {
+                padding: 12px;
+                min-height: 300px;
+                margin-bottom: 15px;
+            }
+
+            .message {
+                padding: 12px;
+                margin-bottom: 15px;
+                font-size: 0.95rem;
+            }
+
+            /* Input Group */
+            .input-group {
+                flex-wrap: nowrap;
+                gap: 8px;
+            }
+
+            textarea {
+                padding: 12px;
+                height: 50px;
+                font-size: 16px; /* Prevents iOS zoom on focus */
+            }
+
+            .send-btn {
+                padding: 0 15px;
+                height: 50px;
+                font-size: 0.85rem;
+            }
+
+            .send-btn > div {
+                display: none; /* Hide Ctrl+Enter hint on mobile */
+            }
+
+            .stop-btn {
+                padding: 0 15px;
+                height: 50px;
+            }
+
+            /* Progress UI */
+            .progress-ui {
+                width: 160px;
+                padding: 6px 15px;
+            }
+
+            .progress-text {
+                font-size: 0.8rem;
+            }
+
+            /* Welcome Message */
+            .welcome-message {
+                padding: 40px 15px;
+            }
+
+            .welcome-message .welcome-icon {
+                font-size: 2.5rem;
+            }
+
+            .welcome-message .welcome-text {
+                font-size: 1rem;
+            }
+
+            .welcome-message .welcome-hint {
+                font-size: 0.85rem;
+            }
+
+            /* Tables - responsive wrapper */
+            .ai-message {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .ai-message table {
+                min-width: 100%;
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+                white-space: normal;
+                word-break: keep-all;
+            }
+
+            /* Glossary buttons */
+            .glossary-btn-area,
+            .message > div[style*="border-top"] {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .glossary-btn-area select,
+            #subject-select-static {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        /* Extra small devices */
+        @media screen and (max-width: 480px) {
+            .main-header {
+                padding: 10px 12px;
+            }
+
+            .main-header .logo {
+                font-size: 1rem;
+            }
+
+            .main-content {
+                padding: 10px 8px;
+            }
+
+            .chat-container {
+                padding: 12px;
+                border-radius: 8px;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+                margin-bottom: 15px;
+            }
+
+            .chat-box {
+                padding: 10px;
+                min-height: 250px;
+            }
+
+            .message {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            textarea {
+                padding: 10px;
+                height: 45px;
+            }
+
+            .send-btn,
+            .stop-btn {
+                padding: 0 12px;
+                height: 45px;
+            }
+
+            .welcome-message {
+                padding: 30px 10px;
+            }
+
+            .welcome-message .welcome-icon {
+                font-size: 2rem;
+            }
+
+            .welcome-message .welcome-text {
+                font-size: 0.95rem;
+            }
+        }
+
     </style>
 </head>
 
@@ -468,42 +619,8 @@
         </nav>
     </header>
 
-    <!-- Main Wrapper for Sidebar + Content -->
+    <!-- Main Wrapper -->
     <div class="main-wrapper">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="{% url 'chat:index' %}" class="new-chat-btn">+ 새로운 질문</a>
-
-        <ul class="history-list">
-            {% for history in page_obj %}
-            <li class="history-item">
-                <a href="?history_id={{ history.id }}" title="{{ history.user_input }}"
-                    class="history-link {% if selected_history and selected_history.id == history.id %}active{% endif %}">
-                    {{ history.user_input }}
-                </a>
-            </li>
-            {% empty %}
-            <li style="color: #95d5b2; text-align: center; padding: 20px;">기록이 없습니다.</li>
-            {% endfor %}
-        </ul>
-
-        <!-- Pagination Controls -->
-        <div style="margin-top: 10px; text-align: center; font-size: 0.8rem; color: #d8f3dc;">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" style="color: white; text-decoration: none;">&laquo;
-                이전</a>
-            {% endif %}
-
-            <span style="margin: 0 10px;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" style="color: white; text-decoration: none;">다음 &raquo;</a>
-            {% endif %}
-        </div>
-
-        <a href="{% url 'main:index' %}" class="home-link-sidebar">메인으로 돌아가기</a>
-    </div>
-
     <!-- Main Content -->
     <div class="main-content">
         <div class="chat-container">
@@ -540,8 +657,10 @@
                     답변을 생성 중이거나 오류가 발생했습니다.
                 </div>
                 {% elif not user_input %}
-                <div class="message ai-message" id="welcome-msg">
-                    궁금한 점을 물어보시면 바로 답변해드리겠습니다.
+                <div class="welcome-message" id="welcome-msg">
+                    <div class="welcome-icon">🌳</div>
+                    <div class="welcome-text">궁금한 점을 물어보시면 바로 답변해드리겠습니다</div>
+                    <div class="welcome-hint">나무의사 시험 관련 질문을 입력해 주세요</div>
                 </div>
                 {% endif %}
             </div>
@@ -722,27 +841,6 @@
 
                     // Show AI Response
                     appendMessage('ai', data.response_text);
-
-                    // Update Sidebar History (simplified for stability)
-                    const historyList = document.querySelector('.history-list');
-                    const noRecordMsg = historyList.querySelector('li[style*="text-align: center"]');
-                    if (noRecordMsg) noRecordMsg.remove();
-
-                    document.querySelectorAll('.history-link').forEach(link => link.classList.remove('active'));
-
-                    const newItem = document.createElement('li');
-                    newItem.className = 'history-item';
-                    newItem.innerHTML = `
-                        <a href="?history_id=${data.history_id}" title="${data.user_input}" class="history-link active">
-                            ${data.user_input}
-                        </a>
-                    `;
-
-                    if (historyList.firstChild) {
-                        historyList.insertBefore(newItem, historyList.firstChild);
-                    } else {
-                        historyList.appendChild(newItem);
-                    }
 
                 } catch (error) {
                     if (error.name === 'AbortError') {
