@@ -394,21 +394,25 @@
 
         /* ========== Mobile Responsive Styles ========== */
         @media screen and (max-width: 768px) {
+            /* Body - full height layout */
+            body {
+                height: 100vh;
+                height: 100dvh; /* Dynamic viewport height for mobile */
+            }
+
             /* Header */
             .main-header {
-                padding: 12px 15px;
-                flex-wrap: wrap;
-                gap: 8px;
+                padding: 10px 15px;
+                flex-wrap: nowrap;
             }
 
             .main-header .logo {
-                font-size: 1.2rem;
+                font-size: 1.1rem;
             }
 
             .main-header .nav-links {
                 display: flex;
                 align-items: center;
-                flex-wrap: wrap;
                 gap: 5px;
             }
 
@@ -417,98 +421,136 @@
             }
 
             .main-header .nav-links a {
-                margin-left: 10px;
-                font-size: 0.85rem;
+                margin-left: 8px;
+                font-size: 0.8rem;
             }
 
             .main-header button {
-                margin-left: 8px;
-                font-size: 0.85rem;
+                margin-left: 5px;
+                font-size: 0.8rem;
             }
 
-            /* Main Content */
+            /* Main Content - flex layout for sticky input */
+            .main-wrapper {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                overflow: hidden;
+            }
+
             .main-content {
-                padding: 15px 10px;
+                padding: 0;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
             }
 
             .chat-container {
-                padding: 15px;
-                border-radius: 10px;
+                padding: 0;
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                max-width: 100%;
+                overflow: hidden;
             }
 
-            /* Chat Box */
+            /* Chat Box - scrollable area */
             .chat-box {
-                padding: 12px;
-                min-height: 300px;
-                margin-bottom: 15px;
+                flex: 1;
+                padding: 10px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                background-color: #f0f7f4;
+                overflow-y: auto;
+                min-height: 0; /* Important for flex scroll */
             }
 
             .message {
                 padding: 12px;
-                margin-bottom: 15px;
+                margin-bottom: 12px;
                 font-size: 0.95rem;
+                border-radius: 12px;
             }
 
-            /* Input Group */
+            /* Input Group - sticky bottom */
             .input-group {
-                flex-wrap: nowrap;
+                flex-shrink: 0;
+                padding: 10px;
+                background: white;
+                border-top: 1px solid #d8f3dc;
                 gap: 8px;
+                position: relative;
             }
 
             textarea {
                 padding: 12px;
-                height: 50px;
-                font-size: 16px; /* Prevents iOS zoom on focus */
+                height: 44px;
+                font-size: 16px; /* Prevents iOS zoom */
+                border-radius: 22px;
+                border: 1px solid #d8f3dc;
             }
 
+            /* Send button - icon only */
             .send-btn {
-                padding: 0 15px;
-                height: 50px;
-                font-size: 0.85rem;
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                padding: 0;
+                border-radius: 50%;
+                font-size: 1.2rem;
             }
 
+            .send-btn > span,
             .send-btn > div {
-                display: none; /* Hide Ctrl+Enter hint on mobile */
+                display: none;
+            }
+
+            .send-btn::after {
+                content: "➤";
+                font-size: 1.1rem;
             }
 
             .stop-btn {
-                padding: 0 15px;
-                height: 50px;
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                padding: 0;
+                border-radius: 50%;
             }
 
             /* Progress UI */
             .progress-ui {
-                width: 160px;
-                padding: 6px 15px;
-            }
-
-            .progress-text {
+                width: 150px;
+                padding: 6px 12px;
                 font-size: 0.8rem;
             }
 
-            /* Welcome Message */
+            .progress-text {
+                font-size: 0.75rem;
+                margin-bottom: 6px;
+            }
+
+            /* Welcome Message - compact */
             .welcome-message {
-                padding: 50px 15px;
+                padding: 40px 15px;
             }
 
             .welcome-message .welcome-icon {
                 font-size: 3rem;
+                margin-bottom: 15px;
             }
 
             .welcome-message .welcome-title {
-                font-size: 1.1rem;
-                margin-bottom: 12px;
+                font-size: 1.05rem;
+                margin-bottom: 0;
             }
 
-            .welcome-message .welcome-text {
-                font-size: 0.95rem;
-            }
-
-            .welcome-message .welcome-hint {
-                font-size: 0.8rem;
-            }
-
-            /* Tables - responsive wrapper */
+            /* Tables */
             .ai-message {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -526,63 +568,79 @@
                 word-break: keep-all;
             }
 
-            /* Glossary buttons */
+            /* Glossary buttons - larger touch targets */
             .glossary-btn-area,
             .message > div[style*="border-top"] {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 8px;
+                margin-top: 12px;
+                padding-top: 12px;
             }
 
             .glossary-btn-area select,
             #subject-select-static {
                 flex: 1;
-                min-width: 120px;
+                min-width: 100px;
+                height: 36px;
+                font-size: 0.85rem;
+            }
+
+            .glossary-btn-area button,
+            .glossary-add-btn {
+                height: 36px;
+                padding: 0 12px !important;
+                font-size: 0.85rem !important;
             }
         }
 
         /* Extra small devices */
         @media screen and (max-width: 480px) {
             .main-header {
-                padding: 10px 12px;
+                padding: 8px 10px;
             }
 
             .main-header .logo {
-                font-size: 1rem;
+                font-size: 0.95rem;
             }
 
-            .main-content {
-                padding: 10px 8px;
+            .main-header .nav-links a {
+                margin-left: 6px;
+                font-size: 0.75rem;
             }
 
-            .chat-container {
-                padding: 12px;
-                border-radius: 8px;
+            .main-header button {
+                font-size: 0.75rem;
             }
 
             .chat-box {
-                padding: 10px;
-                min-height: 250px;
+                padding: 8px;
             }
 
             .message {
                 padding: 10px;
                 font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+
+            .input-group {
+                padding: 8px;
             }
 
             textarea {
-                padding: 10px;
-                height: 45px;
+                height: 40px;
+                padding: 10px 14px;
             }
 
             .send-btn,
             .stop-btn {
-                padding: 0 12px;
-                height: 45px;
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
             }
 
             .welcome-message {
-                padding: 40px 10px;
+                padding: 30px 10px;
             }
 
             .welcome-message .welcome-icon {
@@ -590,11 +648,7 @@
             }
 
             .welcome-message .welcome-title {
-                font-size: 1rem;
-            }
-
-            .welcome-message .welcome-text {
-                font-size: 0.9rem;
+                font-size: 0.95rem;
             }
         }
 
@@ -667,22 +721,6 @@
 
                 <button type="submit" id="send-btn" class="send-btn">
                     <span>보내기</span>
-                    <div style="display: flex; align-items: center; gap: 4px; font-size: 0.7rem; opacity: 0.9;">
-                        <!-- Ctrl Key Icon -->
-                        <svg width="24" height="14" viewBox="0 0 36 20" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="1" y="1" width="34" height="18" rx="3" ry="3"></rect>
-                            <text x="18" y="13" font-size="10" text-anchor="middle" stroke="none" fill="currentColor"
-                                font-family="sans-serif" font-weight="bold">Ctrl</text>
-                        </svg>
-                        <span>+</span>
-                        <!-- Enter Key Icon -->
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 10 4 15 9 20"></polyline>
-                            <path d="M20 4v7a4 4 0 0 1-4 4H4"></path>
-                        </svg>
-                    </div>
                 </button>
                 <button type="button" id="stop-btn" class="stop-btn" style="display: none;">🛑</button>
 
@@ -888,6 +926,27 @@
             if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
                 window.MathJax.typesetPromise().catch(err => console.log(err));
             }
+
+            // 5. Mobile keyboard handling - scroll to bottom when input focused
+            if (window.visualViewport) {
+                let pendingUpdate = false;
+                window.visualViewport.addEventListener('resize', () => {
+                    if (pendingUpdate) return;
+                    pendingUpdate = true;
+                    requestAnimationFrame(() => {
+                        pendingUpdate = false;
+                        // Scroll chat to bottom when keyboard appears
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    });
+                });
+            }
+
+            // Focus input and scroll on touch
+            userInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 300);
+            });
         });
         
         // Global subjects data for dynamic buttons
