@@ -326,14 +326,15 @@
         }
 
         .references-title {
-            font-size: 1rem !important;
+            font-size: 0.95rem !important;
             color: #2d6a4f;
         }
 
         .view-qs-btn {
-            font-size: 0.75rem !important;
-            padding: 5px 12px !important;
-            border-radius: 16px !important;
+            font-size: 0.8rem !important;
+            padding: 4px 10px !important;
+            border-radius: 12px !important;
+            line-height: 1.2;
         }
 
         .round-badge {
@@ -484,9 +485,13 @@
         {% if references %}
         <div class="references-section">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                <h3 class="references-title" style="display: inline; font-size: 1.1rem; margin: 0;">📎 기출문제</h3>
+                <h3 class="references-title" style="display: inline; font-size: 1.1rem; margin: 0;">🔖 기출문제</h3>
                 <button onclick="toggleAllQuestions()" id="toggle-btn" class="view-qs-btn">
-                    {{ references|length }} 문제 보기
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <span id="btn-count">{{ references|length }}</span>
                 </button>
             </div>
             
@@ -504,15 +509,22 @@
             .view-qs-btn {
                 background: transparent;
                 color: #d32f2f;
-                padding: 4px 12px;
+                padding: 4px 10px;
                 border-radius: 12px;
-                font-size: 0.8rem;
+                font-size: 0.85rem;
                 border: 1px solid #d32f2f;
                 cursor: pointer;
                 font-weight: bold;
                 transition: all 0.2s;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
             }
             .view-qs-btn:hover {
+                background-color: #d32f2f;
+                color: white;
+            }
+            .view-qs-btn.active {
                 background-color: #d32f2f;
                 color: white;
             }
@@ -717,15 +729,18 @@ function highlightTerm(htmlContent) {
 async function toggleAllQuestions() {
     const container = document.getElementById('all-questions-container');
     const btn = document.getElementById('toggle-btn');
-    
+    const eyeIcon = document.getElementById('eye-icon');
+
     if (container.style.display !== 'none') {
         container.style.display = 'none';
-        btn.textContent = `${questionIds.length} 문제 보기`;
+        btn.classList.remove('active');
+        eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
         return;
     }
-    
+
     container.style.display = 'block';
-    btn.textContent = `${questionIds.length} 문제 접기`;
+    btn.classList.add('active');
+    eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
     
     if (questionsLoaded) return;
     
