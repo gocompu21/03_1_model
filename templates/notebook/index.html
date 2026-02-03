@@ -56,16 +56,31 @@
             gap: 10px;
         }
 
+        .main-header .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
         .main-header .nav-links a {
             color: white;
             text-decoration: none;
             margin-left: 20px;
             font-weight: 500;
             transition: color 0.3s;
+            line-height: 1.5;
+            display: inline-flex;
+            align-items: center;
         }
 
         .main-header .nav-links a:hover {
             color: #b7e4c7;
+        }
+
+        .main-header .nav-links form {
+            display: inline-flex;
+            align-items: center;
+            margin: 0;
         }
 
         .main-header span {
@@ -76,105 +91,26 @@
         .main-header button {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.8);
+            color: white;
             cursor: pointer;
             font-size: 1rem;
             font-weight: 500;
             margin-left: 15px;
+            line-height: 1.5;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
         }
 
         .main-header button:hover {
-            color: white;
+            color: #b7e4c7;
         }
 
-        /* Main wrapper for sidebar + content */
+        /* Main wrapper */
         .main-wrapper {
             display: flex;
             flex: 1;
             overflow: hidden;
-        }
-
-        /* Sidebar Styles */
-        .sidebar {
-            width: 300px;
-            background-color: #1b4332;
-            color: white;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid #2d6a4f;
-        }
-
-        .sidebar h2 {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #40916c;
-            padding-bottom: 10px;
-        }
-
-        .history-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            flex-grow: 1;
-        }
-
-        .history-item {
-            margin-bottom: 2px;
-        }
-
-        .history-link {
-            display: block;
-            padding: 6px 10px;
-            color: #d8f3dc;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background-color 0.2s;
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .history-link:hover {
-            background-color: #2d6a4f;
-            color: white;
-        }
-
-        .history-link.active {
-            background-color: #40916c;
-            color: white;
-            font-weight: bold;
-        }
-
-        /* Removed history-meta styles */
-
-        .new-chat-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #52b788;
-            color: #081c15;
-            text-align: center;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            transition: background-color 0.3s;
-        }
-
-        .new-chat-btn:hover {
-            background-color: #40916c;
-            color: white;
-        }
-
-        .home-link-sidebar {
-            margin-top: 20px;
-            color: #95d5b2;
-            text-decoration: none;
-            text-align: center;
-            font-size: 0.9rem;
         }
 
         /* Main Content Styles */
@@ -398,6 +334,336 @@
                 transform: translateX(100%);
             }
         }
+
+        /* Welcome Message Style */
+        .welcome-message {
+            text-align: center;
+            padding: 80px 20px;
+            color: #6c757d;
+            font-size: 1.1rem;
+            background: transparent;
+            border: none;
+        }
+
+        .welcome-message .welcome-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .welcome-message .welcome-title {
+            color: #2d6a4f;
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .welcome-message .welcome-text {
+            color: #52796f;
+            font-weight: 500;
+            font-size: 1.1rem;
+        }
+
+        /* ========== Mobile Responsive Styles ========== */
+        @media screen and (max-width: 768px) {
+            /* Body - full height layout */
+            body {
+                height: 100vh;
+                height: 100dvh;
+            }
+
+            /* Header */
+            .main-header {
+                padding: 10px 15px;
+                flex-wrap: nowrap;
+            }
+
+            .main-header .logo {
+                font-size: 1.1rem;
+            }
+
+            .main-header .nav-links {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            .main-header .nav-links span {
+                display: none;
+            }
+
+            .main-header .nav-links a,
+            .main-header .nav-links form,
+            .main-header .nav-links button {
+                margin: 0;
+                margin-left: 10px;
+                font-size: 0.8rem;
+                line-height: 1;
+                height: auto;
+                display: inline-flex;
+                align-items: center;
+                vertical-align: middle;
+            }
+
+            /* Main Content - flex layout for sticky input */
+            .main-wrapper {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                overflow: hidden;
+            }
+
+            .main-content {
+                padding: 0;
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .chat-container {
+                padding: 0;
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+                max-width: 100%;
+                overflow: hidden;
+            }
+
+            /* Subject buttons */
+            .subject-header {
+                flex-shrink: 0;
+                padding: 8px 10px;
+                background: white;
+                border-bottom: 1px solid #d8f3dc;
+                display: flex !important;
+                justify-content: center !important;
+                gap: 6px !important;
+                flex-wrap: nowrap !important;
+                margin-bottom: 0 !important;
+            }
+
+            .subject-btn {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+                white-space: nowrap;
+                border-width: 1.5px;
+            }
+
+            /* Show short text, hide full text on mobile */
+            .subject-btn .short-text {
+                display: inline;
+            }
+            .subject-btn .full-text {
+                display: none;
+            }
+
+            /* Chat Box - scrollable area */
+            .chat-box {
+                flex: 1;
+                padding: 10px;
+                margin-bottom: 0;
+                border: none;
+                border-radius: 0;
+                background-color: #f0f7f4;
+                overflow-y: auto;
+                min-height: 0;
+            }
+
+            .message {
+                padding: 12px;
+                margin-bottom: 12px;
+                font-size: 0.95rem;
+                border-radius: 12px;
+            }
+
+            /* Input Group - sticky bottom */
+            .input-group {
+                flex-shrink: 0;
+                padding: 10px;
+                background: white;
+                border-top: 1px solid #d8f3dc;
+                gap: 8px;
+                position: relative;
+            }
+
+            textarea {
+                padding: 0 16px;
+                height: 44px;
+                font-size: 16px;
+                border-radius: 22px;
+                border: 1px solid #d8f3dc;
+                line-height: 44px;
+                overflow: hidden;
+            }
+
+            textarea.expanded {
+                height: 120px;
+                line-height: 1.5;
+                padding: 12px 16px;
+            }
+
+            .expand-btn {
+                display: none;
+            }
+
+            /* Send button - icon only */
+            .send-btn {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                padding: 0;
+                border-radius: 50%;
+                font-size: 1.2rem;
+            }
+
+            .send-btn > span,
+            .send-btn > div {
+                display: none;
+            }
+
+            .send-btn::after {
+                content: "➤";
+                font-size: 1.1rem;
+            }
+
+            .stop-btn {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                padding: 0;
+                border-radius: 50%;
+            }
+
+            /* Progress UI */
+            .progress-ui {
+                width: 150px;
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .progress-text {
+                font-size: 0.75rem;
+                margin-bottom: 6px;
+            }
+
+            /* Welcome Message - compact */
+            .welcome-message {
+                padding: 40px 15px;
+            }
+
+            .welcome-message .welcome-icon {
+                font-size: 3rem;
+                margin-bottom: 15px;
+            }
+
+            .welcome-message .welcome-title {
+                font-size: 1.05rem;
+                margin-bottom: 0;
+            }
+
+            /* Hide h1 title on mobile */
+            h1 {
+                display: none;
+            }
+
+            /* Tables */
+            .ai-message {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .ai-message table {
+                min-width: 100%;
+                font-size: 0.8rem;
+            }
+
+            th, td {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+                white-space: normal;
+                word-break: keep-all;
+            }
+
+            /* Glossary buttons */
+            .glossary-btn-area {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 12px;
+                padding-top: 12px;
+            }
+        }
+
+        /* Extra small devices */
+        @media screen and (max-width: 480px) {
+            .main-header {
+                padding: 8px 10px;
+            }
+
+            .main-header .logo {
+                font-size: 0.95rem;
+            }
+
+            .main-header .nav-links a,
+            .main-header .nav-links form,
+            .main-header .nav-links button {
+                margin-left: 8px;
+                font-size: 0.75rem;
+            }
+
+            .subject-header {
+                padding: 6px 8px;
+                gap: 4px !important;
+            }
+
+            .subject-btn {
+                padding: 5px 8px;
+                font-size: 0.7rem;
+            }
+
+            .chat-box {
+                padding: 8px;
+            }
+
+            .message {
+                padding: 10px;
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+
+            .input-group {
+                padding: 8px;
+            }
+
+            textarea {
+                height: 40px;
+                padding: 0 14px;
+                line-height: 40px;
+            }
+
+            .send-btn,
+            .stop-btn {
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+            }
+
+            .welcome-message {
+                padding: 30px 10px;
+            }
+
+            .welcome-message .welcome-icon {
+                font-size: 2.5rem;
+            }
+
+            .welcome-message .welcome-title {
+                font-size: 0.95rem;
+            }
+        }
     </style>
     <!-- MathJax Configuration -->
     <script>
@@ -432,63 +698,24 @@
         </nav>
     </header>
 
-    <!-- Main Wrapper for Sidebar + Content -->
+    <!-- Main Wrapper -->
     <div class="main-wrapper">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <a href="{% url 'notebook:index' %}" class="new-chat-btn">+ 새로운 질문</a>
-
-
-        <ul class="history-list">
-            {% for history in page_obj %}
-            <li class="history-item">
-                <a href="?history_id={{ history.id }}" title="{{ history.user_input }}"
-                    class="history-link {% if selected_history and selected_history.id == history.id %}active{% endif %}">
-                    {{ history.user_input }}
-                </a>
-            </li>
-            {% empty %}
-            <li style="color: #95d5b2; text-align: center; padding: 20px;">기록이 없습니다.</li>
-            {% endfor %}
-        </ul>
-
-        <!-- Pagination Controls -->
-        <div style="margin-top: 10px; text-align: center; font-size: 0.8rem; color: #d8f3dc;">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}&subject={{ current_subject }}"
-                style="color: white; text-decoration: none;">&laquo;
-                이전</a>
-            {% endif %}
-
-            {% if page_obj %}
-            <span style="margin: 0 10px;">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-            {% endif %}
-
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}&subject={{ current_subject }}"
-                style="color: white; text-decoration: none;">다음 &raquo;</a>
-            {% endif %}
-        </div>
-
-        <a href="{% url 'main:index' %}" class="home-link-sidebar">메인으로 돌아가기</a>
-    </div>
-
     <!-- Main Content -->
     <div class="main-content">
         <div class="chat-container">
 
             <!-- Subject Selection Header -->
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+            <div class="subject-header" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <a href="?subject=수목생리학"
-                    class="subject-btn {% if current_subject == '수목생리학' %}active{% endif %}">수목생리학</a>
+                    class="subject-btn {% if current_subject == '수목생리학' %}active{% endif %}"><span class="full-text">수목생리학</span><span class="short-text">생리학</span></a>
                 <a href="?subject=수목병리학"
-                    class="subject-btn {% if current_subject == '수목병리학' %}active{% endif %}">수목병리학</a>
+                    class="subject-btn {% if current_subject == '수목병리학' %}active{% endif %}"><span class="full-text">수목병리학</span><span class="short-text">병리학</span></a>
                 <a href="?subject=수목해충학"
-                    class="subject-btn {% if current_subject == '수목해충학' %}active{% endif %}">수목해충학</a>
+                    class="subject-btn {% if current_subject == '수목해충학' %}active{% endif %}"><span class="full-text">수목해충학</span><span class="short-text">해충학</span></a>
                 <a href="?subject=산림토양학"
-                    class="subject-btn {% if current_subject == '산림토양학' %}active{% endif %}">산림토양학</a>
+                    class="subject-btn {% if current_subject == '산림토양학' %}active{% endif %}"><span class="full-text">산림토양학</span><span class="short-text">토양학</span></a>
                 <a href="?subject=수목관리학"
-                    class="subject-btn {% if current_subject == '수목관리학' %}active{% endif %}">수목관리학</a>
+                    class="subject-btn {% if current_subject == '수목관리학' %}active{% endif %}"><span class="full-text">수목관리학</span><span class="short-text">관리학</span></a>
             </div>
             <style>
                 .subject-btn {
@@ -513,9 +740,25 @@
                     background-color: #52b788;
                     color: white;
                 }
-            </style>
 
-            <h1>기본서에게 질문하세요.</h1>
+                /* Show full text, hide short text on desktop */
+                .subject-btn .short-text {
+                    display: none;
+                }
+                .subject-btn .full-text {
+                    display: inline;
+                }
+
+                /* Mobile: Show short text, hide full text */
+                @media screen and (max-width: 768px) {
+                    .subject-btn .short-text {
+                        display: inline !important;
+                    }
+                    .subject-btn .full-text {
+                        display: none !important;
+                    }
+                }
+            </style>
 
             <div class="chat-box" id="chat-box">
                 <!-- ... existing chat box ... -->
@@ -543,8 +786,9 @@
                     답변을 생성 중이거나 오류가 발생했습니다.
                 </div>
                 {% elif not user_input %}
-                <div class="message ai-message" id="welcome-msg">
-                    <strong>수목생리학</strong> 기본서를 분석하여 답변드리겠습니다.
+                <div class="welcome-message" id="welcome-msg">
+                    <div class="welcome-icon">📚</div>
+                    <div class="welcome-title">기본서에게 무엇이든 물어보세요</div>
                 </div>
                 {% endif %}
             </div>
@@ -752,29 +996,6 @@
                     
                     aiMsgDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                    // Append to History Sidebar
-                    if (data.history_id) {
-                        const historyList = document.querySelector('.history-list');
-                        // Remove "No records" message if it exists
-                        const emptyMsg = historyList.querySelector('li[style*="text-align: center"]');
-                        if (emptyMsg) emptyMsg.remove();
-
-                        const newLi = document.createElement('li');
-                        newLi.className = 'history-item';
-                        newLi.innerHTML = `
-                            <a href="?history_id=${data.history_id}" title="${data.user_input}"
-                                class="history-link active">
-                                ${data.user_input}
-                            </a>
-                        `;
-
-                        // Remove active class from other links
-                        historyList.querySelectorAll('.history-link').forEach(link => link.classList.remove('active'));
-
-                        // Add to top
-                        historyList.insertBefore(newLi, historyList.firstChild);
-                    }
-
                 } catch (error) {
                     if (error.name === 'AbortError') {
                         await appendMessage('ai', '<span style="color: #e63946;">🛑 요청이 중단되었습니다.</span>');
@@ -790,7 +1011,7 @@
                     stopTimer();
                     userInput.disabled = false;
                     userInput.focus();
-                    sendBtn.style.display = 'block';
+                    sendBtn.style.display = 'flex';
                     sendBtn.disabled = false;
                     stopBtn.style.display = 'none';
                     progressUi.style.display = 'none';
@@ -821,10 +1042,27 @@
             const currentSubject = "{{ current_subject }}";
             if (currentSubject) {
                 if (storeInput) storeInput.value = currentSubject;
-                if (welcomeMsg) {
-                    welcomeMsg.innerHTML = `<strong>${currentSubject}</strong> 기본서를 분석하여 답변드리겠습니다.`;
-                }
             }
+
+            // Mobile keyboard handling - scroll to bottom when input focused
+            if (window.visualViewport) {
+                let pendingUpdate = false;
+                window.visualViewport.addEventListener('resize', () => {
+                    if (pendingUpdate) return;
+                    pendingUpdate = true;
+                    requestAnimationFrame(() => {
+                        pendingUpdate = false;
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    });
+                });
+            }
+
+            // Focus input and scroll on touch
+            userInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 300);
+            });
         });
         
         // Subject to ID mapping for glossary
