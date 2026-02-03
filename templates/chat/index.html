@@ -55,16 +55,31 @@
             gap: 10px;
         }
 
+        .main-header .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0;
+        }
+
         .main-header .nav-links a {
             color: white;
             text-decoration: none;
             margin-left: 20px;
             font-weight: 500;
             transition: color 0.3s;
+            line-height: 1.5;
+            display: inline-flex;
+            align-items: center;
         }
 
         .main-header .nav-links a:hover {
             color: #b7e4c7;
+        }
+
+        .main-header .nav-links form {
+            display: inline-flex;
+            align-items: center;
+            margin: 0;
         }
 
         .main-header span {
@@ -75,15 +90,19 @@
         .main-header button {
             background: none;
             border: none;
-            color: rgba(255, 255, 255, 0.8);
+            color: white;
             cursor: pointer;
             font-size: 1rem;
             font-weight: 500;
             margin-left: 15px;
+            line-height: 1.5;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
         }
 
         .main-header button:hover {
-            color: white;
+            color: #b7e4c7;
         }
 
         /* Main wrapper for sidebar + content */
@@ -420,14 +439,17 @@
                 display: none;
             }
 
-            .main-header .nav-links a {
-                margin-left: 8px;
+            .main-header .nav-links a,
+            .main-header .nav-links form,
+            .main-header .nav-links button {
+                margin: 0;
+                margin-left: 10px;
                 font-size: 0.8rem;
-            }
-
-            .main-header button {
-                margin-left: 5px;
-                font-size: 0.8rem;
+                line-height: 1;
+                height: auto;
+                display: inline-flex;
+                align-items: center;
+                vertical-align: middle;
             }
 
             /* Main Content - flex layout for sticky input */
@@ -488,11 +510,13 @@
             }
 
             textarea {
-                padding: 12px;
+                padding: 0 16px;
                 height: 44px;
                 font-size: 16px; /* Prevents iOS zoom */
                 border-radius: 22px;
                 border: 1px solid #d8f3dc;
+                line-height: 44px;
+                overflow: hidden;
             }
 
             /* Send button - icon only */
@@ -604,12 +628,10 @@
                 font-size: 0.95rem;
             }
 
-            .main-header .nav-links a {
-                margin-left: 6px;
-                font-size: 0.75rem;
-            }
-
-            .main-header button {
+            .main-header .nav-links a,
+            .main-header .nav-links form,
+            .main-header .nav-links button {
+                margin-left: 8px;
                 font-size: 0.75rem;
             }
 
@@ -629,7 +651,8 @@
 
             textarea {
                 height: 40px;
-                padding: 10px 14px;
+                padding: 0 14px;
+                line-height: 40px;
             }
 
             .send-btn,
