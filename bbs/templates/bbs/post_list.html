@@ -541,9 +541,9 @@
         /* Title - main content */
         .bbs-wrapper td:nth-child(2) {
             display: block !important;
-            padding: 0 0 10px 0 !important;
-            border-bottom: 1px dashed #e0e0e0;
-            margin-bottom: 10px;
+            padding: 0 !important;
+            border-bottom: none;
+            margin-bottom: 2px;
         }
 
         .bbs-wrapper td:nth-child(2) a {
@@ -556,7 +556,15 @@
             color: #333 !important;
         }
 
-        /* Meta info row */
+        /* Meta info row - 우측 정렬 */
+        .bbs-wrapper tbody tr {
+            text-align: right;
+        }
+
+        .bbs-wrapper td:nth-child(2) {
+            text-align: left !important;
+        }
+
         .bbs-wrapper td:nth-child(3),
         .bbs-wrapper td:nth-child(4),
         .bbs-wrapper td:nth-child(5) {
