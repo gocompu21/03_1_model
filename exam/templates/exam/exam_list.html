@@ -197,6 +197,98 @@
     .submit-btn:hover {
         background: #1b4332;
     }
+
+    /* 모바일 최적화 */
+    @media (max-width: 480px) {
+        /* 헤더 */
+        .custom-main-header {
+            padding: 10px 12px;
+        }
+
+        .custom-main-header .logo {
+            font-size: 1rem;
+        }
+
+        .custom-main-header .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .custom-main-header .nav-links span {
+            display: none;
+        }
+
+        .custom-main-header .nav-links a,
+        .custom-main-header .nav-links button {
+            font-size: 0.8rem;
+            margin-left: 0;
+        }
+
+        /* 레이아웃 */
+        .study-layout {
+            padding: 70px 8px 20px 8px;
+        }
+
+        .study-header {
+            margin-bottom: 20px;
+        }
+
+        .study-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .study-header p {
+            font-size: 0.9rem;
+        }
+
+        .header-deco {
+            width: 40px;
+            height: 3px;
+            margin: 12px auto;
+        }
+
+        /* 그리드 - 2열 */
+        .round-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* 카드 */
+        .round-card {
+            padding: 12px 10px;
+            min-height: 180px;
+            border-radius: 10px;
+        }
+
+        .round-number {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+
+        /* 전과목 선택 */
+        .exam-form > div:first-child label {
+            font-size: 0.8rem !important;
+        }
+
+        /* 과목 옵션 */
+        .subject-options {
+            padding: 6px;
+            margin-bottom: 10px;
+            max-height: 100px;
+        }
+
+        .subject-options label {
+            font-size: 0.75rem;
+            margin-bottom: 3px;
+        }
+
+        /* 버튼 */
+        .submit-btn {
+            padding: 10px;
+            font-size: 0.85rem;
+        }
+    }
 </style>
 
 <div class="custom-main-header">

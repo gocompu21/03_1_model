@@ -12,7 +12,7 @@
         {% if user.is_staff or user.is_superuser %}
         <a href="{% url 'dashboard:index' %}" class="admin-link">관리</a>
         {% endif %}
-        <a href="{% url 'mypage:index' %}" class="nav-link">마이</a>
+        <a href="{% url 'mypage:index' %}" class="nav-link">마이페이지</a>
         {% else %}
         <a href="{% url 'accounts:user_login' %}" class="nav-link">로그인</a>
         {% endif %}
