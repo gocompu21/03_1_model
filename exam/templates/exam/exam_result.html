@@ -630,9 +630,22 @@
                 min-height: auto !important;
             }
 
-            /* 이미지 모달 - 기본 숨김 유지 */
+            /* 이미지 모달 - JavaScript로 제어 */
             .image-modal {
-                display: none !important;
+                display: none;
+                padding-top: 20px !important;
+            }
+
+            .image-modal-content {
+                width: 95% !important;
+                max-width: none !important;
+                max-height: 85vh !important;
+            }
+
+            .image-modal-close {
+                top: 10px !important;
+                right: 15px !important;
+                font-size: 32px !important;
             }
 
             /* OMR 패널 숨김 */
