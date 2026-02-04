@@ -5,17 +5,71 @@
 {% block title %}{{ subject.name }} 기출분석{% endblock %}
 
 {% block header %}
-<header style="background-color: #2d6a4f; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-    <a href="{% url 'main:index' %}" style="color: white; font-size: 1.5rem; font-weight: bold; text-decoration: none;">🌳 나무의사 합격반</a>
-    <nav style="display: flex; align-items: center; gap: 20px;">
+<header class="analysis-header-bar">
+    <a href="{% url 'main:index' %}" class="analysis-logo">🌳 나무의사 합격반</a>
+    <nav class="analysis-nav">
         {% if user.is_authenticated %}
-        <span style="color: rgba(255,255,255,0.8);">{{ user.username }}님</span>
-        <a href="{% url 'mypage:index' %}" style="color: white; text-decoration: none; font-weight: 500;">마이페이지</a>
+        <span class="analysis-username">{{ user.username }}님</span>
+        <a href="{% url 'mypage:index' %}">마이페이지</a>
         {% else %}
-        <a href="{% url 'accounts:user_login' %}" style="color: white; text-decoration: none;">로그인</a>
+        <a href="{% url 'accounts:user_login' %}">로그인</a>
         {% endif %}
     </nav>
 </header>
+<style>
+    .analysis-header-bar {
+        background-color: #2d6a4f;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .analysis-logo {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    .analysis-nav {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .analysis-nav a {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .analysis-username {
+        color: rgba(255,255,255,0.8);
+    }
+    @media screen and (max-width: 768px) {
+        .analysis-header-bar {
+            padding: 12px 16px;
+        }
+        .analysis-logo {
+            font-size: 1.1rem;
+        }
+        .analysis-nav {
+            gap: 10px;
+        }
+        .analysis-nav a {
+            font-size: 0.85rem;
+        }
+        .analysis-username {
+            display: none;
+        }
+    }
+    @media screen and (max-width: 400px) {
+        .analysis-logo {
+            font-size: 0.95rem;
+        }
+        .analysis-nav a {
+            font-size: 0.75rem;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -202,9 +256,152 @@
     .round-section {
         display: none;
     }
-    
+
     .round-section.active {
         display: block;
+    }
+
+    /* ========== Mobile Responsive ========== */
+    @media screen and (max-width: 768px) {
+        .analysis-container {
+            padding: 4px;
+        }
+
+        .filter-bar {
+            padding: 8px 10px;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            border-radius: 8px;
+        }
+
+        .page-title {
+            font-size: 0.95rem;
+        }
+
+        .subject-badge {
+            padding: 4px 10px;
+            font-size: 0.8rem;
+        }
+
+        .stats-info {
+            font-size: 0.75rem;
+            margin-left: 0;
+            width: 100%;
+            text-align: right;
+        }
+
+        /* Round tabs - horizontal scroll */
+        .round-tabs {
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 4px;
+            padding-bottom: 2px;
+        }
+
+        .round-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .round-tab {
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Table - card style on mobile */
+        .analysis-table {
+            font-size: 0.8rem;
+        }
+
+        .analysis-table thead {
+            display: none;
+        }
+
+        .analysis-table tbody tr {
+            display: block;
+            background: white;
+            margin-bottom: 4px;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .analysis-table td {
+            display: block;
+            padding: 4px 0;
+            border-bottom: none;
+        }
+
+        .analysis-table td.number-cell {
+            font-size: 0.85rem;
+            color: #2d6a4f;
+            margin-bottom: 4px;
+        }
+
+        .analysis-table td.number-cell::before {
+            content: "문제 ";
+        }
+
+        .analysis-table td.summary-cell {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #e0e0e0;
+            margin-bottom: 8px;
+        }
+
+        .terms-cell {
+            gap: 4px;
+        }
+
+        .term-tag {
+            padding: 3px 8px;
+            font-size: 0.7rem;
+        }
+    }
+
+    /* Extra small devices */
+    @media screen and (max-width: 400px) {
+        .analysis-container {
+            padding: 3px;
+        }
+
+        .filter-bar {
+            padding: 6px 8px;
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-size: 0.85rem;
+        }
+
+        .subject-badge {
+            padding: 3px 8px;
+            font-size: 0.75rem;
+        }
+
+        .round-tab {
+            padding: 4px 10px;
+            font-size: 0.75rem;
+        }
+
+        .analysis-table tbody tr {
+            padding: 8px;
+            margin-bottom: 3px;
+        }
+
+        .analysis-table td.summary-cell {
+            font-size: 0.85rem;
+        }
+
+        .term-tag {
+            padding: 2px 6px;
+            font-size: 0.65rem;
+        }
     }
 </style>
 

@@ -282,5 +282,189 @@
     tbody tr:hover {
         background-color: #e8f5e9 !important;
     }
+
+    /* ========== Mobile Responsive ========== */
+    @media screen and (max-width: 768px) {
+        /* Header */
+        .custom-header {
+            padding: 12px 16px;
+        }
+
+        .custom-header .logo {
+            font-size: 1.1rem;
+        }
+
+        .custom-header span {
+            display: none;
+        }
+
+        .custom-header .nav-links a,
+        .custom-header .nav-links button {
+            margin-left: 10px;
+            font-size: 0.85rem;
+        }
+
+        /* BBS Wrapper */
+        .bbs-wrapper {
+            padding: 8px !important;
+            font-size: 0.9rem;
+        }
+
+        /* Top Toolbar */
+        .bbs-wrapper > div:first-child {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 8px !important;
+        }
+
+        /* Category Filters */
+        .category-filters {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding-bottom: 2px;
+        }
+
+        .category-filters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-btn {
+            padding: 5px 10px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        /* Search Form */
+        .bbs-wrapper form[method="get"] {
+            width: 100%;
+        }
+
+        .bbs-wrapper form[method="get"] input[type="text"] {
+            flex: 1;
+            width: auto !important;
+            min-width: 0;
+        }
+
+        /* Table */
+        .bbs-wrapper table {
+            font-size: 0.8rem;
+        }
+
+        .bbs-wrapper th {
+            padding: 8px 4px !important;
+            font-size: 0.75rem;
+        }
+
+        .bbs-wrapper td {
+            padding: 8px 4px !important;
+            font-size: 0.8rem;
+        }
+
+        /* Hide 번호 column on mobile */
+        .bbs-wrapper th:first-child,
+        .bbs-wrapper td:first-child {
+            display: none;
+        }
+
+        /* Adjust column widths */
+        .bbs-wrapper th:nth-child(3),
+        .bbs-wrapper td:nth-child(3) {
+            width: 50px !important;
+        }
+
+        .bbs-wrapper th:nth-child(4),
+        .bbs-wrapper td:nth-child(4) {
+            width: 45px !important;
+        }
+
+        .bbs-wrapper th:nth-child(5),
+        .bbs-wrapper td:nth-child(5) {
+            width: 35px !important;
+        }
+
+        /* Pagination & Write Button */
+        .bbs-wrapper .bbs-content > div:last-child {
+            display: flex !important;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px !important;
+        }
+
+        .pagination-link {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            margin: 0 1px;
+        }
+
+        .btn-write {
+            width: 100%;
+            text-align: center;
+            padding: 10px 16px;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Extra small devices */
+    @media screen and (max-width: 400px) {
+        .custom-header {
+            padding: 10px 12px;
+        }
+
+        .custom-header .logo {
+            font-size: 0.95rem;
+        }
+
+        .custom-header .nav-links a,
+        .custom-header .nav-links button {
+            margin-left: 8px;
+            font-size: 0.75rem;
+        }
+
+        .bbs-wrapper {
+            padding: 5px !important;
+        }
+
+        .filter-btn {
+            padding: 4px 8px;
+            font-size: 0.7rem;
+        }
+
+        .bbs-wrapper form[method="get"] input[type="text"] {
+            padding: 6px 10px !important;
+            font-size: 0.8rem !important;
+        }
+
+        .bbs-wrapper table {
+            font-size: 0.75rem;
+        }
+
+        .bbs-wrapper th {
+            padding: 6px 3px !important;
+            font-size: 0.7rem;
+        }
+
+        .bbs-wrapper td {
+            padding: 6px 3px !important;
+            font-size: 0.75rem;
+        }
+
+        /* Hide 조회 column on extra small */
+        .bbs-wrapper th:nth-child(5),
+        .bbs-wrapper td:nth-child(5) {
+            display: none;
+        }
+
+        .pagination-link {
+            padding: 5px 8px;
+            font-size: 0.75rem;
+        }
+
+        .btn-write {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+    }
 </style>
 {% endblock %}

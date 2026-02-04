@@ -5,10 +5,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>모의고사 결과</title>
-    <!-- Use Pretendard Font -->
-    <link rel="stylesheet" as="style" crossorigin
-        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <script>
         window.MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -21,7 +19,7 @@
             margin: 0;
             display: flex;
             height: 100vh;
-            font-family: 'Pretendard', sans-serif;
+            font-family: sans-serif;
             overflow: hidden;
         }
 
@@ -217,6 +215,40 @@
             background-color: transparent !important;
         }
 
+        .choice-item.selected-text .q-mark::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-35%, -120%) scale(2.5);
+            width: 100%;
+            height: 100%;
+            background-image: url("{% static 'exam/images/check_mark_black.png' %}");
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            mix-blend-mode: multiply;
+            filter: contrast(1.5) brightness(1.1);
+        }
+
+        .correct-answer-circle {
+            position: relative;
+        }
+
+        .correct-answer-circle::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 25px;
+            height: 25px;
+            border: 3px solid #d93025;
+            border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+            transform: translate(-50%, -50%);
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
         .omr-panel {
             width: 200px;
             min-width: 200px;
@@ -271,6 +303,7 @@
             background: white;
             justify-content: flex-start;
             width: 100%;
+            cursor: pointer;
         }
 
         .omr-row:nth-child(5n+1) {
@@ -279,6 +312,10 @@
 
         .omr-row:last-child {
             border-bottom: none;
+        }
+
+        .omr-row:hover {
+            background-color: #fff0f5;
         }
 
         .omr-num {
@@ -387,40 +424,6 @@
             transform: translate(-50%, -50%);
         }
 
-        .choice-item.selected-text .q-mark::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-35%, -120%) scale(2.5);
-            width: 100%;
-            height: 100%;
-            background-image: url("{% static 'exam/images/check_mark_black.png' %}");
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            mix-blend-mode: multiply;
-            filter: contrast(1.5) brightness(1.1);
-        }
-
-        .correct-answer-circle {
-            position: relative;
-        }
-
-        .correct-answer-circle::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 25px;
-            height: 25px;
-            border: 3px solid #d93025;
-            border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
-            transform: translate(-50%, -50%);
-            box-sizing: border-box;
-            pointer-events: none;
-        }
-
         .pagination-controls {
             margin-top: auto;
             padding-top: 20px;
@@ -499,10 +502,311 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+        /* 모바일 전용 요소 - 데스크탑에서 숨김 */
+        .mobile-header {
+            display: none;
+        }
+        .mobile-home-btn {
+            display: none;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            body {
+                display: block !important;
+                height: auto !important;
+                overflow: auto !important;
+                background: #f8f6e6 !important;
+                font-family: sans-serif !important;
+            }
+
+            /* 메인 래퍼 */
+            body > div:not(.image-modal):not(.mobile-header) {
+                display: block !important;
+                width: 100% !important;
+                min-height: auto !important;
+            }
+
+            /* OMR 패널 숨김 */
+            .omr-panel {
+                display: none !important;
+            }
+
+            /* 모바일 헤더 - 점수 표시 */
+            .mobile-header {
+                display: block !important;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: linear-gradient(135deg, #1b4332, #2d6a4f);
+                color: white;
+                padding: 14px 16px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            }
+
+            .mobile-header .score-display {
+                font-size: 1.8rem;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }
+
+            .mobile-header .score-detail {
+                font-size: 0.9rem;
+                opacity: 0.95;
+                margin-top: 6px;
+                font-weight: 500;
+            }
+
+            /* 모바일 홈 버튼 */
+            .mobile-home-btn {
+                display: flex !important;
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 56px;
+                height: 56px;
+                background: linear-gradient(135deg, #1b4332, #2d6a4f);
+                color: white;
+                border: none;
+                border-radius: 50%;
+                font-size: 1.5rem;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 100;
+                text-decoration: none;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* 문제 패널 */
+            .question-panel {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                overflow: visible !important;
+                flex: none !important;
+                background: transparent !important;
+                display: block !important;
+            }
+
+            /* 제목 숨김 */
+            .question-panel > h2 {
+                display: none !important;
+            }
+
+            /* 문제 컨테이너 */
+            #questions-container {
+                position: static !important;
+                perspective: none !important;
+                transform-style: flat !important;
+                overflow: visible !important;
+                display: block !important;
+                padding: 8px !important;
+                margin: 0 !important;
+                background: transparent !important;
+            }
+
+            /* 페이지 래퍼 */
+            .question-page {
+                position: static !important;
+                display: block !important;
+                background: transparent !important;
+                padding: 0 !important;
+            }
+
+            .question-page.active::after {
+                display: none !important;
+            }
+
+            /* 문제 카드 */
+            #questions-container .question-item,
+            .question-page .question-item {
+                display: block !important;
+                position: relative !important;
+                margin-bottom: 8px !important;
+                padding: 20px 15px !important;
+                background: white !important;
+                border-radius: 12px !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+                border: 1px solid #e8e8e8 !important;
+                grid-column: auto !important;
+                grid-row: auto !important;
+            }
+
+            /* 채점 마크 위치 */
+            .question-item .grade-mark {
+                position: absolute !important;
+                top: 12px !important;
+                right: 12px !important;
+                left: auto !important;
+                transform: none !important;
+                width: 36px !important;
+                height: 36px !important;
+            }
+
+            .question-item .grade-circle {
+                background-image: none !important;
+                border: 3px solid rgba(0, 0, 0, 0.6) !important;
+                border-radius: 50% !important;
+            }
+
+            .question-item .grade-x {
+                background-size: contain !important;
+            }
+
+            /* 문제 내용 */
+            .question-content {
+                font-size: 1rem !important;
+                line-height: 1.6 !important;
+                margin-bottom: 10px !important;
+                padding-left: 1.3em !important;
+                text-indent: -1.3em !important;
+                padding-right: 45px !important;
+                font-weight: 600 !important;
+            }
+
+            /* 문제 이미지 */
+            .question-item img {
+                max-width: 100% !important;
+                margin: 10px 0 !important;
+                border-radius: 8px !important;
+            }
+
+            /* 선택지 컨테이너 */
+            .choices {
+                padding-left: 0 !important;
+                margin-top: 10px !important;
+            }
+
+            .choices .choices {
+                padding: 0 !important;
+            }
+
+            /* 선택지 아이템 */
+            .choices div.choice-item {
+                padding: 8px 8px 8px 2em !important;
+                margin-bottom: 4px !important;
+                background: transparent !important;
+                border-radius: 6px !important;
+                font-size: 0.95rem !important;
+                position: relative !important;
+                line-height: 1.5 !important;
+            }
+
+            /* 선택지 번호 */
+            .choices .choice-item .q-mark {
+                position: absolute !important;
+                left: 4px !important;
+                top: 8px !important;
+                font-size: 1rem !important;
+            }
+
+            /* 선택된 선택지 */
+            .choice-item.selected-text {
+                background: #e3f2fd !important;
+                border-radius: 8px !important;
+            }
+
+            /* 정답 표시 원 */
+            .choices .choice-item .q-mark.correct-answer-circle::before {
+                width: 26px !important;
+                height: 26px !important;
+                border: 3px solid #d93025 !important;
+            }
+
+            /* 버튼 영역 - 우측 정렬 */
+            .action-buttons {
+                justify-content: flex-end !important;
+                gap: 12px !important;
+                margin-top: 12px !important;
+                padding-top: 10px !important;
+                border-top: 1px dashed #e0e0e0 !important;
+            }
+
+            /* 버튼 텍스트 숨김 - 아이콘만 표시 */
+            .action-buttons .tts-text,
+            .action-buttons .exp-text {
+                display: none !important;
+            }
+
+            /* TTS 버튼 스타일 */
+            .action-buttons .tts-btn {
+                padding: 10px !important;
+                background: #e3f2fd !important;
+                border-radius: 50% !important;
+                width: 44px !important;
+                height: 44px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+
+            .action-buttons .tts-btn svg {
+                width: 22px !important;
+                height: 22px !important;
+            }
+
+            /* 해설 보기 버튼 스타일 */
+            .action-buttons .exp-btn {
+                padding: 10px !important;
+                background: #e8f5e9 !important;
+                border-radius: 50% !important;
+                width: 44px !important;
+                height: 44px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                color: #2e7d32 !important;
+            }
+
+            .action-buttons .exp-btn svg {
+                width: 22px !important;
+                height: 22px !important;
+            }
+
+            /* 해설 박스 */
+            .question-item > div[id^="exp-"] {
+                margin: 15px 0 5px 0 !important;
+                padding: 16px !important;
+                background: #fdfdfd !important;
+                border-radius: 10px !important;
+                font-size: 0.95rem !important;
+                line-height: 1.7 !important;
+                border: 1px dashed #bbb !important;
+            }
+
+            /* 푸터 숨김 */
+            .exam-footer {
+                display: none !important;
+            }
+
+            /* 이미지 모달 */
+            .image-modal-content {
+                width: 95% !important;
+                max-width: none !important;
+                max-height: 85vh !important;
+            }
+
+            .image-modal-close {
+                top: 10px !important;
+                right: 15px !important;
+                font-size: 32px !important;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- 모바일 헤더 -->
+    <div class="mobile-header">
+        <div class="score-display">{{ average_score }}점</div>
+        <div class="score-detail">모의고사 | {% for s in subject_results %}{{ s.name|slice:":2" }}:{{ s.score }} {% endfor %}</div>
+    </div>
+
     <div style="display: flex; width: 100%; min-height: 100vh;">
 
         <!-- Question Panel (Left) -->
@@ -516,6 +820,13 @@
                 {% for mq in questions %}
                 <div class="question-item" id="q-{{ mq.question.id }}" data-question-index="{{ forloop.counter0 }}"
                     data-subject="{{ mq.question.subject.name }}">
+                    <!-- Grade Mark -->
+                    {% if mq.is_correct %}
+                    <div class="grade-mark grade-circle"></div>
+                    {% else %}
+                    <div class="grade-mark grade-x"></div>
+                    {% endif %}
+
                     <div class="question-content">
                         {{ forloop.counter }}. {{ mq.question.content|format_question }}
                     </div>
@@ -544,9 +855,28 @@
                         </div>
                     </div>
 
-                    <!-- Toggle Button -->
-                    <div style="margin-top: 10px; text-align: right;">
-                        <button type="button" onclick="toggleExplanation('exp-{{ mq.question.id }}')"
+                    <!-- Toggle Buttons -->
+                    <div class="action-buttons" style="margin-top: 10px; text-align: right; display: flex; justify-content: flex-end; gap: 15px; align-items: center;">
+                        <!-- TTS Button -->
+                        <button type="button" class="tts-btn" data-question-id="{{ mq.question.id }}" onclick="toggleTTS(this, '{{ mq.question.id }}')"
+                            style="background:none; border:none; cursor:pointer; color:#2196F3; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="tts-icon-play">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" class="tts-icon-stop" style="display:none;">
+                                <rect x="6" y="4" width="4" height="16"></rect>
+                                <rect x="14" y="4" width="4" height="16"></rect>
+                            </svg>
+                            <span class="tts-text">해설 듣기</span>
+                        </button>
+                        <!-- View Explanation Button -->
+                        <button type="button" class="exp-btn" onclick="toggleExplanation('exp-{{ mq.question.id }}')"
                             style="background:none; border:none; cursor:pointer; color:#555; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -556,7 +886,7 @@
                                 <line x1="11" y1="8" x2="11" y2="14"></line>
                                 <line x1="8" y1="11" x2="14" y2="11"></line>
                             </svg>
-                            해설 보기
+                            <span class="exp-text">해설 보기</span>
                         </button>
                     </div>
 
@@ -680,10 +1010,13 @@
     </div>
 
     <!-- Image Modal -->
-    <div id="imageModal" class="image-modal">
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
         <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
         <img class="image-modal-content" id="modalImage">
     </div>
+
+    <!-- 모바일 홈 버튼 -->
+    <a href="{% url 'mock_exam:index' %}" class="mobile-home-btn" title="모의고사 홈">🌳</a>
 
     <!-- Pagination Script -->
     <script>
@@ -692,9 +1025,30 @@
         let totalPages = 1;
         let questionToPageMap = {};
 
+        // 모바일 감지
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            initPagination();
+            if (isMobile()) {
+                initMobileView();
+            } else {
+                initPagination();
+            }
         });
+
+        function initMobileView() {
+            // 모바일에서는 모든 문제를 한 번에 표시
+            const container = document.getElementById('questions-container');
+            const items = Array.from(container.children);
+
+            // 페이지 구조 없이 모든 문제 표시
+            container.innerHTML = '';
+            items.forEach(item => {
+                container.appendChild(item);
+            });
+        }
 
         function initPagination() {
             const container = document.getElementById('questions-container');
@@ -709,7 +1063,6 @@
             const specialNumbers = [25, 50, 75, 100, 125];
 
             items.forEach((item, index) => {
-                // Mock Exam logic: Question number is mostly sequential (index + 1)
                 const qNum = index + 1;
 
                 if (specialNumbers.includes(qNum)) {
@@ -870,6 +1223,147 @@
                 modal.style.display = "none";
             }
         }
+
+        /* TTS (Text-to-Speech) Functions */
+        let currentAudio = null;
+        let currentTTSButton = null;
+        let isLoading = false;
+        let isPaused = false;
+
+        function toggleTTS(btn, questionId) {
+            if (isLoading && currentTTSButton === btn) return;
+
+            if (isPaused && currentAudio && currentTTSButton === btn) {
+                currentAudio.play();
+                isPaused = false;
+                setTTSButtonActive(btn);
+                return;
+            }
+
+            if (currentAudio && currentTTSButton === btn && !currentAudio.paused) {
+                currentAudio.pause();
+                isPaused = true;
+                setTTSButtonPaused(btn);
+                return;
+            }
+
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio.currentTime = 0;
+                currentAudio = null;
+            }
+            if (currentTTSButton && currentTTSButton !== btn) {
+                resetTTSButton(currentTTSButton);
+            }
+
+            setTTSButtonLoading(btn);
+            currentTTSButton = btn;
+            isLoading = true;
+
+            fetch('{% url "study:tts_generate" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({
+                    question_id: questionId,
+                    tab: 'textbook'
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'TTS 생성 실패');
+                    });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                isLoading = false;
+                const audioUrl = URL.createObjectURL(blob);
+                currentAudio = new Audio(audioUrl);
+
+                currentAudio.onended = function() {
+                    URL.revokeObjectURL(audioUrl);
+                    resetTTSButton(btn);
+                    currentTTSButton = null;
+                    currentAudio = null;
+                    isPaused = false;
+                };
+
+                currentAudio.onerror = function() {
+                    URL.revokeObjectURL(audioUrl);
+                    resetTTSButton(btn);
+                    currentTTSButton = null;
+                    currentAudio = null;
+                    isPaused = false;
+                };
+
+                setTTSButtonActive(btn);
+                currentAudio.play();
+            })
+            .catch(error => {
+                isLoading = false;
+                resetTTSButton(btn);
+                currentTTSButton = null;
+                console.error('TTS Error:', error);
+            });
+        }
+
+        function setTTSButtonLoading(btn) {
+            btn.querySelector('.tts-icon-play').style.display = 'none';
+            btn.querySelector('.tts-icon-stop').style.display = 'none';
+            const textSpan = btn.querySelector('.tts-text');
+            if (textSpan) textSpan.textContent = '로딩...';
+            btn.style.color = '#ff9800';
+        }
+
+        function setTTSButtonActive(btn) {
+            btn.querySelector('.tts-icon-play').style.display = 'none';
+            btn.querySelector('.tts-icon-stop').style.display = 'inline';
+            const textSpan = btn.querySelector('.tts-text');
+            if (textSpan) textSpan.textContent = '중지';
+            btn.style.color = '#f44336';
+        }
+
+        function setTTSButtonPaused(btn) {
+            btn.querySelector('.tts-icon-play').style.display = 'inline';
+            btn.querySelector('.tts-icon-stop').style.display = 'none';
+            const textSpan = btn.querySelector('.tts-text');
+            if (textSpan) textSpan.textContent = '이어듣기';
+            btn.style.color = '#ff9800';
+        }
+
+        function resetTTSButton(btn) {
+            btn.querySelector('.tts-icon-play').style.display = 'inline';
+            btn.querySelector('.tts-icon-stop').style.display = 'none';
+            const textSpan = btn.querySelector('.tts-text');
+            if (textSpan) textSpan.textContent = '해설 듣기';
+            btn.style.color = '#2196F3';
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        window.addEventListener('beforeunload', function() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+        });
     </script>
 </body>
 

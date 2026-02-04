@@ -436,21 +436,22 @@
             /* Subject buttons */
             .subject-header {
                 flex-shrink: 0;
-                padding: 8px 10px;
+                padding: 6px 8px;
                 background: white;
                 border-bottom: 1px solid #d8f3dc;
                 display: flex !important;
                 justify-content: center !important;
-                gap: 6px !important;
+                gap: 4px !important;
                 flex-wrap: nowrap !important;
                 margin-bottom: 0 !important;
             }
 
             .subject-btn {
-                padding: 6px 10px;
-                font-size: 0.75rem;
+                padding: 5px 8px;
+                font-size: 0.7rem;
                 white-space: nowrap;
                 border-width: 1.5px;
+                border-radius: 15px;
             }
 
             /* Show short text, hide full text on mobile */
@@ -616,13 +617,14 @@
             }
 
             .subject-header {
-                padding: 6px 8px;
-                gap: 4px !important;
+                padding: 5px 6px;
+                gap: 3px !important;
             }
 
             .subject-btn {
-                padding: 5px 8px;
-                font-size: 0.7rem;
+                padding: 4px 6px;
+                font-size: 0.65rem;
+                border-radius: 12px;
             }
 
             .chat-box {
@@ -756,6 +758,20 @@
                     }
                     .subject-btn .full-text {
                         display: none !important;
+                    }
+                    .subject-btn {
+                        padding: 5px 8px !important;
+                        font-size: 0.7rem !important;
+                        border-radius: 15px !important;
+                    }
+                }
+
+                /* Extra small devices */
+                @media screen and (max-width: 400px) {
+                    .subject-btn {
+                        padding: 4px 6px !important;
+                        font-size: 0.65rem !important;
+                        border-radius: 12px !important;
                     }
                 }
             </style>

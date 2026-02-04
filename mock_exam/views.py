@@ -13,13 +13,16 @@ def index(request):
     Mock Exam Dashboard with subject-based scoring
     """
     recent_exams = MockExam.objects.filter(user=request.user).order_by("-start_time")[:5]
-    
+
+    # Get all subjects for selection
+    subjects = Subject.objects.all().order_by("code")
+
     # Pre-calculate subject scores for each completed exam
     exams_with_scores = []
     for exam in recent_exams:
         if exam.is_completed:
             questions = exam.questions.select_related("question", "question__subject").all()
-            
+
             # Calculate per-subject scores
             subject_scores = {}
             for mq in questions:
@@ -29,7 +32,7 @@ def index(request):
                 subject_scores[subject_name]["total"] += 1
                 if mq.is_correct:
                     subject_scores[subject_name]["correct"] += 1
-            
+
             # Calculate scores (4 points per question)
             subject_results = []
             total_score_sum = 0
@@ -42,9 +45,9 @@ def index(request):
                         "score": score,
                     })
                     total_score_sum += score
-            
+
             average_score = round(total_score_sum / len(subject_results), 1) if subject_results else 0
-            
+
             exams_with_scores.append({
                 "exam": exam,
                 "subject_results": subject_results,
@@ -56,25 +59,53 @@ def index(request):
                 "subject_results": None,
                 "average_score": None,
             })
-    
-    return render(request, "mock_exam/index.html", {"exams_with_scores": exams_with_scores})
+
+    return render(request, "mock_exam/index.html", {
+        "exams_with_scores": exams_with_scores,
+        "subjects": subjects,
+    })
 
 
 @login_required
 def generate_mock_exam(request):
     """
-    Generate a new random mock exam with 125 questions (25 per subject)
+    Generate a new random mock exam with 25 questions per selected subject
     Order: 수목병리학 -> 수목해충학 -> 수목생리학 -> 산림토양학 -> 수목관리학
 
     Questions not yet attempted in previous mock exams have higher weight.
     """
-    target_subjects = [
-        "수목병리학",
-        "수목해충학",
-        "수목생리학",
-        "산림토양학",
-        "수목관리학",
-    ]
+    # Get selected subjects from request
+    selected_subject_codes = request.GET.getlist("subjects")
+
+    # Map subject codes to names
+    subject_code_to_name = {
+        "1": "수목병리학",
+        "2": "수목해충학",
+        "3": "수목생리학",
+        "4": "산림토양학",
+        "5": "수목관리학",
+    }
+
+    # Default to all subjects if none selected
+    if not selected_subject_codes or request.GET.get("all_subjects"):
+        target_subjects = [
+            "수목병리학",
+            "수목해충학",
+            "수목생리학",
+            "산림토양학",
+            "수목관리학",
+        ]
+    else:
+        # Build target subjects list maintaining order
+        all_subjects_order = ["수목병리학", "수목해충학", "수목생리학", "산림토양학", "수목관리학"]
+        target_subjects = [
+            subject_code_to_name[code]
+            for code in selected_subject_codes
+            if code in subject_code_to_name
+        ]
+        # Sort by predefined order
+        target_subjects = [s for s in all_subjects_order if s in target_subjects]
+
     selected_questions = []
 
     # Get IDs of questions this user has already attempted in mock exams

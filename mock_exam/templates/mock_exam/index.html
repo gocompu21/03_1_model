@@ -10,13 +10,13 @@
             margin: 0;
             padding: 0;
             font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f0f7f4;
+            background-color: #f8f6e6;
             color: #333;
         }
 
-        /* Navbar */
+        /* Header */
         header {
-            background-color: #2d6a4f;
+            background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
             padding: 15px 40px;
             display: flex;
             justify-content: space-between;
@@ -50,120 +50,172 @@
             color: rgba(255, 255, 255, 0.8);
         }
 
-        /* Main Content */
-        .container {
-            max-width: 900px;
-            margin: 50px auto;
-            padding: 0 20px;
+        .nav-links button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-left: 15px;
         }
 
-        .jumbotron {
+        /* Main Layout */
+        .main-container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Exam Card */
+        .exam-card {
             background: white;
-            border-radius: 12px;
-            padding: 40px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+
+        .exam-card-header {
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            color: white;
+            padding: 30px 24px;
             text-align: center;
         }
 
-        .jumbotron h1 {
+        .exam-card-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .exam-card-header p {
+            margin: 0;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .exam-card-body {
+            padding: 24px;
+        }
+
+        /* Question Count Info */
+        .question-info {
+            text-align: center;
+            padding: 16px;
+            background: #fff8e6;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #856404;
+        }
+
+        .question-info strong {
             color: #1b4332;
-            margin-bottom: 15px;
+            font-size: 1.1rem;
         }
 
-        .jumbotron .lead {
-            color: #555;
-            font-size: 1.2rem;
-        }
-
-        .jumbotron hr {
-            border: none;
-            border-top: 1px solid #e0e0e0;
-            margin: 25px 0;
-        }
-
+        /* Submit Button */
         .btn-start {
-            display: inline-block;
-            padding: 15px 40px;
-            background-color: #40916c;
+            display: block;
+            width: auto;
+            padding: 16px 60px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
             color: white;
             text-decoration: none;
-            border-radius: 30px;
-            font-weight: bold;
+            text-align: center;
+            border-radius: 12px;
+            font-weight: 700;
             font-size: 1.1rem;
-            transition: background-color 0.3s, transform 0.2s;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
+            transition: all 0.2s;
         }
 
         .btn-start:hover {
-            background-color: #2d6a4f;
             transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(45, 106, 79, 0.4);
+        }
+
+        .btn-start:active {
+            transform: scale(0.98);
         }
 
         .alert-danger {
             background-color: #f8d7da;
             color: #721c24;
-            padding: 15px;
+            padding: 12px 16px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
         }
 
-        /* Recent Exams Table */
+        /* Recent Exams Section */
         .recent-exams {
             background: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         }
 
         .recent-exams h3 {
             color: #1b4332;
-            margin-bottom: 20px;
+            margin: 0 0 20px 0;
+            font-size: 1.2rem;
+            padding-bottom: 12px;
             border-bottom: 2px solid #d8f3dc;
-            padding-bottom: 10px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 12px 15px;
-            text-align: left;
+        .exam-history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
             border-bottom: 1px solid #eee;
         }
 
-        th {
-            background-color: #f0f7f4;
-            color: #1b4332;
-            font-weight: 600;
+        .exam-history-item:last-child {
+            border-bottom: none;
         }
 
-        tr:hover {
-            background-color: #f8f9fa;
+        .exam-date {
+            font-size: 0.9rem;
+            color: #666;
         }
 
-        .badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
+        .exam-scores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 0.8rem;
         }
 
-        .badge-success {
-            background-color: #d4edda;
-            color: #155724;
+        .exam-scores span {
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #f0f0f0;
         }
 
-        .badge-warning {
-            background-color: #fff3cd;
-            color: #856404;
+        .exam-scores span.pass {
+            color: #28a745;
+            background: #d4edda;
+        }
+
+        .exam-scores span.fail {
+            color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .exam-average {
+            font-weight: bold;
+            font-size: 0.95rem;
         }
 
         .btn-sm {
-            padding: 6px 15px;
-            border-radius: 20px;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-size: 0.85rem;
             text-decoration: none;
             font-weight: 500;
@@ -179,12 +231,60 @@
             color: white;
         }
 
-        .btn-sm:hover {
-            opacity: 0.9;
+        .text-muted {
+            color: #888;
+            text-align: center;
+            padding: 20px;
         }
 
-        .text-center {
-            text-align: center;
+        /* Mobile Styles */
+        @media screen and (max-width: 768px) {
+            header {
+                padding: 12px 16px;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .nav-links span {
+                display: none;
+            }
+
+            .nav-links a, .nav-links button {
+                font-size: 0.9rem;
+                margin-left: 12px;
+            }
+
+            .main-container {
+                padding: 20px 16px;
+            }
+
+            .exam-card-header {
+                padding: 24px 20px;
+            }
+
+            .exam-card-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .exam-card-body {
+                padding: 20px;
+            }
+
+            .recent-exams {
+                padding: 20px;
+            }
+
+            .exam-history-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .exam-scores {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -194,12 +294,11 @@
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
         <nav class="nav-links">
             {% if user.is_authenticated %}
-            <span>{{ user.username }}님 환영합니다</span>
+            <span>{{ user.username }}님</span>
             <a href="{% url 'mypage:index' %}">마이페이지</a>
             <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit"
-                    style="background:none; border:none; color:rgba(255,255,255,0.8); cursor:pointer; font-size:1rem; font-weight:500; margin-left:15px;">로그아웃</button>
+                <button type="submit">로그아웃</button>
             </form>
             {% else %}
             <a href="{% url 'accounts:user_login' %}">로그인</a>
@@ -208,69 +307,54 @@
         </nav>
     </header>
 
-    <div class="container">
-        <div class="jumbotron">
-            <h1>🌲 나무의사 실전 모의고사</h1>
-            <p class="lead">실전처럼 모의고사를 풀어보세요.</p>
-            <hr>
-            <p>전체 과목에서 무작위로 선정된 125문제로 실력을 테스트합니다.</p>
-            {% if error %}
-            <div class="alert-danger">{{ error }}</div>
-            {% endif %}
-            <a class="btn-start" href="{% url 'mock_exam:generate' %}">모의고사 시작하기</a>
+    <div class="main-container">
+        <!-- Exam Card -->
+        <div class="exam-card">
+            <div class="exam-card-header">
+                <h1>🌲 실전 모의고사</h1>
+                <p>전과목 125문제 무작위 출제</p>
+            </div>
+
+            <div class="exam-card-body">
+                {% if error %}
+                <div class="alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <div class="question-info">
+                    과목당 <strong>25문제</strong>씩 총 125문제 출제
+                </div>
+
+                <a href="{% url 'mock_exam:generate' %}" class="btn-start">시작</a>
+            </div>
         </div>
 
+        <!-- Recent Exams -->
         <div class="recent-exams">
             <h3>📋 최근 응시 내역</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>날짜</th>
-                        <th>점수</th>
-                        <th>상태</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in exams_with_scores %}
-                    <tr>
-                        <td>{{ item.exam.start_time|date:"Y-m-d H:i" }}</td>
-                        <td>
-                            {% if item.subject_results %}
-                            <div style="font-size: 0.85em;">
-                                {% for s in item.subject_results %}
-                                <span style="margin-right: 5px; {% if s.score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">{{ s.name }}:{{ s.score }}</span>
-                                {% endfor %}
-                            </div>
-                            <div style="font-weight: bold; margin-top: 3px;">
-                                <span style="{% if item.average_score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">평균: {{ item.average_score }}점</span>
-                            </div>
-                            {% else %}
-                            -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if item.exam.is_completed %}
-                            <span class="badge badge-success">완료</span>
-                            {% else %}
-                            <span class="badge badge-warning">진행 중</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if item.exam.is_completed %}
-                            <a href="{% url 'mock_exam:result' item.exam.id %}" class="btn-sm btn-info">결과 보기</a>
-                            {% else %}
-                            <a href="{% url 'mock_exam:take' item.exam.id %}" class="btn-sm btn-primary">계속하기</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">응시 내역이 없습니다.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% for item in exams_with_scores %}
+            <div class="exam-history-item">
+                <div>
+                    <div class="exam-date">{{ item.exam.start_time|date:"Y-m-d H:i" }}</div>
+                    {% if item.subject_results %}
+                    <div class="exam-scores">
+                        {% for s in item.subject_results %}
+                        <span class="{% if s.score >= 60 %}pass{% else %}fail{% endif %}">{{ s.name }}:{{ s.score }}</span>
+                        {% endfor %}
+                        <span class="exam-average {% if item.average_score >= 60 %}pass{% else %}fail{% endif %}">평균:{{ item.average_score }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if item.exam.is_completed %}
+                    <a href="{% url 'mock_exam:result' item.exam.id %}" class="btn-sm btn-info">결과</a>
+                    {% else %}
+                    <a href="{% url 'mock_exam:take' item.exam.id %}" class="btn-sm btn-primary">계속</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted">응시 내역이 없습니다.</p>
+            {% endfor %}
         </div>
     </div>
 </body>
