@@ -25,34 +25,36 @@
         height: calc(100vh - 60px);
         max-width: 1200px;
         margin: 0 auto;
-        background: #f8f6e6;
+        background: white;
     }
 
-    /* Top Bar similar to detail.html but simplified for Topic Set */
+    /* Top Bar */
     .tabs-header {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        display: flex;
+        flex-direction: column;
         background: white;
         border-bottom: 2px solid #e0e0e0;
         position: sticky;
         top: 0;
         z-index: 100;
-        padding: 15px 20px;
-        gap: 10px;
-        align-items: center;
+        padding: 10px 15px;
+        gap: 8px;
         width: 100%;
         box-sizing: border-box;
     }
 
+    .header-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        width: 100%;
+    }
+
     .topic-title {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: bold;
         color: #2c5f2d;
-        flex: 1;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        width: 100%;
     }
 
     .tab-btn {
@@ -118,6 +120,12 @@
         line-height: 1.6;
         margin-bottom: 20px;
         font-weight: bold;
+    }
+
+    .q-round-info {
+        color: #888;
+        font-size: 0.8em;
+        font-weight: normal;
     }
 
     .q-choices {
@@ -291,44 +299,180 @@
     .markdown-content mjx-container[jax="CHTML"] {
         font-size: inherit !important;
     }
+
+    /* 반응형 - 모바일 */
+    @media (max-width: 480px) {
+        body {
+            background: white;
+        }
+
+        .study-container {
+            height: auto;
+            min-height: 100vh;
+            background: white;
+        }
+
+        .tabs-header {
+            padding: 10px;
+            gap: 8px;
+        }
+
+        .topic-title {
+            font-size: 0.95rem;
+        }
+
+        .tab-btn {
+            padding: 6px 10px;
+            font-size: 0.8em;
+        }
+
+        .tab-btn span {
+            display: none;
+        }
+
+        .content-area {
+            padding: 0;
+        }
+
+        .question-card {
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            padding: 20px 12px;
+            margin-bottom: 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .q-content {
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 5px;
+            padding-left: 1.2em;
+            text-indent: -1.2em;
+        }
+
+        .q-choices {
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+
+        .choice-item {
+            font-size: 1rem;
+            padding: 4px 6px 4px 1.8em;
+            margin-bottom: 2px;
+            position: relative;
+        }
+
+        .choice-item .choice-num {
+            position: absolute;
+            left: 6px;
+        }
+
+        .explanation-section {
+            padding: 15px 12px;
+            margin-top: 15px;
+        }
+
+        .exp-title {
+            font-size: 1rem;
+        }
+
+        .exp-text {
+            font-size: 0.95rem;
+        }
+
+        .narration-content .exp-text {
+            font-size: 0.9rem !important;
+            line-height: 1.6 !important;
+        }
+
+        .exp-tabs {
+            gap: 5px !important;
+        }
+
+        .exp-tab-btn {
+            padding: 6px 10px !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* 버튼 영역 간격 줄임 */
+        .question-card > div[style*="text-align: right"] {
+            gap: 0 !important;
+        }
+
+        /* 속도 선택기 숨김 */
+        .tts-speed-selector {
+            display: none !important;
+        }
+
+        /* 해설 듣기/보기 버튼 아이콘만 표시 */
+        .tts-btn .tts-text,
+        .toggle-btn .btn-text {
+            display: none !important;
+        }
+
+        .tts-btn,
+        .toggle-btn {
+            padding: 6px !important;
+        }
+
+        .tts-btn svg,
+        .toggle-btn svg {
+            width: 22px !important;
+            height: 22px !important;
+        }
+
+        /* 회차 정보 모바일 조정 */
+        .q-round-info {
+            font-size: 0.75em;
+        }
+
+        .header-buttons {
+            gap: 6px;
+        }
+
+        .back-btn {
+            display: none;
+        }
+
+        .topic-title {
+            font-size: 0.95rem;
+        }
+    }
 </style>
 
 <div class="study-container">
     <div class="tabs-header">
-        <div class="topic-title">
-            📚 {{ topic_set.title }}
-        </div>
+        <!-- 버튼 영역 (우측 정렬) -->
+        <div class="header-buttons">
+            <!-- Expand All Button -->
+            <button class="tab-btn" id="expand-all-btn" onclick="toggleAllExplanations()" style="background-color: #fff3cd; color: #856404;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span id="expand-all-text">전체 펼치기</span>
+            </button>
 
-        <!-- Expand All Button -->
-        <button class="tab-btn" id="expand-all-btn" onclick="toggleAllExplanations()" style="background-color: #fff3cd; color: #856404;">
+            <!-- Back Button -->
+            <a href="{% url 'study:index' %}?tab=topic&subject={{ topic_set.subject.id }}" class="tab-btn back-btn" style="background-color: #f7f7f7; color: #555;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 9L12 16L5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span id="expand-all-text">전체 펼치기</span>
-        </button>
-
-        <!-- Back Button -->
-        <a href="{% url 'study:index' %}?tab=topic&subject={{ topic_set.subject.id }}" class="tab-btn back-btn" style="background-color: #f7f7f7; color: #555;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right:5px;">
-                <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <span>목록으로</span>
         </a>
+        </div>
+        <!-- 제목 영역 (두 번째 줄) -->
+        <div class="topic-title">
+            📚 {{ topic_set.title }}
+        </div>
     </div>
 
     <div class="content-area" id="question-list">
         {% for q in questions %}
         <div class="question-card" data-subject="{{ q.subject.name }}">
             <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
-                <div style="margin-bottom: 10px;">
-                    <span class="q-badge" style="float: right;">{{ q.subject.name }}</span>
-                    <!-- Show Round info if mixed set -->
-                    <span class="q-badge" style="float: right; margin-right: 5px; background: #e3f2fd; color: #1976d2;">
-                        {{ q.exam.round_number }}회 {{ q.number }}번
-                    </span>
-                </div>
                 <div class="q-content">
-                    {{ forloop.counter }}. {{ q.content|safe|linebreaksbr }}
+                    {{ forloop.counter }}. {{ q.content|safe|linebreaksbr }} <span class="q-round-info">({{ q.exam.round_number }}-{{ q.number }})</span>
                 </div>
             </div>
 
@@ -381,7 +525,7 @@
                 </select>
                 
                 <!-- View Explanation Button -->
-                <button type="button" onclick="toggleExplanation('exp-{{ q.id }}')"
+                <button type="button" class="toggle-btn" onclick="toggleExplanation('exp-{{ q.id }}')"
                     style="background:none; border:none; cursor:pointer; color:#555; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -391,7 +535,7 @@
                         <line x1="11" y1="8" x2="11" y2="14"></line>
                         <line x1="8" y1="11" x2="14" y2="11"></line>
                     </svg>
-                    해설 보기
+                    <span class="btn-text">해설 보기</span>
                 </button>
             </div>
 

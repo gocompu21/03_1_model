@@ -445,6 +445,8 @@
     
     .btn-solve:hover { background: #40916c; color: white; }
 
+    .btn-text-mobile { display: none; }
+
     .btn-edit {
         padding: 6px 10px;
         background: #2196f3;
@@ -668,12 +670,10 @@
             font-size: 0.9rem;
         }
 
-        /* 필터바 가로 스크롤 */
+        /* 필터바 */
         .filter-bar {
-            padding: 8px 6px;
+            padding: 6px 2px;
             margin-bottom: 8px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
             border-radius: 8px;
         }
 
@@ -688,15 +688,21 @@
         }
 
         .subject-btn {
-            padding: 8px 12px;
+            padding: 6px 10px;
             font-size: 0.8rem;
             white-space: nowrap;
             flex-shrink: 0;
-            border-radius: 20px;
+            border-radius: 18px;
+            gap: 3px;
         }
 
         .subject-btn.active {
             box-shadow: 0 2px 8px rgba(45, 106, 79, 0.4);
+        }
+
+        .subject-buttons {
+            justify-content: space-around;
+            width: 100%;
         }
 
         /* 모바일에서 짧은 과목명 표시 */
@@ -728,11 +734,13 @@
 
         .topic-table tbody tr {
             display: flex;
+            flex-direction: row;
             flex-wrap: wrap;
             align-items: center;
+            justify-content: space-between;
             background: white;
             border-radius: 10px;
-            padding: 12px;
+            padding: 10px 8px 10px 4px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             border: 1px solid #e8e8e8;
         }
@@ -750,48 +758,40 @@
         /* 제목 셀 */
         .topic-table .title-cell {
             flex: 1;
-            min-width: 0;
             padding: 0;
             border-radius: 0;
         }
 
         .topic-table .title-cell a {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: #333;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
             display: block;
             padding: 0;
+            line-height: 1.3;
         }
 
-        /* 합계 셀 */
+        /* 합계 셀 - 모바일에서 숨김 */
         .topic-table .total-cell {
-            padding: 4px 10px;
-            background: #e8f5e9;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            color: #2d6a4f;
-            margin-right: 8px;
-            border: none;
+            display: none;
         }
 
-        .topic-table .total-cell::after {
-            content: '문제';
-            margin-left: 2px;
-            font-weight: normal;
-        }
+        /* 버튼 텍스트 토글 */
+        .btn-text-desktop { display: none; }
+        .btn-text-mobile { display: inline; }
 
-        /* 액션 셀 */
+        /* 액션 셀 - 제목 옆 */
         .topic-table td:last-child {
             padding: 0;
             border-radius: 0;
+            flex-shrink: 0;
+            margin-left: 8px;
         }
 
         .btn-solve {
-            padding: 8px 16px;
-            font-size: 0.85rem;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 15px;
         }
 
         /* 카드 터치 피드백 */
@@ -869,7 +869,7 @@
                         {% elif '수목관리' in subject.name %}🌳
                         {% else %}📚{% endif %}
                         <span class="subject-full">{{ subject.name }}</span>
-                        <span class="subject-short">{% if '수목병리' in subject.name %}병리학{% elif '수목해충' in subject.name %}해충학{% elif '수목생리' in subject.name %}생리학{% elif '산림토양' in subject.name %}토양학{% elif '수목관리' in subject.name %}관리학{% else %}{{ subject.name }}{% endif %}</span>
+                        <span class="subject-short">{% if '수목병리' in subject.name %}병{% elif '수목해충' in subject.name %}해{% elif '수목생리' in subject.name %}생{% elif '산림토양' in subject.name %}토{% elif '수목관리' in subject.name %}관{% else %}{{ subject.name|slice:":1" }}{% endif %}</span>
                     </a>
                     {% endif %}
                 {% endfor %}
@@ -902,7 +902,10 @@
                         {% endfor %}
                         <td class="total-cell">{{ set.total }}</td>
                         <td>
-                            <a href="{% url 'study:topic_solve' set.id %}" class="btn-solve">풀기</a>
+                            <a href="{% url 'study:topic_solve' set.id %}" class="btn-solve">
+                                <span class="btn-text-desktop">풀기</span>
+                                <span class="btn-text-mobile">{{ set.total }} ✏️</span>
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
