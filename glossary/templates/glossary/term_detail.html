@@ -343,66 +343,24 @@
             border-radius: 10px;
         }
 
-        /* 문제 카드 스타일 */
-        .question-card {
-            padding: 16px 14px;
-            margin-bottom: 12px;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        }
-
-        .q-badge {
-            font-size: 0.75em;
-            padding: 3px 10px;
-            border-radius: 12px;
-            background: #2d6a4f;
-            color: white;
-        }
-
-        .q-content {
-            font-size: 1rem !important;
-            line-height: 1.6;
-            margin-bottom: 12px;
-            color: #1a1a1a;
-        }
-
-        .q-choices {
-            padding-left: 8px;
-            margin-bottom: 16px;
-        }
-
-        .choice-item {
-            font-size: 0.9rem;
-            padding: 8px 10px;
-            margin-bottom: 6px;
-            border-radius: 8px;
-            background: #fafafa;
-        }
-
-        .choice-item.correct {
-            background: #e8f5e9;
-            border-left: 3px solid #2d6a4f;
-        }
-
-        .explanation-section {
-            padding: 14px;
+        /* 문제 컨테이너 */
+        .questions-outside {
             margin-top: 16px;
-            background: #fffbf0;
-            border: 1px dashed #f0c14b;
-            border-radius: 10px;
         }
 
-        .exp-title {
-            font-size: 0.95rem;
-            margin-bottom: 10px;
-            color: #c87137;
+        /* 문제 카드 - 모바일에서 패딩만 조정 */
+        .question-card {
+            padding: 16px;
+            margin-bottom: 12px;
         }
 
-        .exp-text {
-            font-size: 0.88rem;
-            line-height: 1.7;
-            color: #444;
+        /* 해설 섹션 - 박스 제거하여 여백 최소화 */
+        .explanation-section {
+            background: none;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            margin-top: 12px;
         }
 
         /* 메타 정보 */
@@ -413,12 +371,6 @@
             text-align: right;
         }
 
-        /* 용어 강조 애니메이션 */
-        .term-highlight {
-            background: linear-gradient(120deg, #fff9c4 0%, #ffecb3 100%);
-            padding: 0 2px;
-            border-radius: 2px;
-        }
     }
 </style>
 
@@ -495,15 +447,30 @@
                 </button>
             </div>
             
-            <div style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 4px;">
+            <div id="round-badges" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 4px;">
                 {% for ref in references %}
                 <span class="round-badge" data-round="{{ ref.source_title|slice:':2'|cut:'회' }}">{{ ref.source_title }}</span>
                 {% endfor %}
             </div>
+            <script>
+                // 배지 텍스트 변환 및 회차별 정렬
+                const badgeContainer = document.getElementById('round-badges');
+                const badges = Array.from(badgeContainer.querySelectorAll('.round-badge'));
+
+                // 텍스트 변환 및 정렬 키 추출
+                badges.forEach(badge => {
+                    const match = badge.textContent.match(/(\d+)회\s*(\d+)번/);
+                    if (match) {
+                        badge.dataset.sortKey = parseInt(match[1]) * 1000 + parseInt(match[2]);
+                        badge.textContent = `${match[1]}-${match[2]}`;
+                    }
+                });
+
+                // 회차-번호 순으로 정렬
+                badges.sort((a, b) => (parseInt(a.dataset.sortKey) || 0) - (parseInt(b.dataset.sortKey) || 0));
+                badges.forEach(badge => badgeContainer.appendChild(badge));
+            </script>
             
-            <div id="all-questions-container" style="display: none; margin-top: 15px;">
-                <p id="loading-text" style="color: #666;">문제 불러오는 중...</p>
-            </div>
         </div>
         <style>
             .view-qs-btn {
@@ -528,27 +495,28 @@
                 background-color: #d32f2f;
                 color: white;
             }
-            .round-badge { 
-                display: inline-block; 
-                color: white; 
-                padding: 3px 8px; 
-                border-radius: 12px; 
-                font-size: 0.8rem; 
+            .round-badge {
+                display: inline-block;
+                color: #333;
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 0.8rem;
                 font-weight: 500;
-                background: #757575; 
+                background: white;
+                border: 1.5px solid #757575;
             }
-            .round-badge[data-round="1"] { background: #e53935; }
-            .round-badge[data-round="2"] { background: #d81b60; }
-            .round-badge[data-round="3"] { background: #8e24aa; }
-            .round-badge[data-round="4"] { background: #5e35b1; }
-            .round-badge[data-round="5"] { background: #3949ab; }
-            .round-badge[data-round="6"] { background: #1e88e5; }
-            .round-badge[data-round="7"] { background: #00acc1; }
-            .round-badge[data-round="8"] { background: #00897b; }
-            .round-badge[data-round="9"] { background: #43a047; }
-            .round-badge[data-round="10"] { background: #7cb342; }
-            .round-badge[data-round="11"] { background: #c0ca33; color: #333; }
-            .round-badge[data-round="12"] { background: #ffb300; color: #333; }
+            .round-badge[data-round="1"] { border-color: #e53935; }
+            .round-badge[data-round="2"] { border-color: #d81b60; }
+            .round-badge[data-round="3"] { border-color: #8e24aa; }
+            .round-badge[data-round="4"] { border-color: #5e35b1; }
+            .round-badge[data-round="5"] { border-color: #3949ab; }
+            .round-badge[data-round="6"] { border-color: #1e88e5; }
+            .round-badge[data-round="7"] { border-color: #00acc1; }
+            .round-badge[data-round="8"] { border-color: #00897b; }
+            .round-badge[data-round="9"] { border-color: #43a047; }
+            .round-badge[data-round="10"] { border-color: #7cb342; }
+            .round-badge[data-round="11"] { border-color: #c0ca33; }
+            .round-badge[data-round="12"] { border-color: #ffb300; }
         </style>
         {% endif %}
         
@@ -556,6 +524,13 @@
             최종 수정: {{ term.updated_at|date:"Y-m-d H:i" }}
         </div>
     </div>
+
+    <!-- 문제 컨테이너 - 메인 카드 밖에 배치 -->
+    {% if references %}
+    <div id="all-questions-container" class="questions-outside" style="display: none;">
+        <p id="loading-text" style="color: #666; text-align: center; padding: 20px;">문제 불러오는 중...</p>
+    </div>
+    {% endif %}
 </div>
 
 <script>
@@ -757,26 +732,22 @@ async function toggleAllQuestions() {
                 const circled = ['①','②','③','④','⑤'][i-1];
                 choicesHtml += `
                     <div class="choice-item ${isAnswer ? 'correct' : ''}">
-                        <span class="choice-num ${isAnswer ? 'correct' : ''}" style="position: relative;">${circled}</span> ${highlightTerm(choice)}
+                        <span class="choice-num ${isAnswer ? 'correct' : ''}">${circled}</span> ${highlightTerm(choice)}
                     </div>`;
             }
             
             allHtml += `
                 <div class="question-card">
                     <div class="q-header">
-                        <div style="margin-bottom: 10px;">
-                            <span class="q-badge">${data.exam_round}회</span>
-                        </div>
                         <div class="q-content">
-                            ${data.number}. ${highlightTerm(data.content.replace(/\n/g, '<br>'))}
+                            <span class="q-badge">${data.exam_round}-${data.number}</span> ${highlightTerm(data.content.replace(/\n/g, '<br>'))}
                         </div>
-                        ${data.image ? `<div style="text-align:center; margin-bottom: 20px;"><img src="${data.image}" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #eee;"></div>` : ''}
+                        ${data.image ? `<div style="text-align:center; margin-bottom: 10px;"><img src="${data.image}" style="max-width: 100%; max-height: 400px; border-radius: 8px; border: 1px solid #eee;"></div>` : ''}
                     </div>
                     <div class="q-choices">${choicesHtml}</div>
-                    <div class="explanation-section">
-                        <div class="exp-title">💡 정답 및 해설</div>
-                        <div class="exp-text">${highlightTerm(data.explanation) || '해설 없음'}</div>
-                    </div>
+                </div>
+                <div class="explanation-card">
+                    <div class="exp-text">${highlightTerm(data.explanation) || '해설 없음'}</div>
                 </div>
             `;
         } catch (e) {
@@ -803,14 +774,27 @@ async function toggleAllQuestions() {
 </script>
 
 <style>
-    /* study/detail.html과 동일한 스타일 */
+    /* 문제 컨테이너 - 메인 카드와 동일한 좌우 여백 */
+    .questions-outside {
+        margin-top: 20px;
+        padding: 0;
+    }
+    /* 문제 카드 스타일 */
     .question-card {
         background: white;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 8px;
+    }
+    /* 해설 카드 스타일 */
+    .explanation-card {
+        background: #fffef5;
+        border: 1px solid #f0c14b;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
     .q-header {
         display: block;
@@ -818,64 +802,71 @@ async function toggleAllQuestions() {
         margin-bottom: 5px;
     }
     .q-badge {
-        background: #eee;
-        padding: 5px 10px;
-        border-radius: 15px;
-        font-size: 0.9em;
-        color: #555;
-        float: right;
+        background: #2d6a4f;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.75em;
+        font-weight: normal;
+        margin-right: 6px;
+        vertical-align: middle;
     }
     .q-content {
-        font-size: 1.2em;
+        font-size: 1.1em;
         line-height: 1.6;
-        margin-bottom: 20px;
+        margin-bottom: 16px;
         font-weight: bold;
+        padding-left: 0;
+        text-indent: 0;
     }
     .q-choices {
-        padding-left: 20px;
-        margin-bottom: 20px;
+        padding-left: 10px;
+        margin-bottom: 16px;
     }
     .choice-item {
-        margin-bottom: 8px;
-        font-size: 1.05em;
-        padding: 5px;
-        border-radius: 5px;
+        margin-bottom: 6px;
+        font-size: 1em;
+        padding: 8px 10px 8px 2em;
+        border-radius: 6px;
+        cursor: default;
+        position: relative;
+    }
+    .choice-item .choice-num {
+        position: absolute;
+        left: 10px;
     }
     .choice-item.correct {
-        background-color: #e8f5e9;
-    }
-    .choice-num {
-        display: inline-block;
-        margin-right: 5px;
-        font-size: 1.1em;
+        background-color: transparent;
+        border-left: none;
     }
     .choice-num.correct::before {
         content: "";
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 26px;
-        height: 26px;
+        width: 24px;
+        height: 24px;
         border: 3px solid #d93025;
         border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
         transform: translate(-50%, -50%) rotate(-5deg);
         pointer-events: none;
     }
     .explanation-section {
-        margin-top: 30px;
-        background-color: #fdfdfd;
-        border: 1px dashed #bbb;
-        border-radius: 5px;
-        padding: 20px;
+        margin-top: 16px;
+        background-color: #fafafa;
+        border: none;
+        border-left: 3px solid #f0c14b;
+        border-radius: 0 8px 8px 0;
+        padding: 16px;
     }
     .exp-title {
         font-weight: bold;
         color: #d35400;
-        margin-bottom: 15px;
-        font-size: 1.1em;
+        margin-bottom: 12px;
+        font-size: 1em;
     }
     .exp-text {
-        font-size: 1.0em;
+        font-size: 0.95em;
         line-height: 1.7;
         color: #333;
     }
@@ -885,7 +876,7 @@ async function toggleAllQuestions() {
         padding-left: 2em;
         margin-bottom: 0.8em;
     }
-    .choice-num {
+    .choice-explanation .choice-num {
         position: absolute;
         left: 0;
     }
@@ -921,11 +912,32 @@ async function toggleAllQuestions() {
         color: #d93025;
         font-size: inherit;
         font-weight: inherit;
-        animation: sparkle 1.5s ease-in-out infinite;
     }
-    @keyframes sparkle {
-        0%, 100% { text-shadow: 0 0 5px #ffeb3b, 0 0 10px #ffc107; }
-        50% { text-shadow: 0 0 15px #ffeb3b, 0 0 25px #ffc107, 0 0 35px #ff9800; }
+
+    /* 모바일 - 여백 최소화 */
+    @media (max-width: 480px) {
+        .question-card {
+            padding: 16px;
+            margin-bottom: 6px;
+        }
+        .explanation-card {
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .q-content {
+            margin-bottom: 8px;
+        }
+        .q-choices {
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+        .choice-item {
+            margin-bottom: 2px;
+            padding: 4px 8px 4px 2em;
+        }
+        .exp-title {
+            margin-bottom: 8px;
+        }
     }
 </style>
 {% endblock %}
