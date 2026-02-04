@@ -283,7 +283,7 @@
         background-color: #e8f5e9 !important;
     }
 
-    /* ========== Mobile Responsive ========== */
+    /* ========== Mobile Responsive - Card Layout ========== */
     @media screen and (max-width: 768px) {
         /* Header */
         .custom-header {
@@ -347,41 +347,88 @@
             min-width: 0;
         }
 
-        /* Table */
-        .bbs-wrapper table {
-            font-size: 0.8rem;
+        /* Table Container */
+        .table-container {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
         }
 
-        .bbs-wrapper th {
-            padding: 8px 4px !important;
-            font-size: 0.75rem;
-        }
-
-        .bbs-wrapper td {
-            padding: 8px 4px !important;
-            font-size: 0.8rem;
-        }
-
-        /* Hide 번호 column on mobile */
-        .bbs-wrapper th:first-child,
-        .bbs-wrapper td:first-child {
+        /* Hide table header */
+        .bbs-wrapper thead {
             display: none;
         }
 
-        /* Adjust column widths */
-        .bbs-wrapper th:nth-child(3),
-        .bbs-wrapper td:nth-child(3) {
-            width: 50px !important;
+        /* Table to Card conversion */
+        .bbs-wrapper table {
+            display: block;
+            background: transparent;
         }
 
-        .bbs-wrapper th:nth-child(4),
-        .bbs-wrapper td:nth-child(4) {
-            width: 45px !important;
+        .bbs-wrapper tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .bbs-wrapper th:nth-child(5),
+        .bbs-wrapper tbody tr {
+            display: block;
+            background: white !important;
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid #e8e8e8;
+        }
+
+        .bbs-wrapper tbody tr:hover {
+            border-color: #2d6a4f;
+        }
+
+        /* Hide number column */
+        .bbs-wrapper td:first-child {
+            display: none !important;
+        }
+
+        /* Title - main content */
+        .bbs-wrapper td:nth-child(2) {
+            display: block !important;
+            padding: 0 0 8px 0 !important;
+            border-bottom: 1px dashed #e0e0e0;
+            margin-bottom: 8px;
+        }
+
+        .bbs-wrapper td:nth-child(2) a {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+            font-size: 0.95rem !important;
+            font-weight: 500;
+            line-height: 1.4;
+            color: #333 !important;
+        }
+
+        /* Meta info row */
+        .bbs-wrapper td:nth-child(3),
+        .bbs-wrapper td:nth-child(4),
         .bbs-wrapper td:nth-child(5) {
-            width: 35px !important;
+            display: inline-block !important;
+            padding: 0 !important;
+            font-size: 0.75rem !important;
+            color: #888 !important;
+        }
+
+        .bbs-wrapper td:nth-child(3)::before {
+            content: "👤 ";
+        }
+
+        .bbs-wrapper td:nth-child(4)::before {
+            content: "📅 ";
+            margin-left: 12px;
+        }
+
+        .bbs-wrapper td:nth-child(5)::before {
+            content: "👁 ";
+            margin-left: 12px;
         }
 
         /* Pagination & Write Button */
@@ -436,24 +483,23 @@
             font-size: 0.8rem !important;
         }
 
-        .bbs-wrapper table {
-            font-size: 0.75rem;
+        .bbs-wrapper tbody tr {
+            padding: 10px;
         }
 
-        .bbs-wrapper th {
-            padding: 6px 3px !important;
-            font-size: 0.7rem;
+        .bbs-wrapper td:nth-child(2) a {
+            font-size: 0.9rem !important;
         }
 
-        .bbs-wrapper td {
-            padding: 6px 3px !important;
-            font-size: 0.75rem;
-        }
-
-        /* Hide 조회 column on extra small */
-        .bbs-wrapper th:nth-child(5),
+        .bbs-wrapper td:nth-child(3),
+        .bbs-wrapper td:nth-child(4),
         .bbs-wrapper td:nth-child(5) {
-            display: none;
+            font-size: 0.7rem !important;
+        }
+
+        .bbs-wrapper td:nth-child(4)::before,
+        .bbs-wrapper td:nth-child(5)::before {
+            margin-left: 8px;
         }
 
         .pagination-link {

@@ -345,10 +345,270 @@
         max-width: 100%;
         height: auto;
     }
-    
+
     /* Rows hover */
     tbody tr:hover {
         background-color: #fafdfb;
+    }
+
+    /* ========== Mobile Responsive ========== */
+    @media screen and (max-width: 768px) {
+        /* Header */
+        .custom-header {
+            padding: 12px 16px;
+        }
+
+        .custom-header .logo {
+            font-size: 1.1rem;
+        }
+
+        .custom-header span {
+            display: none;
+        }
+
+        .custom-header .nav-links a,
+        .custom-header .nav-links button {
+            margin-left: 10px;
+            font-size: 0.85rem;
+        }
+
+        /* BBS Wrapper */
+        .bbs-wrapper {
+            padding: 8px !important;
+        }
+
+        .bbs-container {
+            padding: 0 10px !important;
+        }
+
+        /* Post Header */
+        .bbs-container > div:first-child {
+            padding-bottom: 15px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .bbs-container > div:first-child h1 {
+            font-size: 1.1rem !important;
+            line-height: 1.5;
+            margin-bottom: 12px !important;
+        }
+
+        /* Meta Info - stack vertically */
+        .bbs-container > div:first-child > div {
+            flex-wrap: wrap;
+            gap: 8px !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* Edit/Delete buttons */
+        .bbs-container > div:first-child > div > div:last-child {
+            width: 100%;
+            justify-content: flex-end;
+            margin-left: 0 !important;
+            margin-top: 8px;
+        }
+
+        .btn-action.btn-edit,
+        .btn-action.btn-delete {
+            padding: 6px 10px !important;
+            font-size: 0.8rem !important;
+        }
+
+        /* Post Content */
+        .post-content {
+            min-height: 150px !important;
+            margin-bottom: 30px !important;
+            font-size: 0.95rem;
+            line-height: 1.7 !important;
+        }
+
+        .post-content table {
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Comment Section */
+        #comment-section {
+            padding: 12px !important;
+            border-radius: 10px !important;
+        }
+
+        #comment-section ul li {
+            padding: 10px 0 !important;
+        }
+
+        #comment-section ul li > div:first-child {
+            font-size: 0.9rem !important;
+        }
+
+        #comment-section ul li > div:last-child {
+            font-size: 0.8rem !important;
+            gap: 10px !important;
+        }
+
+        /* Comment Form */
+        #comment-section form > div {
+            flex-direction: column;
+            gap: 10px !important;
+        }
+
+        #comment-section form textarea {
+            width: 100%;
+            font-size: 0.9rem !important;
+        }
+
+        #comment-section form button {
+            width: 100%;
+            padding: 12px !important;
+            font-size: 0.9rem !important;
+        }
+
+        /* Related Posts - Card Layout */
+        .bbs-wrapper > .bbs-content > .bbs-container > div:nth-child(4) {
+            margin-top: 30px !important;
+        }
+
+        .bbs-wrapper table thead {
+            display: none;
+        }
+
+        .bbs-wrapper table {
+            display: block;
+        }
+
+        .bbs-wrapper table tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bbs-wrapper table tbody tr {
+            display: block;
+            background: white !important;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid #e8e8e8 !important;
+        }
+
+        .bbs-wrapper table tbody tr:hover {
+            border-color: #2d6a4f !important;
+        }
+
+        /* Hide number column */
+        .bbs-wrapper table td:first-child {
+            display: none !important;
+        }
+
+        /* Title */
+        .bbs-wrapper table td:nth-child(2) {
+            display: block !important;
+            padding: 0 0 6px 0 !important;
+            border-bottom: 1px dashed #e0e0e0;
+            margin-bottom: 6px;
+        }
+
+        .bbs-wrapper table td:nth-child(2) a {
+            white-space: normal !important;
+            overflow: visible !important;
+            font-size: 0.9rem !important;
+            line-height: 1.4;
+        }
+
+        /* Meta info */
+        .bbs-wrapper table td:nth-child(3),
+        .bbs-wrapper table td:nth-child(4),
+        .bbs-wrapper table td:nth-child(5) {
+            display: inline-block !important;
+            padding: 0 !important;
+            font-size: 0.7rem !important;
+            color: #888 !important;
+        }
+
+        .bbs-wrapper table td:nth-child(3)::before {
+            content: "👤 ";
+        }
+
+        .bbs-wrapper table td:nth-child(4)::before {
+            content: "📅 ";
+            margin-left: 10px;
+        }
+
+        .bbs-wrapper table td:nth-child(5)::before {
+            content: "👁 ";
+            margin-left: 10px;
+        }
+
+        /* List Button */
+        .bbs-container > div:last-child {
+            margin-top: 20px !important;
+        }
+
+        .btn-action.btn-list {
+            width: 100%;
+            justify-content: center;
+            padding: 12px !important;
+        }
+    }
+
+    /* Extra small devices */
+    @media screen and (max-width: 400px) {
+        .custom-header {
+            padding: 10px 12px;
+        }
+
+        .custom-header .logo {
+            font-size: 0.95rem;
+        }
+
+        .custom-header .nav-links a,
+        .custom-header .nav-links button {
+            margin-left: 8px;
+            font-size: 0.75rem;
+        }
+
+        .bbs-wrapper {
+            padding: 5px !important;
+        }
+
+        .bbs-container {
+            padding: 0 8px !important;
+        }
+
+        .bbs-container > div:first-child h1 {
+            font-size: 1rem !important;
+        }
+
+        .bbs-container > div:first-child > div {
+            font-size: 0.8rem !important;
+        }
+
+        .post-content {
+            font-size: 0.9rem;
+        }
+
+        #comment-section {
+            padding: 10px !important;
+        }
+
+        .bbs-wrapper table tbody tr {
+            padding: 8px;
+        }
+
+        .bbs-wrapper table td:nth-child(2) a {
+            font-size: 0.85rem !important;
+        }
+
+        .bbs-wrapper table td:nth-child(3),
+        .bbs-wrapper table td:nth-child(4),
+        .bbs-wrapper table td:nth-child(5) {
+            font-size: 0.65rem !important;
+        }
+
+        .bbs-wrapper table td:nth-child(4)::before,
+        .bbs-wrapper table td:nth-child(5)::before {
+            margin-left: 6px;
+        }
     }
 </style>
 {% endblock %}
