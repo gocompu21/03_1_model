@@ -370,12 +370,14 @@
             body {
                 height: 100vh;
                 height: 100dvh;
+                background: linear-gradient(180deg, #e8f5e9 0%, #f5f5f5 100%);
             }
 
             /* Header */
             .main-header {
-                padding: 10px 15px;
+                padding: 12px 16px;
                 flex-wrap: nowrap;
+                background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
             }
 
             .main-header .logo {
@@ -396,7 +398,7 @@
             .main-header .nav-links form,
             .main-header .nav-links button {
                 margin: 0;
-                margin-left: 10px;
+                margin-left: 12px;
                 font-size: 0.8rem;
                 line-height: 1;
                 height: auto;
@@ -419,6 +421,7 @@
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
+                background: transparent;
             }
 
             .chat-container {
@@ -433,92 +436,108 @@
                 overflow: hidden;
             }
 
-            /* Subject buttons */
+            /* Subject buttons - 아이콘 + 텍스트 세로 배치 */
             .subject-header {
                 flex-shrink: 0;
-                padding: 6px 8px;
-                background: white;
-                border-bottom: 1px solid #d8f3dc;
+                padding: 10px 8px;
+                background: linear-gradient(180deg, #ffffff 0%, #fafdfb 100%);
+                border-bottom: none;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
                 display: flex !important;
                 justify-content: center !important;
-                gap: 4px !important;
+                gap: 6px !important;
                 flex-wrap: nowrap !important;
                 margin-bottom: 0 !important;
-            }
-
-            .subject-btn {
-                padding: 5px 8px;
-                font-size: 0.7rem;
-                white-space: nowrap;
-                border-width: 1.5px;
-                border-radius: 15px;
-            }
-
-            /* Show short text, hide full text on mobile */
-            .subject-btn .short-text {
-                display: inline;
-            }
-            .subject-btn .full-text {
-                display: none;
             }
 
             /* Chat Box - scrollable area */
             .chat-box {
                 flex: 1;
-                padding: 10px;
+                padding: 12px;
                 margin-bottom: 0;
                 border: none;
                 border-radius: 0;
-                background-color: #f0f7f4;
+                background: transparent;
                 overflow-y: auto;
                 min-height: 0;
             }
 
+            /* 메시지 버블 개선 */
             .message {
-                padding: 12px;
+                padding: 14px 16px;
                 margin-bottom: 12px;
                 font-size: 0.95rem;
-                border-radius: 12px;
+                border-radius: 16px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                border: none;
+            }
+
+            .user-message {
+                background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+                border-left: 4px solid #4caf50;
+                margin-left: 20px;
+            }
+
+            .ai-message {
+                background: white;
+                border-left: 4px solid #2196f3;
+                margin-right: 20px;
             }
 
             /* Input Group - sticky bottom */
             .input-group {
                 flex-shrink: 0;
-                padding: 10px;
+                padding: 12px 12px 16px 12px;
                 background: white;
-                border-top: 1px solid #d8f3dc;
-                gap: 8px;
+                border-top: none;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+                border-radius: 20px 20px 0 0;
+                gap: 10px;
                 position: relative;
             }
 
             textarea {
-                padding: 0 16px;
-                height: 44px;
+                padding: 0 18px;
+                height: 46px;
                 font-size: 16px;
-                border-radius: 22px;
-                border: 1px solid #d8f3dc;
-                line-height: 44px;
+                border-radius: 23px;
+                border: 2px solid #e0e0e0;
+                line-height: 42px;
                 overflow: hidden;
+                background: #f8f9fa;
+                transition: border-color 0.2s, background-color 0.2s;
+            }
+
+            textarea:focus {
+                border-color: #4caf50;
+                background: white;
             }
 
             textarea.expanded {
                 height: 120px;
                 line-height: 1.5;
-                padding: 12px 16px;
+                padding: 12px 18px;
             }
 
             .expand-btn {
                 display: none;
             }
 
-            /* Send button - icon only */
+            /* Send button - 그라데이션 */
             .send-btn {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
+                width: 46px;
+                height: 46px;
+                min-width: 46px;
                 padding: 0;
                 border-radius: 50%;
                 font-size: 1.2rem;
+                background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+
+            .send-btn:active {
+                transform: scale(0.95);
             }
 
             .send-btn > span,
@@ -532,38 +551,56 @@
             }
 
             .stop-btn {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
+                width: 46px;
+                height: 46px;
+                min-width: 46px;
                 padding: 0;
                 border-radius: 50%;
+                background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+                box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
             }
 
             /* Progress UI */
             .progress-ui {
-                width: 150px;
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                width: 160px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+                border-radius: 16px;
+                background: white;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             }
 
             .progress-text {
-                font-size: 0.75rem;
-                margin-bottom: 6px;
+                font-size: 0.8rem;
+                margin-bottom: 8px;
             }
 
-            /* Welcome Message - compact */
+            /* Welcome Message - 개선 */
             .welcome-message {
-                padding: 40px 15px;
+                padding: 60px 20px;
+                background: transparent;
             }
 
             .welcome-message .welcome-icon {
-                font-size: 3rem;
-                margin-bottom: 15px;
+                font-size: 4rem;
+                margin-bottom: 20px;
+                animation: float 3s ease-in-out infinite;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
             }
 
             .welcome-message .welcome-title {
-                font-size: 1.05rem;
-                margin-bottom: 0;
+                font-size: 1.15rem;
+                margin-bottom: 8px;
+                color: #2d6a4f;
+            }
+
+            .welcome-message .welcome-text {
+                font-size: 0.9rem;
+                color: #666;
             }
 
             /* Hide h1 title on mobile */
@@ -602,7 +639,7 @@
         /* Extra small devices */
         @media screen and (max-width: 480px) {
             .main-header {
-                padding: 8px 10px;
+                padding: 10px 12px;
             }
 
             .main-header .logo {
@@ -617,53 +654,59 @@
             }
 
             .subject-header {
-                padding: 5px 6px;
-                gap: 3px !important;
-            }
-
-            .subject-btn {
-                padding: 4px 6px;
-                font-size: 0.65rem;
-                border-radius: 12px;
+                padding: 8px 6px;
+                gap: 4px !important;
             }
 
             .chat-box {
-                padding: 8px;
+                padding: 10px;
             }
 
             .message {
-                padding: 10px;
+                padding: 12px 14px;
                 font-size: 0.9rem;
                 margin-bottom: 10px;
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
+            .user-message {
+                margin-left: 15px;
+                margin-right: 0;
+            }
+
+            .ai-message {
+                margin-right: 15px;
+                margin-left: 0;
             }
 
             .input-group {
-                padding: 8px;
+                padding: 10px 10px 14px 10px;
             }
 
             textarea {
-                height: 40px;
+                height: 42px;
                 padding: 0 14px;
-                line-height: 40px;
+                line-height: 38px;
             }
 
             .send-btn,
             .stop-btn {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
+                width: 42px;
+                height: 42px;
+                min-width: 42px;
             }
 
             .welcome-message {
-                padding: 30px 10px;
+                padding: 40px 15px;
             }
 
             .welcome-message .welcome-icon {
-                font-size: 2.5rem;
+                font-size: 3rem;
             }
 
             .welcome-message .welcome-title {
-                font-size: 0.95rem;
+                font-size: 1rem;
             }
         }
     </style>
@@ -709,17 +752,18 @@
             <!-- Subject Selection Header -->
             <div class="subject-header" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                 <a href="?subject=수목생리학"
-                    class="subject-btn {% if current_subject == '수목생리학' %}active{% endif %}"><span class="full-text">수목생리학</span><span class="short-text">생리학</span></a>
+                    class="subject-btn subject-physiology {% if current_subject == '수목생리학' %}active{% endif %}"><span class="btn-icon">🌱</span><span class="full-text">수목생리학</span><span class="short-text">생리</span></a>
                 <a href="?subject=수목병리학"
-                    class="subject-btn {% if current_subject == '수목병리학' %}active{% endif %}"><span class="full-text">수목병리학</span><span class="short-text">병리학</span></a>
+                    class="subject-btn subject-pathology {% if current_subject == '수목병리학' %}active{% endif %}"><span class="btn-icon">🦠</span><span class="full-text">수목병리학</span><span class="short-text">병리</span></a>
                 <a href="?subject=수목해충학"
-                    class="subject-btn {% if current_subject == '수목해충학' %}active{% endif %}"><span class="full-text">수목해충학</span><span class="short-text">해충학</span></a>
+                    class="subject-btn subject-entomology {% if current_subject == '수목해충학' %}active{% endif %}"><span class="btn-icon">🐛</span><span class="full-text">수목해충학</span><span class="short-text">해충</span></a>
                 <a href="?subject=산림토양학"
-                    class="subject-btn {% if current_subject == '산림토양학' %}active{% endif %}"><span class="full-text">산림토양학</span><span class="short-text">토양학</span></a>
+                    class="subject-btn subject-soil {% if current_subject == '산림토양학' %}active{% endif %}"><span class="btn-icon">🪨</span><span class="full-text">산림토양학</span><span class="short-text">토양</span></a>
                 <a href="?subject=수목관리학"
-                    class="subject-btn {% if current_subject == '수목관리학' %}active{% endif %}"><span class="full-text">수목관리학</span><span class="short-text">관리학</span></a>
+                    class="subject-btn subject-management {% if current_subject == '수목관리학' %}active{% endif %}"><span class="btn-icon">✂️</span><span class="full-text">수목관리학</span><span class="short-text">관리</span></a>
             </div>
             <style>
+                /* 과목 버튼 기본 스타일 */
                 .subject-btn {
                     background-color: transparent;
                     border: 2px solid #52b788;
@@ -727,21 +771,49 @@
                     padding: 8px 16px;
                     border-radius: 20px;
                     cursor: pointer;
-                    font-weight: bold;
-                    transition: all 0.2s;
+                    font-weight: 600;
+                    transition: all 0.25s ease;
                     font-size: 0.9rem;
                     text-decoration: none;
-                    display: inline-block;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .subject-btn .btn-icon {
+                    font-size: 1rem;
                 }
 
                 .subject-btn:hover {
-                    background-color: #e8f5e9;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(82, 183, 136, 0.3);
                 }
 
                 .subject-btn.active {
-                    background-color: #52b788;
                     color: white;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
                 }
+
+                /* 과목별 고유 색상 */
+                .subject-physiology { border-color: #4caf50; color: #4caf50; }
+                .subject-physiology:hover { background-color: rgba(76, 175, 80, 0.1); }
+                .subject-physiology.active { background: linear-gradient(135deg, #4caf50, #66bb6a); border-color: #4caf50; }
+
+                .subject-pathology { border-color: #e91e63; color: #e91e63; }
+                .subject-pathology:hover { background-color: rgba(233, 30, 99, 0.1); }
+                .subject-pathology.active { background: linear-gradient(135deg, #e91e63, #f06292); border-color: #e91e63; }
+
+                .subject-entomology { border-color: #ff9800; color: #ff9800; }
+                .subject-entomology:hover { background-color: rgba(255, 152, 0, 0.1); }
+                .subject-entomology.active { background: linear-gradient(135deg, #ff9800, #ffb74d); border-color: #ff9800; }
+
+                .subject-soil { border-color: #795548; color: #795548; }
+                .subject-soil:hover { background-color: rgba(121, 85, 72, 0.1); }
+                .subject-soil.active { background: linear-gradient(135deg, #795548, #a1887f); border-color: #795548; }
+
+                .subject-management { border-color: #2196f3; color: #2196f3; }
+                .subject-management:hover { background-color: rgba(33, 150, 243, 0.1); }
+                .subject-management.active { background: linear-gradient(135deg, #2196f3, #64b5f6); border-color: #2196f3; }
 
                 /* Show full text, hide short text on desktop */
                 .subject-btn .short-text {
@@ -751,7 +823,7 @@
                     display: inline;
                 }
 
-                /* Mobile: Show short text, hide full text */
+                /* ===== Mobile 과목 버튼 ===== */
                 @media screen and (max-width: 768px) {
                     .subject-btn .short-text {
                         display: inline !important;
@@ -759,19 +831,35 @@
                     .subject-btn .full-text {
                         display: none !important;
                     }
+                    .subject-btn .btn-icon {
+                        display: block;
+                        font-size: 1.2rem;
+                        margin-bottom: 2px;
+                    }
                     .subject-btn {
-                        padding: 5px 8px !important;
+                        flex: 1 !important;
+                        flex-direction: column;
+                        padding: 8px 4px !important;
                         font-size: 0.7rem !important;
-                        border-radius: 15px !important;
+                        border-radius: 10px !important;
+                        text-align: center !important;
+                        gap: 0 !important;
+                        min-width: 0;
+                    }
+                    .subject-btn:hover {
+                        transform: none;
                     }
                 }
 
                 /* Extra small devices */
                 @media screen and (max-width: 400px) {
                     .subject-btn {
-                        padding: 4px 6px !important;
+                        padding: 6px 2px !important;
                         font-size: 0.65rem !important;
-                        border-radius: 12px !important;
+                        border-radius: 8px !important;
+                    }
+                    .subject-btn .btn-icon {
+                        font-size: 1rem;
                     }
                 }
             </style>

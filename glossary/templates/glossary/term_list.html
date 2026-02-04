@@ -581,8 +581,9 @@
                 {% endif %}
             </td>
             <td class="bar-cell" style="padding: 4px 4px; border-bottom: 1px solid #eee; width: 50px;">
-                <div class="freq-bar bar-{{ term.filtered_ref_count|default:0 }}">
-                    {% with count=term.filtered_ref_count|default:0 %}
+                {% if term.filtered_ref_count %}
+                <div class="freq-bar bar-{{ term.filtered_ref_count }}">
+                    {% with count=term.filtered_ref_count %}
                     <span class="bar-segment {% if count >= 1 %}active{% endif %}"></span>
                     <span class="bar-segment {% if count >= 3 %}active{% endif %}"></span>
                     <span class="bar-segment {% if count >= 5 %}active{% endif %}"></span>
@@ -590,9 +591,10 @@
                     <span class="bar-segment {% if count >= 15 %}active{% endif %}"></span>
                     {% endwith %}
                 </div>
+                {% endif %}
             </td>
             <td class="count-cell count-{{ term.filtered_ref_count|default:0 }}" style="padding: 4px 2px; border-bottom: 1px solid #eee; text-align: center; width: 28px;">
-                {{ term.filtered_ref_count|default:0 }}
+                {% if term.filtered_ref_count %}{{ term.filtered_ref_count }}{% endif %}
             </td>
             <td class="refs-cell" style="padding: 4px 10px; border-bottom: 1px solid #eee;">
                 {% for ref in term.filtered_references %}
@@ -653,7 +655,7 @@
         .bar-segment {
             width: 6px;
             height: 10px;
-            background: #e0e0e0;
+            background: transparent;
             border-radius: 1px;
         }
         .bar-segment.active:nth-child(1) { background: #90caf9; }  /* 1회 - 연파랑 */
