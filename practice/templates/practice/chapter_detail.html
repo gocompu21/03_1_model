@@ -201,6 +201,75 @@
         width: 20px;
         height: 20px;
     }
+
+    /* 이미지 라이트박스 모달 */
+    .lightbox-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        touch-action: none;
+    }
+
+    .lightbox-overlay.active {
+        display: flex;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        font-size: 24px;
+        cursor: pointer;
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .lightbox-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .lightbox-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .lightbox-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        transform-origin: center center;
+        transition: transform 0.1s ease-out;
+        will-change: transform;
+    }
+
+    .lightbox-hint {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
     
     .empty-content {
         text-align: center;
@@ -622,8 +691,31 @@
     </div>
 </div>
 
+<!-- 라이트박스 모달 -->
+<div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close">&times;</button>
+    <div class="lightbox-container" id="lightbox-container">
+        <img class="lightbox-img" id="lightbox-img" src="" alt="확대 이미지">
+    </div>
+    <div class="lightbox-hint">두 손가락으로 확대/축소</div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxContainer = document.getElementById('lightbox-container');
+
+    let scale = 1;
+    let posX = 0;
+    let posY = 0;
+    let startDistance = 0;
+    let startScale = 1;
+    let startX = 0;
+    let startY = 0;
+    let isDragging = false;
+
     // content-body 내의 모든 이미지에 확대 버튼 추가
     const images = document.querySelectorAll('.content-body img');
 
@@ -637,7 +729,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 확대 버튼 생성
         const zoomBtn = document.createElement('button');
         zoomBtn.className = 'img-zoom-btn';
-        zoomBtn.title = '새 창에서 보기';
+        zoomBtn.title = '확대 보기';
         zoomBtn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="15 3 21 3 21 9"></polyline>
@@ -647,14 +739,142 @@ document.addEventListener('DOMContentLoaded', function() {
             </svg>
         `;
 
-        // 클릭 시 새 탭에서 이미지 열기
+        // 클릭 시 라이트박스 열기
         zoomBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            window.open(img.src, '_blank');
+            openLightbox(img.src);
+        });
+
+        // 이미지 직접 클릭 시에도 라이트박스 열기
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', function(e) {
+            e.preventDefault();
+            openLightbox(img.src);
         });
 
         wrapper.appendChild(zoomBtn);
     });
+
+    function openLightbox(src) {
+        lightboxImg.src = src;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        resetTransform();
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        resetTransform();
+    }
+
+    function resetTransform() {
+        scale = 1;
+        posX = 0;
+        posY = 0;
+        applyTransform();
+    }
+
+    function applyTransform() {
+        lightboxImg.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    }
+
+    function getDistance(touches) {
+        return Math.hypot(
+            touches[0].clientX - touches[1].clientX,
+            touches[0].clientY - touches[1].clientY
+        );
+    }
+
+    function getCenter(touches) {
+        return {
+            x: (touches[0].clientX + touches[1].clientX) / 2,
+            y: (touches[0].clientY + touches[1].clientY) / 2
+        };
+    }
+
+    // 닫기 버튼
+    lightboxClose.addEventListener('click', closeLightbox);
+
+    // 배경 클릭 시 닫기 (scale이 1일 때만)
+    lightbox.addEventListener('click', function(e) {
+        if (e.target === lightbox || e.target === lightboxContainer) {
+            if (scale <= 1) {
+                closeLightbox();
+            }
+        }
+    });
+
+    // ESC 키로 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+            closeLightbox();
+        }
+    });
+
+    // 터치 이벤트 - 핀치 줌
+    lightboxContainer.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            startDistance = getDistance(e.touches);
+            startScale = scale;
+        } else if (e.touches.length === 1 && scale > 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - posX;
+            startY = e.touches[0].clientY - posY;
+        }
+    }, { passive: false });
+
+    lightboxContainer.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const currentDistance = getDistance(e.touches);
+            const newScale = startScale * (currentDistance / startDistance);
+            scale = Math.min(Math.max(newScale, 0.5), 5);
+            applyTransform();
+        } else if (e.touches.length === 1 && isDragging && scale > 1) {
+            e.preventDefault();
+            posX = e.touches[0].clientX - startX;
+            posY = e.touches[0].clientY - startY;
+            applyTransform();
+        }
+    }, { passive: false });
+
+    lightboxContainer.addEventListener('touchend', function(e) {
+        isDragging = false;
+        if (scale < 1) {
+            scale = 1;
+            posX = 0;
+            posY = 0;
+            applyTransform();
+        }
+    });
+
+    // 더블탭으로 확대/축소
+    let lastTap = 0;
+    lightboxContainer.addEventListener('touchend', function(e) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+
+        if (tapLength < 300 && tapLength > 0 && e.changedTouches.length === 1) {
+            e.preventDefault();
+            if (scale > 1) {
+                resetTransform();
+            } else {
+                scale = 2.5;
+                applyTransform();
+            }
+        }
+        lastTap = currentTime;
+    });
+
+    // 마우스 휠 줌 (데스크탑)
+    lightboxContainer.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        scale = Math.min(Math.max(scale * delta, 0.5), 5);
+        applyTransform();
+    }, { passive: false });
 });
 </script>
 {% endblock %}
