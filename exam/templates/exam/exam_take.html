@@ -553,14 +553,13 @@
                 display: none !important;
             }
 
-            /* 모바일 타이머 */
+            /* 모바일 타이머 - 헤더 스타일 */
             .mobile-timer {
                 display: flex !important;
-                justify-content: center;
+                justify-content: space-between;
                 align-items: center;
-                gap: 10px;
-                padding: 12px;
-                background: #2c5f2d;
+                padding: 10px 16px;
+                background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
                 font-weight: bold;
                 font-size: 1rem;
                 color: white;
@@ -569,32 +568,45 @@
                 z-index: 100;
             }
 
-            /* 모바일용 제출 버튼 */
-            .mobile-submit-container {
-                display: block !important;
-                position: sticky;
-                bottom: 0;
-                background: white;
-                padding: 12px;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
-                z-index: 100;
+            .mobile-timer .timer-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
             }
 
-            .mobile-submit-btn {
-                width: 100%;
-                padding: 16px;
-                background: linear-gradient(135deg, #2c5f2d, #40916c);
+            .mobile-timer .round-badge {
+                background: rgba(255,255,255,0.2);
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 0.9rem;
+            }
+
+            .mobile-timer .time-display {
+                font-size: 1rem;
+                font-weight: 600;
+            }
+
+            /* 모바일 헤더 제출 버튼 */
+            .mobile-header-submit {
+                background: #ff6b35;
                 color: white;
                 border: none;
-                border-radius: 10px;
-                font-size: 1.1rem;
-                font-weight: bold;
+                padding: 6px 12px;
+                border-radius: 16px;
+                font-size: 0.8rem;
+                font-weight: 600;
                 cursor: pointer;
-                box-shadow: 0 4px 12px rgba(44, 95, 45, 0.3);
+                box-shadow: 0 2px 6px rgba(255, 107, 53, 0.3);
             }
 
-            .mobile-submit-btn:active {
-                transform: scale(0.98);
+            .mobile-header-submit:active {
+                transform: scale(0.95);
+                box-shadow: 0 1px 4px rgba(255, 107, 53, 0.4);
+            }
+
+            /* 하단 제출 버튼 숨김 */
+            .mobile-submit-container {
+                display: none !important;
             }
         }
 
@@ -626,8 +638,11 @@
 
         <!-- 모바일 타이머 -->
         <div class="mobile-timer">
-            <span style="font-weight: normal;">{{exam.round_number}}회</span>
-            <span>⏱️ <span id="mobile-elapsed-time">00:00:00</span></span>
+            <div class="timer-left">
+                <span class="round-badge">{{exam.round_number}}회</span>
+                <span class="time-display">⏱️ <span id="mobile-elapsed-time">00:00:00</span></span>
+            </div>
+            <button type="submit" class="mobile-header-submit">제출하기</button>
         </div>
 
         <!-- Question Panel (Left) -->
