@@ -177,7 +177,7 @@
             </div>
 
             <!-- Related Posts List -->
-            <div
+            <div class="related-posts"
                 style="margin-top: 50px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid #e0e0e0;">
                 <h3
                     style="padding: 10px 20px; margin: 0; font-size: 1rem; color: #333; border-bottom: 2px solid #2d6a4f; background: #f8f9fa;">
@@ -465,25 +465,25 @@
         }
 
         /* Related Posts - Card Layout */
-        .bbs-wrapper > .bbs-content > .bbs-container > div:nth-child(4) {
+        .related-posts {
             margin-top: 30px !important;
         }
 
-        .bbs-wrapper table thead {
+        .related-posts thead {
             display: none;
         }
 
-        .bbs-wrapper table {
+        .related-posts table {
             display: block;
         }
 
-        .bbs-wrapper table tbody {
+        .related-posts tbody {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
 
-        .bbs-wrapper table tbody tr {
+        .related-posts tbody tr {
             display: block;
             background: white !important;
             border-radius: 8px;
@@ -491,24 +491,24 @@
             border: 1px solid #e8e8e8 !important;
         }
 
-        .bbs-wrapper table tbody tr:hover {
+        .related-posts tbody tr:hover {
             border-color: #2d6a4f !important;
         }
 
         /* Hide number column */
-        .bbs-wrapper table td:first-child {
+        .related-posts td:first-child {
             display: none !important;
         }
 
         /* Title */
-        .bbs-wrapper table td:nth-child(2) {
+        .related-posts td:nth-child(2) {
             display: block !important;
             padding: 0 0 6px 0 !important;
             border-bottom: 1px dashed #e0e0e0;
             margin-bottom: 6px;
         }
 
-        .bbs-wrapper table td:nth-child(2) a {
+        .related-posts td:nth-child(2) a {
             white-space: normal !important;
             overflow: visible !important;
             font-size: 0.9rem !important;
@@ -516,25 +516,25 @@
         }
 
         /* Meta info */
-        .bbs-wrapper table td:nth-child(3),
-        .bbs-wrapper table td:nth-child(4),
-        .bbs-wrapper table td:nth-child(5) {
+        .related-posts td:nth-child(3),
+        .related-posts td:nth-child(4),
+        .related-posts td:nth-child(5) {
             display: inline-block !important;
             padding: 0 !important;
             font-size: 0.7rem !important;
             color: #888 !important;
         }
 
-        .bbs-wrapper table td:nth-child(3)::before {
+        .related-posts td:nth-child(3)::before {
             content: "👤 ";
         }
 
-        .bbs-wrapper table td:nth-child(4)::before {
+        .related-posts td:nth-child(4)::before {
             content: "📅 ";
             margin-left: 10px;
         }
 
-        .bbs-wrapper table td:nth-child(5)::before {
+        .related-posts td:nth-child(5)::before {
             content: "👁 ";
             margin-left: 10px;
         }
@@ -591,22 +591,22 @@
             padding: 10px !important;
         }
 
-        .bbs-wrapper table tbody tr {
+        .related-posts tbody tr {
             padding: 8px;
         }
 
-        .bbs-wrapper table td:nth-child(2) a {
+        .related-posts td:nth-child(2) a {
             font-size: 0.85rem !important;
         }
 
-        .bbs-wrapper table td:nth-child(3),
-        .bbs-wrapper table td:nth-child(4),
-        .bbs-wrapper table td:nth-child(5) {
+        .related-posts td:nth-child(3),
+        .related-posts td:nth-child(4),
+        .related-posts td:nth-child(5) {
             font-size: 0.65rem !important;
         }
 
-        .bbs-wrapper table td:nth-child(4)::before,
-        .bbs-wrapper table td:nth-child(5)::before {
+        .related-posts td:nth-child(4)::before,
+        .related-posts td:nth-child(5)::before {
             margin-left: 6px;
         }
     }
