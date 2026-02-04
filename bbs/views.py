@@ -152,6 +152,51 @@ def comment_delete(request, pk):
     return redirect("bbs:post_detail", pk=comment.post.pk)
 
 
+def post_list_api(request):
+    """API endpoint for infinite scroll on mobile."""
+    query = request.GET.get("q", "")
+    page_number = int(request.GET.get("page", 1))
+    category = request.GET.get("category", "ALL")
+
+    posts = Post.objects.all().order_by("-created_at")
+
+    if category == "BOOK":
+        posts = posts.filter(type__name="기본서")
+    elif category == "DOCTOR":
+        posts = posts.filter(type__name="주치의")
+    elif category == "GENERAL":
+        posts = posts.filter(type__name="일반 질의")
+
+    if query:
+        posts = posts.filter(
+            Q(title__icontains=query)
+            | Q(content__icontains=query)
+            | Q(author__username__icontains=query)
+        )
+
+    paginator = Paginator(posts, 20)
+    page_obj = paginator.get_page(page_number)
+
+    posts_data = []
+    for post in page_obj:
+        author_name = post.author.first_name if post.author.first_name else post.author.username
+        posts_data.append({
+            "pk": post.pk,
+            "title": post.title,
+            "author": author_name,
+            "created_at": post.created_at.strftime("%m/%d"),
+            "hits": post.hits,
+            "comment_count": post.comments.count(),
+        })
+
+    return JsonResponse({
+        "posts": posts_data,
+        "has_next": page_obj.has_next(),
+        "current_page": page_obj.number,
+        "total_pages": paginator.num_pages,
+    })
+
+
 @login_required
 def image_upload(request):
     """Handle image upload from Summernote editor."""

@@ -91,13 +91,18 @@
             <a href="?category=GENERAL&q={{ query }}" class="filter-btn {% if category == 'GENERAL' %}active{% endif %}">일반 질의</a>
         </div>
 
-        <!-- Search Form -->
-        <form method="get" action="" style="display: flex; gap: 5px;">
-            <input type="hidden" name="category" value="{{ category }}">
-            <input type="text" name="q" value="{{ query }}" placeholder="검색어를 입력하세요"
-                style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; width: 200px; font-size: 0.9rem;">
-            <button type="submit" class="btn-search-icon">🔍</button>
-        </form>
+        <!-- Search Form + Write Button -->
+        <div class="search-write-area">
+            <form method="get" action="" style="display: flex; gap: 5px; flex: 1;">
+                <input type="hidden" name="category" value="{{ category }}">
+                <input type="text" name="q" value="{{ query }}" placeholder="검색어를 입력하세요"
+                    style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; width: 200px; font-size: 0.9rem;">
+                <button type="submit" class="btn-search-icon">🔍</button>
+            </form>
+            {% if user.is_authenticated %}
+            <a href="{% url 'bbs:post_create' %}" class="btn-write-top">✏️ 글쓰기</a>
+            {% endif %}
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -149,8 +154,8 @@
             </table>
         </div>
 
-        <!-- Pagination & Write Button -->
-        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
+        <!-- Pagination & Write Button (Desktop) -->
+        <div class="pagination-area" style="margin-top: 20px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
             <div></div> <!-- Spacer -->
 
             <div style="text-align: center;">
@@ -178,6 +183,24 @@
                 <a href="{% url 'bbs:post_create' %}" class="btn-write">✏️ 글쓰기</a>
                 {% endif %}
             </div>
+        </div>
+
+        <!-- Loading Indicator (Mobile Infinite Scroll) -->
+        <div id="scroll-loading" class="scroll-loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <span>게시글 불러오는 중...</span>
+        </div>
+
+        <!-- End of List Message -->
+        <div id="scroll-end" class="scroll-end" style="display: none;">
+            <span>📋 모든 게시글을 불러왔습니다</span>
+        </div>
+
+        <!-- Mobile Write Button (Fixed) -->
+        <div class="mobile-write-btn-area">
+            {% if user.is_authenticated %}
+            <a href="{% url 'bbs:post_create' %}" class="btn-write-mobile"></a>
+            {% endif %}
         </div>
 
     </div>
@@ -244,6 +267,17 @@
         transform: scale(1.1);
     }
 
+    /* Search + Write area (desktop) */
+    .search-write-area {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn-write-top {
+        display: none; /* Hidden on desktop, shown on mobile */
+    }
+
     .btn-write {
         background-color: #2d6a4f;
         color: white;
@@ -300,9 +334,18 @@
 
     /* ========== Mobile Responsive - Card Layout ========== */
     @media screen and (max-width: 768px) {
-        /* Header */
+        /* main.container 패딩 제거 */
+        main.container {
+            padding: 0 !important;
+        }
+
+        /* Header - 그라데이션 + 고정 */
         .custom-header {
             padding: 12px 16px;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .custom-header .logo {
@@ -315,29 +358,50 @@
 
         .custom-header .nav-links a,
         .custom-header .nav-links button {
-            margin-left: 10px;
-            font-size: 0.85rem;
+            margin-left: 12px;
+            font-size: 0.8rem;
         }
 
-        /* BBS Wrapper */
+        /* BBS Wrapper - 배경 그라데이션 */
         .bbs-wrapper {
-            padding: 8px !important;
+            padding: 10px 0 !important; /* 좌우 여백 제거 */
             font-size: 0.9rem;
+            background: linear-gradient(180deg, #e8f5e9 0%, #f5f5f5 100%);
+            min-height: calc(100vh - 50px);
         }
 
-        /* Top Toolbar */
+        /* Top Toolbar - 고정 */
         .bbs-wrapper > div:first-child {
             flex-direction: column;
             align-items: stretch !important;
             gap: 8px !important;
+            position: fixed;
+            top: 44px; /* Header height */
+            left: 0;
+            right: 0;
+            z-index: 99;
+            background: linear-gradient(180deg, #f8faf9 0%, #ffffff 100%);
+            padding: 12px 12px 14px 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border-bottom: none;
         }
 
-        /* Category Filters */
+        /* 고정 헤더 아래 콘텐츠 여백 */
+        .bbs-content {
+            margin-top: 100px !important;
+        }
+
+        /* Category Filters - 개선 */
         .category-filters {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
-            padding-bottom: 2px;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            display: flex;
+            gap: 8px;
         }
 
         .category-filters::-webkit-scrollbar {
@@ -345,21 +409,86 @@
         }
 
         .filter-btn {
-            padding: 5px 10px;
-            font-size: 0.75rem;
+            padding: 7px 14px;
+            font-size: 0.8rem;
             white-space: nowrap;
             flex-shrink: 0;
+            border-radius: 20px;
+            transition: all 0.2s;
+            background: white;
+            border: 1px solid #ddd;
+            color: #666;
+            font-weight: 500;
         }
 
-        /* Search Form */
-        .bbs-wrapper form[method="get"] {
+        .filter-btn:hover {
+            background: #f0f7f4;
+            border-color: #2d6a4f;
+            color: #2d6a4f;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 2px 6px rgba(45, 106, 79, 0.3);
+        }
+
+        /* Search + Write area - 모바일 */
+        .search-write-area {
+            display: flex;
+            gap: 8px;
+            align-items: center;
             width: 100%;
+        }
+
+        .search-write-area form {
+            flex: 1;
+            min-width: 0;
         }
 
         .bbs-wrapper form[method="get"] input[type="text"] {
             flex: 1;
             width: auto !important;
             min-width: 0;
+            border: 1px solid #ddd;
+            background: white;
+            transition: all 0.2s;
+            border-radius: 20px !important;
+            padding: 9px 16px !important;
+            font-size: 0.85rem;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+
+        .bbs-wrapper form[method="get"] input[type="text"]:focus {
+            border-color: #2d6a4f;
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+        }
+
+        /* Top Write Button - 모바일 */
+        .btn-write-top {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            color: white;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 9px 14px;
+            border-radius: 20px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(45, 106, 79, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-write-top:active {
+            transform: scale(0.95);
+            box-shadow: 0 1px 3px rgba(45, 106, 79, 0.3);
         }
 
         /* Table Container */
@@ -383,20 +512,25 @@
         .bbs-wrapper tbody {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
+            padding: 0 8px;
         }
 
+        /* 카드 스타일 - 배경색 보이도록 */
         .bbs-wrapper tbody tr {
             display: block;
             background: white !important;
             border-radius: 10px;
-            padding: 12px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-            border: 1px solid #e8e8e8;
+            padding: 14px 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            border: none;
+            transition: background-color 0.2s;
         }
 
         .bbs-wrapper tbody tr:hover {
-            border-color: #2d6a4f;
+            transform: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            background-color: #fafdfb !important;
         }
 
         /* Hide number column */
@@ -407,9 +541,9 @@
         /* Title - main content */
         .bbs-wrapper td:nth-child(2) {
             display: block !important;
-            padding: 0 0 8px 0 !important;
+            padding: 0 0 10px 0 !important;
             border-bottom: 1px dashed #e0e0e0;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .bbs-wrapper td:nth-child(2) a {
@@ -417,8 +551,8 @@
             overflow: visible !important;
             text-overflow: clip !important;
             font-size: 0.95rem !important;
-            font-weight: 500;
-            line-height: 1.4;
+            font-weight: 600;
+            line-height: 1.5;
             color: #333 !important;
         }
 
@@ -455,16 +589,31 @@
         }
 
         .pagination-link {
-            padding: 6px 10px;
+            padding: 8px 12px;
             font-size: 0.8rem;
-            margin: 0 1px;
+            margin: 0 2px;
+            border-radius: 8px;
         }
 
+        .pagination-link.active {
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            box-shadow: 0 2px 8px rgba(45, 106, 79, 0.4);
+        }
+
+        /* 글쓰기 버튼 - 그라데이션 */
         .btn-write {
             width: 100%;
             text-align: center;
-            padding: 10px 16px;
-            font-size: 0.9rem;
+            padding: 14px 16px;
+            font-size: 0.95rem;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            box-shadow: 0 4px 12px rgba(45, 106, 79, 0.4);
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-write:active {
+            transform: scale(0.98);
         }
     }
 
@@ -485,21 +634,40 @@
         }
 
         .bbs-wrapper {
-            padding: 5px !important;
+            padding: 8px 0 !important; /* 좌우 여백 제거 */
+        }
+
+        .category-filters {
+            padding: 3px;
         }
 
         .filter-btn {
-            padding: 4px 8px;
-            font-size: 0.7rem;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+        }
+
+        .bbs-wrapper > div:first-child {
+            top: 38px; /* Smaller header */
         }
 
         .bbs-wrapper form[method="get"] input[type="text"] {
-            padding: 6px 10px !important;
+            padding: 8px 14px !important;
             font-size: 0.8rem !important;
         }
 
+        .btn-write-top {
+            font-size: 0.75rem;
+            padding: 8px 12px;
+        }
+
+        .bbs-wrapper tbody {
+            gap: 5px;
+            padding: 0 6px;
+        }
+
         .bbs-wrapper tbody tr {
-            padding: 10px;
+            padding: 12px 14px;
+            border-radius: 8px;
         }
 
         .bbs-wrapper td:nth-child(2) a {
@@ -518,14 +686,183 @@
         }
 
         .pagination-link {
-            padding: 5px 8px;
+            padding: 6px 10px;
             font-size: 0.75rem;
         }
 
         .btn-write {
-            padding: 8px 14px;
-            font-size: 0.85rem;
+            padding: 12px 14px;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* ========== Infinite Scroll Styles ========== */
+    .scroll-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 20px;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e0e0e0;
+        border-top-color: #4caf50;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .scroll-end {
+        text-align: center;
+        padding: 20px;
+        color: #888;
+        font-size: 0.85rem;
+    }
+
+    /* Mobile Write Button - Fixed at bottom */
+    .mobile-write-btn-area {
+        display: none;
+    }
+
+    @media screen and (max-width: 768px) {
+        /* Hide desktop pagination on mobile */
+        .pagination-area {
+            display: none !important;
+        }
+
+        /* Hide FAB - now using top button */
+        .mobile-write-btn-area {
+            display: none !important;
+        }
+
+        /* Add padding at bottom for scroll */
+        .bbs-wrapper {
+            padding-bottom: 20px !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
         }
     }
 </style>
+
+<!-- Infinite Scroll Script (Mobile Only) -->
+<script>
+(function() {
+    // Only enable on mobile
+    function isMobile() {
+        return window.innerWidth <= 768;
+    }
+
+    if (!isMobile()) return;
+
+    const tbody = document.querySelector('.bbs-wrapper tbody');
+    const loadingEl = document.getElementById('scroll-loading');
+    const endEl = document.getElementById('scroll-end');
+
+    let currentPage = 1;
+    let isLoading = false;
+    let hasNext = {{ page_obj.has_next|yesno:"true,false" }};
+    const category = "{{ category }}";
+    const query = "{{ query }}";
+
+    // Create post card HTML
+    function createPostCard(post) {
+        const tr = document.createElement('tr');
+        tr.style.cssText = 'border-bottom: 1px solid #eee;';
+
+        const url = `/bbs/${post.pk}/?category=${category}&q=${encodeURIComponent(query)}`;
+        const commentHtml = post.comment_count > 0
+            ? `<span style="color: #e63946; font-size: 0.9em; font-weight: normal;">[${post.comment_count}]</span>`
+            : '';
+
+        tr.innerHTML = `
+            <td style="padding: 2px 2px; text-align: center; color: #888;">${post.pk}</td>
+            <td style="padding: 2px 2px;">
+                <a href="${url}" style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${escapeHtml(post.title)} ${commentHtml}
+                </a>
+            </td>
+            <td style="padding: 2px 2px; text-align: center; color: #555;">${escapeHtml(post.author)}</td>
+            <td style="padding: 2px 2px; text-align: center; color: #888; font-size: 0.9em;">${post.created_at}</td>
+            <td style="padding: 2px 2px; text-align: center; color: #888;">${post.hits}</td>
+        `;
+
+        return tr;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Load more posts
+    async function loadMore() {
+        if (isLoading || !hasNext) return;
+
+        isLoading = true;
+        loadingEl.style.display = 'flex';
+
+        try {
+            const response = await fetch(`/bbs/api/posts/?page=${currentPage + 1}&category=${category}&q=${encodeURIComponent(query)}`);
+            const data = await response.json();
+
+            data.posts.forEach(post => {
+                tbody.appendChild(createPostCard(post));
+            });
+
+            currentPage = data.current_page;
+            hasNext = data.has_next;
+
+            if (!hasNext) {
+                endEl.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Failed to load posts:', error);
+        } finally {
+            isLoading = false;
+            loadingEl.style.display = 'none';
+        }
+    }
+
+    // Scroll detection with throttle
+    let ticking = false;
+
+    function onScroll() {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const windowHeight = window.innerHeight;
+                const docHeight = document.documentElement.scrollHeight;
+
+                // Load more when 200px from bottom
+                if (scrollTop + windowHeight >= docHeight - 200) {
+                    loadMore();
+                }
+
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Handle resize - reload page if switching between mobile/desktop
+    let wasMobile = isMobile();
+    window.addEventListener('resize', () => {
+        const nowMobile = isMobile();
+        if (wasMobile !== nowMobile) {
+            window.location.reload();
+        }
+    });
+})();
+</script>
 {% endblock %}
