@@ -4,20 +4,71 @@
 {% block title %}찾아보기{% endblock %}
 
 {% block header %}
-<header style="background-color: #2d6a4f; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
-    <a href="{% url 'main:index' %}" style="color: white; font-size: 1.5rem; font-weight: bold; text-decoration: none;">🌳 나무의사 합격반</a>
-    <nav style="display: flex; align-items: center; gap: 20px;">
+<header class="glossary-header">
+    <a href="{% url 'main:index' %}" class="header-logo">🌳 나무의사 합격반</a>
+    <nav class="header-nav">
         {% if user.is_authenticated %}
-        <span style="color: rgba(255,255,255,0.8);">{{ user.username }}님</span>
+        <span class="user-name">{{ user.username }}님</span>
         {% if user.is_staff or user.is_superuser %}
-        <a href="{% url 'dashboard:index' %}" style="color: #ffc107; text-decoration: none; font-weight: 500;">관리메뉴</a>
+        <a href="{% url 'dashboard:index' %}" class="admin-link">관리</a>
         {% endif %}
-        <a href="{% url 'mypage:index' %}" style="color: white; text-decoration: none; font-weight: 500;">마이페이지</a>
+        <a href="{% url 'mypage:index' %}" class="nav-link">마이</a>
         {% else %}
-        <a href="{% url 'accounts:user_login' %}" style="color: white; text-decoration: none;">로그인</a>
+        <a href="{% url 'accounts:user_login' %}" class="nav-link">로그인</a>
         {% endif %}
     </nav>
 </header>
+<style>
+    .glossary-header {
+        background-color: #2d6a4f;
+        padding: 15px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .header-logo {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    .header-nav {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .user-name {
+        color: rgba(255,255,255,0.8);
+    }
+    .admin-link {
+        color: #ffc107;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .nav-link {
+        color: white;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    @media (max-width: 480px) {
+        .glossary-header {
+            padding: 8px 8px;
+        }
+        .header-logo {
+            font-size: 1rem;
+        }
+        .header-nav {
+            gap: 8px;
+        }
+        .user-name {
+            display: none;
+        }
+        .admin-link, .nav-link {
+            font-size: 0.8rem;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -138,6 +189,168 @@
         color: rgba(255, 255, 255, 0.7);
         font-size: 1.1rem;
     }
+
+    /* 모바일 최적화 */
+    @media (max-width: 480px) {
+        body {
+            background: white !important;
+        }
+
+        .glossary-container {
+            padding: 2px 0 0 0;
+            margin: 0;
+        }
+
+        main.container,
+        main {
+            padding: 0 4px !important;
+            margin: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+        }
+
+        /* 헤더 숨김 */
+        header {
+            padding: 10px 15px !important;
+        }
+
+        header a[href*="main:index"] {
+            font-size: 1.1rem !important;
+        }
+
+        header nav {
+            gap: 10px !important;
+        }
+
+        header nav span,
+        header nav a {
+            font-size: 0.85rem !important;
+        }
+
+        /* 과목 버튼 - 한 줄, 짧은 이름 */
+        .subject-buttons {
+            gap: 4px !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            width: 100%;
+            justify-content: space-around;
+        }
+
+        .subject-btn {
+            padding: 5px 8px !important;
+            font-size: 0.75rem !important;
+            gap: 2px !important;
+        }
+
+        .subject-btn .subject-full {
+            display: none !important;
+        }
+
+        .subject-btn .subject-short {
+            display: inline !important;
+        }
+
+        /* 인덱스 탭 - 작게 */
+        .glossary-tab {
+            padding: 4px 8px !important;
+            font-size: 0.75rem !important;
+        }
+
+        /* 기출 필터 */
+        .exam-segmented-control {
+            height: 26px !important;
+        }
+
+        .exam-option {
+            padding: 0 8px !important;
+            font-size: 0.75rem !important;
+        }
+
+        /* 테이블 최적화 */
+        table {
+            font-size: 0.75rem !important;
+        }
+
+        table td {
+            padding: 3px 4px !important;
+        }
+
+        /* 초성 열 */
+        .initial-cell {
+            width: 20px !important;
+            padding: 4px 4px !important;
+            font-size: 0.8rem !important;
+        }
+
+        .initial-cell div {
+            margin-top: 4px !important;
+        }
+
+        /* 용어명 열 */
+        .term-cell {
+            width: auto !important;
+            padding: 3px 4px !important;
+        }
+
+        .term-cell a {
+            font-size: 0.85rem !important;
+        }
+
+        /* 메모 아이콘 열 숨김 */
+        .note-cell {
+            display: none;
+        }
+
+        /* 회수 열 */
+        .count-cell {
+            width: 28px !important;
+            font-size: 0.7rem !important;
+            padding: 3px 2px !important;
+        }
+
+        /* 회차 배지 열 - 모바일에서 숨김 */
+        .refs-cell {
+            display: none;
+        }
+
+        /* 인덱스 줄바꿈 */
+        div[style*="flex-basis: 100%"] {
+            height: 1px !important;
+        }
+
+        /* 인덱스 네비게이션 컨테이너 */
+        div[style*="flex-wrap: wrap"][style*="border-bottom"] {
+            padding: 0 !important;
+            margin: 0 !important;
+            gap: 1px !important;
+            width: 100% !important;
+        }
+
+        /* 테이블 */
+        table {
+            margin: 0 !important;
+            width: 100% !important;
+        }
+
+        table td {
+            padding: 2px 3px !important;
+        }
+
+        /* 초성 열 좌측 여백 제거 */
+        .initial-cell {
+            padding-left: 2px !important;
+            padding-right: 2px !important;
+        }
+    }
+
+    .subject-btn .subject-full { display: inline; }
+    .subject-btn .subject-short { display: none; }
+
     .subject-buttons {
         display: flex;
         flex-wrap: wrap;
@@ -191,35 +404,35 @@
             {% for subject in subjects %}
                 {% if '병리' in subject.name %}
                 <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
-                    🍃 {{ subject.name }}
+                    🍃 <span class="subject-full">{{ subject.name }}</span><span class="subject-short">병리</span>
                 </a>
                 {% endif %}
             {% endfor %}
             {% for subject in subjects %}
                 {% if '해충' in subject.name %}
                 <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
-                    🐛 {{ subject.name }}
+                    🐛 <span class="subject-full">{{ subject.name }}</span><span class="subject-short">해충</span>
                 </a>
                 {% endif %}
             {% endfor %}
             {% for subject in subjects %}
                 {% if '생리' in subject.name %}
                 <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
-                    🌱 {{ subject.name }}
+                    🌱 <span class="subject-full">{{ subject.name }}</span><span class="subject-short">생리</span>
                 </a>
                 {% endif %}
             {% endfor %}
             {% for subject in subjects %}
                 {% if '토양' in subject.name %}
                 <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
-                    🟫 {{ subject.name }}
+                    🏜️ <span class="subject-full">{{ subject.name }}</span><span class="subject-short">토양</span>
                 </a>
                 {% endif %}
             {% endfor %}
             {% for subject in subjects %}
                 {% if '관리' in subject.name %}
                 <a href="?subject={{ subject.id }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" class="subject-btn {% if selected_subject == subject.id|stringformat:'s' %}active{% endif %}">
-                    💊 {{ subject.name }}
+                    🌳 <span class="subject-full">{{ subject.name }}</span><span class="subject-short">관리</span>
                 </a>
                 {% endif %}
             {% endfor %}
@@ -345,7 +558,7 @@
     <table style="width: 100%; border-collapse: collapse; background: white; font-size: 0.8rem; margin-top: 0; border-top: none;">
         {% for group in grouped_terms %}
         <tr id="term-group-{{ group.grouper }}">
-            <td rowspan="{{ group.list|length }}" style="background: linear-gradient(135deg, #2d6a4f, #40916c); color: white; padding: 8px 12px; font-weight: 700; text-align: center; width: 30px; vertical-align: top; border-bottom: 1px solid #1b4332;">
+            <td class="initial-cell" rowspan="{{ group.list|length }}" style="background: linear-gradient(135deg, #2d6a4f, #40916c); color: white; padding: 8px 12px; font-weight: 700; text-align: center; width: 30px; vertical-align: top; border-bottom: 1px solid #1b4332;">
                 {{ group.grouper }}
                 <div style="margin-top: 8px;">
                     <a href="#" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); return false;" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.7rem;" title="맨 위로">
@@ -355,22 +568,33 @@
             </td>
             {% for term in group.list %}
             {% if not forloop.first %}</tr><tr>{% endif %}
-            <td style="padding: 4px 10px; border-bottom: 1px solid #eee; width: 200px;">
-                <a href="{% url 'glossary:term_detail' term.pk %}?subject={{ selected_subject|default:'' }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" style="color: #2d6a4f; text-decoration: none; font-weight: 500;">
+            <td class="term-cell term-count-{{ term.filtered_ref_count|default:0 }}" style="padding: 4px 10px; border-bottom: 1px solid #eee; width: 200px;">
+                <a href="{% url 'glossary:term_detail' term.pk %}?subject={{ selected_subject|default:'' }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}">
                     {{ term.word }}
                 </a>
             </td>
-            <td style="padding: 4px 0px; border-bottom: 1px solid #eee; width: 20px; text-align: center;">
+            <td class="note-cell" style="padding: 4px 0px; border-bottom: 1px solid #eee; width: 20px; text-align: center;">
                 {% if term.content and term.content|length > 100 %}
                 <a href="{% url 'glossary:term_detail' term.pk %}?subject={{ selected_subject|default:'' }}&q={{ search_query }}&exam_only={{ exam_only|yesno:'on,off' }}" style="text-decoration: none;">
                     <span style="font-size: 0.8rem; cursor: pointer;" title="설명 있음">📝</span>
                 </a>
                 {% endif %}
             </td>
-            <td style="padding: 4px 6px; border-bottom: 1px solid #eee; text-align: center; width: 40px; color: #666;">
-                {{ term.filtered_ref_count|default:0 }}회
+            <td class="bar-cell" style="padding: 4px 4px; border-bottom: 1px solid #eee; width: 50px;">
+                <div class="freq-bar bar-{{ term.filtered_ref_count|default:0 }}">
+                    {% with count=term.filtered_ref_count|default:0 %}
+                    <span class="bar-segment {% if count >= 1 %}active{% endif %}"></span>
+                    <span class="bar-segment {% if count >= 3 %}active{% endif %}"></span>
+                    <span class="bar-segment {% if count >= 5 %}active{% endif %}"></span>
+                    <span class="bar-segment {% if count >= 10 %}active{% endif %}"></span>
+                    <span class="bar-segment {% if count >= 15 %}active{% endif %}"></span>
+                    {% endwith %}
+                </div>
             </td>
-            <td style="padding: 4px 10px; border-bottom: 1px solid #eee;">
+            <td class="count-cell count-{{ term.filtered_ref_count|default:0 }}" style="padding: 4px 2px; border-bottom: 1px solid #eee; text-align: center; width: 28px;">
+                {{ term.filtered_ref_count|default:0 }}
+            </td>
+            <td class="refs-cell" style="padding: 4px 10px; border-bottom: 1px solid #eee;">
                 {% for ref in term.filtered_references %}
                 <span class="round-badge" data-round="{{ ref.source_title|slice:':2'|cut:'회' }}" style="display: inline-block; color: white; padding: 1px 6px; border-radius: 10px; font-size: 0.65rem; margin: 1px;">{{ ref.source_title }}</span>
                 {% empty %}
@@ -395,6 +619,63 @@
         .round-badge[data-round="11"] { background: #c0ca33; color: #333; }
         .round-badge[data-round="12"] { background: #ffb300; color: #333; }
         .round-badge { background: #757575; }
+
+        /* 기출 회수별 색상 */
+        .count-cell { color: #aaa; }
+        .count-0 { color: #ccc; }
+        .count-1 { color: #888; }
+        .count-2 { color: #555; }
+        .count-3, .count-4 { color: #1976d2; font-weight: 600; }
+        .count-5, .count-6, .count-7, .count-8, .count-9 { color: #7b1fa2; font-weight: 600; }
+        .count-10, .count-11, .count-12, .count-13, .count-14 { color: #e65100; font-weight: 700; }
+        .count-15, .count-16, .count-17, .count-18, .count-19, .count-20,
+        .count-21, .count-22, .count-23, .count-24, .count-25, .count-26, .count-27, .count-28, .count-29, .count-30 { color: #c62828; font-weight: 700; }
+
+        /* 용어명 기출 회수별 색상 */
+        .term-cell a { color: #2d6a4f; text-decoration: none; font-weight: 500; }
+        .term-count-0 a { color: #999; }
+        .term-count-1 a { color: #666; }
+        .term-count-2 a { color: #444; }
+        .term-count-3 a, .term-count-4 a { color: #1565c0; font-weight: 600; }
+        .term-count-5 a, .term-count-6 a, .term-count-7 a, .term-count-8 a, .term-count-9 a { color: #6a1b9a; font-weight: 600; }
+        .term-count-10 a, .term-count-11 a, .term-count-12 a, .term-count-13 a, .term-count-14 a { color: #e65100; font-weight: 700; }
+        .term-count-15 a, .term-count-16 a, .term-count-17 a, .term-count-18 a, .term-count-19 a, .term-count-20 a,
+        .term-count-21 a, .term-count-22 a, .term-count-23 a, .term-count-24 a, .term-count-25 a,
+        .term-count-26 a, .term-count-27 a, .term-count-28 a, .term-count-29 a, .term-count-30 a { color: #c62828; font-weight: 700; }
+
+        /* 배터리 바 스타일 */
+        .freq-bar {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+            height: 14px;
+        }
+        .bar-segment {
+            width: 6px;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 1px;
+        }
+        .bar-segment.active:nth-child(1) { background: #90caf9; }  /* 1회 - 연파랑 */
+        .bar-segment.active:nth-child(2) { background: #42a5f5; }  /* 3회 - 파랑 */
+        .bar-segment.active:nth-child(3) { background: #ab47bc; }  /* 5회 - 보라 */
+        .bar-segment.active:nth-child(4) { background: #ff9800; }  /* 10회 - 주황 */
+        .bar-segment.active:nth-child(5) { background: #f44336; }  /* 15회 - 빨강 */
+
+        /* 모바일에서 배터리 바 */
+        @media (max-width: 480px) {
+            .bar-cell {
+                width: 40px !important;
+                padding: 3px 2px !important;
+            }
+            .freq-bar {
+                gap: 1px;
+            }
+            .bar-segment {
+                width: 5px;
+                height: 8px;
+            }
+        }
     </style>
     {% else %}
     <div class="empty-state">
