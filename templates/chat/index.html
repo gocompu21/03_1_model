@@ -416,13 +416,15 @@
             /* Body - full height layout */
             body {
                 height: 100vh;
-                height: 100dvh; /* Dynamic viewport height for mobile */
+                height: 100dvh;
+                background: linear-gradient(180deg, #e8f5e9 0%, #f5f5f5 100%);
             }
 
             /* Header */
             .main-header {
-                padding: 10px 15px;
+                padding: 12px 16px;
                 flex-wrap: nowrap;
+                background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
             }
 
             .main-header .logo {
@@ -443,7 +445,7 @@
             .main-header .nav-links form,
             .main-header .nav-links button {
                 margin: 0;
-                margin-left: 10px;
+                margin-left: 12px;
                 font-size: 0.8rem;
                 line-height: 1;
                 height: auto;
@@ -466,6 +468,7 @@
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
+                background: transparent;
             }
 
             .chat-container {
@@ -483,50 +486,81 @@
             /* Chat Box - scrollable area */
             .chat-box {
                 flex: 1;
-                padding: 10px;
+                padding: 12px;
                 margin-bottom: 0;
                 border: none;
                 border-radius: 0;
-                background-color: #f0f7f4;
+                background: transparent;
                 overflow-y: auto;
-                min-height: 0; /* Important for flex scroll */
+                min-height: 0;
             }
 
+            /* 메시지 버블 개선 */
             .message {
-                padding: 12px;
+                padding: 14px 16px;
                 margin-bottom: 12px;
                 font-size: 0.95rem;
-                border-radius: 12px;
+                border-radius: 16px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+                border: none;
+            }
+
+            .user-message {
+                background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+                border-left: 4px solid #4caf50;
+                margin-left: 20px;
+            }
+
+            .ai-message {
+                background: white;
+                border-left: 4px solid #2196f3;
+                margin-right: 20px;
             }
 
             /* Input Group - sticky bottom */
             .input-group {
                 flex-shrink: 0;
-                padding: 10px;
+                padding: 12px 12px 16px 12px;
                 background: white;
-                border-top: 1px solid #d8f3dc;
-                gap: 8px;
+                border-top: none;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+                border-radius: 20px 20px 0 0;
+                gap: 10px;
                 position: relative;
             }
 
             textarea {
-                padding: 0 16px;
-                height: 44px;
-                font-size: 16px; /* Prevents iOS zoom */
-                border-radius: 22px;
-                border: 1px solid #d8f3dc;
-                line-height: 44px;
+                padding: 0 18px;
+                height: 46px;
+                font-size: 16px;
+                border-radius: 23px;
+                border: 2px solid #e0e0e0;
+                line-height: 42px;
                 overflow: hidden;
+                background: #f8f9fa;
+                transition: border-color 0.2s, background-color 0.2s;
             }
 
-            /* Send button - icon only */
+            textarea:focus {
+                border-color: #4caf50;
+                background: white;
+            }
+
+            /* Send button - 그라데이션 */
             .send-btn {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
+                width: 46px;
+                height: 46px;
+                min-width: 46px;
                 padding: 0;
                 border-radius: 50%;
                 font-size: 1.2rem;
+                background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+
+            .send-btn:active {
+                transform: scale(0.95);
             }
 
             .send-btn > span,
@@ -540,38 +574,56 @@
             }
 
             .stop-btn {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
+                width: 46px;
+                height: 46px;
+                min-width: 46px;
                 padding: 0;
                 border-radius: 50%;
+                background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%);
+                box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
             }
 
             /* Progress UI */
             .progress-ui {
-                width: 150px;
-                padding: 6px 12px;
-                font-size: 0.8rem;
+                width: 160px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+                border-radius: 16px;
+                background: white;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             }
 
             .progress-text {
-                font-size: 0.75rem;
-                margin-bottom: 6px;
+                font-size: 0.8rem;
+                margin-bottom: 8px;
             }
 
-            /* Welcome Message - compact */
+            /* Welcome Message - 개선 */
             .welcome-message {
-                padding: 40px 15px;
+                padding: 60px 20px;
+                background: transparent;
             }
 
             .welcome-message .welcome-icon {
-                font-size: 3rem;
-                margin-bottom: 15px;
+                font-size: 4rem;
+                margin-bottom: 20px;
+                animation: float 3s ease-in-out infinite;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
             }
 
             .welcome-message .welcome-title {
-                font-size: 1.05rem;
-                margin-bottom: 0;
+                font-size: 1.15rem;
+                margin-bottom: 8px;
+                color: #2d6a4f;
+            }
+
+            .welcome-message .welcome-text {
+                font-size: 0.9rem;
+                color: #666;
             }
 
             /* Tables */
@@ -608,6 +660,8 @@
                 min-width: 100px;
                 height: 36px;
                 font-size: 0.85rem;
+                border-radius: 8px;
+                border: 2px solid #e0e0e0;
             }
 
             .glossary-btn-area button,
@@ -615,13 +669,16 @@
                 height: 36px;
                 padding: 0 12px !important;
                 font-size: 0.85rem !important;
+                border-radius: 8px;
+                background: linear-gradient(135deg, #ffc107 0%, #ffca28 100%);
+                box-shadow: 0 2px 6px rgba(255, 193, 7, 0.4);
             }
         }
 
         /* Extra small devices */
         @media screen and (max-width: 480px) {
             .main-header {
-                padding: 8px 10px;
+                padding: 10px 12px;
             }
 
             .main-header .logo {
@@ -636,42 +693,54 @@
             }
 
             .chat-box {
-                padding: 8px;
+                padding: 10px;
             }
 
             .message {
-                padding: 10px;
+                padding: 12px 14px;
                 font-size: 0.9rem;
                 margin-bottom: 10px;
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+
+            .user-message {
+                margin-left: 15px;
+                margin-right: 0;
+            }
+
+            .ai-message {
+                margin-right: 15px;
+                margin-left: 0;
             }
 
             .input-group {
-                padding: 8px;
+                padding: 10px 10px 14px 10px;
             }
 
             textarea {
-                height: 40px;
+                height: 42px;
                 padding: 0 14px;
-                line-height: 40px;
+                line-height: 38px;
             }
 
             .send-btn,
             .stop-btn {
-                width: 40px;
-                height: 40px;
-                min-width: 40px;
+                width: 42px;
+                height: 42px;
+                min-width: 42px;
             }
 
             .welcome-message {
-                padding: 30px 10px;
+                padding: 40px 15px;
             }
 
             .welcome-message .welcome-icon {
-                font-size: 2.5rem;
+                font-size: 3rem;
             }
 
             .welcome-message .welcome-title {
-                font-size: 0.95rem;
+                font-size: 1rem;
             }
         }
 
