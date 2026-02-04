@@ -374,34 +374,30 @@
     .question-item {
         padding: 6px 15px;
         border-bottom: 1px solid #eee;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        position: relative;
+        padding-left: 45px;
     }
-    
+
     .question-item:last-child {
         border-bottom: none;
     }
-    
+
     .question-item:hover {
         background: #f8fdf9;
     }
-    
+
     .question-number {
+        position: absolute;
+        left: 15px;
         font-weight: bold;
         color: #2d6a4f;
-        min-width: 25px;
         font-size: 0.875rem;
     }
-    
+
     .question-preview {
-        flex: 1;
         color: #555;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        margin: 0 2px;
         font-size: 0.875rem;
+        line-height: 1.5;
     }
     
     /* Bottom Navigation */
@@ -529,7 +525,7 @@
         }
 
         .content-body {
-            font-size: 1rem;
+            font-size: 1.1rem;
             line-height: 1.8;
         }
 
@@ -549,9 +545,11 @@
 
         .question-item {
             padding: 8px 10px;
+            padding-left: 40px;
         }
 
         .question-number {
+            left: 10px;
             font-size: 0.85rem;
         }
 
@@ -571,13 +569,19 @@
         }
 
         /* 관련 용어 섹션 */
+        .content-card > div[style*="margin-top: 40px"] {
+            margin-top: 25px !important;
+            padding-top: 15px !important;
+        }
+
         .content-card > div[style*="margin-top: 40px"] h3 {
-            font-size: 1rem !important;
+            font-size: 0.95rem !important;
+            margin-bottom: 8px !important;
         }
 
         .content-card > div[style*="margin-top: 40px"] a {
-            font-size: 0.85rem !important;
-            padding: 5px 10px !important;
+            font-size: 0.8rem !important;
+            padding: 3px 8px !important;
         }
     }
 </style>
