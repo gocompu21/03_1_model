@@ -5,6 +5,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>복습 세션 - 나무의사</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -287,6 +288,11 @@
             background: #1b4332;
         }
 
+        /* Mobile submit button - hidden on desktop */
+        .mobile-submit-btn {
+            display: none;
+        }
+
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -308,6 +314,193 @@
 
         .review-info strong {
             color: #1b4332;
+        }
+
+        /* ========== Mobile Responsive ========== */
+        @media (max-width: 768px) {
+            body {
+                display: block;
+                height: auto;
+                overflow: auto;
+            }
+
+            /* Header */
+            .top-header {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+
+            .top-header .logo {
+                font-size: 1rem;
+            }
+
+            /* Form - block layout */
+            .main-container {
+                display: block;
+                height: auto;
+            }
+
+            /* Hide OMR panel on mobile */
+            .omr-panel {
+                display: none;
+            }
+
+            /* Question panel - full width */
+            .question-panel {
+                width: 100%;
+                padding: 0;
+                border: none;
+                overflow: visible;
+                background: white;
+            }
+
+            .question-header {
+                padding: 12px;
+                margin-bottom: 0;
+                border-bottom: 2px solid #d8f3dc;
+            }
+
+            .question-header h2 {
+                font-size: 1.1rem;
+            }
+
+            .review-info {
+                margin: 10px;
+                padding: 10px 12px;
+                font-size: 0.8rem;
+                border-radius: 6px;
+            }
+
+            /* Questions container */
+            #questions-container {
+                overflow: visible;
+                padding: 0;
+            }
+
+            /* Question item - card style */
+            .question-item {
+                border-radius: 0;
+                border-left: none;
+                border-bottom: 8px solid #f0f0f0;
+                padding: 16px 12px;
+                margin-bottom: 0;
+                box-shadow: none;
+            }
+
+            .question-meta {
+                font-size: 0.8rem;
+                margin-bottom: 8px;
+            }
+
+            .q-number {
+                width: 22px;
+                height: 22px;
+                line-height: 22px;
+                font-size: 0.85rem;
+            }
+
+            .question-content {
+                font-size: 1rem;
+                line-height: 1.6;
+                margin-bottom: 12px;
+            }
+
+            .question-item img {
+                max-width: 100%;
+                margin: 10px 0;
+            }
+
+            /* Choices */
+            .choices {
+                gap: 4px;
+            }
+
+            .choice-item {
+                padding: 10px 8px 10px 2em;
+                font-size: 0.95rem;
+                border-radius: 6px;
+                position: relative;
+                line-height: 1.4;
+            }
+
+            .choice-item .choice-num {
+                position: absolute;
+                left: 6px;
+                top: 10px;
+                font-size: 1.1em;
+                margin-right: 0;
+            }
+
+            .choice-item.selected {
+                background-color: #e8f5e9;
+                border: 1px solid #2d6a4f;
+            }
+
+            /* Mobile submit button - fixed at bottom */
+            .mobile-submit-btn {
+                display: block;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 15px;
+                background: #2d6a4f;
+                color: white;
+                border: none;
+                font-size: 1.1rem;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 100;
+                text-align: center;
+            }
+
+            .mobile-submit-btn:active {
+                background: #1b4332;
+            }
+
+            /* Add bottom padding to prevent content being hidden behind fixed button */
+            #questions-container {
+                padding-bottom: 80px;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 400px) {
+            .top-header {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+
+            .top-header .logo {
+                font-size: 0.9rem;
+            }
+
+            .question-header h2 {
+                font-size: 1rem;
+            }
+
+            .review-info {
+                font-size: 0.75rem;
+                padding: 8px 10px;
+            }
+
+            .question-item {
+                padding: 12px 10px;
+            }
+
+            .question-content {
+                font-size: 0.95rem;
+            }
+
+            .choice-item {
+                padding: 8px 6px 8px 1.8em;
+                font-size: 0.9rem;
+            }
+
+            .mobile-submit-btn {
+                padding: 12px;
+                font-size: 1rem;
+            }
         }
     </style>
     <script>
@@ -407,6 +600,11 @@
                 <i class="fas fa-check-circle"></i> 복습 완료하기
             </button>
         </div>
+
+        <!-- Mobile Submit Button (outside OMR panel) -->
+        <button type="submit" class="mobile-submit-btn">
+            <i class="fas fa-check-circle"></i> 복습 완료하기
+        </button>
     </form>
     {% else %}
     <div class="main-container" style="justify-content: center; align-items: center;">
