@@ -10,6 +10,11 @@ urlpatterns = [
     path(
         "wrong_answer/<int:pk>/", views.wrong_answer_detail, name="wrong_answer_detail"
     ),
+    path(
+        "wrong_answers/<int:attempt_id>/",
+        views.wrong_answer_full_list,
+        name="wrong_answer_full_list",
+    ),
     path("analyze/", views.analyze_questions, name="analyze_questions"),
     path(
         "api/analyze_attempt/<int:attempt_id>/",

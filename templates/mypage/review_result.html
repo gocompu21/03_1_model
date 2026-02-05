@@ -576,6 +576,47 @@
             }
         }
 
+        /* Image Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .image-modal.show {
+            display: flex;
+        }
+
+        .image-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .image-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 10000;
+        }
+
+        .zoomable-img {
+            cursor: zoom-in;
+        }
+
         /* Extra small devices */
         @media (max-width: 400px) {
             .top-header {
@@ -673,7 +714,7 @@
                     </div>
                     {% if res.question.image %}
                     <div style="text-align: center; margin-bottom: 15px;">
-                        <img src="{{ res.question.image.url }}" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                        <img src="{{ res.question.image.url }}" class="zoomable-img" onclick="openImageModal('{{ res.question.image.url }}')" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
                     </div>
                     {% endif %}
                     <div class="choices">
@@ -719,7 +760,7 @@
                         </div>
                         {% if res.question.infographic_image %}
                         <div style="margin-top: 10px; text-align: center;">
-                            <img src="{{ res.question.infographic_image.url }}" style="border: 2px solid #000; width: 100%;">
+                            <img src="{{ res.question.infographic_image.url }}" class="zoomable-img" onclick="event.stopPropagation(); openImageModal('{{ res.question.infographic_image.url }}')" style="border: 2px solid #000; width: 100%;">
                         </div>
                         {% endif %}
                         <div style="text-align: center; margin-top: 10px; cursor: pointer;" onclick="toggleExplanation('exp-{{ res.schedule_id }}')">
@@ -774,6 +815,12 @@
         <i class="fas fa-home"></i> 마이페이지로 돌아가기
     </a>
 
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <span class="image-modal-close">&times;</span>
+        <img id="modalImage" src="" alt="확대 이미지">
+    </div>
+
     <script>
         function toggleExplanation(id) {
             const el = document.getElementById(id);
@@ -788,6 +835,25 @@
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
+
+        function openImageModal(src) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = src;
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        // ESC key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeImageModal();
+        });
     </script>
 </body>
 

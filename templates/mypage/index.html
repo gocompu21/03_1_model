@@ -1242,8 +1242,8 @@
                                     {{ schedule.question.subject.name }} · 제{{ schedule.question.exam.round_number }}회
                                     {{ schedule.question.number }}번
                                 </div>
-                                <div class="review-question-content" style="font-weight: 500; line-height: 1.5; max-height: 100px; overflow: hidden;">
-                                    {{ schedule.question.content|safe }}
+                                <div class="review-question-content" style="font-weight: 500; line-height: 1.6; margin: 10px 0;">
+                                    {{ schedule.question.content|safe|linebreaksbr }}
                                 </div>
                                 <div style="margin-top: 10px; font-size: 0.8rem; color: #888;">
                                     <i class="fas fa-calendar-alt"></i> 마지막 오답:
@@ -1836,7 +1836,7 @@
                 if (loadingIndicator) loadingIndicator.style.display = 'block';
 
                 // Fetch filtered wrong answers with FULL DETAILS
-                const url = `{% url 'mypage:index' %}?mode=full_details&attempt_id=${attemptId}`;
+                const url = `{% url 'mypage:index' %}wrong_answers/${attemptId}/`;
                 fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                     .then(response => response.text())
                     .then(html => {

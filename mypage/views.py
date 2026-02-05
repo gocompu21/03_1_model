@@ -89,17 +89,9 @@ def index(request):
         attempt = get_object_or_404(UserExamAttempt, id=attempt_id, user=request.user)
         wrong_qs = wrong_qs.filter(attempt=attempt)
 
-        # Auto-generate Analysis if missing
-        if mode == "full_details" and not attempt.ai_analysis:
-            _generate_exam_analysis(attempt)
-
-    if mode == "full_details":
-        # No pagination for full details view
-        wrong_answers = wrong_qs
-    else:
-        wrong_paginator = Paginator(wrong_qs, 15)
-        wrong_page = request.GET.get("w_page")
-        wrong_answers = wrong_paginator.get_page(wrong_page)
+    wrong_paginator = Paginator(wrong_qs, 15)
+    wrong_page = request.GET.get("w_page")
+    wrong_answers = wrong_paginator.get_page(wrong_page)
 
     # 1. Aggregate results by Subject
     subject_stats = (
@@ -306,8 +298,6 @@ def index(request):
             return render(request, "mypage/my_questions_partial.html", context)
         if "w_page" in request.GET:
             return render(request, "mypage/wrong_answer_partial.html", context)
-        if mode == "full_details":
-            return render(request, "mypage/wrong_answer_full_list.html", context)
         return render(request, "mypage/history_partial.html", context)
 
     return render(request, "mypage/index.html", context)
@@ -400,6 +390,30 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.db.models import Count, Case, When, IntegerField, Q
 
 # ... (rest of imports)
+
+
+@login_required
+def wrong_answer_full_list(request, attempt_id):
+    """전체 오답노트 - 별도 페이지"""
+    attempt = get_object_or_404(UserExamAttempt, id=attempt_id, user=request.user)
+
+    # Auto-generate Analysis if missing
+    if not attempt.ai_analysis:
+        _generate_exam_analysis(attempt)
+
+    wrong_answers = (
+        UserQuestionResult.objects.filter(attempt=attempt, is_correct=False)
+        .select_related("question", "question__exam", "question__subject")
+        .order_by("question__number")
+    )
+
+    context = {
+        "wrong_answers": wrong_answers,
+        "attempt": attempt,
+        "attempt_id": attempt_id,
+    }
+
+    return render(request, "mypage/wrong_answer_full_list.html", context)
 
 
 @login_required
