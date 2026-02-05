@@ -115,6 +115,9 @@
                     style="display: flex; justify-content: flex-end; align-items: center; color: #666; font-size: 0.95rem; gap: 15px;">
                     <span>{{ post.created_at|timesince }} 전</span>
                     <span>조회 {{ post.hits }}</span>
+                    {% if post.type %}
+                    <span class="post-type-badge post-type-{{ post.type.name|slugify }}">{{ post.type.name }}</span>
+                    {% endif %}
                     <span>
                         {% if post.author.first_name %}{{ post.author.first_name }}{% else %}{{ post.author.username
                         }}{% endif %}
@@ -203,6 +206,7 @@
                         <tr style="background-color: #f0f7f4; border-bottom: 2px solid #2d6a4f;">
                             <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 40px;">번호</th>
                             <th style="padding: 4px 2px; text-align: center; color: #2d6a4f;">제목</th>
+                            <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 55px;">유형</th>
                             <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 60px;">작성자</th>
                             <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 50px;">작성일</th>
                             <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 40px;">조회</th>
@@ -216,12 +220,17 @@
                             <td style="padding: 2px 2px;">
                                 <a href="{% url 'bbs:post_detail' related.pk %}?category={{ category }}&q={{ query }}"
                                     style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; {% if related.pk == post.pk %}font-weight: bold; color: #2d6a4f;{% endif %}">
-                                    {% if related.pk == post.pk %}▶ {% endif %}{{ related.title|highlight_prefix }}
+                                    {% if related.pk == post.pk %}▶ {% endif %}{{ related.title }}
                                     {% if related.comments.count > 0 %}
                                     <span
                                         style="color: #e63946; font-size: 0.9em; font-weight: normal;">[{{related.comments.count}}]</span>
                                     {% endif %}
                                 </a>
+                            </td>
+                            <td style="padding: 2px 2px; text-align: center;">
+                                {% if related.type %}
+                                <span class="post-type-badge post-type-{{ related.type.name|slugify }}">{{ related.type.name }}</span>
+                                {% endif %}
                             </td>
                             <td style="padding: 2px 2px; text-align: center; color: #555;">
                                 {% if related.author.first_name %}{{ related.author.first_name }}
@@ -234,7 +243,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" style="padding: 20px; text-align: center; color: #888;">관련 게시글이 없습니다.</td>
+                            <td colspan="6" style="padding: 20px; text-align: center; color: #888;">관련 게시글이 없습니다.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -310,6 +319,34 @@
     
     .btn-search-icon:hover {
         transform: scale(1.1);
+    }
+
+    /* Post Type Badge Styles */
+    .post-type-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .post-type-기본서, .post-type-giboenseo {
+        background-color: #fff5f5;
+        color: #c92a2a;
+        border: 1px solid #ffc9c9;
+    }
+
+    .post-type-주치의, .post-type-juchieui {
+        background-color: #e7f5ff;
+        color: #1e88e5;
+        border: 1px solid #a5d8ff;
+    }
+
+    .post-type-일반 {
+        background-color: #f8f9fa;
+        color: #666;
+        border: 1px solid #dee2e6;
     }
 
     .btn-action {
@@ -557,26 +594,36 @@
             line-height: 1.4;
         }
 
-        /* Meta info */
+        /* Meta info - 유형, 작성자, 작성일, 조회 */
         .related-posts td:nth-child(3),
         .related-posts td:nth-child(4),
-        .related-posts td:nth-child(5) {
+        .related-posts td:nth-child(5),
+        .related-posts td:nth-child(6) {
             display: inline-block !important;
             padding: 0 !important;
             font-size: 0.7rem !important;
             color: #888 !important;
         }
 
-        .related-posts td:nth-child(3)::before {
-            content: "👤 ";
+        .related-posts td:nth-child(3) {
+            margin-right: 8px;
+        }
+
+        .related-posts td:nth-child(3) .post-type-badge {
+            font-size: 0.65rem;
+            padding: 1px 4px;
         }
 
         .related-posts td:nth-child(4)::before {
+            content: "👤 ";
+        }
+
+        .related-posts td:nth-child(5)::before {
             content: "📅 ";
             margin-left: 10px;
         }
 
-        .related-posts td:nth-child(5)::before {
+        .related-posts td:nth-child(6)::before {
             content: "👁 ";
             margin-left: 10px;
         }
@@ -643,12 +690,13 @@
 
         .related-posts td:nth-child(3),
         .related-posts td:nth-child(4),
-        .related-posts td:nth-child(5) {
+        .related-posts td:nth-child(5),
+        .related-posts td:nth-child(6) {
             font-size: 0.65rem !important;
         }
 
-        .related-posts td:nth-child(4)::before,
-        .related-posts td:nth-child(5)::before {
+        .related-posts td:nth-child(5)::before,
+        .related-posts td:nth-child(6)::before {
             margin-left: 6px;
         }
     }

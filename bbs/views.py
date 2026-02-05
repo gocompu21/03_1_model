@@ -183,6 +183,7 @@ def post_list_api(request):
         posts_data.append({
             "pk": post.pk,
             "title": post.title,
+            "type": post.type.name if post.type else None,
             "author": author_name,
             "created_at": post.created_at.strftime("%m/%d"),
             "hits": post.hits,

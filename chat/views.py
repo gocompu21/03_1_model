@@ -214,7 +214,7 @@ def chat_api(request):
 
             p = Post.objects.create(
                 author=request.user,
-                title=f"[주치의] {user_input}"[:200],
+                title=user_input[:200],
                 content=str(response_text),
                 type=post_type,
             )

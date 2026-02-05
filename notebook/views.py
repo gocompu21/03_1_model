@@ -153,19 +153,9 @@ def api_ask(request):
 
                 post_type, _ = PostType.objects.get_or_create(name="기본서")
 
-                # Subject-specific prefix mapping
-                subject_prefix_map = {
-                    "수목생리학": "[생리학]",
-                    "수목병리학": "[병리학]",
-                    "수목해충학": "[해충학]",
-                    "산림토양학": "[토양학]",
-                    "수목관리학": "[관리학]",
-                }
-                title_prefix = subject_prefix_map.get(target_store, "[기본서]")
-
                 Post.objects.create(
                     author=request.user,
-                    title=f"{title_prefix} {user_input}"[:200],
+                    title=user_input[:200],
                     content=bbs_content,
                     type=post_type,
                 )
