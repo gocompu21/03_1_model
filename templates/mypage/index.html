@@ -193,27 +193,104 @@
             background-color: #f8f9fa;
         }
 
-        /* History Table Styles */
+        /* History Table - Card Layout */
         .history-table {
+            display: block;
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
         }
 
-        .history-table th,
+        .history-table thead {
+            display: none;
+        }
+
+        .history-table tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-table tbody tr {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            background: white;
+            border-radius: 10px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border: 1px solid #e8e8e8;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-table tbody tr:hover {
+            border-color: #2d6a4f;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
         .history-table td {
-            padding: 5px 8px;
-            /* More Compact Padding */
-            text-align: center;
-            border-bottom: 1px solid #eee;
-            font-size: 0.9rem;
-            /* Smaller text for compact display */
+            display: block;
+            padding: 0;
+            border: none;
         }
 
-        .history-table th {
-            background-color: #f1f8f5;
-            color: #2d6a4f;
-            font-weight: bold;
+        /* 문제 (상단 - full width, 1줄) - 강제 줄바꿈 */
+        .history-table td:nth-child(1) {
+            order: 1 !important;
+            flex: 0 0 100% !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 10px !important;
+            padding-bottom: 10px !important;
+            border-bottom: 1px dashed #e0e0e0 !important;
+            font-size: 1rem !important;
+            color: #333 !important;
+            line-height: 1.6 !important;
+            text-align: left !important;
+        }
+
+        .history-table td:nth-child(1) div {
+            white-space: normal !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+        }
+
+        /* 문제 내용 내부 보기 박스 스타일 */
+        .history-table td:nth-child(1) div div {
+            display: block !important;
+            clear: both !important;
+            border: 1px solid #ddd !important;
+            padding: 8px 12px !important;
+            margin: 8px 0 !important;
+            background: #f9f9f9 !important;
+            border-radius: 4px !important;
+        }
+
+        .history-table td:nth-child(1) div div:first-of-type {
+            margin-top: 12px !important;
+        }
+
+        /* 응시일시 (하단 오른쪽) */
+        .history-table td:nth-child(3) {
+            order: 2 !important;
+            flex: 0 0 auto !important;
+            font-size: 0.85rem !important;
+            color: #888 !important;
+            white-space: nowrap !important;
+            margin-left: auto !important;
+        }
+
+        /* 과목 (하단 오른쪽 - 응시일시 다음) */
+        .history-table td:nth-child(2) {
+            order: 3 !important;
+            flex: 0 0 auto !important;
+            font-size: 0.85rem !important;
+            color: #2d6a4f !important;
+            font-weight: bold !important;
+            background: #e6f4ea !important;
+            padding: 3px 10px !important;
+            border-radius: 4px !important;
+            white-space: nowrap !important;
+            margin-left: 10px !important;
         }
 
         .pass-badge {
@@ -861,82 +938,28 @@
                 width: 100px;
             }
 
-            /* History Table - Card Layout */
-            .history-table {
-                display: block;
-                width: 100%;
-            }
-
-            .history-table thead {
-                display: none;
-            }
-
+            /* History Table - Mobile Adjustments */
             .history-table tbody {
-                display: flex;
-                flex-direction: column;
                 gap: 8px;
             }
 
             .history-table tbody tr {
-                display: flex;
-                flex-wrap: wrap;
-                align-items: center;
-                background: white;
-                border-radius: 10px;
                 padding: 14px;
-                box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-                border: 1px solid #e8e8e8;
             }
 
-            .history-table tbody tr:hover {
-                border-color: #2d6a4f;
-            }
-
-            .history-table td {
-                padding: 0;
-                border: none;
-                font-size: 0.9rem;
-            }
-
-            /* 문제 컬럼 (상단 - full width) */
-            .history-table td:nth-child(3) {
-                order: 1;
-                width: 100%;
+            .history-table td:nth-child(1) {
                 margin-bottom: 6px;
                 padding-bottom: 6px;
-                border-bottom: 1px dashed #e0e0e0;
-                font-size: 1rem !important;
-                color: #333;
-                line-height: 1.6;
-                text-align: left !important;
+                font-size: 0.95rem;
             }
 
-            .history-table td:nth-child(3) div {
-                white-space: normal !important;
-                overflow: visible !important;
-                text-overflow: clip !important;
-            }
-
-            /* 응시일시 (하단 오른쪽 - 먼저) */
-            .history-table td:nth-child(1) {
-                order: 2;
-                font-size: 0.75rem !important;
-                color: #888;
-                margin-left: auto;
-                line-height: 1;
-            }
-
-            /* 과목 (하단 오른쪽 - 응시일시 뒤) */
             .history-table td:nth-child(2) {
-                order: 3;
-                font-size: 0.75rem !important;
-                color: #2d6a4f;
-                font-weight: bold;
-                background: #e6f4ea;
-                padding: 1px 6px !important;
-                border-radius: 3px;
-                margin-left: 6px;
-                line-height: 1.2;
+                font-size: 0.75rem;
+                padding: 1px 6px;
+            }
+
+            .history-table td:nth-child(3) {
+                font-size: 0.75rem;
             }
 
             /* Stats Cards */
@@ -1054,16 +1077,16 @@
                 padding: 12px;
             }
 
-            .history-table td:nth-child(3) {
+            .history-table td:nth-child(1) {
                 font-size: 0.95rem !important;
             }
 
             .history-table td:nth-child(2) {
-                font-size: 0.8rem !important;
+                font-size: 0.7rem !important;
             }
 
-            .history-table td:nth-child(1) {
-                font-size: 0.75rem !important;
+            .history-table td:nth-child(3) {
+                font-size: 0.7rem !important;
             }
 
             .pass-badge {

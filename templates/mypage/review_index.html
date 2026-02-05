@@ -249,14 +249,15 @@
         }
 
 
-        /* 마지막 오답 (하단 왼쪽) */
+        /* 마지막 오답 (하단 오른쪽) */
         .history-table td:nth-child(1) {
             order: 2;
             font-size: 0.85rem;
             color: #888;
+            margin-left: auto;
         }
 
-        /* 과목 (하단 오른쪽) */
+        /* 과목 (하단 오른쪽 - 일시 다음) */
         .history-table td:nth-child(2) {
             order: 3;
             font-size: 0.85rem;
@@ -265,7 +266,7 @@
             background: #e6f4ea;
             padding: 3px 10px;
             border-radius: 4px;
-            margin-left: auto;
+            margin-left: 10px;
         }
 
         .review-count-badge {
@@ -307,6 +308,132 @@
             font-size: 4rem;
             color: #2d6a4f;
             margin-bottom: 20px;
+        }
+
+        /* Ebbinghaus Link */
+        .ebbinghaus-link {
+            color: #2d6a4f;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .ebbinghaus-link:hover {
+            color: #1b4332;
+        }
+
+        /* Ebbinghaus Modal */
+        .ebbinghaus-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .ebbinghaus-modal.active {
+            display: flex;
+        }
+
+        .ebbinghaus-modal-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .ebbinghaus-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #888;
+            cursor: pointer;
+            padding: 5px 10px;
+        }
+
+        .ebbinghaus-modal-close:hover {
+            color: #333;
+        }
+
+        .ebbinghaus-modal h2 {
+            color: #2d6a4f;
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #2d6a4f;
+            padding-bottom: 10px;
+        }
+
+        .ebbinghaus-modal h3 {
+            color: #1b4332;
+            margin: 25px 0 12px 0;
+            font-size: 1.1rem;
+        }
+
+        .ebbinghaus-modal p {
+            color: #444;
+            line-height: 1.8;
+            margin: 0 0 15px 0;
+        }
+
+        .ebbinghaus-modal ul {
+            color: #444;
+            line-height: 1.8;
+            padding-left: 20px;
+            margin: 0 0 15px 0;
+        }
+
+        .ebbinghaus-modal li {
+            margin-bottom: 8px;
+        }
+
+        .ebbinghaus-highlight {
+            background: linear-gradient(135deg, #e6f4ea 0%, #d4edda 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #2d6a4f;
+        }
+
+        .ebbinghaus-highlight p {
+            margin: 0;
+            font-weight: 500;
+            color: #1b4332;
+        }
+
+        .review-schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .review-schedule-table th,
+        .review-schedule-table td {
+            border: 1px solid #ddd;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        .review-schedule-table th {
+            background: #2d6a4f;
+            color: white;
+        }
+
+        .review-schedule-table tr:nth-child(even) {
+            background: #f8f9fa;
         }
 
         /* Hamburger Menu */
@@ -424,6 +551,36 @@
                 font-size: 0.7rem !important;
                 margin-left: 4px;
             }
+
+            /* Ebbinghaus Modal Mobile */
+            .ebbinghaus-modal {
+                padding: 10px;
+            }
+
+            .ebbinghaus-modal-content {
+                padding: 20px;
+                max-height: 90vh;
+            }
+
+            .ebbinghaus-modal h2 {
+                font-size: 1.2rem;
+            }
+
+            .ebbinghaus-modal h3 {
+                font-size: 1rem;
+            }
+
+            .ebbinghaus-modal p,
+            .ebbinghaus-modal ul {
+                font-size: 0.9rem;
+                line-height: 1.7;
+            }
+
+            .review-schedule-table th,
+            .review-schedule-table td {
+                padding: 8px 6px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -495,7 +652,7 @@
 
                 <div class="review-description">
                     <i class="fas fa-info-circle"></i>
-                    에빙하우스 망각곡선에 기반하여 오늘 복습해야 할 문제들입니다.
+                    <a class="ebbinghaus-link" onclick="openEbbinghausModal()">에빙하우스 망각곡선</a>에 기반하여 오늘 복습해야 할 문제들입니다.
                     정기적인 복습으로 장기 기억에 저장하세요!
                 </div>
 
@@ -536,11 +693,126 @@
         </div>
     </div>
 
+    <!-- Ebbinghaus Modal -->
+    <div class="ebbinghaus-modal" id="ebbinghausModal" onclick="closeEbbinghausModal(event)">
+        <div class="ebbinghaus-modal-content" onclick="event.stopPropagation()">
+            <button class="ebbinghaus-modal-close" onclick="closeEbbinghausModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2><i class="fas fa-brain"></i> 에빙하우스 망각곡선</h2>
+
+            <p>
+                <strong>에빙하우스 망각곡선(Ebbinghaus Forgetting Curve)</strong>은 독일의 심리학자
+                헤르만 에빙하우스(Hermann Ebbinghaus)가 1885년에 발표한 기억과 망각에 관한 연구 결과입니다.
+            </p>
+
+            <h3><i class="fas fa-chart-line"></i> 망각곡선이란?</h3>
+            <p>
+                에빙하우스는 무의미 철자(의미 없는 음절의 나열)를 암기한 후 시간이 지남에 따라
+                얼마나 많은 내용을 잊어버리는지 측정했습니다. 그 결과 다음과 같은 패턴을 발견했습니다:
+            </p>
+            <ul>
+                <li><strong>20분 후:</strong> 약 42%를 망각</li>
+                <li><strong>1시간 후:</strong> 약 56%를 망각</li>
+                <li><strong>1일 후:</strong> 약 74%를 망각</li>
+                <li><strong>1주일 후:</strong> 약 77%를 망각</li>
+                <li><strong>1개월 후:</strong> 약 79%를 망각</li>
+            </ul>
+            <p>
+                즉, 학습 직후부터 급격하게 망각이 일어나고, 시간이 지날수록 망각 속도가 점차 느려집니다.
+            </p>
+
+            <h3><i class="fas fa-sync-alt"></i> 반복 복습의 효과</h3>
+            <p>
+                에빙하우스의 연구에서 가장 중요한 발견은 <strong>적절한 간격으로 반복 복습</strong>하면
+                망각곡선이 완만해진다는 것입니다. 복습을 할 때마다:
+            </p>
+            <ul>
+                <li>기억 유지 기간이 길어집니다</li>
+                <li>다음 복습까지 필요한 간격이 늘어납니다</li>
+                <li>결국 장기 기억으로 전환됩니다</li>
+            </ul>
+
+            <div class="ebbinghaus-highlight">
+                <p>
+                    <i class="fas fa-lightbulb"></i>
+                    <strong>나무의사 합격반</strong>은 이 원리를 활용하여 틀린 문제를
+                    최적의 시점에 복습할 수 있도록 추천해 드립니다.
+                </p>
+            </div>
+
+            <h3><i class="fas fa-calendar-check"></i> 권장 복습 주기</h3>
+            <table class="review-schedule-table">
+                <thead>
+                    <tr>
+                        <th>복습 회차</th>
+                        <th>복습 시점</th>
+                        <th>기대 효과</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1회차</td>
+                        <td>1일 후</td>
+                        <td>급격한 망각 방지</td>
+                    </tr>
+                    <tr>
+                        <td>2회차</td>
+                        <td>3일 후</td>
+                        <td>기억 강화</td>
+                    </tr>
+                    <tr>
+                        <td>3회차</td>
+                        <td>7일 후</td>
+                        <td>중기 기억 형성</td>
+                    </tr>
+                    <tr>
+                        <td>4회차</td>
+                        <td>14일 후</td>
+                        <td>장기 기억 전환</td>
+                    </tr>
+                    <tr>
+                        <td>5회차</td>
+                        <td>30일 후</td>
+                        <td>영구 기억 정착</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3><i class="fas fa-graduation-cap"></i> 효과적인 복습 방법</h3>
+            <ul>
+                <li><strong>능동적 회상(Active Recall):</strong> 답을 보기 전에 먼저 생각해보세요</li>
+                <li><strong>정해진 시간에 복습:</strong> 매일 같은 시간에 복습하면 습관이 됩니다</li>
+                <li><strong>오답 분석:</strong> 왜 틀렸는지 이해하면 더 오래 기억됩니다</li>
+                <li><strong>연관 짓기:</strong> 다른 개념과 연결하면 기억이 강화됩니다</li>
+            </ul>
+        </div>
+    </div>
+
     <script>
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('active');
             document.querySelector('.sidebar-overlay').classList.toggle('active');
         }
+
+        function openEbbinghausModal() {
+            document.getElementById('ebbinghausModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEbbinghausModal(event) {
+            if (!event || event.target === document.getElementById('ebbinghausModal')) {
+                document.getElementById('ebbinghausModal').classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // ESC 키로 모달 닫기
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEbbinghausModal();
+            }
+        });
     </script>
 </body>
 

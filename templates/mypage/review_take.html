@@ -89,19 +89,13 @@
             color: #888;
             font-size: 0.85rem;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .q-number {
-            display: inline-block;
-            width: 26px;
-            height: 26px;
-            background-color: #2d6a4f;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 26px;
-            font-weight: bold;
-            margin-right: 8px;
+        .question-info {
+            text-align: right;
         }
 
         .question-content {
@@ -403,13 +397,6 @@
                 margin-bottom: 8px;
             }
 
-            .q-number {
-                width: 22px;
-                height: 22px;
-                line-height: 22px;
-                font-size: 0.85rem;
-            }
-
             .question-content {
                 font-size: 1rem;
                 line-height: 1.6;
@@ -548,12 +535,11 @@
                 {% for item in review_items %}
                 <div class="question-item" id="q-{{ item.id }}" data-index="{{ forloop.counter0 }}">
                     <div class="question-meta">
-                        <span class="q-number">{{ forloop.counter }}</span>
-                        {{ item.question.subject.name }} · 제{{ item.question.exam.round_number }}회 {{ item.question.number }}번
-                        <span style="float: right; color: #2d6a4f; font-weight: bold;">복습 {{ item.review_count }}회차</span>
+                        <span style="color: #2d6a4f; font-weight: bold;">복습 {{ item.review_count }}회차</span>
+                        <span class="question-info">{{ item.question.subject.name }}({{ item.question.exam.round_number }}-{{ item.question.number }})</span>
                     </div>
                     <div class="question-content">
-                        {{ item.question.content|safe }}
+                        <strong style="color: #2d6a4f;">{{ forloop.counter }}.</strong> {{ item.question.content|safe }}
                     </div>
                     {% if item.question.image %}
                     <div style="text-align: center; margin-bottom: 15px;">

@@ -10,21 +10,21 @@
 <table class="history-table" id="wrong-answer-table">
     <thead>
         <tr>
-            <th style="width: 1%; white-space: nowrap;">응시 일시</th>
-            <th style="width: 1%; white-space: nowrap;">과목</th>
             <th>문제</th>
+            <th style="width: 1%; white-space: nowrap;">과목</th>
+            <th style="width: 1%; white-space: nowrap;">응시 일시</th>
         </tr>
     </thead>
     <tbody id="wrong-answer-tbody">
         {% for result in wrong_answers %}
-        <tr onclick="loadWrongAnswerDetail({{ result.id }});" style="cursor: pointer;" title="클릭하여 상세 해설 보기">
-            <td style="white-space: nowrap;">{{ result.attempt.start_time|date:"y/m/d H:i" }}</td>
-            <td style="white-space: nowrap;">{{ result.question.subject.name }}</td>
-            <td style="text-align: left; max-width: 300px;">
-                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <tr onclick="loadWrongAnswerDetail({{ result.id }});" title="클릭하여 상세 해설 보기">
+            <td>
+                <div>
                     <strong style="color: #2d6a4f;">{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong> {{ result.question.content|safe }}
                 </div>
             </td>
+            <td>{{ result.question.subject.name }}</td>
+            <td>{{ result.attempt.start_time|date:"y/m/d H:i" }}</td>
         </tr>
         {% empty %}
         <tr>

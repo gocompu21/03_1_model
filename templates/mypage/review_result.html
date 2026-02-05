@@ -101,23 +101,13 @@
             color: #888;
             font-size: 0.85rem;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .q-number {
-            display: inline-block;
-            width: 26px;
-            height: 26px;
-            background-color: #2d6a4f;
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 26px;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-
-        .q-number.incorrect {
-            background-color: #d93025;
+        .question-info {
+            text-align: right;
         }
 
         .question-content {
@@ -477,13 +467,6 @@
                 margin-bottom: 8px;
             }
 
-            .q-number {
-                width: 22px;
-                height: 22px;
-                line-height: 22px;
-                font-size: 0.85rem;
-            }
-
             .question-content {
                 font-size: 1rem;
                 line-height: 1.6;
@@ -817,18 +800,15 @@
                 {% for res in results %}
                 <div class="question-item {% if not res.is_correct %}incorrect{% endif %}" id="q-{{ res.schedule_id }}">
                     <div class="question-meta">
-                        <span class="q-number {% if not res.is_correct %}incorrect{% endif %}">{{ forloop.counter }}</span>
-                        {{ res.question.subject.name }} · 제{{ res.question.exam.round_number }}회 {{ res.question.number }}번
-                        <span style="float: right;">
-                            {% if res.is_correct %}
-                            <span style="color: #2d6a4f;"><i class="fas fa-check-circle"></i> 정답</span>
-                            {% else %}
-                            <span style="color: #d93025;"><i class="fas fa-times-circle"></i> 오답</span>
-                            {% endif %}
-                        </span>
+                        {% if res.is_correct %}
+                        <span style="color: #2d6a4f; font-weight: bold;"><i class="fas fa-check-circle"></i> 정답</span>
+                        {% else %}
+                        <span style="color: #d93025; font-weight: bold;"><i class="fas fa-times-circle"></i> 오답</span>
+                        {% endif %}
+                        <span class="question-info">{{ res.question.subject.name }}({{ res.question.exam.round_number }}-{{ res.question.number }})</span>
                     </div>
                     <div class="question-content">
-                        {{ res.question.content|safe }}
+                        <strong style="color: #2d6a4f;">{{ forloop.counter }}.</strong> {{ res.question.content|safe }}
                     </div>
                     {% if res.question.image %}
                     <div style="text-align: center; margin-bottom: 15px;">
