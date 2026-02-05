@@ -42,6 +42,7 @@ urlpatterns = [
         name="update_my_question",
     ),
     # Smart Review Session
+    path("review/", views.review_index, name="review_index"),
     path("review/start/", views.review_start, name="review_start"),
     path("review/submit/", views.review_submit, name="review_submit"),
     # Admin Prompt Generator

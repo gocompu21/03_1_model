@@ -1,0 +1,546 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 복습 - 나무의사</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            flex: 0 0 auto;
+            z-index: 10;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #b7e4c7;
+        }
+
+        .nav-links button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-left: 15px;
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #1b4332;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-item {
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 1rem;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background-color: #40916c;
+            color: white;
+            font-weight: bold;
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            width: 24px;
+            text-align: center;
+        }
+
+        .back-home {
+            margin-top: auto;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px 40px;
+            overflow-y: auto;
+        }
+
+        /* Review Styles */
+        .review-container {
+            background: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .review-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #2d6a4f;
+        }
+
+        .review-header h1 {
+            color: #2d6a4f;
+            font-size: 1.5rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 5px solid #2d6a4f;
+            padding-left: 15px;
+        }
+
+        .review-summary {
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .review-summary .count {
+            font-size: 3rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .review-summary .label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .review-description {
+            color: #666;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+
+        /* Card Layout (PC & Mobile) */
+        .history-table {
+            display: block;
+            width: 100%;
+        }
+
+        .history-table thead {
+            display: none;
+        }
+
+        .history-table tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-table tbody tr {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            background: white;
+            border-radius: 10px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            border: 1px solid #e8e8e8;
+        }
+
+        .history-table tbody tr:hover {
+            border-color: #2d6a4f;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .history-table td {
+            display: block;
+            padding: 0;
+            border: none;
+        }
+
+        /* 문제 (상단 - full width) */
+        .history-table td:nth-child(3) {
+            order: 1;
+            flex: 0 0 100%;
+            width: 100%;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #e0e0e0;
+            font-size: 1rem;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .history-table td:nth-child(3) > div {
+            white-space: normal !important;
+            overflow: visible !important;
+        }
+
+        /* 문제 내용 내부 보기 박스 스타일 */
+        .history-table td:nth-child(3) div div {
+            display: block !important;
+            clear: both;
+            border: 1px solid #ddd !important;
+            padding: 8px 12px !important;
+            margin: 8px 0 !important;
+            background: #f9f9f9 !important;
+            border-radius: 4px;
+        }
+
+        .history-table td:nth-child(3) div div:first-of-type {
+            margin-top: 12px;
+        }
+
+
+        /* 마지막 오답 (하단 왼쪽) */
+        .history-table td:nth-child(1) {
+            order: 2;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        /* 과목 (하단 오른쪽) */
+        .history-table td:nth-child(2) {
+            order: 3;
+            font-size: 0.85rem;
+            color: #2d6a4f;
+            font-weight: bold;
+            background: #e6f4ea;
+            padding: 3px 10px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        .review-count-badge {
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 8px;
+        }
+
+        .review-start-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            padding: 15px 40px;
+            background-color: #2d6a4f;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .review-start-btn:hover {
+            background-color: #1b4332;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #2d6a4f;
+            margin-bottom: 20px;
+        }
+
+        /* Hamburger Menu */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 99;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Mobile Responsive */
+        @media screen and (max-width: 768px) {
+            header {
+                padding: 12px 16px;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .nav-links span {
+                display: none;
+            }
+
+            .nav-links a,
+            .nav-links button {
+                margin-left: 10px !important;
+                font-size: 0.85rem !important;
+            }
+
+            .hamburger-btn {
+                display: block;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -300px;
+                top: 0;
+                height: 100vh;
+                width: 260px;
+                z-index: 100;
+                padding: 60px 20px 20px 20px;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .menu-item {
+                padding: 12px 16px;
+                font-size: 0.9rem;
+            }
+
+            .main-content {
+                padding: 10px 12px;
+                width: 100%;
+                overflow-x: hidden;
+                box-sizing: border-box;
+            }
+
+            .review-container {
+                padding: 15px;
+                border-radius: 10px;
+            }
+
+            .review-header h1 {
+                font-size: 1.2rem;
+            }
+
+            .review-summary .count {
+                font-size: 2.5rem;
+            }
+
+            /* Mobile Card Adjustments */
+            .history-table tbody tr {
+                padding: 14px;
+            }
+
+            .history-table td:nth-child(3) {
+                margin-bottom: 6px;
+                padding-bottom: 6px;
+            }
+
+            .history-table td:nth-child(1) {
+                font-size: 0.75rem !important;
+            }
+
+            .history-table td:nth-child(2) {
+                font-size: 0.75rem !important;
+                padding: 1px 6px !important;
+            }
+
+            .review-count-badge {
+                font-size: 0.7rem !important;
+                margin-left: 4px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div style="display: flex; align-items: center;">
+            <button class="hamburger-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        </div>
+        <nav class="nav-links">
+            {% if user.is_authenticated %}
+            <a href="{% url 'mypage:index' %}">마이페이지</a>
+            <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">로그아웃</button>
+            </form>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <a href="{% url 'mypage:review_index' %}" class="menu-item active" style="text-decoration: none;">
+                <i class="fas fa-brain"></i> 오늘의 복습
+                {% if review_count > 0 %}
+                <span style="background-color: #e63946; color: white; border-radius: 50%; padding: 2px 8px; font-size: 0.75rem; margin-left: 5px;">
+                    {{ review_count }}</span>
+                {% endif %}
+            </a>
+            <a href="{% url 'mypage:index' %}?section=wrong_answer" class="menu-item" style="text-decoration: none;">
+                <i class="fas fa-times-circle"></i> 전체 오답 노트
+            </a>
+            <a href="{% url 'mypage:index' %}?section=my_questions" class="menu-item" style="text-decoration: none;">
+                <i class="fas fa-question-circle"></i> 나의 질의응답
+            </a>
+            <a href="{% url 'mypage:index' %}?section=history" class="menu-item" style="text-decoration: none;">
+                <i class="fas fa-clipboard-list"></i> 기출시험 결과
+            </a>
+            <a href="{% url 'mypage:index' %}?section=analysis" class="menu-item" style="text-decoration: none;">
+                <i class="fas fa-chart-pie"></i> 과목별 실력분석
+            </a>
+            <a href="{% url 'mypage:index' %}?section=info" class="menu-item" style="text-decoration: none;">
+                <i class="fas fa-user"></i> 회원 정보
+            </a>
+            <a href="{% url 'main:index' %}" class="menu-item back-home" style="text-decoration: none;">
+                <i class="fas fa-home"></i> 홈으로
+            </a>
+        </div>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="review-container">
+                <div class="review-header">
+                    <h1><i class="fas fa-brain"></i> 오늘의 복습</h1>
+                </div>
+
+                {% if review_recommendations %}
+                <div class="review-summary">
+                    <span class="count">{{ review_count }}</span>
+                    <span class="label">개의 문제가 복습을 기다리고 있습니다</span>
+                </div>
+
+                <div class="review-description">
+                    <i class="fas fa-info-circle"></i>
+                    에빙하우스 망각곡선에 기반하여 오늘 복습해야 할 문제들입니다.
+                    정기적인 복습으로 장기 기억에 저장하세요!
+                </div>
+
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 1%; white-space: nowrap;">마지막 오답</th>
+                            <th style="width: 1%; white-space: nowrap;">과목</th>
+                            <th>문제</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in review_recommendations %}
+                        <tr>
+                            <td style="white-space: nowrap;">{{ schedule.last_wrong_date|date:"y/m/d" }} <span class="review-count-badge">{{ schedule.review_count }}회차</span></td>
+                            <td style="white-space: nowrap;">{{ schedule.question.subject.name }}</td>
+                            <td>
+                                <div>
+                                    <strong style="color: #2d6a4f;">{{ schedule.question.exam.round_number }}-{{ schedule.question.number }}.</strong> {{ schedule.question.content|safe }}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{% url 'mypage:review_start' %}" class="review-start-btn">
+                    <i class="fas fa-play-circle"></i> 시 작
+                </a>
+
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-check-circle"></i>
+                    <p>오늘 복습할 문제가 없습니다.<br>잘하고 있어요!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.querySelector('.sidebar-overlay').classList.toggle('active');
+        }
+    </script>
+</body>
+
+</html>

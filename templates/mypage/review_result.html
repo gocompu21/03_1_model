@@ -127,6 +127,16 @@
             margin-bottom: 10px;
         }
 
+        .question-content div {
+            display: block !important;
+            font-weight: normal;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
         .choices {
             display: flex;
             flex-direction: column;
@@ -183,20 +193,6 @@
             border-radius: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
-        }
-
-        /* Explanation Section */
-        .explanation-section {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border-left: 3px solid #2d6a4f;
-            display: none;
-        }
-
-        .explanation-section.show {
-            display: block;
         }
 
         .toggle-btn {
@@ -545,13 +541,6 @@
                 border-radius: 20px;
             }
 
-            /* Explanation section */
-            .explanation-section {
-                padding: 12px;
-                font-size: 0.9rem;
-                margin-top: 12px;
-            }
-
             /* Mobile home button - fixed at bottom */
             .mobile-home-btn {
                 display: block;
@@ -584,7 +573,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             z-index: 9999;
             justify-content: center;
             align-items: center;
@@ -601,6 +590,7 @@
             max-height: 100%;
             object-fit: contain;
             border-radius: 8px;
+            touch-action: pinch-zoom;
         }
 
         .image-modal-close {
@@ -608,13 +598,143 @@
             top: 15px;
             right: 20px;
             color: white;
-            font-size: 2rem;
+            font-size: 2.5rem;
             cursor: pointer;
             z-index: 10000;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
         }
 
         .zoomable-img {
             cursor: zoom-in;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Mobile image tap hint */
+        @media (max-width: 768px) {
+            .zoomable-img {
+                position: relative;
+            }
+
+            .image-modal-close {
+                top: 10px;
+                right: 10px;
+                font-size: 2rem;
+                width: 44px;
+                height: 44px;
+            }
+
+            .image-modal {
+                padding: 10px;
+            }
+        }
+
+        /* Explanation Section (Same Level as Question) */
+        .explanation-section {
+            background: white;
+            border-radius: 12px;
+            border: 2px solid #2d6a4f;
+            overflow: hidden;
+            display: none;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .explanation-section.show {
+            display: block;
+        }
+
+        .explanation-header {
+            background: linear-gradient(135deg, #2d6a4f, #40916c);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .explanation-header h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .explanation-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .explanation-body {
+            padding: 20px;
+            line-height: 1.8;
+        }
+
+        .explanation-answer {
+            background: #e6f4ea;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+
+        .explanation-answer strong {
+            color: #2d6a4f;
+        }
+
+        .explanation-text {
+            border-top: 1px dashed #ddd;
+            padding-top: 15px;
+        }
+
+        .explanation-infographic {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .explanation-infographic img {
+            max-width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: zoom-in;
+        }
+
+        @media (max-width: 768px) {
+            .explanation-section {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                margin-bottom: 0;
+                border-bottom: 8px solid #f0f0f0;
+            }
+
+            .explanation-header {
+                padding: 10px 15px;
+            }
+
+            .explanation-header h4 {
+                font-size: 0.9rem;
+            }
+
+            .explanation-body {
+                padding: 15px;
+                font-size: 0.9rem;
+            }
+
+            .explanation-answer {
+                padding: 8px 12px;
+                font-size: 0.95rem;
+            }
         }
 
         /* Extra small devices */
@@ -660,11 +780,6 @@
             .toggle-btn {
                 font-size: 0.8rem;
                 padding: 6px 10px;
-            }
-
-            .explanation-section {
-                padding: 10px;
-                font-size: 0.85rem;
             }
 
             .mobile-home-btn {
@@ -747,11 +862,19 @@
                             해설 보기
                         </button>
                     </div>
+                </div>
 
-                    <!-- Explanation Section -->
-                    <div id="exp-{{ res.schedule_id }}" class="explanation-section">
-                        <div><strong>정답:</strong> {{ res.question.answer|circle_number }}</div>
-                        <div style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 10px;">
+                <!-- Explanation Section (Same Level as Question) -->
+                <div id="exp-{{ res.schedule_id }}" class="explanation-section">
+                    <div class="explanation-header">
+                        <h4><i class="fas fa-lightbulb"></i> 해설</h4>
+                        <button class="explanation-close" onclick="toggleExplanation('exp-{{ res.schedule_id }}')">&times;</button>
+                    </div>
+                    <div class="explanation-body">
+                        <div class="explanation-answer">
+                            <strong>정답:</strong> {{ res.question.answer|circle_number }}
+                        </div>
+                        <div class="explanation-text">
                             {% if res.question.textbook_chat %}
                             {{ res.question.textbook_chat|markdown|safe }}
                             {% else %}
@@ -759,15 +882,10 @@
                             {% endif %}
                         </div>
                         {% if res.question.infographic_image %}
-                        <div style="margin-top: 10px; text-align: center;">
-                            <img src="{{ res.question.infographic_image.url }}" class="zoomable-img" onclick="event.stopPropagation(); openImageModal('{{ res.question.infographic_image.url }}')" style="border: 2px solid #000; width: 100%;">
+                        <div class="explanation-infographic">
+                            <img src="{{ res.question.infographic_image.url }}" class="zoomable-img" onclick="openImageModal('{{ res.question.infographic_image.url }}')">
                         </div>
                         {% endif %}
-                        <div style="text-align: center; margin-top: 10px; cursor: pointer;" onclick="toggleExplanation('exp-{{ res.schedule_id }}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="18 15 12 9 6 15"></polyline>
-                            </svg>
-                        </div>
                     </div>
                 </div>
                 {% endfor %}
@@ -817,18 +935,11 @@
 
     <!-- Image Modal -->
     <div id="imageModal" class="image-modal" onclick="closeImageModal()">
-        <span class="image-modal-close">&times;</span>
-        <img id="modalImage" src="" alt="확대 이미지">
+        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
+        <img id="modalImage" src="" alt="확대 이미지" onclick="event.stopPropagation()">
     </div>
 
     <script>
-        function toggleExplanation(id) {
-            const el = document.getElementById(id);
-            if (el) {
-                el.classList.toggle('show');
-            }
-        }
-
         function scrollToQuestion(scheduleId) {
             const el = document.getElementById('q-' + scheduleId);
             if (el) {
@@ -837,22 +948,45 @@
         }
 
         function openImageModal(src) {
+            event.preventDefault();
+            event.stopPropagation();
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
             modalImg.src = src;
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
         }
 
         function closeImageModal() {
             const modal = document.getElementById('imageModal');
             modal.classList.remove('show');
             document.body.style.overflow = '';
+            document.body.style.touchAction = '';
         }
 
-        // ESC key to close modal
+        function toggleExplanation(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                const isShowing = el.classList.toggle('show');
+                if (isShowing) {
+                    // Scroll to the explanation section
+                    setTimeout(() => {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 50);
+                    // MathJax re-render when showing
+                    if (window.MathJax) {
+                        MathJax.typesetPromise([el]);
+                    }
+                }
+            }
+        }
+
+        // ESC key to close image modal
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeImageModal();
+            if (e.key === 'Escape') {
+                closeImageModal();
+            }
         });
     </script>
 </body>

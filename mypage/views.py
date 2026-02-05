@@ -708,6 +708,29 @@ def delete_my_question(request, pk):
 
 
 @login_required
+def review_index(request):
+    """
+    Dedicated review page showing all questions due for review.
+    """
+    today = timezone.localdate()
+    review_recommendations = ReviewSchedule.objects.filter(
+        user=request.user, next_review_date__lte=today, is_mastered=False
+    ).select_related("question", "question__subject", "question__exam").order_by(
+        "next_review_date", "-review_count"
+    )
+    review_count = review_recommendations.count()
+
+    return render(
+        request,
+        "mypage/review_index.html",
+        {
+            "review_recommendations": review_recommendations,
+            "review_count": review_count,
+        },
+    )
+
+
+@login_required
 def review_start(request):
     """
     Start a review session with all questions due for review today.

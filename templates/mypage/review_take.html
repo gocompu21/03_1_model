@@ -111,6 +111,17 @@
             margin-bottom: 10px;
         }
 
+        /* 문제 내용 내부 보기 박스 */
+        .question-content div {
+            display: block !important;
+            font-weight: normal;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            margin: 10px 0;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
         .choices {
             display: flex;
             flex-direction: column;
@@ -597,13 +608,13 @@
             </div>
 
             <button type="submit" class="submit-btn">
-                <i class="fas fa-check-circle"></i> 복습 완료하기
+                <i class="fas fa-check-circle"></i> 제출하기
             </button>
         </div>
 
         <!-- Mobile Submit Button (outside OMR panel) -->
         <button type="submit" class="mobile-submit-btn">
-            <i class="fas fa-check-circle"></i> 복습 완료하기
+            <i class="fas fa-check-circle"></i> 제출하기
         </button>
     </form>
     {% else %}
