@@ -898,8 +898,8 @@
                 font-size: 0.8rem;
             }
 
-            /* 문제 컬럼 (첫 번째 - 상단) */
-            .history-table td:nth-child(4) {
+            /* 문제 컬럼 (상단 - full width) */
+            .history-table td:nth-child(3) {
                 order: 1;
                 width: 100%;
                 margin-bottom: 10px;
@@ -916,26 +916,21 @@
             }
 
             /* 과목 (하단 왼쪽) */
-            .history-table td:nth-child(3) {
+            .history-table td:nth-child(2) {
                 order: 2;
                 font-size: 0.75rem !important;
-                color: #888;
-            }
-
-            /* 회차-번호 (하단 중앙) */
-            .history-table td:nth-child(2) {
-                order: 3;
-                font-size: 0.8rem !important;
-                font-weight: bold;
                 color: #2d6a4f;
-                margin-left: 10px;
+                font-weight: bold;
+                background: #e6f4ea;
+                padding: 3px 8px !important;
+                border-radius: 4px;
             }
 
             /* 응시일시 (하단 오른쪽) */
             .history-table td:nth-child(1) {
-                order: 4;
+                order: 3;
                 font-size: 0.7rem !important;
-                color: #aaa;
+                color: #999;
                 margin-left: auto;
             }
 
@@ -1054,19 +1049,16 @@
                 padding: 10px;
             }
 
-            .history-table td:nth-child(2) {
-                font-size: 0.9rem !important;
-                margin-bottom: 5px;
-                padding-bottom: 5px;
+            .history-table td:nth-child(3) {
+                font-size: 0.85rem !important;
             }
 
-            .history-table td:nth-child(1),
-            .history-table td:nth-child(3) {
+            .history-table td:nth-child(2) {
                 font-size: 0.7rem !important;
             }
 
-            .history-table td:nth-child(3) {
-                margin-left: 8px;
+            .history-table td:nth-child(1) {
+                font-size: 0.65rem !important;
             }
 
             .pass-badge {
@@ -1417,9 +1409,6 @@
                 <!-- List View -->
                 <div id="wrong-answer-list-view">
                     <h1>전체 오답 노트</h1>
-                    <p style="color: #666; margin-bottom: 20px;">
-                        <i class="fas fa-info-circle"></i> 클릭하면 해당 문제의 상세 해설을 볼 수 있습니다.
-                    </p>
                     <div id="wrong-answer-list-container">
                         {% include 'mypage/wrong_answer_partial.html' %}
                     </div>

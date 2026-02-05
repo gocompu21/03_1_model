@@ -4,7 +4,6 @@
     <thead>
         <tr>
             <th style="width: 1%; white-space: nowrap;">응시 일시</th>
-            <th style="width: 1%; white-space: nowrap;">문제번호</th>
             <th style="width: 1%; white-space: nowrap;">과목</th>
             <th>문제</th>
         </tr>
@@ -13,9 +12,6 @@
         {% for result in wrong_answers %}
         <tr onclick="loadWrongAnswerDetail({{ result.id }});" style="cursor: pointer;" title="클릭하여 상세 해설 보기">
             <td style="white-space: nowrap;">{{ result.attempt.start_time|date:"y/m/d H:i" }}</td>
-            <td style="font-weight: bold; color: #2d6a4f; white-space: nowrap;">
-                {{ result.question.exam.round_number }}/{{ result.question.number }}
-            </td>
             <td style="white-space: nowrap;">{{ result.question.subject.name }}</td>
             <td style="text-align: left; max-width: 300px;">
                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -25,7 +21,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="4" style="padding: 30px; color: #868e96;">틀린 문제가 없습니다. 훌륭합니다!</td>
+            <td colspan="3" style="padding: 30px; color: #868e96;">틀린 문제가 없습니다. 훌륭합니다!</td>
         </tr>
         {% endfor %}
     </tbody>
