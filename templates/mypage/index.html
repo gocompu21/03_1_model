@@ -898,48 +898,45 @@
                 font-size: 0.8rem;
             }
 
-            /* 문제번호 - 메인 표시 (첫 번째 줄) */
-            .history-table td:nth-child(2) {
+            /* 문제 컬럼 (첫 번째 - 상단) */
+            .history-table td:nth-child(4) {
                 order: 1;
                 width: 100%;
-                font-size: 1rem !important;
-                font-weight: bold;
-                color: #2d6a4f;
-                margin-bottom: 8px;
-                padding-bottom: 8px;
+                margin-bottom: 10px;
+                padding-bottom: 10px;
                 border-bottom: 1px dashed #e0e0e0;
+                font-size: 0.9rem !important;
+                color: #333;
+                line-height: 1.5;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-align: left !important;
             }
 
-            .history-table td:nth-child(2)::before {
-                content: "📝 ";
-            }
-
-            /* 응시일시 (두 번째 줄 왼쪽) */
-            .history-table td:nth-child(1) {
+            /* 과목 (하단 왼쪽) */
+            .history-table td:nth-child(3) {
                 order: 2;
                 font-size: 0.75rem !important;
                 color: #888;
             }
 
-            .history-table td:nth-child(1)::before {
-                content: "📅 ";
-            }
-
-            /* 과목 (두 번째 줄 오른쪽) */
-            .history-table td:nth-child(3) {
+            /* 회차-번호 (하단 중앙) */
+            .history-table td:nth-child(2) {
                 order: 3;
-                font-size: 0.75rem !important;
-                color: #888;
-                margin-left: 12px;
+                font-size: 0.8rem !important;
+                font-weight: bold;
+                color: #2d6a4f;
+                margin-left: 10px;
             }
 
-            .history-table td:nth-child(3)::before {
-                content: "📚 ";
-            }
-
-            /* Hide the "문제" column (4th column) on mobile */
-            .history-table td:nth-child(4) {
-                display: none !important;
+            /* 응시일시 (하단 오른쪽) */
+            .history-table td:nth-child(1) {
+                order: 4;
+                font-size: 0.7rem !important;
+                color: #aaa;
+                margin-left: auto;
             }
 
             /* Stats Cards */
@@ -978,6 +975,30 @@
 
             .admin-dashboard h2 {
                 font-size: 1.2rem;
+            }
+
+            /* 오늘의 복습 - 모바일 최적화 */
+            .review-card {
+                padding: 12px !important;
+                border-radius: 8px !important;
+            }
+
+            .review-question-content {
+                font-size: 0.9rem !important;
+                line-height: 1.5 !important;
+            }
+
+            .review-meta {
+                font-size: 0.75rem !important;
+            }
+
+            .review-start-btn {
+                display: block !important;
+                width: calc(100% - 20px) !important;
+                margin: 0 auto !important;
+                padding: 12px 20px !important;
+                font-size: 1rem !important;
+                box-sizing: border-box !important;
             }
         }
 
@@ -1234,18 +1255,17 @@
                 </p>
                 <div style="display: grid; gap: 15px;">
                     {% for schedule in review_recommendations %}
-                    <div
+                    <div class="review-card"
                         style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid #2d6a4f;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div style="flex: 1;">
-                                <div style="color: #888; font-size: 0.85rem; margin-bottom: 5px;">
-                                    {{ schedule.question.subject.name }} · 제{{ schedule.question.exam.round_number }}회
-                                    {{ schedule.question.number }}번
+                                <div class="review-meta" style="color: #888; font-size: 0.85rem; margin-bottom: 5px;">
+                                    {{ schedule.question.subject.name }} · {{ schedule.question.exam.round_number }}-{{ schedule.question.number }}
                                 </div>
                                 <div class="review-question-content" style="font-weight: 500; line-height: 1.6; margin: 10px 0;">
                                     {{ schedule.question.content|safe|linebreaksbr }}
                                 </div>
-                                <div style="margin-top: 10px; font-size: 0.8rem; color: #888;">
+                                <div class="review-meta" style="margin-top: 10px; font-size: 0.8rem; color: #888;">
                                     <i class="fas fa-calendar-alt"></i> 마지막 오답:
                                     {{schedule.last_wrong_date|date:"Y.m.d"}}
                                     <span style="margin-left: 10px;"><i class="fas fa-redo"></i> 복습
@@ -1257,9 +1277,9 @@
                     {% endfor %}
                 </div>
                 <div style="text-align: center; margin-top: 25px;">
-                    <a href="{% url 'mypage:review_start' %}"
+                    <a href="{% url 'mypage:review_start' %}" class="review-start-btn"
                         style="display: inline-block; padding: 15px 40px; background-color: #2d6a4f; color: white; text-decoration: none; border-radius: 30px; font-weight: bold; font-size: 1.1rem; transition: background-color 0.3s;">
-                        <i class="fas fa-play-circle"></i> 복습 시작하기
+                        <i class="fas fa-play-circle"></i> 복습 시작
                     </a>
                 </div>
                 {% else %}
