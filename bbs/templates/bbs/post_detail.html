@@ -199,7 +199,7 @@
                 style="margin-top: 50px; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid #e0e0e0;">
                 <h3
                     style="padding: 10px 20px; margin: 0; font-size: 1rem; color: #333; border-bottom: 2px solid #2d6a4f; background: #f8f9fa;">
-                    관련 게시글
+                    아래 게시글
                 </h3>
                 <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
                     <thead>
@@ -243,7 +243,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" style="padding: 20px; text-align: center; color: #888;">관련 게시글이 없습니다.</td>
+                            <td colspan="6" style="padding: 20px; text-align: center; color: #888;">아래 게시글이 없습니다.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -574,9 +574,17 @@
             font-size: 0.9rem !important;
         }
 
-        /* Related Posts - Card Layout */
+        /* Related Posts - Simple List (like post_list) */
         .related-posts {
             margin-top: 30px !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+
+        .related-posts h3 {
+            padding: 12px 16px !important;
+            font-size: 0.9rem !important;
         }
 
         .related-posts thead {
@@ -585,24 +593,26 @@
 
         .related-posts table {
             display: block;
+            background: white;
         }
 
         .related-posts tbody {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            display: block;
         }
 
         .related-posts tbody tr {
             display: block;
             background: white !important;
-            border-radius: 8px;
-            padding: 10px;
-            border: 1px solid #e8e8e8 !important;
+            padding: 14px 16px;
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
         }
 
-        .related-posts tbody tr:hover {
-            border-color: #2d6a4f !important;
+        .related-posts tbody tr:active {
+            background-color: #f8f9fa !important;
         }
 
         /* Hide number column */
@@ -610,53 +620,31 @@
             display: none !important;
         }
 
-        /* Title */
+        /* Title only */
         .related-posts td:nth-child(2) {
             display: block !important;
-            padding: 0 0 6px 0 !important;
-            border-bottom: 1px dashed #e0e0e0;
-            margin-bottom: 6px;
+            padding: 0 !important;
         }
 
         .related-posts td:nth-child(2) a {
             white-space: normal !important;
-            overflow: visible !important;
-            font-size: 0.9rem !important;
-            line-height: 1.4;
+            overflow: hidden !important;
+            text-overflow: clip !important;
+            font-size: 0.95rem !important;
+            font-weight: 500;
+            line-height: 1.45;
+            color: #202124 !important;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
-        /* Meta info - 유형, 작성자, 작성일, 조회 */
+        /* Hide meta info - 유형, 작성자, 작성일, 조회 */
         .related-posts td:nth-child(3),
         .related-posts td:nth-child(4),
         .related-posts td:nth-child(5),
         .related-posts td:nth-child(6) {
-            display: inline-block !important;
-            padding: 0 !important;
-            font-size: 0.7rem !important;
-            color: #888 !important;
-        }
-
-        .related-posts td:nth-child(3) {
-            margin-right: 8px;
-        }
-
-        .related-posts td:nth-child(3) .post-type-badge {
-            font-size: 0.65rem;
-            padding: 1px 4px;
-        }
-
-        .related-posts td:nth-child(4)::before {
-            content: "👤 ";
-        }
-
-        .related-posts td:nth-child(5)::before {
-            content: "📅 ";
-            margin-left: 10px;
-        }
-
-        .related-posts td:nth-child(6)::before {
-            content: "👁 ";
-            margin-left: 10px;
+            display: none !important;
         }
 
         /* List Button */
@@ -712,23 +700,11 @@
         }
 
         .related-posts tbody tr {
-            padding: 8px;
+            padding: 12px 14px;
         }
 
         .related-posts td:nth-child(2) a {
-            font-size: 0.85rem !important;
-        }
-
-        .related-posts td:nth-child(3),
-        .related-posts td:nth-child(4),
-        .related-posts td:nth-child(5),
-        .related-posts td:nth-child(6) {
-            font-size: 0.65rem !important;
-        }
-
-        .related-posts td:nth-child(5)::before,
-        .related-posts td:nth-child(6)::before {
-            margin-left: 6px;
+            font-size: 0.9rem !important;
         }
     }
 </style>

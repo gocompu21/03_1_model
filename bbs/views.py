@@ -20,7 +20,7 @@ def post_list(request):
     posts = Post.objects.all().order_by("-created_at")
 
     if category == "BOOK":
-        posts = posts.filter(type__name="기본서")
+        posts = posts.filter(type__name__in=["수목생리학", "수목병리학", "산림토양학", "수목관리학", "수목해충학"])
     elif category == "DOCTOR":
         posts = posts.filter(type__name="주치의")
     elif category == "GENERAL":
@@ -54,7 +54,7 @@ def post_detail(request, pk):
     posts = Post.objects.all().order_by("-created_at")
 
     if category == "BOOK":
-        posts = posts.filter(type__name="기본서")
+        posts = posts.filter(type__name__in=["수목생리학", "수목병리학", "산림토양학", "수목관리학", "수목해충학"])
     elif category == "DOCTOR":
         posts = posts.filter(type__name="주치의")
     elif category == "GENERAL":
@@ -161,7 +161,7 @@ def post_list_api(request):
     posts = Post.objects.all().order_by("-created_at")
 
     if category == "BOOK":
-        posts = posts.filter(type__name="기본서")
+        posts = posts.filter(type__name__in=["수목생리학", "수목병리학", "산림토양학", "수목관리학", "수목해충학"])
     elif category == "DOCTOR":
         posts = posts.filter(type__name="주치의")
     elif category == "GENERAL":
