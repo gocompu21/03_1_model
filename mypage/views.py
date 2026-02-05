@@ -619,6 +619,59 @@ def exam_history_api(request):
 
 
 @login_required
+def ai_analysis_page(request):
+    """AI 질의분석 별도 페이지"""
+    return render(request, "mypage/ai_analysis_page.html")
+
+
+@login_required
+def analysis_page(request):
+    """과목별 실력분석 별도 페이지"""
+    # Aggregate results by Subject
+    subject_stats = (
+        UserQuestionResult.objects.filter(attempt__user=request.user)
+        .values("question__subject__name")
+        .annotate(
+            total=Count("id"),
+            correct=Count(
+                Case(When(is_correct=True, then=1), output_field=IntegerField())
+            ),
+        )
+    )
+
+    # Prepare data for Chart.js
+    labels = []
+    data = []
+    weakest_subject = None
+    min_accuracy = 101
+
+    for stat in subject_stats:
+        subj_name = stat["question__subject__name"]
+        accuracy = (
+            round((stat["correct"] / stat["total"]) * 100, 1)
+            if stat["total"] > 0
+            else 0
+        )
+        labels.append(subj_name)
+        data.append(accuracy)
+        if accuracy < min_accuracy:
+            min_accuracy = accuracy
+            weakest_subject = f"{subj_name} ({accuracy}%)"
+
+    if not labels:
+        labels = ["데이터 없음"]
+        data = [0]
+        weakest_subject = "아직 학습 데이터가 충분하지 않습니다."
+
+    context = {
+        "radar_labels": json.dumps(labels, ensure_ascii=False),
+        "radar_data": json.dumps(data),
+        "weakest_subject": weakest_subject,
+    }
+    return render(request, "mypage/analysis_page.html", context)
+
+
+@login_required
 @require_POST
 def analyze_questions(request):
     try:

@@ -623,7 +623,10 @@
             <a href="{% url 'mypage:exam_history_list' %}" class="menu-item" style="text-decoration: none;">
                 <i class="fas fa-clipboard-list"></i> 기출시험 결과
             </a>
-            <a href="{% url 'mypage:index' %}?section=analysis" class="menu-item" style="text-decoration: none;">
+            <a href="{% url 'mypage:ai_analysis_page' %}" class="menu-item" style="text-decoration: none;">
+                <i class="fas fa-robot"></i> AI 질의분석
+            </a>
+            <a href="{% url 'mypage:analysis_page' %}" class="menu-item" style="text-decoration: none;">
                 <i class="fas fa-chart-pie"></i> 과목별 실력분석
             </a>
             <a href="{% url 'mypage:index' %}?section=info" class="menu-item" style="text-decoration: none;">

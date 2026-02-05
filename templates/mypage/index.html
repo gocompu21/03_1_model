@@ -984,15 +984,31 @@
                 padding-left: 10px;
             }
 
-            /* Info Table */
-            .info-table th,
-            .info-table td {
-                padding: 10px;
-                font-size: 0.9rem;
+            /* Info Cards - Mobile */
+            .info-cards {
+                grid-template-columns: 1fr;
+                gap: 12px;
             }
 
-            .info-table th {
-                width: 100px;
+            .info-card {
+                padding: 16px;
+            }
+
+            .info-card-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .info-card-icon i {
+                font-size: 1.1rem;
+            }
+
+            .info-card-label {
+                font-size: 0.8rem;
+            }
+
+            .info-card-value {
+                font-size: 1rem;
             }
 
             /* History Table - Mobile Adjustments */
@@ -1125,10 +1141,27 @@
                 font-size: 1.1rem;
             }
 
-            .info-table th,
-            .info-table td {
-                padding: 8px;
-                font-size: 0.85rem;
+            /* Info Cards - Extra Small */
+            .info-card {
+                padding: 12px;
+                gap: 12px;
+            }
+
+            .info-card-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .info-card-icon i {
+                font-size: 1rem;
+            }
+
+            .info-card-label {
+                font-size: 0.75rem;
+            }
+
+            .info-card-value {
+                font-size: 0.95rem;
             }
 
             .history-table tbody tr {
@@ -1273,13 +1306,13 @@
             <a href="{% url 'mypage:exam_history_list' %}" class="menu-item">
                 <i class="fas fa-clipboard-list"></i> 기출시험 결과
             </a>
-            <div class="menu-item" onclick="showSection('analysis')">
+            <a href="{% url 'mypage:analysis_page' %}" class="menu-item">
                 <i class="fas fa-chart-pie"></i> 과목별 실력분석
-            </div>
+            </a>
 
-            <div class="menu-item" onclick="showSection('ai_analysis')">
-                <i class="fas fa-robot"></i> 내 최근 질의 분석
-            </div>
+            <a href="{% url 'mypage:ai_analysis_page' %}" class="menu-item">
+                <i class="fas fa-robot"></i> AI 질의분석
+            </a>
 
             <div class="menu-item" onclick="showSection('info')">
                 <i class="fas fa-user"></i> 회원 정보
@@ -1394,29 +1427,54 @@
 
             <!-- Section 1: Member Info -->
             <div id="info-section" class="content-section">
-                <h1>회원 정보</h1>
-                <table class="info-table">
-                    <tr>
-                        <th>아이디</th>
-                        <td>{{ user.username }}</td>
-                    </tr>
-                    <tr>
-                        <th>이메일</th>
-                        <td>{{ user.email|default:"-" }}</td>
-                    </tr>
-                    <tr>
-                        <th>이름</th>
-                        <td>{{ user.first_name|default:"-" }}</td>
-                    </tr>
-                    <tr>
-                        <th>가입일</th>
-                        <td>{{ user.date_joined|date:"Y/m/d" }}</td>
-                    </tr>
-                    <tr>
-                        <th>마지막 로그인</th>
-                        <td>{{ user.last_login|date:"Y/m/d" }} ({{ days_since_login }}일 전)</td>
-                    </tr>
-                </table>
+                <h1><i class="fas fa-user-circle" style="color: #2d6a4f;"></i> 회원 정보</h1>
+                <div class="info-cards">
+                    <div class="info-card">
+                        <div class="info-card-icon">
+                            <i class="fas fa-id-badge"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">아이디</div>
+                            <div class="info-card-value highlight">{{ user.username }}</div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">이메일</div>
+                            <div class="info-card-value">{{ user.email|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">이름</div>
+                            <div class="info-card-value">{{ user.first_name|default:"-" }}</div>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-card-icon">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">가입일</div>
+                            <div class="info-card-value">{{ user.date_joined|date:"Y년 m월 d일" }}</div>
+                        </div>
+                    </div>
+                    <div class="info-card full-width">
+                        <div class="info-card-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">마지막 로그인</div>
+                            <div class="info-card-value">{{ user.last_login|date:"Y년 m월 d일 H:i" }} <span style="color: #888; font-size: 0.9rem;">({{ days_since_login }}일 전)</span></div>
+                        </div>
+                    </div>
+                </div>
 
                 <div style="display: flex; justify-content: space-between;">
                     <a href="{% url 'mypage:edit' %}" class="btn btn-primary">비밀번호 확인 후 수정</a>
@@ -1818,14 +1876,14 @@
                 document.getElementById('analysis-section').classList.add('active');
                 updateChartData();
             } else if (sectionId === 'ai_analysis') {
-                menuItems[2].classList.add('active');
-                document.getElementById('ai-analysis-section').classList.add('active');
-                resetAIAnalysis();
+                // AI Analysis is now a separate page, redirect there
+                window.location.href = '{% url "mypage:ai_analysis_page" %}';
+                return;
             } else if (sectionId === 'dashboard') {
                 // Dashboard uses separate menu handling
                 document.getElementById('dashboard-section').classList.add('active');
             } else if (sectionId === 'edit_profile' || sectionId === 'info') {
-                menuItems[3].classList.add('active');
+                menuItems[2].classList.add('active');
                 document.getElementById('info-section').classList.add('active');
             } else if (sectionId === 'practice_input') {
                 const menu = document.getElementById('menu-practice-input');

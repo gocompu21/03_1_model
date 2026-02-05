@@ -28,6 +28,8 @@ urlpatterns = [
     path("questions/", views.my_questions_list, name="my_questions_list"),
     path("history/", views.exam_history_list, name="exam_history_list"),
     path("api/exam_history/", views.exam_history_api, name="exam_history_api"),
+    path("ai-analysis/", views.ai_analysis_page, name="ai_analysis_page"),
+    path("analysis/", views.analysis_page, name="analysis_page"),
     path("analyze/", views.analyze_questions, name="analyze_questions"),
     path(
         "api/analyze_attempt/<int:attempt_id>/",
