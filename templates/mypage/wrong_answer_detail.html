@@ -360,7 +360,7 @@
             margin-left: 10px;
         }
 
-        /* Image Modal */
+        /* Image Modal - Lightbox with Zoom/Pan */
         .modal {
             display: none;
             position: fixed;
@@ -369,28 +369,135 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: rgba(0, 0, 0, 0.95);
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
 
         .modal-content {
-            margin: auto;
-            display: block;
-            max-width: 90%;
+            max-width: 95%;
             max-height: 90%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            object-fit: contain;
+            transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+            will-change: transform;
+        }
+
+        .modal-content.grabbing,
+        .modal-content.pinching {
+            cursor: grabbing;
+            transition: none; /* 드래그/핀치 중에는 즉각 반응 */
         }
 
         .modal-close {
             position: absolute;
             top: 15px;
-            right: 35px;
-            color: #f1f1f1;
-            font-size: 40px;
+            right: 20px;
+            color: #fff;
+            font-size: 36px;
             font-weight: bold;
             cursor: pointer;
+            z-index: 1001;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1001;
+        }
+
+        .modal-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-btn:active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .zoom-indicator {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 0.9rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 12px;
+            border-radius: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1001;
+        }
+
+        .zoom-indicator.visible {
+            opacity: 1;
+        }
+
+        .modal-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .modal-hint.visible {
+            opacity: 1;
         }
 
         /* Hamburger Menu Button */
@@ -707,10 +814,30 @@
         </div>
     </div>
 
-    <!-- Image Modal -->
-    <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="modal-close">&times;</span>
-        <img class="modal-content" id="modalImage">
+    <!-- Image Modal with Zoom/Pan -->
+    <div id="imageModal" class="modal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <div class="modal-container" id="modalContainer">
+            <img class="modal-content" id="modalImage" draggable="false">
+        </div>
+        <div class="zoom-indicator" id="zoomIndicator">100%</div>
+        <div class="modal-hint" id="modalHint">
+            <i class="fas fa-hand-pointer"></i><br>
+            더블탭: 확대/축소<br>
+            핀치: 줌 조절<br>
+            드래그: 이동
+        </div>
+        <div class="modal-controls">
+            <button class="modal-btn" onclick="zoomOut()" title="축소">
+                <i class="fas fa-search-minus"></i>
+            </button>
+            <button class="modal-btn" onclick="resetZoom()" title="원래 크기">
+                <i class="fas fa-compress-arrows-alt"></i>
+            </button>
+            <button class="modal-btn" onclick="zoomIn()" title="확대">
+                <i class="fas fa-search-plus"></i>
+            </button>
+        </div>
     </div>
 
     <script>
@@ -732,15 +859,219 @@
             });
         });
 
-        // Image Modal Functions
+        // ========== Image Modal with Zoom/Pan ==========
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        const modalContainer = document.getElementById('modalContainer');
+        const zoomIndicator = document.getElementById('zoomIndicator');
+        const modalHint = document.getElementById('modalHint');
+
+        let scale = 1;
+        let posX = 0;
+        let posY = 0;
+        let isDragging = false;
+        let startX, startY;
+        let lastTap = 0;
+        let initialDistance = 0;
+        let initialScale = 1;
+        let hintTimeout = null;
+
+        const MIN_SCALE = 0.5;
+        const MAX_SCALE = 5;
+
         function openModal(src) {
-            document.getElementById('imageModal').style.display = 'block';
-            document.getElementById('modalImage').src = src;
+            modal.classList.add('active');
+            modalImage.src = src;
+            document.body.style.overflow = 'hidden';
+            resetZoom();
+
+            // Show hint for mobile users
+            if (window.innerWidth <= 768) {
+                modalHint.classList.add('visible');
+                if (hintTimeout) clearTimeout(hintTimeout);
+                hintTimeout = setTimeout(() => {
+                    modalHint.classList.remove('visible');
+                }, 2500);
+            }
         }
 
         function closeModal() {
-            document.getElementById('imageModal').style.display = 'none';
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+            resetZoom();
         }
+
+        function updateTransform() {
+            modalImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
+
+        function showZoomIndicator() {
+            zoomIndicator.textContent = Math.round(scale * 100) + '%';
+            zoomIndicator.classList.add('visible');
+            setTimeout(() => zoomIndicator.classList.remove('visible'), 800);
+        }
+
+        function zoomIn() {
+            scale = Math.min(scale * 1.3, MAX_SCALE);
+            updateTransform();
+            showZoomIndicator();
+        }
+
+        function zoomOut() {
+            scale = Math.max(scale / 1.3, MIN_SCALE);
+            if (scale <= 1) {
+                posX = 0;
+                posY = 0;
+            }
+            updateTransform();
+            showZoomIndicator();
+        }
+
+        function resetZoom() {
+            scale = 1;
+            posX = 0;
+            posY = 0;
+            updateTransform();
+            showZoomIndicator();
+        }
+
+        // Mouse events for desktop
+        modalImage.addEventListener('mousedown', (e) => {
+            if (scale > 1) {
+                isDragging = true;
+                startX = e.clientX - posX;
+                startY = e.clientY - posY;
+                modalImage.classList.add('grabbing');
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                posX = e.clientX - startX;
+                posY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            modalImage.classList.remove('grabbing');
+            // 드래그 끝나면 부드러운 전환 복원
+            setTimeout(() => modalImage.classList.remove('pinching'), 50);
+        });
+
+        // Mouse wheel zoom
+        modalContainer.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            const newScale = Math.max(MIN_SCALE, Math.min(scale * delta, MAX_SCALE));
+
+            if (newScale !== scale) {
+                scale = newScale;
+                if (scale <= 1) {
+                    posX = 0;
+                    posY = 0;
+                }
+                updateTransform();
+                showZoomIndicator();
+            }
+        }, { passive: false });
+
+        // Touch events for mobile
+        let touches = [];
+
+        modalContainer.addEventListener('touchstart', (e) => {
+            touches = Array.from(e.touches);
+
+            if (touches.length === 1) {
+                // Double tap detection
+                const now = Date.now();
+                if (now - lastTap < 300) {
+                    // Double tap - toggle zoom (부드러운 전환 유지)
+                    modalImage.classList.remove('pinching');
+                    if (scale > 1) {
+                        resetZoom();
+                    } else {
+                        scale = 2.5;
+                        updateTransform();
+                        showZoomIndicator();
+                    }
+                    e.preventDefault();
+                    return;
+                }
+                lastTap = now;
+
+                // Start drag if zoomed
+                if (scale > 1) {
+                    isDragging = true;
+                    modalImage.classList.add('pinching'); // 드래그 중 즉각 반응
+                    startX = touches[0].clientX - posX;
+                    startY = touches[0].clientY - posY;
+                }
+            } else if (touches.length === 2) {
+                // Pinch start
+                isDragging = false;
+                modalImage.classList.add('pinching'); // 핀치 중 즉각 반응
+                initialDistance = getDistance(touches[0], touches[1]);
+                initialScale = scale;
+            }
+        }, { passive: false });
+
+        modalContainer.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            touches = Array.from(e.touches);
+
+            if (touches.length === 1 && isDragging && scale > 1) {
+                // Pan
+                posX = touches[0].clientX - startX;
+                posY = touches[0].clientY - startY;
+                updateTransform();
+            } else if (touches.length === 2) {
+                // Pinch zoom
+                const currentDistance = getDistance(touches[0], touches[1]);
+                const newScale = Math.max(MIN_SCALE, Math.min(initialScale * (currentDistance / initialDistance), MAX_SCALE));
+
+                if (newScale !== scale) {
+                    scale = newScale;
+                    if (scale <= 1) {
+                        posX = 0;
+                        posY = 0;
+                    }
+                    updateTransform();
+                    showZoomIndicator();
+                }
+            }
+        }, { passive: false });
+
+        modalContainer.addEventListener('touchend', (e) => {
+            touches = Array.from(e.touches);
+            if (touches.length < 2) {
+                isDragging = false;
+            }
+            if (touches.length === 1) {
+                startX = touches[0].clientX - posX;
+                startY = touches[0].clientY - posY;
+                isDragging = scale > 1;
+            }
+            // 터치 끝나면 부드러운 전환 복원
+            if (touches.length === 0) {
+                setTimeout(() => modalImage.classList.remove('pinching'), 50);
+            }
+        });
+
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // Close modal when clicking outside image
+        modalContainer.addEventListener('click', (e) => {
+            if (e.target === modalContainer && scale === 1) {
+                closeModal();
+            }
+        });
 
         // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
