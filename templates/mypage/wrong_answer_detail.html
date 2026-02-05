@@ -130,6 +130,100 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         cursor: pointer;
     }
+
+    /* 이어지는 오답 노트 카드 레이아웃 */
+    .next-wrong-table {
+        display: block;
+        width: 100%;
+    }
+
+    .next-wrong-table thead {
+        display: none;
+    }
+
+    .next-wrong-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .next-wrong-table tbody tr {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        background: white;
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border: 1px solid #e8e8e8;
+        cursor: pointer;
+    }
+
+    .next-wrong-table tbody tr:hover {
+        border-color: #2d6a4f;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .next-wrong-table td {
+        display: block;
+        padding: 0;
+        border: none;
+    }
+
+    /* 문제 (첫째 줄 - full width) */
+    .next-wrong-table td:nth-child(3) {
+        order: 1;
+        flex: 0 0 100%;
+        width: 100%;
+        margin-bottom: 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px dashed #e0e0e0;
+        font-size: 1.05rem;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .next-wrong-table td:nth-child(3) > div {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        max-width: none !important;
+    }
+
+    /* 문제 내용 내부 보기 박스 스타일 */
+    .next-wrong-table td:nth-child(3) div div {
+        display: block !important;
+        clear: both;
+        border: 1px solid #ddd !important;
+        padding: 8px 12px !important;
+        margin: 8px 0 !important;
+        background: #f9f9f9 !important;
+        border-radius: 4px;
+    }
+
+    .next-wrong-table td:nth-child(3) div div:first-of-type {
+        margin-top: 12px;
+    }
+
+    /* 응시 일시 (둘째 줄 오른쪽) */
+    .next-wrong-table td:nth-child(1) {
+        order: 2;
+        font-size: 0.8rem;
+        color: #888;
+        margin-left: auto;
+    }
+
+    /* 과목 (둘째 줄 - 일시 오른쪽) */
+    .next-wrong-table td:nth-child(2) {
+        order: 3;
+        font-size: 0.8rem;
+        color: #2d6a4f;
+        font-weight: bold;
+        background: #e6f4ea;
+        padding: 2px 8px;
+        border-radius: 4px;
+        margin-left: 10px;
+    }
 </style>
 
 <div class="wa-detail-container">
@@ -180,38 +274,14 @@
     <div class="explanation-section">
         <div class="exp-title">💡 정답 및 해설</div>
 
-        <!-- Explanation Tabs -->
-        <div class="exp-tabs" style="display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 2px solid #eee;">
-            <button class="exp-tab-btn active" onclick="switchExpTab(this, 'textbook')"
-                style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #d35400; border-bottom: 2px solid #d35400; cursor: pointer;">기본서
-                해설</button>
-            <button class="exp-tab-btn" onclick="switchExpTab(this, 'general')"
-                style="padding: 8px 15px; border: none; background: none; font-weight: bold; color: #888; cursor: pointer;">일반
-                해설</button>
-        </div>
-
         <div class="exp-content-area">
-            <!-- Textbook Explanation -->
-            <div class="exp-content textbook-content" style="display: block;">
-                {% if result.question.textbook_chat %}
-                <div class="markdown-content">
-                    {{ result.question.textbook_chat|markdown|safe }}
-                </div>
-                {% else %}
-                <p style="color: #999; font-style: italic;">기본서 해설이 없습니다.</p>
-                {% endif %}
+            {% if result.question.textbook_chat %}
+            <div class="markdown-content">
+                {{ result.question.textbook_chat|markdown|safe }}
             </div>
-
-            <!-- General Explanation -->
-            <div class="exp-content general-content" style="display: none;">
-                {% if result.question.general_chat %}
-                <div class="markdown-content">
-                    {{ result.question.general_chat|markdown|safe }}
-                </div>
-                {% else %}
-                <p style="color: #999; font-style: italic;">일반 해설이 없습니다.</p>
-                {% endif %}
-            </div>
+            {% else %}
+            <p style="color: #999; font-style: italic;">해설이 없습니다.</p>
+            {% endif %}
         </div>
 
 
@@ -245,21 +315,21 @@
                  data-has-more="true"
                  style="display: none;"></div>
 
-            <table class="history-table" style="margin-top:0; width: 100%;">
+            <table class="next-wrong-table">
                 <thead>
                     <tr>
-                        <th style="width: 1%; white-space: nowrap;">응시 일시</th>
-                        <th style="width: 1%; white-space: nowrap;">과목</th>
+                        <th>응시 일시</th>
+                        <th>과목</th>
                         <th>문제</th>
                     </tr>
                 </thead>
                 <tbody id="next-wrong-tbody">
                     {% for next_item in next_results %}
-                    <tr onclick="loadWrongAnswerDetail({{ next_item.id }})" style="cursor: pointer;" title="클릭하여 상세 해설 보기">
-                        <td style="white-space: nowrap;">{{ next_item.attempt.start_time|date:"y/m/d H:i" }}</td>
-                        <td style="white-space: nowrap;">{{ next_item.question.subject.name }}</td>
-                        <td style="text-align: left; max-width: 300px;">
-                            <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <tr onclick="loadWrongAnswerDetail({{ next_item.id }})" title="클릭하여 상세 해설 보기">
+                        <td>{{ next_item.attempt.start_time|date:"y/m/d H:i" }}</td>
+                        <td>{{ next_item.question.subject.name }}</td>
+                        <td>
+                            <div>
                                 <strong style="color: #2d6a4f;">{{ next_item.question.exam.round_number }}-{{ next_item.question.number }}.</strong> {{ next_item.question.content|safe }}
                             </div>
                         </td>

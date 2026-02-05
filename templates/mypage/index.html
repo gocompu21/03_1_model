@@ -2180,15 +2180,14 @@
                 .then(data => {
                     data.items.forEach(item => {
                         const tr = document.createElement('tr');
-                        tr.style.cursor = 'pointer';
                         tr.title = '클릭하여 상세 해설 보기';
                         tr.onclick = () => loadWrongAnswerDetail(item.id);
 
                         tr.innerHTML = `
-                            <td style="white-space: nowrap;">${item.date}</td>
-                            <td style="white-space: nowrap;">${item.subject}</td>
-                            <td style="text-align: left; max-width: 300px;">
-                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <td>${item.date}</td>
+                            <td>${item.subject}</td>
+                            <td>
+                                <div>
                                     <strong style="color: #2d6a4f;">${item.round}-${item.number}.</strong> ${item.content}
                                 </div>
                             </td>
