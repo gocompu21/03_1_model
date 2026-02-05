@@ -24,7 +24,7 @@
     }
 
     .q-content {
-        font-size: 1.15em;
+        font-size: 1.2em;
         font-weight: bold;
         line-height: 1.6;
         color: #333;
@@ -39,8 +39,52 @@
     .choice-item {
         margin-bottom: 8px;
         font-size: 1.05em;
-        padding: 8px;
+        padding: 10px;
         border-radius: 5px;
+        line-height: 1.5;
+    }
+
+    .markdown-content {
+        line-height: 1.8;
+        font-size: 1.05em;
+    }
+
+    /* MathJax 인라인 수식 - 주변 텍스트와 자연스럽게 조화 */
+    .markdown-content .MathJax {
+        font-size: 1.0em !important;
+    }
+
+    /* MathJax 컨테이너 스타일 */
+    .markdown-content mjx-container[jax="CHTML"] {
+        font-size: inherit !important;
+        vertical-align: baseline;
+    }
+
+    /* 블록 수식 (display mode) */
+    .markdown-content mjx-container[jax="CHTML"][display="true"] {
+        font-size: 1.1em !important;
+        margin: 1em 0;
+    }
+
+    /* 인라인 수식이 텍스트 흐름에 자연스럽게 맞도록 */
+    .markdown-content mjx-math {
+        font-size: inherit !important;
+    }
+
+    /* 모바일 반응형 */
+    @media screen and (max-width: 768px) {
+        .q-content {
+            font-size: 1rem;
+        }
+
+        .choice-item {
+            font-size: 1rem;
+            padding: 10px;
+        }
+
+        .markdown-content {
+            font-size: 1rem;
+        }
     }
 
     .choice-item.correct {
@@ -59,11 +103,9 @@
     }
 
     .explanation-section {
-        background-color: #f8f9fa;
-        border: 1px dashed #dee2e6;
-        border-radius: 8px;
-        padding: 20px;
-        margin-top: 30px;
+        padding-top: 24px;
+        margin-top: 24px;
+        border-top: 1px solid #e0e0e0;
     }
 
     .exp-title {
@@ -180,49 +222,56 @@
         </div>
         {% endif %}
     </div>
+</div>
 
-    <!-- Next Wrong Answers List -->
-    {% if next_results %}
-    <div style="margin-top: 50px;">
-        <div
-            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e9ecef; margin-bottom: 15px; padding-bottom: 10px;">
-            <h4 style="font-size: 1.1rem; color: #2d6a4f; margin: 0;">
-                <i class="fas fa-history"></i> 이어지는 오답 노트
-            </h4>
-            <button class="btn btn-sm btn-secondary" onclick="showWrongAnswerList()"
-                style="background-color: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; cursor: pointer;">
-                <i class="fas fa-arrow-left"></i> 목록으로
-            </button>
-        </div>
-        <div style="background: #fff;">
+<!-- Next Wrong Answers List -->
+{% if next_results %}
+<div id="next-wrong-answers-section" style="margin-top: 30px;">
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e9ecef; margin-bottom: 15px; padding-bottom: 10px;">
+        <h4 style="font-size: 1.1rem; color: #2d6a4f; margin: 0;">
+            <i class="fas fa-history"></i> 이어지는 오답 노트
+        </h4>
+        <button onclick="showWrongAnswerList()" title="목록으로"
+            style="background-color: #6c757d; color: white; border: none; width: 32px; height: 32px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-list"></i>
+        </button>
+    </div>
+    <div>
+            <!-- 무한 스크롤용 데이터 -->
+            <div id="next-wrong-scroll-data"
+                 data-current-id="{{ result.id }}"
+                 data-offset="10"
+                 data-has-more="true"
+                 style="display: none;"></div>
+
             <table class="history-table" style="margin-top:0; width: 100%;">
                 <thead>
                     <tr>
                         <th style="width: 1%; white-space: nowrap;">응시 일시</th>
-                        <th style="width: 1%; white-space: nowrap;">문제번호</th>
                         <th style="width: 1%; white-space: nowrap;">과목</th>
                         <th>문제</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="next-wrong-tbody">
                     {% for next_item in next_results %}
-                    <tr onclick="loadWrongAnswerDetail({{ next_item.id }})"
-                        style="cursor: pointer; border-bottom: 1px solid #f1f3f5;">
+                    <tr onclick="loadWrongAnswerDetail({{ next_item.id }})" style="cursor: pointer;" title="클릭하여 상세 해설 보기">
                         <td style="white-space: nowrap;">{{ next_item.attempt.start_time|date:"y/m/d H:i" }}</td>
-                        <td style="font-weight: bold; color: #2d6a4f; white-space: nowrap;">
-                            {{ next_item.question.exam.round_number }}/{{ next_item.question.number }}
-                        </td>
                         <td style="white-space: nowrap;">{{ next_item.question.subject.name }}</td>
                         <td style="text-align: left; max-width: 300px;">
                             <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                {{ next_item.question.content }}
+                                <strong style="color: #2d6a4f;">{{ next_item.question.exam.round_number }}-{{ next_item.question.number }}.</strong> {{ next_item.question.content|safe }}
                             </div>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+        <!-- 로딩 인디케이터 -->
+        <div id="next-wrong-loading" style="text-align: center; padding: 20px; display: none;">
+            <i class="fas fa-spinner fa-spin" style="color: #2d6a4f;"></i> 불러오는 중...
         </div>
     </div>
-    {% endif %}
 </div>
+{% endif %}

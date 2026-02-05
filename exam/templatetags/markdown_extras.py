@@ -31,6 +31,11 @@ def markdown_format(text):
         #    Python-Markdown ignores markdown inside HTML blocks by default.
         text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
 
+        # 4.1. Manually process italic text (*...*) for scientific names etc.
+        #      Must be after bold processing to avoid conflicts
+        #      Strict: content must start/end with non-space, max 50 chars
+        text = re.sub(r'\*(\S[^\*\n]{0,48}?\S|\S)\*', r'<em>\1</em>', text)
+
         # 4.5. Convert $\text{...}$ to plain text (avoid MathJax rendering issues)
         #      \text{} is just for displaying text, no math formatting needed
         text = re.sub(r'\$\\text\{([^}]+)\}\$', r'\1', text)

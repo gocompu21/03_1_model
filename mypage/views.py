@@ -442,6 +442,44 @@ def wrong_answer_detail(request, pk):
 
 
 @login_required
+def next_wrong_answers_api(request, pk):
+    """API for infinite scroll of next wrong answers"""
+    result = get_object_or_404(UserQuestionResult, pk=pk, attempt__user=request.user)
+    offset = int(request.GET.get("offset", 0))
+    limit = 10
+
+    # Get next wrong answers after the current one
+    next_results = list(
+        UserQuestionResult.objects.filter(attempt__user=request.user, is_correct=False)
+        .filter(
+            Q(attempt__start_time__lt=result.attempt.start_time)
+            | Q(
+                attempt__start_time=result.attempt.start_time,
+                question__number__gt=result.question.number,
+            )
+        )
+        .order_by("-attempt__start_time", "question__number")[offset : offset + limit]
+    )
+
+    has_more = len(next_results) == limit
+
+    items = []
+    for item in next_results:
+        items.append(
+            {
+                "id": item.id,
+                "date": item.attempt.start_time.strftime("%y/%m/%d %H:%M"),
+                "subject": item.question.subject.name,
+                "round": item.question.exam.round_number,
+                "number": item.question.number,
+                "content": item.question.content[:100],
+            }
+        )
+
+    return JsonResponse({"items": items, "has_more": has_more, "offset": offset + limit})
+
+
+@login_required
 @require_POST
 def analyze_questions(request):
     try:

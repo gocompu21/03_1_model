@@ -902,8 +902,8 @@
             .history-table td:nth-child(3) {
                 order: 1;
                 width: 100%;
-                margin-bottom: 10px;
-                padding-bottom: 10px;
+                margin-bottom: 6px;
+                padding-bottom: 6px;
                 border-bottom: 1px dashed #e0e0e0;
                 font-size: 1rem !important;
                 color: #333;
@@ -920,21 +920,23 @@
             /* 응시일시 (하단 오른쪽 - 먼저) */
             .history-table td:nth-child(1) {
                 order: 2;
-                font-size: 0.8rem !important;
+                font-size: 0.75rem !important;
                 color: #888;
                 margin-left: auto;
+                line-height: 1;
             }
 
             /* 과목 (하단 오른쪽 - 응시일시 뒤) */
             .history-table td:nth-child(2) {
                 order: 3;
-                font-size: 0.8rem !important;
+                font-size: 0.75rem !important;
                 color: #2d6a4f;
                 font-weight: bold;
                 background: #e6f4ea;
-                padding: 4px 10px !important;
-                border-radius: 4px;
-                margin-left: 8px;
+                padding: 1px 6px !important;
+                border-radius: 3px;
+                margin-left: 6px;
+                line-height: 1.2;
             }
 
             /* Stats Cards */
@@ -1888,18 +1890,13 @@
 
 
         // Show Wrong Answer List (Normal Tab)
-        function showWrongAnswerList(params = '', skipHistory = false) {
+        function showWrongAnswerList(params = '') {
             const detailView = document.getElementById('wrong-answer-detail-view');
             const listView = document.getElementById('wrong-answer-list-view');
 
             if (listView && detailView) {
                 detailView.style.display = 'none';
                 listView.style.display = 'block';
-
-                // History 관리 (뒤로가기 지원)
-                if (!skipHistory) {
-                    history.pushState({ view: 'wrong_answer_list' }, '', '{% url "mypage:index" %}?section=wrong_answer');
-                }
 
                 if (params) {
                     const url = `{% url 'mypage:index' %}?w_page=1` + params;
@@ -2120,6 +2117,8 @@
                                 if (window.MathJax) {
                                     MathJax.typesetPromise([qDetailContent]).catch((err) => console.log(err));
                                 }
+                                // 이어지는 오답 노트 무한 스크롤 초기화
+                                initNextWrongAnswersScroll(id);
                             }, 100);
                         });
                 }
@@ -2148,9 +2147,93 @@
                             if (window.MathJax) {
                                 MathJax.typesetPromise([detailContent]).catch((err) => console.log(err));
                             }
+                            // 이어지는 오답 노트 무한 스크롤 초기화
+                            initNextWrongAnswersScroll(id);
                         }, 100);
                     });
             }
+        }
+
+        // 이어지는 오답 노트 무한 스크롤
+        let nextWrongScrollLoading = false;
+        function initNextWrongAnswersScroll(currentId) {
+            const section = document.getElementById('next-wrong-answers-section');
+            if (!section) return;
+
+            const scrollData = document.getElementById('next-wrong-scroll-data');
+            if (!scrollData) return;
+
+            // IntersectionObserver로 스크롤 감지
+            const loadingEl = document.getElementById('next-wrong-loading');
+            if (!loadingEl) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !nextWrongScrollLoading) {
+                        loadMoreNextWrongAnswers(currentId);
+                    }
+                });
+            }, { rootMargin: '100px' });
+
+            observer.observe(loadingEl);
+
+            // 초기에는 로딩 인디케이터 표시
+            const hasMore = scrollData.dataset.hasMore === 'true';
+            if (hasMore) {
+                loadingEl.style.display = 'block';
+            }
+        }
+
+        function loadMoreNextWrongAnswers(currentId) {
+            const scrollData = document.getElementById('next-wrong-scroll-data');
+            const tbody = document.getElementById('next-wrong-tbody');
+            const loadingEl = document.getElementById('next-wrong-loading');
+
+            if (!scrollData || !tbody || nextWrongScrollLoading) return;
+
+            const hasMore = scrollData.dataset.hasMore === 'true';
+            if (!hasMore) {
+                if (loadingEl) loadingEl.style.display = 'none';
+                return;
+            }
+
+            nextWrongScrollLoading = true;
+            const offset = parseInt(scrollData.dataset.offset) || 10;
+
+            fetch(`/mypage/api/next_wrong_answers/${currentId}/?offset=${offset}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.items.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.style.cursor = 'pointer';
+                        tr.title = '클릭하여 상세 해설 보기';
+                        tr.onclick = () => loadWrongAnswerDetail(item.id);
+
+                        tr.innerHTML = `
+                            <td style="white-space: nowrap;">${item.date}</td>
+                            <td style="white-space: nowrap;">${item.subject}</td>
+                            <td style="text-align: left; max-width: 300px;">
+                                <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    <strong style="color: #2d6a4f;">${item.round}-${item.number}.</strong> ${item.content}
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+
+                    scrollData.dataset.offset = data.offset;
+                    scrollData.dataset.hasMore = data.has_more ? 'true' : 'false';
+
+                    if (!data.has_more && loadingEl) {
+                        loadingEl.style.display = 'none';
+                    }
+
+                    nextWrongScrollLoading = false;
+                })
+                .catch(err => {
+                    console.error('Error loading more wrong answers:', err);
+                    nextWrongScrollLoading = false;
+                });
         }
 
         function resetAIAnalysis() {
@@ -3627,29 +3710,15 @@
 
 // ========== 브라우저 뒤로가기 처리 ==========
 window.addEventListener('popstate', function(e) {
-    const state = e.state;
+    const detailView = document.getElementById('wrong-answer-detail-view');
 
-    if (state && state.view === 'wrong_answer_list') {
-        // 오답 리스트로 복원
-        showWrongAnswerList('', true); // skipHistory = true
-    } else if (state && state.view === 'wrong_answer_detail') {
-        // 오답 상세로 복원 (필요시)
-        // 보통 뒤로가기는 리스트로 가므로 이 케이스는 드묾
-    } else {
-        // 기본: 오답 리스트 화면으로
-        const detailView = document.getElementById('wrong-answer-detail-view');
-        const listView = document.getElementById('wrong-answer-list-view');
-        if (detailView && listView && detailView.style.display !== 'none') {
-            detailView.style.display = 'none';
-            listView.style.display = 'block';
-        }
+    // 오답 상세 화면이 열려있으면 리스트로 돌아가기
+    if (detailView && detailView.style.display !== 'none') {
+        showWrongAnswerList();
+        // 뒤로가기로 리스트 복원했으므로, 추가 뒤로가기 시 메인으로 가도록 히스토리 유지
     }
+    // 상세 화면이 아니면 브라우저 기본 동작 (메인으로 이동) 허용
 });
-
-// 초기 상태 저장 (페이지 로드 시)
-if (history.state === null) {
-    history.replaceState({ view: 'wrong_answer_list' }, '', window.location.href);
-}
 </script>
 </body>
 
