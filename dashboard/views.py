@@ -69,6 +69,7 @@ def index(request):
             'review_count': review_count,
             'today_duration': format_duration(today_minutes),
             'total_duration': format_duration(total_minutes),
+            'today_minutes_raw': today_minutes,  # For sorting
             'total_minutes_raw': total_minutes,  # For sorting
             'is_online': is_online,
             'last_activity': last_session.last_activity if last_session else None,
@@ -78,8 +79,12 @@ def index(request):
             'device_icon': last_session.device_icon if last_session else 'fas fa-globe',
         })
     
-    # Sort by online status first, then by total duration (descending)
-    user_stats.sort(key=lambda x: (not x['is_online'], -x['total_minutes_raw']))
+    # Sort by: 1) online status, 2) today's usage time, 3) total usage time
+    user_stats.sort(key=lambda x: (
+        not x['is_online'],           # Online users first
+        -x['today_minutes_raw'],      # Then by today's usage (descending)
+        -x['total_minutes_raw']       # Then by total usage (descending)
+    ))
     
     # Subject performance stats
     subject_stats = []
