@@ -5,27 +5,105 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    /* Next Questions Card Layout */
+    .next-questions-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .next-question-card {
+        background: white;
+        border-radius: 10px;
+        padding: 14px 16px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+        border: 1px solid #e8e8e8;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        transition: all 0.2s;
+    }
+
+    .next-question-card:hover {
+        border-color: #2d6a4f;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-1px);
+    }
+
+    .nq-title {
+        font-size: 1rem;
+        color: #333;
+        line-height: 1.5;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .nq-meta {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    .nq-meta span {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Mobile Responsive for detail_answer */
+    @media screen and (max-width: 768px) {
+        .bbs-container {
+            padding: 0 12px !important;
+        }
+
+        .next-question-card {
+            padding: 12px 14px;
+        }
+
+        .nq-title {
+            font-size: 0.95rem;
+        }
+
+        .nq-meta {
+            font-size: 0.75rem;
+        }
+
+        .detail-post-meta {
+            flex-wrap: wrap;
+            gap: 8px !important;
+        }
+
+        .detail-post-actions {
+            width: 100%;
+            margin-top: 8px;
+            margin-left: 0 !important;
+        }
+    }
+</style>
 <div class="bbs-container" style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
     <!-- Post Header -->
     <div style="border-bottom: 2px solid #2d6a4f; padding-bottom: 20px; margin-bottom: 30px;">
-        <h1 style="font-size: 1.2rem; color: #333; margin-bottom: 15px;">{{ post.title }}</h1>
-        <div
-            style="display: flex; justify-content: flex-end; align-items: center; color: #666; font-size: 0.95rem; gap: 15px;">
-            <span>{{ post.created_at|timesince }} 전</span>
-            <span>조회 {{ post.hits }}</span>
-            <span>
-                {% if post.author.first_name %}{{ post.author.first_name }}{% else %}{{ post.author.username }}
-                {% endif%}
-            </span>
+        <h1 style="font-size: 1.2rem; color: #333; margin-bottom: 15px; line-height: 1.5;">{{ post.title }}</h1>
+        <div class="detail-post-meta"
+            style="display: flex; justify-content: flex-end; align-items: center; color: #666; font-size: 0.9rem; gap: 12px;">
+            <span><i class="fas fa-clock" style="margin-right: 4px;"></i>{{ post.created_at|timesince }} 전</span>
+            <span><i class="fas fa-eye" style="margin-right: 4px;"></i>{{ post.hits }}</span>
+            <span><i class="fas fa-user" style="margin-right: 4px;"></i>{% if post.author.first_name %}{{ post.author.first_name }}{% else %}{{ post.author.username }}{% endif%}</span>
 
             {% if user == post.author %}
-            <div style="margin-left: 10px; display: flex; gap: 5px;" id="post-actions">
-                <a href="{% url 'mypage:update_my_question' post.pk %}" class="btn-action btn-edit"
-                    style="background-color: #50b585; color: white; border: none; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; text-decoration: none; transition: background 0.3s;">
+            <div class="detail-post-actions" style="margin-left: 10px; display: flex; gap: 5px;">
+                <a href="{% url 'mypage:update_my_question' post.pk %}"
+                    style="background-color: #50b585; color: white; border: none; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; text-decoration: none;">
                     수정
                 </a>
-                <a href="{% url 'mypage:delete_my_question' post.pk %}" class="btn-action btn-delete"
-                    style="background-color: white; color: #e63946; border: 1px solid #e63946; padding: 6px 16px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; text-decoration: none; transition: all 0.3s;"
+                <a href="{% url 'mypage:delete_my_question' post.pk %}"
+                    style="background-color: white; color: #e63946; border: 1px solid #e63946; padding: 6px 14px; border-radius: 6px; font-weight: bold; font-size: 0.85rem; text-decoration: none;"
                     onclick="return confirm('정말 삭제하시겠습니까?');">
                     삭제
                 </a>
@@ -91,31 +169,21 @@
             <h4 style="font-size: 1.1rem; color: #2d6a4f; margin: 0;">
                 <i class="fas fa-chevron-circle-right"></i> 이어지는 질문
             </h4>
-            <button class="btn btn-sm btn-secondary" onclick="showListView()"
-                style="background-color: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; cursor: pointer;">
+            <a href="{% url 'mypage:my_questions_list' %}"
+                style="background-color: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; cursor: pointer; text-decoration: none;">
                 <i class="fas fa-arrow-left"></i> 목록으로
-            </button>
+            </a>
         </div>
-        <div id="next-questions-list">
-            {% load bbs_extras %}
-            <table class="history-table" style="margin-top:0;">
-                <tbody id="question-list-tbody">
-                    {% for p in next_posts %}
-                    <tr>
-                        <td style="text-align: left;">
-                            <a href="{% url 'mypage:detail_answer' p.pk %}" class="post-link"
-                                style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 500px;">
-                                {{ p.title|highlight_prefix }}
-                            </a>
-                        </td>
-                        <td style="text-align: center; color: #888; font-size: 0.9em; width: 100px;">
-                            {{ p.created_at|compact_date }}
-                        </td>
-                        <td style="width: 60px;">조회 {{ p.hits }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="next-questions-container">
+            {% for p in next_posts %}
+            <a href="{% url 'mypage:detail_answer' p.pk %}" class="next-question-card">
+                <div class="nq-title">{{ p.title|highlight_prefix }}</div>
+                <div class="nq-meta">
+                    <span><i class="fas fa-calendar"></i> {{ p.created_at|compact_date }}</span>
+                    <span><i class="fas fa-eye"></i> {{ p.hits }}</span>
+                </div>
+            </a>
+            {% endfor %}
         </div>
     </div>
     {% endif %}
