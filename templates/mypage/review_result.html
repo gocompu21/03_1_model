@@ -829,7 +829,7 @@
                     </div>
                     {% if res.question.image %}
                     <div style="text-align: center; margin-bottom: 15px;">
-                        <img src="{{ res.question.image.url }}" class="zoomable-img" onclick="openImageModal('{{ res.question.image.url }}')" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
+                        <img src="{{ res.question.image.url }}" class="zoomable-img" onclick="openImageModal('{{ res.question.image.url }}', event)" style="max-width: 100%; border: 1px solid #ddd; border-radius: 8px;">
                     </div>
                     {% endif %}
                     <div class="choices">
@@ -883,7 +883,7 @@
                         </div>
                         {% if res.question.infographic_image %}
                         <div class="explanation-infographic">
-                            <img src="{{ res.question.infographic_image.url }}" class="zoomable-img" onclick="openImageModal('{{ res.question.infographic_image.url }}')">
+                            <img src="{{ res.question.infographic_image.url }}" class="zoomable-img" onclick="openImageModal('{{ res.question.infographic_image.url }}', event)">
                         </div>
                         {% endif %}
                     </div>
@@ -947,9 +947,11 @@
             }
         }
 
-        function openImageModal(src) {
-            event.preventDefault();
-            event.stopPropagation();
+        function openImageModal(src, e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
             const modal = document.getElementById('imageModal');
             const modalImg = document.getElementById('modalImage');
             modalImg.src = src;
