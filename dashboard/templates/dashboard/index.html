@@ -178,11 +178,366 @@
         .data-table tbody tr:hover {
             background: #f0f7f4;
         }
+
+        /* Hamburger Button */
+        .hamburger-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Slide Menu */
+        .slide-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100vh;
+            background: white;
+            z-index: 1000;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .slide-menu.active {
+            left: 0;
+        }
+
+        .slide-menu-header {
+            background: #2d6a4f;
+            color: white;
+            padding: 20px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slide-menu-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .slide-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .slide-menu-items {
+            padding: 10px 0;
+        }
+
+        .slide-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .slide-menu-item:hover, .slide-menu-item:active {
+            background: #f0f7f4;
+        }
+
+        .slide-menu-item i {
+            width: 20px;
+            color: #2d6a4f;
+            font-size: 1.1rem;
+        }
+
+        .slide-menu-item.highlight {
+            border-left: 3px solid #ffc107;
+            background: #fffbeb;
+        }
+
+        .slide-menu-item.highlight i {
+            color: #ffc107;
+        }
+
+        /* Overlay */
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+
+        .menu-overlay.active {
+            display: block;
+        }
+
+        /* ========== Mobile Responsive ========== */
+        @media screen and (max-width: 768px) {
+            /* Header */
+            header {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+            }
+
+            .logo {
+                font-size: 1.1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hamburger-btn {
+                display: block;
+            }
+
+            .slide-menu {
+                display: block;
+            }
+
+            /* Hide menu grid on mobile */
+            .menu-grid {
+                display: none;
+            }
+
+            /* Dashboard Container */
+            .dashboard-container {
+                padding: 10px;
+            }
+
+            /* Menu Grid - 3 columns on mobile */
+            .menu-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+
+            .menu-card {
+                padding: 12px 5px;
+                border-radius: 10px;
+            }
+
+            .menu-card i {
+                font-size: 1.3rem;
+                margin-bottom: 6px;
+            }
+
+            .menu-card h3 {
+                font-size: 0.7rem;
+                line-height: 1.2;
+            }
+
+            /* Stats Grid */
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 10px;
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+
+            .stat-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+
+            .stat-info .stat-number {
+                font-size: 1.2rem;
+            }
+
+            .stat-info .stat-label {
+                font-size: 0.7rem;
+            }
+
+            /* Section */
+            .section {
+                padding: 12px;
+                border-radius: 10px;
+            }
+
+            .section-title {
+                font-size: 0.95rem;
+                margin-bottom: 12px;
+            }
+
+            /* User Table - Card Layout */
+            .data-table {
+                display: block;
+            }
+
+            .data-table thead {
+                display: none;
+            }
+
+            .data-table tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .data-table tbody tr {
+                display: grid;
+                grid-template-columns: auto auto 1fr auto;
+                grid-template-rows: auto auto;
+                gap: 5px 8px;
+                background: #f8fdf9;
+                border-radius: 10px;
+                padding: 12px;
+                border: 1px solid #e0e0e0;
+            }
+
+            .data-table tbody tr:hover {
+                border-color: #2d6a4f;
+            }
+
+            /* 1행: 상태, 이름, 기기, 활동내용 */
+            .data-table td:nth-child(1) {
+                grid-row: 1;
+                grid-column: 1;
+                font-size: 0.8rem !important;
+                min-width: 45px;
+            }
+
+            .data-table td:nth-child(2) {
+                grid-row: 1;
+                grid-column: 2;
+                font-size: 0.95rem !important;
+                font-weight: bold !important;
+            }
+
+            .data-table td:nth-child(6) {
+                grid-row: 1;
+                grid-column: 3;
+                font-size: 0.8rem !important;
+            }
+
+            .data-table td:nth-child(7) {
+                grid-row: 1;
+                grid-column: 4;
+                font-size: 0.85rem !important;
+                color: #2d6a4f !important;
+                font-weight: 500;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .data-table td:nth-child(7)::before {
+                content: "📍 ";
+            }
+
+            /* 2행: 기출, 복습, 오늘, 누적 */
+            .data-table td:nth-child(9) {
+                grid-row: 2;
+                grid-column: 1;
+                font-size: 0.75rem !important;
+                color: #666;
+                padding-top: 5px;
+            }
+            .data-table td:nth-child(9)::before { content: "기출 "; color: #888; }
+
+            .data-table td:nth-child(10) {
+                grid-row: 2;
+                grid-column: 2;
+                font-size: 0.75rem !important;
+                color: #666;
+                padding-top: 5px;
+            }
+            .data-table td:nth-child(10)::before { content: "복습 "; color: #888; }
+
+            .data-table td:nth-child(11) {
+                grid-row: 2;
+                grid-column: 3;
+                font-size: 0.75rem !important;
+                color: #666;
+                padding-top: 5px;
+            }
+            .data-table td:nth-child(11)::before { content: "오늘 "; color: #888; }
+
+            .data-table td:nth-child(12) {
+                grid-row: 2;
+                grid-column: 4;
+                font-size: 0.75rem !important;
+                color: #666;
+                padding-top: 5px;
+                text-align: right;
+            }
+            .data-table td:nth-child(12)::before { content: "누적 "; color: #888; }
+
+            /* 숨길 컬럼 - 로그인, 로그아웃, 활동시각, 시험 */
+            .data-table td:nth-child(3),
+            .data-table td:nth-child(4),
+            .data-table td:nth-child(5),
+            .data-table td:nth-child(8) {
+                display: none;
+            }
+        }
+
+        /* Extra small devices */
+        @media screen and (max-width: 400px) {
+            .menu-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 5px;
+            }
+
+            .menu-card {
+                padding: 10px 3px;
+            }
+
+            .menu-card i {
+                font-size: 1.1rem;
+            }
+
+            .menu-card h3 {
+                font-size: 0.65rem;
+            }
+
+            .stats-grid {
+                gap: 5px;
+            }
+
+            .stat-card {
+                padding: 8px;
+            }
+
+            .stat-info .stat-number {
+                font-size: 1rem;
+            }
+
+            .stat-info .stat-label {
+                font-size: 0.65rem;
+            }
+
+            .data-table tbody tr {
+                padding: 10px;
+            }
+
+            .data-table td:nth-child(2) {
+                font-size: 0.9rem !important;
+            }
+        }
     </style>
 </head>
 <body>
     <header>
-        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <button class="hamburger-btn" onclick="toggleSlideMenu()"><i class="fas fa-bars"></i></button>
+            <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        </div>
         <nav class="nav-links">
             {% if user.is_authenticated %}
             <span>{{ user.username }}님 환영합니다</span>
@@ -340,6 +695,50 @@
         </div>
     </div>
 
+    <!-- Slide Menu (Mobile) -->
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleSlideMenu()"></div>
+    <div class="slide-menu" id="slideMenu">
+        <div class="slide-menu-header">
+            <h3><i class="fas fa-cogs"></i> 관리 메뉴</h3>
+            <button class="slide-menu-close" onclick="toggleSlideMenu()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="slide-menu-items">
+            <a href="{% url 'dashboard:textbook_generator' %}" class="slide-menu-item">
+                <i class="fas fa-magic"></i> 기본서 생성
+            </a>
+            <a href="{% url 'study:practice_manage' %}" class="slide-menu-item">
+                <i class="fas fa-edit"></i> 내용이해 문제
+            </a>
+            <a href="{% url 'mypage:prompt_generator' %}" class="slide-menu-item">
+                <i class="fas fa-cog"></i> 기출문제 관리
+            </a>
+            <a href="{% url 'mypage:index' %}?section=chapter_tree" class="slide-menu-item">
+                <i class="fas fa-sitemap"></i> 목차 관리
+            </a>
+            <a href="{% url 'glossary:term_list' %}" class="slide-menu-item">
+                <i class="fas fa-book-open"></i> 용어 사전
+            </a>
+            <a href="/admin/" class="slide-menu-item">
+                <i class="fas fa-database"></i> Django Admin
+            </a>
+            <a href="{% url 'dashboard:print_material' %}" class="slide-menu-item">
+                <i class="fas fa-print"></i> 자료 인쇄
+            </a>
+            <a href="{% url 'study:topic_set_list' %}" class="slide-menu-item">
+                <i class="fas fa-layer-group"></i> 주제별 문제집
+            </a>
+            <a href="{% url 'dashboard:image_generator' %}" class="slide-menu-item">
+                <i class="fas fa-palette"></i> 이미지 생성
+            </a>
+            <a href="{% url 'dashboard:settings' %}" class="slide-menu-item highlight">
+                <i class="fas fa-cogs"></i> 환경설정
+            </a>
+            <a href="{% url 'mypage:index' %}" class="slide-menu-item">
+                <i class="fas fa-home"></i> 마이페이지
+            </a>
+        </div>
+    </div>
+
     <!-- Heartbeat Script (세션 유지) -->
     <script>
         // 2분마다 서버에 ping을 보내 세션을 유지하고 "접속" 상태를 유지
@@ -357,6 +756,15 @@
             method: 'GET',
             credentials: 'same-origin'
         });
+
+        // Slide Menu Toggle
+        function toggleSlideMenu() {
+            const menu = document.getElementById('slideMenu');
+            const overlay = document.getElementById('menuOverlay');
+            menu.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+        }
     </script>
 </body>
 </html>

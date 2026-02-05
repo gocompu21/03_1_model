@@ -78,8 +78,8 @@ def index(request):
             'device_icon': last_session.device_icon if last_session else 'fas fa-globe',
         })
     
-    # Sort by total duration (descending)
-    user_stats.sort(key=lambda x: x['total_minutes_raw'], reverse=True)
+    # Sort by online status first, then by total duration (descending)
+    user_stats.sort(key=lambda x: (not x['is_online'], -x['total_minutes_raw']))
     
     # Subject performance stats
     subject_stats = []
