@@ -1,6 +1,13 @@
 {% load bbs_extras %}
 
-<table class="history-table">
+<!-- 무한 스크롤용 데이터 -->
+<div id="wrong-answer-scroll-data"
+     data-page="{{ wrong_answers.number }}"
+     data-has-next="{{ wrong_answers.has_next|yesno:'true,false' }}"
+     data-next-page="{{ wrong_answers.next_page_number|default:'' }}"
+     style="display: none;"></div>
+
+<table class="history-table" id="wrong-answer-table">
     <thead>
         <tr>
             <th style="width: 1%; white-space: nowrap;">응시 일시</th>
@@ -8,7 +15,7 @@
             <th>문제</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="wrong-answer-tbody">
         {% for result in wrong_answers %}
         <tr onclick="loadWrongAnswerDetail({{ result.id }});" style="cursor: pointer;" title="클릭하여 상세 해설 보기">
             <td style="white-space: nowrap;">{{ result.attempt.start_time|date:"y/m/d H:i" }}</td>
@@ -27,37 +34,10 @@
     </tbody>
 </table>
 
-<!-- Pagination -->
-{% if wrong_answers.has_other_pages %}
-<ul class="pagination">
-    {% if wrong_answers.has_previous %}
-    <li><a href="#" class="page-link" data-page="{{ wrong_answers.previous_page_number }}" data-type="wrong">&laquo;</a>
-    </li>
-    {% endif %}
-
-    {% for i in wrong_answers|elided_page_range %}
-    {% if i == wrong_answers.paginator.ELLIPSIS %}
-    <li><span class="page-link disabled">...</span></li>
-    {% elif wrong_answers.number == i %}
-    <li><a href="#" class="active">{{ i }}</a></li>
-    {% else %}
-    {% if attempt_id %}
-    <li><a href="#" class="page-link" data-page="{{ i }}" data-type="wrong" data-attempt-id="{{ attempt_id }}">{{ i
-            }}</a></li>
-    {% else %}
-    <li><a href="#" class="page-link" data-page="{{ i }}" data-type="wrong">{{ i }}</a></li>
-    {% endif %}
-    {% endif %}
-    {% endfor %}
-
-    {% if wrong_answers.has_next %}
-    {% if attempt_id %}
-    <li><a href="#" class="page-link" data-page="{{ wrong_answers.next_page_number }}" data-type="wrong"
-            data-attempt-id="{{ attempt_id }}">&raquo;</a></li>
-    {% else %}
-    <li><a href="#" class="page-link" data-page="{{ wrong_answers.next_page_number }}" data-type="wrong">&raquo;</a>
-    </li>
-    {% endif %}
-    {% endif %}
-</ul>
+<!-- 로딩 인디케이터 -->
+{% if wrong_answers.has_next %}
+<div id="wrong-answer-loading" style="text-align: center; padding: 20px; display: none;">
+    <i class="fas fa-spinner fa-spin" style="color: #2d6a4f;"></i> 불러오는 중...
+</div>
+<div id="wrong-answer-scroll-trigger" style="height: 1px;"></div>
 {% endif %}

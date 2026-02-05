@@ -106,7 +106,7 @@
 
     {% if result.question.image %}
     <div style="text-align: center; margin-bottom: 20px;">
-        <img src="{{ result.question.image.url }}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc;">
+        <img src="{{ result.question.image.url }}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc; cursor: pointer;" onclick="openModal(this.src)">
     </div>
     {% endif %}
 
@@ -176,7 +176,7 @@
         {% if result.question.infographic_image %}
         <div class="infographic-container">
             <p style="text-align: center; font-weight: bold; color: #555; margin-bottom: 5px;">[비주얼 암기 카드]</p>
-            <img src="{{ result.question.infographic_image.url }}" onclick="window.open(this.src, '_blank')">
+            <img src="{{ result.question.infographic_image.url }}" onclick="openModal(this.src)">
         </div>
         {% endif %}
     </div>

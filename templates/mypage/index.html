@@ -1066,6 +1066,75 @@
                 font-size: 0.65rem;
             }
         }
+
+        /* ========== Lightbox (이미지 확대 모달) ========== */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+        }
+
+        .lightbox-overlay.active {
+            display: flex;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .lightbox-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transform-origin: center center;
+            transition: transform 0.1s ease-out;
+            will-change: transform;
+        }
+
+        .lightbox-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.85rem;
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -1714,6 +1783,10 @@
                 document.querySelectorAll('.menu-item')[1].classList.add('active');
                 document.getElementById('wrong-answer-section').classList.add('active');
                 showWrongAnswerList();
+                // 무한 스크롤 재초기화
+                if (window.initWrongAnswerInfiniteScroll) {
+                    setTimeout(window.initWrongAnswerInfiniteScroll, 100);
+                }
             } else if (sectionId === 'my_questions') {
                 document.querySelectorAll('.menu-item')[2].classList.add('active');
                 document.getElementById('my-questions-section').classList.add('active');
@@ -1916,31 +1989,105 @@
             }
         });
 
-        // Wrong Answer Pagination Listener
+        // Wrong Answer Infinite Scroll
         document.addEventListener('DOMContentLoaded', function () {
-            const waListContainer = document.getElementById('wrong-answer-list-view');
-            if (waListContainer) {
-                waListContainer.addEventListener('click', function (e) {
-                    if (e.target.tagName === 'A' && e.target.classList.contains('page-link') && e.target.dataset.type === 'wrong') {
-                        e.preventDefault();
-                        const page = e.target.dataset.page;
-                        const attemptId = e.target.dataset.attemptId;
+            let wrongAnswerLoading = false;
 
-                        let params = `&w_page=${page}`;
-                        if (attemptId) {
-                            params += `&attempt_id=${attemptId}`;
+            function initWrongAnswerInfiniteScroll() {
+                const mainContent = document.querySelector('.main-content');
+                const scrollData = document.getElementById('wrong-answer-scroll-data');
+
+                if (!mainContent || !scrollData) return;
+
+                // 기존 리스너 제거를 위해 새로운 함수로 래핑
+                mainContent.removeEventListener('scroll', handleWrongAnswerScroll);
+                mainContent.addEventListener('scroll', handleWrongAnswerScroll);
+            }
+
+            function handleWrongAnswerScroll() {
+                const wrongAnswerSection = document.getElementById('wrong-answer-section');
+                if (!wrongAnswerSection || !wrongAnswerSection.classList.contains('active')) return;
+
+                const scrollData = document.getElementById('wrong-answer-scroll-data');
+                if (!scrollData) return;
+
+                const hasNext = scrollData.dataset.hasNext === 'true';
+                if (!hasNext || wrongAnswerLoading) return;
+
+                const mainContent = document.querySelector('.main-content');
+                const scrollTrigger = document.getElementById('wrong-answer-scroll-trigger');
+
+                if (!scrollTrigger) return;
+
+                const triggerRect = scrollTrigger.getBoundingClientRect();
+                const containerRect = mainContent.getBoundingClientRect();
+
+                // 트리거가 컨테이너 하단에 가까워지면 로드
+                if (triggerRect.top <= containerRect.bottom + 100) {
+                    loadMoreWrongAnswers();
+                }
+            }
+
+            function loadMoreWrongAnswers() {
+                const scrollData = document.getElementById('wrong-answer-scroll-data');
+                if (!scrollData || wrongAnswerLoading) return;
+
+                const nextPage = scrollData.dataset.nextPage;
+                if (!nextPage) return;
+
+                wrongAnswerLoading = true;
+                const loadingEl = document.getElementById('wrong-answer-loading');
+                if (loadingEl) loadingEl.style.display = 'block';
+
+                const url = `{% url 'mypage:index' %}?w_page=${nextPage}`;
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(response => response.text())
+                    .then(html => {
+                        // 임시 컨테이너에 파싱
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+
+                        // 새 데이터 추출
+                        const newRows = temp.querySelectorAll('#wrong-answer-tbody tr');
+                        const newScrollData = temp.querySelector('#wrong-answer-scroll-data');
+                        const newScrollTrigger = temp.querySelector('#wrong-answer-scroll-trigger');
+                        const newLoading = temp.querySelector('#wrong-answer-loading');
+
+                        // 기존 tbody에 새 행 추가
+                        const tbody = document.getElementById('wrong-answer-tbody');
+                        newRows.forEach(row => tbody.appendChild(row.cloneNode(true)));
+
+                        // 스크롤 데이터 업데이트
+                        if (newScrollData) {
+                            scrollData.dataset.page = newScrollData.dataset.page;
+                            scrollData.dataset.hasNext = newScrollData.dataset.hasNext;
+                            scrollData.dataset.nextPage = newScrollData.dataset.nextPage || '';
                         }
 
-                        const url = `{% url 'mypage:index' %}?` + params.substring(1); // remove first &
+                        // 더 이상 페이지가 없으면 트리거 제거
+                        if (newScrollData && newScrollData.dataset.hasNext !== 'true') {
+                            const trigger = document.getElementById('wrong-answer-scroll-trigger');
+                            const loading = document.getElementById('wrong-answer-loading');
+                            if (trigger) trigger.remove();
+                            if (loading) loading.remove();
+                        }
 
-                        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                            .then(response => response.text())
-                            .then(html => {
-                                document.getElementById('wrong-answer-list-container').innerHTML = html;
-                            });
-                    }
-                });
+                        wrongAnswerLoading = false;
+                        if (loadingEl) loadingEl.style.display = 'none';
+                    })
+                    .catch(err => {
+                        console.error('Error loading more wrong answers:', err);
+                        wrongAnswerLoading = false;
+                        if (loadingEl) loadingEl.style.display = 'none';
+                    });
             }
+
+            // 초기화
+            initWrongAnswerInfiniteScroll();
+
+            // 섹션 전환 시 재초기화
+            window.initWrongAnswerInfiniteScroll = initWrongAnswerInfiniteScroll;
         });
 
         function loadWrongAnswerDetail(id) {
@@ -3323,7 +3470,145 @@
             showSection(section);
         }
     });
+
+    // ========== Lightbox (이미지 확대 모달) ==========
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxContainer = document.getElementById('lightbox-container');
+
+    let lbScale = 1;
+    let lbPosX = 0;
+    let lbPosY = 0;
+    let lbStartDistance = 0;
+    let lbStartScale = 1;
+    let lbStartX = 0;
+    let lbStartY = 0;
+    let lbIsDragging = false;
+
+    function openModal(src) {
+        lightboxImg.src = src;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        resetLightboxTransform();
+    }
+
+    function closeLightbox() {
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+        resetLightboxTransform();
+    }
+
+    function resetLightboxTransform() {
+        lbScale = 1;
+        lbPosX = 0;
+        lbPosY = 0;
+        applyLightboxTransform();
+    }
+
+    function applyLightboxTransform() {
+        lightboxImg.style.transform = `translate(${lbPosX}px, ${lbPosY}px) scale(${lbScale})`;
+    }
+
+    function getLightboxDistance(touches) {
+        return Math.hypot(
+            touches[0].clientX - touches[1].clientX,
+            touches[0].clientY - touches[1].clientY
+        );
+    }
+
+    // 닫기 버튼
+    lightboxClose.addEventListener('click', closeLightbox);
+
+    // 배경 클릭 시 닫기 (scale이 1일 때만)
+    lightbox.addEventListener('click', function(e) {
+        if (e.target === lightbox || e.target === lightboxContainer) {
+            if (lbScale <= 1) {
+                closeLightbox();
+            }
+        }
+    });
+
+    // ESC 키로 닫기
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+            closeLightbox();
+        }
+    });
+
+    // 터치 이벤트 - 핀치 줌
+    lightboxContainer.addEventListener('touchstart', function(e) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            lbStartDistance = getLightboxDistance(e.touches);
+            lbStartScale = lbScale;
+        } else if (e.touches.length === 1 && lbScale > 1) {
+            lbIsDragging = true;
+            lbStartX = e.touches[0].clientX - lbPosX;
+            lbStartY = e.touches[0].clientY - lbPosY;
+        }
+    }, { passive: false });
+
+    lightboxContainer.addEventListener('touchmove', function(e) {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const currentDistance = getLightboxDistance(e.touches);
+            const newScale = lbStartScale * (currentDistance / lbStartDistance);
+            lbScale = Math.min(Math.max(newScale, 0.5), 5);
+            applyLightboxTransform();
+        } else if (e.touches.length === 1 && lbIsDragging && lbScale > 1) {
+            e.preventDefault();
+            lbPosX = e.touches[0].clientX - lbStartX;
+            lbPosY = e.touches[0].clientY - lbStartY;
+            applyLightboxTransform();
+        }
+    }, { passive: false });
+
+    lightboxContainer.addEventListener('touchend', function(e) {
+        lbIsDragging = false;
+        if (lbScale < 1) {
+            lbScale = 1;
+            lbPosX = 0;
+            lbPosY = 0;
+            applyLightboxTransform();
+        }
+    });
+
+    // 더블탭으로 확대/축소
+    let lbLastTap = 0;
+    lightboxContainer.addEventListener('touchend', function(e) {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lbLastTap;
+
+        if (tapLength < 300 && tapLength > 0 && e.changedTouches.length === 1) {
+            e.preventDefault();
+            if (lbScale > 1) {
+                resetLightboxTransform();
+            } else {
+                lbScale = 2.5;
+                applyLightboxTransform();
+            }
+        }
+        lbLastTap = currentTime;
+    });
+
+    // 마우스 휠 줌 (데스크탑)
+    lightboxContainer.addEventListener('wheel', function(e) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        lbScale = Math.min(Math.max(lbScale * delta, 0.5), 5);
+        applyLightboxTransform();
+    }, { passive: false });
     </script>
+
+<!-- Lightbox HTML -->
+<div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close">&times;</button>
+    <div class="lightbox-container" id="lightbox-container">
+        <img class="lightbox-img" id="lightbox-img" src="" alt="확대 이미지">
+    </div>
+    <div class="lightbox-hint">두 손가락으로 확대/축소</div>
+</div>
 </body>
 
 </html>
