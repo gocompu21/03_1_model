@@ -1885,13 +1885,18 @@
 
 
         // Show Wrong Answer List (Normal Tab)
-        function showWrongAnswerList(params = '') {
+        function showWrongAnswerList(params = '', skipHistory = false) {
             const detailView = document.getElementById('wrong-answer-detail-view');
             const listView = document.getElementById('wrong-answer-list-view');
 
             if (listView && detailView) {
                 detailView.style.display = 'none';
                 listView.style.display = 'block';
+
+                // History 관리 (뒤로가기 지원)
+                if (!skipHistory) {
+                    history.pushState({ view: 'wrong_answer_list' }, '', '{% url "mypage:index" %}?section=wrong_answer');
+                }
 
                 if (params) {
                     const url = `{% url 'mypage:index' %}?w_page=1` + params;
@@ -2131,6 +2136,9 @@
                         if (detailContent) detailContent.innerHTML = html;
                         listArea.style.display = 'none';
                         detailArea.style.display = 'block';
+
+                        // History 관리 (뒤로가기 지원)
+                        history.pushState({ view: 'wrong_answer_detail', id: id }, '', `{% url "mypage:index" %}?section=wrong_answer&detail=${id}`);
 
                         setTimeout(() => {
                             detailArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -3471,7 +3479,20 @@
         }
     });
 
-    // ========== Lightbox (이미지 확대 모달) ==========
+    </script>
+
+<!-- Lightbox HTML -->
+<div class="lightbox-overlay" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close">&times;</button>
+    <div class="lightbox-container" id="lightbox-container">
+        <img class="lightbox-img" id="lightbox-img" src="" alt="확대 이미지">
+    </div>
+    <div class="lightbox-hint">두 손가락으로 확대/축소</div>
+</div>
+
+<script>
+// ========== Lightbox (이미지 확대 모달) ==========
+(function() {
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxClose = document.getElementById('lightbox-close');
@@ -3486,12 +3507,12 @@
     let lbStartY = 0;
     let lbIsDragging = false;
 
-    function openModal(src) {
+    window.openModal = function(src) {
         lightboxImg.src = src;
         lightbox.classList.add('active');
         document.body.style.overflow = 'hidden';
         resetLightboxTransform();
-    }
+    };
 
     function closeLightbox() {
         lightbox.classList.remove('active');
@@ -3599,16 +3620,34 @@
         lbScale = Math.min(Math.max(lbScale * delta, 0.5), 5);
         applyLightboxTransform();
     }, { passive: false });
-    </script>
+})();
 
-<!-- Lightbox HTML -->
-<div class="lightbox-overlay" id="lightbox">
-    <button class="lightbox-close" id="lightbox-close">&times;</button>
-    <div class="lightbox-container" id="lightbox-container">
-        <img class="lightbox-img" id="lightbox-img" src="" alt="확대 이미지">
-    </div>
-    <div class="lightbox-hint">두 손가락으로 확대/축소</div>
-</div>
+// ========== 브라우저 뒤로가기 처리 ==========
+window.addEventListener('popstate', function(e) {
+    const state = e.state;
+
+    if (state && state.view === 'wrong_answer_list') {
+        // 오답 리스트로 복원
+        showWrongAnswerList('', true); // skipHistory = true
+    } else if (state && state.view === 'wrong_answer_detail') {
+        // 오답 상세로 복원 (필요시)
+        // 보통 뒤로가기는 리스트로 가므로 이 케이스는 드묾
+    } else {
+        // 기본: 오답 리스트 화면으로
+        const detailView = document.getElementById('wrong-answer-detail-view');
+        const listView = document.getElementById('wrong-answer-list-view');
+        if (detailView && listView && detailView.style.display !== 'none') {
+            detailView.style.display = 'none';
+            listView.style.display = 'block';
+        }
+    }
+});
+
+// 초기 상태 저장 (페이지 로드 시)
+if (history.state === null) {
+    history.replaceState({ view: 'wrong_answer_list' }, '', window.location.href);
+}
+</script>
 </body>
 
 </html>
