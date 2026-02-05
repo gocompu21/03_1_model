@@ -25,6 +25,11 @@ urlpatterns = [
         views.my_questions_api,
         name="my_questions_api",
     ),
+    path(
+        "api/next_questions/<int:pk>/",
+        views.next_questions_api,
+        name="next_questions_api",
+    ),
     path("questions/", views.my_questions_list, name="my_questions_list"),
     path("history/", views.exam_history_list, name="exam_history_list"),
     path("api/exam_history/", views.exam_history_api, name="exam_history_api"),

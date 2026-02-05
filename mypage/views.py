@@ -39,9 +39,9 @@ def ajax_login_required(view_func):
 
 @login_required
 def index(request):
-    # 일반 사용자는 회원정보 페이지로 리다이렉트 (관리자만 대시보드 접근)
+    # 일반 사용자는 오늘의 복습 페이지로 리다이렉트 (관리자만 대시보드 접근)
     if not (request.user.is_staff or request.user.is_superuser):
-        return redirect("mypage:member_info")
+        return redirect("mypage:review_index")
 
     days_since_login = (timezone.now() - request.user.last_login).days
 
@@ -388,6 +388,39 @@ def detail_answer(request, pk):
         "next_posts": next_posts,
     }
     return render(request, "mypage/detail_answer.html", context)
+
+
+def next_questions_api(request, pk):
+    """API for infinite scroll of next questions in detail_answer"""
+    post = get_object_or_404(Post, pk=pk)
+    page = int(request.GET.get("page", 1))
+    per_page = 10
+
+    target_types = ["기본서", "주치의", "주치의 질의"]
+    next_posts_qs = Post.objects.filter(
+        author=post.author, type__name__in=target_types, created_at__lt=post.created_at
+    ).order_by("-created_at")
+
+    paginator = Paginator(next_posts_qs, per_page)
+    next_posts = paginator.get_page(page)
+
+    items = []
+    for p in next_posts:
+        items.append({
+            "id": p.id,
+            "title": p.title,
+            "type": p.type.name if p.type else "",
+            "created_at": p.created_at.strftime("%y/%m/%d"),
+            "hits": p.hits,
+            "url": f"/mypage/detail_answer/{p.pk}/",
+        })
+
+    return JsonResponse({
+        "items": items,
+        "has_next": next_posts.has_next(),
+        "next_page": next_posts.next_page_number() if next_posts.has_next() else None,
+        "current_page": page,
+    })
 
 
 from django.views.decorators.http import require_POST
