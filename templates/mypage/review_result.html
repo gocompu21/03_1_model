@@ -590,7 +590,10 @@
             max-height: 100%;
             object-fit: contain;
             border-radius: 8px;
-            touch-action: pinch-zoom;
+            touch-action: none;
+            cursor: zoom-in;
+            transform-origin: center center;
+            transition: transform 0.2s ease-out;
         }
 
         .image-modal-close {
@@ -934,9 +937,9 @@
     </a>
 
     <!-- Image Modal -->
-    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+    <div id="imageModal" class="image-modal" onclick="handleModalClick(event)">
         <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
-        <img id="modalImage" src="" alt="확대 이미지" onclick="event.stopPropagation()">
+        <img id="modalImage" src="" alt="확대 이미지">
     </div>
 
     <script>
@@ -946,6 +949,13 @@
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
+
+        // Image Modal State
+        let currentScale = 1;
+        let currentX = 0;
+        let currentY = 0;
+        let initialDistance = 0;
+        let lastTapTime = 0;
 
         function openImageModal(src, e) {
             if (e) {
@@ -957,14 +967,94 @@
             modalImg.src = src;
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
-            document.body.style.touchAction = 'none';
+            resetImageTransform();
         }
 
         function closeImageModal() {
             const modal = document.getElementById('imageModal');
             modal.classList.remove('show');
             document.body.style.overflow = '';
-            document.body.style.touchAction = '';
+            resetImageTransform();
+        }
+
+        function resetImageTransform() {
+            currentScale = 1;
+            currentX = 0;
+            currentY = 0;
+            const modalImg = document.getElementById('modalImage');
+            modalImg.style.transform = 'scale(1) translate(0, 0)';
+            modalImg.style.cursor = 'zoom-in';
+        }
+
+        function updateImageTransform() {
+            const modalImg = document.getElementById('modalImage');
+            modalImg.style.transform = `scale(${currentScale}) translate(${currentX}px, ${currentY}px)`;
+            modalImg.style.cursor = currentScale > 1 ? 'zoom-out' : 'zoom-in';
+        }
+
+        function handleModalClick(e) {
+            if (currentScale > 1) {
+                resetImageTransform();
+            } else {
+                closeImageModal();
+            }
+        }
+
+        // Double tap/click to zoom
+        function handleImageTap(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+                // Double tap
+                if (currentScale > 1) {
+                    resetImageTransform();
+                } else {
+                    currentScale = 2.5;
+                    updateImageTransform();
+                }
+            }
+            lastTapTime = now;
+        }
+
+        // Touch events for pinch zoom
+        const modalImg = document.getElementById('modalImage');
+
+        modalImg.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                initialDistance = getDistance(e.touches[0], e.touches[1]);
+            }
+        }, { passive: false });
+
+        modalImg.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const newDistance = getDistance(e.touches[0], e.touches[1]);
+                const scaleChange = newDistance / initialDistance;
+                currentScale = Math.min(Math.max(currentScale * scaleChange, 1), 5);
+                initialDistance = newDistance;
+                updateImageTransform();
+            }
+        }, { passive: false });
+
+        modalImg.addEventListener('click', handleImageTap);
+        modalImg.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (currentScale > 1) {
+                resetImageTransform();
+            } else {
+                currentScale = 2.5;
+                updateImageTransform();
+            }
+        });
+
+        function getDistance(touch1, touch2) {
+            const dx = touch1.clientX - touch2.clientX;
+            const dy = touch1.clientY - touch2.clientY;
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
         function toggleExplanation(id) {
