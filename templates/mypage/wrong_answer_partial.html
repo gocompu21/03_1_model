@@ -22,7 +22,7 @@
             <td style="white-space: nowrap;">{{ result.question.subject.name }}</td>
             <td style="text-align: left; max-width: 300px;">
                 <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    <strong style="color: #2d6a4f;">{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong> {{ result.question.content }}
+                    <strong style="color: #2d6a4f;">{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong> {{ result.question.content|safe }}
                 </div>
             </td>
         </tr>

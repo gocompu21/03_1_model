@@ -883,7 +883,7 @@
                 align-items: center;
                 background: white;
                 border-radius: 10px;
-                padding: 12px;
+                padding: 14px;
                 box-shadow: 0 1px 4px rgba(0,0,0,0.06);
                 border: 1px solid #e8e8e8;
             }
@@ -895,7 +895,7 @@
             .history-table td {
                 padding: 0;
                 border: none;
-                font-size: 0.8rem;
+                font-size: 0.9rem;
             }
 
             /* 문제 컬럼 (상단 - full width) */
@@ -905,33 +905,36 @@
                 margin-bottom: 10px;
                 padding-bottom: 10px;
                 border-bottom: 1px dashed #e0e0e0;
-                font-size: 0.9rem !important;
+                font-size: 1rem !important;
                 color: #333;
-                line-height: 1.5;
-                display: -webkit-box;
-                -webkit-line-clamp: 3;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+                line-height: 1.6;
                 text-align: left !important;
             }
 
-            /* 과목 (하단 왼쪽) */
-            .history-table td:nth-child(2) {
+            .history-table td:nth-child(3) div {
+                white-space: normal !important;
+                overflow: visible !important;
+                text-overflow: clip !important;
+            }
+
+            /* 응시일시 (하단 오른쪽 - 먼저) */
+            .history-table td:nth-child(1) {
                 order: 2;
-                font-size: 0.75rem !important;
+                font-size: 0.8rem !important;
+                color: #888;
+                margin-left: auto;
+            }
+
+            /* 과목 (하단 오른쪽 - 응시일시 뒤) */
+            .history-table td:nth-child(2) {
+                order: 3;
+                font-size: 0.8rem !important;
                 color: #2d6a4f;
                 font-weight: bold;
                 background: #e6f4ea;
-                padding: 3px 8px !important;
+                padding: 4px 10px !important;
                 border-radius: 4px;
-            }
-
-            /* 응시일시 (하단 오른쪽) */
-            .history-table td:nth-child(1) {
-                order: 3;
-                font-size: 0.7rem !important;
-                color: #999;
-                margin-left: auto;
+                margin-left: 8px;
             }
 
             /* Stats Cards */
@@ -1046,24 +1049,24 @@
             }
 
             .history-table tbody tr {
-                padding: 10px;
+                padding: 12px;
             }
 
             .history-table td:nth-child(3) {
-                font-size: 0.85rem !important;
+                font-size: 0.95rem !important;
             }
 
             .history-table td:nth-child(2) {
-                font-size: 0.7rem !important;
+                font-size: 0.8rem !important;
             }
 
             .history-table td:nth-child(1) {
-                font-size: 0.65rem !important;
+                font-size: 0.75rem !important;
             }
 
             .pass-badge {
                 padding: 2px 6px;
-                font-size: 0.65rem;
+                font-size: 0.7rem;
             }
         }
 
