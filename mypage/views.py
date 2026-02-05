@@ -625,6 +625,28 @@ def ai_analysis_page(request):
 
 
 @login_required
+def wrong_answer_list(request):
+    """전체 오답 노트 별도 페이지"""
+    wrong_qs = (
+        UserQuestionResult.objects.filter(attempt__user=request.user, is_correct=False)
+        .select_related("question", "question__exam", "question__subject", "attempt")
+        .order_by("-attempt__start_time", "question__number")
+    )
+
+    wrong_paginator = Paginator(wrong_qs, 15)
+    wrong_page = request.GET.get("page", 1)
+    wrong_answers = wrong_paginator.get_page(wrong_page)
+
+    total_count = wrong_qs.count()
+
+    context = {
+        "wrong_answers": wrong_answers,
+        "total_count": total_count,
+    }
+    return render(request, "mypage/wrong_answer_list.html", context)
+
+
+@login_required
 def analysis_page(request):
     """과목별 실력분석 별도 페이지"""
     # Aggregate results by Subject

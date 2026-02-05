@@ -1297,9 +1297,9 @@
                     {{ review_count }}</span>
                 {% endif %}
             </a>
-            <div class="menu-item active" onclick="showSection('wrong_answer')">
+            <a href="{% url 'mypage:wrong_answer_list' %}" class="menu-item">
                 <i class="fas fa-times-circle"></i> 전체 오답 노트
-            </div>
+            </a>
             <a href="{% url 'mypage:my_questions_list' %}" class="menu-item">
                 <i class="fas fa-question-circle"></i> 나의 질의응답
             </a>
@@ -1314,7 +1314,7 @@
                 <i class="fas fa-robot"></i> AI 질의분석
             </a>
 
-            <div class="menu-item" onclick="showSection('info')">
+            <div class="menu-item active" onclick="showSection('info')">
                 <i class="fas fa-user"></i> 회원 정보
             </div>
 
@@ -1426,7 +1426,7 @@
             {% endif %}
 
             <!-- Section 1: Member Info -->
-            <div id="info-section" class="content-section">
+            <div id="info-section" class="content-section active">
                 <h1><i class="fas fa-user-circle" style="color: #2d6a4f;"></i> 회원 정보</h1>
                 <div class="info-cards">
                     <div class="info-card">
@@ -1549,21 +1549,7 @@
                 </div>
             </div>
 
-            <!-- Section 3.5: Wrong Answer Note (New) -->
-            <div id="wrong-answer-section" class="content-section active">
-                <!-- Detail View -->
-                <div id="wrong-answer-detail-view" style="display: none;">
-                    <div id="wrong-answer-detail-content"></div>
-                </div>
-
-                <!-- List View -->
-                <div id="wrong-answer-list-view">
-                    <h1>전체 오답 노트</h1>
-                    <div id="wrong-answer-list-container">
-                        {% include 'mypage/wrong_answer_partial.html' %}
-                    </div>
-                </div>
-            </div>
+            <!-- Wrong Answer Section removed - now a separate page at /mypage/wrong-answers/ -->
 
             <!-- Section 4: AI Analysis -->
             <div id="ai-analysis-section" class="content-section">
@@ -1860,21 +1846,17 @@
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
 
             if (sectionId === 'wrong_answer') {
-                menuItems[0].classList.add('active');
-                document.getElementById('wrong-answer-section').classList.add('active');
-                showWrongAnswerList();
-                // 무한 스크롤 재초기화
-                if (window.initWrongAnswerInfiniteScroll) {
-                    setTimeout(window.initWrongAnswerInfiniteScroll, 100);
-                }
+                // Wrong Answer is now a separate page, redirect there
+                window.location.href = '{% url "mypage:wrong_answer_list" %}';
+                return;
             } else if (sectionId === 'history') {
                 // History section is now a separate page, redirect there
                 window.location.href = '{% url "mypage:exam_history_list" %}';
                 return;
             } else if (sectionId === 'analysis') {
-                menuItems[1].classList.add('active');
-                document.getElementById('analysis-section').classList.add('active');
-                updateChartData();
+                // Analysis is now a separate page, redirect there
+                window.location.href = '{% url "mypage:analysis_page" %}';
+                return;
             } else if (sectionId === 'ai_analysis') {
                 // AI Analysis is now a separate page, redirect there
                 window.location.href = '{% url "mypage:ai_analysis_page" %}';
@@ -1883,7 +1865,7 @@
                 // Dashboard uses separate menu handling
                 document.getElementById('dashboard-section').classList.add('active');
             } else if (sectionId === 'edit_profile' || sectionId === 'info') {
-                menuItems[2].classList.add('active');
+                menuItems[0].classList.add('active');
                 document.getElementById('info-section').classList.add('active');
             } else if (sectionId === 'practice_input') {
                 const menu = document.getElementById('menu-practice-input');

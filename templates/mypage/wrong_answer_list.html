@@ -1,11 +1,12 @@
 {% load static %}
+{% load bbs_extras %}
 <!DOCTYPE html>
 <html lang="ko">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 질의분석 - 나무의사</title>
+    <title>전체 오답 노트 - 나무의사</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -113,7 +114,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             max-width: 900px;
         }
 
@@ -126,156 +127,136 @@
             gap: 10px;
         }
 
-        /* Analysis Card */
-        .analysis-card {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e8e8e8;
+        .total-count {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Wrong Answer Cards */
+        .wrong-answer-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             max-width: 900px;
         }
 
-        .analysis-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e6f4ea;
-        }
-
-        .analysis-header h2 {
-            margin: 0;
-            font-size: 1.3rem;
-            color: #2d6a4f;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-analyze {
-            padding: 12px 24px;
-            font-size: 1rem;
-            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
-        }
-
-        .btn-analyze:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(45, 106, 79, 0.4);
-        }
-
-        .btn-analyze:disabled {
-            background: #adb5bd;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .analysis-description {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e6f4ea 100%);
+        .wrong-answer-card {
+            background: white;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            border-left: 4px solid #2d6a4f;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e8e8e8;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
         }
 
-        .analysis-description p {
-            color: #495057;
-            font-size: 0.95rem;
-            line-height: 1.7;
-            margin: 0;
+        .wrong-answer-card:hover {
+            border-color: #2d6a4f;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
         }
 
-        .analysis-description strong {
-            color: #2d6a4f;
-        }
-
-        .analysis-loading {
-            display: none;
-            text-align: center;
-            padding: 50px 20px;
-        }
-
-        .analysis-loading i {
-            font-size: 3rem;
-            color: #2d6a4f;
-            margin-bottom: 20px;
-        }
-
-        .analysis-loading p {
-            color: #666;
-            font-size: 1.1rem;
-            margin: 0;
-        }
-
-        .analysis-result {
-            display: none;
-            line-height: 1.8;
-            color: #343a40;
+        .wa-question {
             font-size: 1rem;
+            color: #333;
+            margin-bottom: 10px;
+            line-height: 1.6;
         }
 
-        .analysis-result h1,
-        .analysis-result h2,
-        .analysis-result h3 {
-            color: #2d6a4f;
-            margin-top: 25px;
-            margin-bottom: 12px;
-        }
-
-        .analysis-result h1 { font-size: 1.4rem; }
-        .analysis-result h2 { font-size: 1.2rem; }
-        .analysis-result h3 { font-size: 1.1rem; }
-
-        .analysis-result ul,
-        .analysis-result ol {
-            padding-left: 20px;
-        }
-
-        .analysis-result li {
-            margin-bottom: 8px;
-        }
-
-        .analysis-result p {
-            margin-bottom: 15px;
-        }
-
-        .analysis-result strong {
+        .wa-question strong {
             color: #2d6a4f;
         }
 
-        .analysis-result code {
-            background: #f1f3f4;
-            padding: 2px 6px;
+        .wa-meta {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .wa-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .wa-meta .subject-badge {
+            background: #e6f4ea;
+            color: #2d6a4f;
+            padding: 2px 8px;
             border-radius: 4px;
-            font-family: monospace;
+            font-weight: 500;
+            font-size: 0.8rem;
+        }
+
+        /* Loading & Empty States */
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #2d6a4f;
+        }
+
+        .loading i {
+            font-size: 1.5rem;
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
             color: #888;
         }
 
         .empty-state i {
-            font-size: 4rem;
+            font-size: 3rem;
             color: #2d6a4f;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            display: block;
         }
 
-        .empty-state p {
-            font-size: 1.1rem;
-            margin: 0;
+        .empty-state .start-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        /* Scroll to top button */
+        .scroll-top-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: #2d6a4f;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s;
+            z-index: 50;
+        }
+
+        .scroll-top-btn:hover {
+            background: #1b4332;
+            transform: scale(1.1);
+        }
+
+        .scroll-top-btn.visible {
+            display: flex;
         }
 
         /* Hamburger Menu Button */
@@ -306,7 +287,7 @@
             display: block;
         }
 
-        /* Mobile Responsive */
+        /* Mobile */
         @media screen and (max-width: 768px) {
             header {
                 padding: 12px 16px;
@@ -348,6 +329,8 @@
             .main-content {
                 padding: 15px;
                 width: 100%;
+                overflow-x: hidden;
+                box-sizing: border-box;
             }
 
             .page-header {
@@ -360,38 +343,28 @@
                 font-size: 1.2rem;
             }
 
-            .analysis-card {
-                padding: 20px;
+            .wrong-answer-card {
+                padding: 14px 16px;
             }
 
-            .analysis-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-
-            .analysis-header h2 {
-                font-size: 1.1rem;
-            }
-
-            .btn-analyze {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .analysis-description {
-                padding: 16px;
-            }
-
-            .analysis-description p {
-                font-size: 0.9rem;
-            }
-
-            .analysis-result {
+            .wa-question {
                 font-size: 0.95rem;
+            }
+
+            .wa-meta {
+                font-size: 0.8rem;
+                flex-wrap: wrap;
+            }
+
+            .scroll-top-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 45px;
+                height: 45px;
             }
         }
 
+        /* Extra small devices */
         @media screen and (max-width: 400px) {
             header {
                 padding: 10px 12px;
@@ -428,17 +401,12 @@
                 font-size: 1.1rem;
             }
 
-            .analysis-card {
-                padding: 16px;
+            .wrong-answer-card {
+                padding: 12px;
             }
 
-            .analysis-header h2 {
-                font-size: 1rem;
-            }
-
-            .btn-analyze {
-                padding: 10px 20px;
-                font-size: 0.95rem;
+            .wa-question {
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -466,7 +434,7 @@
             <a href="{% url 'mypage:review_index' %}" class="menu-item">
                 <i class="fas fa-brain"></i> 오늘의 복습
             </a>
-            <a href="{% url 'mypage:wrong_answer_list' %}" class="menu-item">
+            <a href="{% url 'mypage:wrong_answer_list' %}" class="menu-item active">
                 <i class="fas fa-times-circle"></i> 전체 오답 노트
             </a>
             <a href="{% url 'mypage:my_questions_list' %}" class="menu-item">
@@ -475,7 +443,7 @@
             <a href="{% url 'mypage:exam_history_list' %}" class="menu-item">
                 <i class="fas fa-clipboard-list"></i> 기출시험 결과
             </a>
-            <a href="{% url 'mypage:ai_analysis_page' %}" class="menu-item active">
+            <a href="{% url 'mypage:ai_analysis_page' %}" class="menu-item">
                 <i class="fas fa-robot"></i> AI 질의분석
             </a>
             <a href="{% url 'mypage:analysis_page' %}" class="menu-item">
@@ -495,39 +463,123 @@
         <!-- Main Content -->
         <div class="main-content" id="main-content">
             <div class="page-header">
-                <h1><i class="fas fa-robot"></i> AI 질의분석</h1>
+                <h1><i class="fas fa-times-circle"></i> 전체 오답 노트</h1>
+                <span class="total-count">총 {{ total_count }}개</span>
             </div>
 
-            <div class="analysis-card">
-                <div class="analysis-header">
-                    <h2><i class="fas fa-user-md"></i> 나무주치의 학습 진단</h2>
-                    <button id="btn-analyze" class="btn-analyze">
-                        <i class="fas fa-magic"></i> AI 진단 요청
-                    </button>
-                </div>
+            <!-- Scroll Data for Infinite Scroll -->
+            <div id="scroll-data"
+                 data-page="{{ wrong_answers.number }}"
+                 data-has-next="{{ wrong_answers.has_next|yesno:'true,false' }}"
+                 data-next-page="{{ wrong_answers.next_page_number|default:'' }}"
+                 style="display: none;"></div>
 
-                <div class="analysis-description">
-                    <p>
-                        <i class="fas fa-info-circle" style="color: #2d6a4f; margin-right: 5px;"></i>
-                        <strong>나무주치의 AI 진단이란?</strong><br><br>
-                        회원님이 최근에 작성하신 질문들을 바탕으로 <strong>학습 상태, 취약한 과목, 관심 분야</strong>를 AI가 심층 분석해 드립니다.<br>
-                        개인 맞춤형 학습 조언과 격려 메시지를 통해 합격으로 가는 길을 확인해 보세요!
-                    </p>
+            <div class="wrong-answer-container" id="wrong-answer-container">
+                {% for result in wrong_answers %}
+                <a href="{% url 'mypage:wrong_answer_detail' result.id %}" class="wrong-answer-card">
+                    <div class="wa-question">
+                        <strong>{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong>
+                        {{ result.question.content|safe|truncatechars:150 }}
+                    </div>
+                    <div class="wa-meta">
+                        <span class="subject-badge">{{ result.question.subject.name }}</span>
+                        <span><i class="fas fa-calendar"></i> {{ result.attempt.start_time|date:"y/m/d H:i" }}</span>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="empty-state">
+                    <i class="fas fa-medal"></i>
+                    <p>틀린 문제가 없습니다. 훌륭합니다!</p>
+                    <a href="{% url 'exam:index' %}" class="start-btn">
+                        <i class="fas fa-play"></i> 시험 보러 가기
+                    </a>
                 </div>
+                {% endfor %}
+            </div>
 
-                <div class="analysis-loading" id="analysis-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>나무주치의가 질문 내역을 분석하고 있습니다...</p>
-                </div>
-
-                <div class="analysis-result" id="analysis-result">
-                    <!-- Analysis result will be injected here -->
-                </div>
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> 불러오는 중...
             </div>
         </div>
     </div>
 
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <script>
+        let isLoading = false;
+        const mainContent = document.getElementById('main-content');
+
+        // Infinite Scroll
+        mainContent.addEventListener('scroll', function() {
+            const scrollData = document.getElementById('scroll-data');
+            if (!scrollData) return;
+
+            const hasNext = scrollData.dataset.hasNext === 'true';
+            if (!hasNext || isLoading) return;
+
+            if (mainContent.scrollHeight - mainContent.scrollTop <= mainContent.clientHeight + 200) {
+                loadMore();
+            }
+
+            const scrollTopBtn = document.getElementById('scrollTopBtn');
+            if (mainContent.scrollTop > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        });
+
+        function loadMore() {
+            const scrollData = document.getElementById('scroll-data');
+            const nextPage = scrollData.dataset.nextPage;
+            if (!nextPage) return;
+
+            isLoading = true;
+            const loadingEl = document.getElementById('loading');
+            loadingEl.style.display = 'block';
+
+            fetch(`{% url 'mypage:wrong_answer_list' %}?page=${nextPage}`)
+                .then(response => response.text())
+                .then(html => {
+                    // Parse the response
+                    const temp = document.createElement('div');
+                    temp.innerHTML = html;
+
+                    // Extract new cards
+                    const newCards = temp.querySelectorAll('.wrong-answer-card');
+                    const newScrollData = temp.querySelector('#scroll-data');
+
+                    // Append new cards
+                    const container = document.getElementById('wrong-answer-container');
+                    newCards.forEach(card => {
+                        container.appendChild(card.cloneNode(true));
+                    });
+
+                    // Update scroll data
+                    if (newScrollData) {
+                        scrollData.dataset.page = newScrollData.dataset.page;
+                        scrollData.dataset.hasNext = newScrollData.dataset.hasNext;
+                        scrollData.dataset.nextPage = newScrollData.dataset.nextPage || '';
+                    }
+
+                    isLoading = false;
+                    loadingEl.style.display = 'none';
+                })
+                .catch(err => {
+                    console.error('Error loading more:', err);
+                    isLoading = false;
+                    loadingEl.style.display = 'none';
+                });
+        }
+
+        function scrollToTop() {
+            mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function toggleSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.querySelector('.sidebar-overlay');
@@ -541,48 +593,6 @@
                 if (window.innerWidth <= 768) {
                     toggleSidebar();
                 }
-            });
-        });
-
-        // AI Analysis Logic
-        const analyzeBtn = document.getElementById('btn-analyze');
-        const loading = document.getElementById('analysis-loading');
-        const result = document.getElementById('analysis-result');
-
-        analyzeBtn.addEventListener('click', function() {
-            analyzeBtn.disabled = true;
-            loading.style.display = 'block';
-            result.style.display = 'none';
-
-            fetch("{% url 'mypage:analyze_questions' %}", {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                loading.style.display = 'none';
-                analyzeBtn.disabled = false;
-
-                if (data.status === 'success') {
-                    result.innerHTML = data.analysis;
-                    result.style.display = 'block';
-
-                    // Trigger MathJax for the new content
-                    if (window.MathJax) {
-                        MathJax.typesetPromise([result]).catch((err) => console.log('MathJax Error:', err));
-                    }
-                } else {
-                    alert(data.message || '분석 중 오류가 발생했습니다.');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                loading.style.display = 'none';
-                analyzeBtn.disabled = false;
-                alert('서버 통신 중 오류가 발생했습니다.');
             });
         });
     </script>
