@@ -39,6 +39,10 @@ def ajax_login_required(view_func):
 
 @login_required
 def index(request):
+    # 일반 사용자는 회원정보 페이지로 리다이렉트 (관리자만 대시보드 접근)
+    if not (request.user.is_staff or request.user.is_superuser):
+        return redirect("mypage:member_info")
+
     days_since_login = (timezone.now() - request.user.last_login).days
 
     # 0. Recent Exam History (Pagination: 15 items)
@@ -622,6 +626,16 @@ def exam_history_api(request):
 def ai_analysis_page(request):
     """AI 질의분석 별도 페이지"""
     return render(request, "mypage/ai_analysis_page.html")
+
+
+@login_required
+def member_info(request):
+    """회원 정보 별도 페이지"""
+    days_since_login = (timezone.now() - request.user.last_login).days
+    context = {
+        "days_since_login": days_since_login,
+    }
+    return render(request, "mypage/member_info.html", context)
 
 
 @login_required

@@ -1314,9 +1314,9 @@
                 <i class="fas fa-robot"></i> AI 질의분석
             </a>
 
-            <div class="menu-item active" onclick="showSection('info')">
+            <a href="{% url 'mypage:member_info' %}" class="menu-item">
                 <i class="fas fa-user"></i> 회원 정보
-            </div>
+            </a>
 
             <a href="{% url 'main:index' %}" class="menu-item back-home">
                 <i class="fas fa-home"></i> 홈으로
@@ -1331,7 +1331,7 @@
 
             <!-- Admin Dashboard Section (Staff/Superuser Only) -->
             {% if admin_dashboard %}
-            <div id="dashboard-section" class="content-section">
+            <div id="dashboard-section" class="content-section active">
                 <h1><i class="fas fa-chart-line" style="color: #ff9800;"></i> 관리자 대시보드</h1>
                 
                 <!-- Summary Cards -->
@@ -1426,7 +1426,7 @@
             {% endif %}
 
             <!-- Section 1: Member Info -->
-            <div id="info-section" class="content-section active">
+            <div id="info-section" class="content-section">
                 <h1><i class="fas fa-user-circle" style="color: #2d6a4f;"></i> 회원 정보</h1>
                 <div class="info-cards">
                     <div class="info-card">
@@ -1865,8 +1865,9 @@
                 // Dashboard uses separate menu handling
                 document.getElementById('dashboard-section').classList.add('active');
             } else if (sectionId === 'edit_profile' || sectionId === 'info') {
-                menuItems[0].classList.add('active');
-                document.getElementById('info-section').classList.add('active');
+                // Member Info is now a separate page, redirect there
+                window.location.href = '{% url "mypage:member_info" %}';
+                return;
             } else if (sectionId === 'practice_input') {
                 const menu = document.getElementById('menu-practice-input');
                 if (menu) menu.classList.add('active');
