@@ -183,6 +183,33 @@
             border-left: 5px solid #40916c;
         }
 
+        /* MathJax 인라인 수식 - 주변 텍스트와 자연스럽게 조화 */
+        .ai-message .MathJax {
+            font-size: 1.0em !important;
+        }
+
+        /* MathJax 컨테이너 스타일 */
+        .ai-message mjx-container[jax="CHTML"] {
+            font-size: inherit !important;
+            vertical-align: baseline;
+        }
+
+        /* 블록 수식 (display mode) */
+        .ai-message mjx-container[jax="CHTML"][display="true"] {
+            font-size: 1.1em !important;
+            margin: 1em 0;
+        }
+
+        /* 인라인 수식이 텍스트 흐름에 자연스럽게 맞도록 */
+        .ai-message mjx-math {
+            font-size: inherit !important;
+        }
+
+        /* 상하첨자 크기 조정 */
+        .ai-message mjx-script {
+            font-size: 0.7em !important;
+        }
+
         .input-group {
             display: flex;
             gap: 10px;

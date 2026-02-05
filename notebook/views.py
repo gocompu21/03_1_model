@@ -151,7 +151,8 @@ def api_ask(request):
                 # Format content for Wysiwyg (Summernote)
                 bbs_content = f'<p><span style="font-weight: bold; font-size: 1.2em; color: #2d6a4f;">[기본서 내용]</span></p>{html_content}'
 
-                post_type, _ = PostType.objects.get_or_create(name="기본서")
+                # 과목명으로 PostType 생성
+                post_type, _ = PostType.objects.get_or_create(name=target_store)
 
                 Post.objects.create(
                     author=request.user,
