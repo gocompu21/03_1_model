@@ -780,7 +780,7 @@
     <div class="top-header">
         <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
         <span><i class="fas fa-check-circle"></i> 복습 결과 - {{ correct_count }}/{{ total_count }} 정답</span>
-        <a href="{% url 'mypage:index' %}"><i class="fas fa-home"></i> 마이페이지</a>
+        <a href="{% url 'mypage:review_index' %}"><i class="fas fa-home"></i> 마이페이지</a>
     </div>
 
     <!-- Mobile Score Banner -->
@@ -912,7 +912,7 @@
     </div>
 
     <!-- Mobile Home Button -->
-    <a href="{% url 'mypage:index' %}" class="mobile-home-btn">
+    <a href="{% url 'mypage:review_index' %}" class="mobile-home-btn">
         <i class="fas fa-home"></i> 마이페이지로 돌아가기
     </a>
 
