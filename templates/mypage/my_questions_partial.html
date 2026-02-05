@@ -1,4 +1,12 @@
 {% load bbs_extras %}
+
+<!-- Scroll Data for Infinite Scroll -->
+<div id="my-questions-scroll-data"
+     data-page="{{ my_questions.number }}"
+     data-has-next="{{ my_questions.has_next|yesno:'true,false' }}"
+     data-next-page="{{ my_questions.next_page_number|default:'' }}"
+     style="display: none;"></div>
+
 <table class="history-table">
     <thead>
         <tr>
@@ -30,23 +38,12 @@
     </tbody>
 </table>
 
-<!-- Pagination for My Questions -->
-{% if my_questions.has_other_pages %}
-<ul class="pagination">
-    {% if my_questions.has_previous %}
-    <li><a href="?tab=my_questions&q_page={{ my_questions.previous_page_number }}" class="q-ajax-link">&laquo;</a></li>
-    {% endif %}
-
-    {% for i in my_questions.paginator.page_range %}
-    {% if my_questions.number == i %}
-    <li><a href="#" class="active">{{ i }}</a></li>
-    {% else %}
-    <li><a href="?tab=my_questions&q_page={{ i }}" class="q-ajax-link">{{ i }}</a></li>
-    {% endif %}
-    {% endfor %}
-
-    {% if my_questions.has_next %}
-    <li><a href="?tab=my_questions&q_page={{ my_questions.next_page_number }}" class="q-ajax-link">&raquo;</a></li>
-    {% endif %}
-</ul>
+<!-- Scroll Trigger for Infinite Scroll -->
+{% if my_questions.has_next %}
+<div id="my-questions-scroll-trigger" style="height: 1px;"></div>
 {% endif %}
+
+<!-- Loading Indicator -->
+<div id="my-questions-loading" style="text-align: center; padding: 20px; display: none;">
+    <i class="fas fa-spinner fa-spin" style="color: #2d6a4f;"></i> 불러오는 중...
+</div>

@@ -53,6 +53,12 @@ def index(request):
                     output_field=IntegerField(),
                 )
             ),
+            wrong_count=Count(
+                Case(
+                    When(results__is_correct=False, then=1),
+                    output_field=IntegerField(),
+                )
+            ),
         )
         .order_by("-start_time")
     )
@@ -397,10 +403,7 @@ def wrong_answer_full_list(request, attempt_id):
     """전체 오답노트 - 별도 페이지"""
     attempt = get_object_or_404(UserExamAttempt, id=attempt_id, user=request.user)
 
-    # Auto-generate Analysis if missing
-    if not attempt.ai_analysis:
-        _generate_exam_analysis(attempt)
-
+    # Don't block - AI analysis will be loaded asynchronously via AJAX
     wrong_answers = (
         UserQuestionResult.objects.filter(attempt=attempt, is_correct=False)
         .select_related("question", "question__exam", "question__subject")
@@ -411,6 +414,7 @@ def wrong_answer_full_list(request, attempt_id):
         "wrong_answers": wrong_answers,
         "attempt": attempt,
         "attempt_id": attempt_id,
+        "has_ai_analysis": bool(attempt.ai_analysis),
     }
 
     return render(request, "mypage/wrong_answer_full_list.html", context)
@@ -477,6 +481,141 @@ def next_wrong_answers_api(request, pk):
         )
 
     return JsonResponse({"items": items, "has_more": has_more, "offset": offset + limit})
+
+
+@ajax_login_required
+def my_questions_api(request):
+    """API for infinite scroll of my questions (BBS Posts)"""
+    page = int(request.GET.get("page", 1))
+    per_page = 15
+
+    target_types = ["기본서", "주치의", "주치의 질의"]
+    posts_qs = Post.objects.filter(
+        author=request.user, type__name__in=target_types
+    ).order_by("-created_at")
+
+    paginator = Paginator(posts_qs, per_page)
+    posts = paginator.get_page(page)
+
+    items = []
+    for post in posts:
+        items.append({
+            "id": post.id,
+            "title": post.title,
+            "type": post.type.name if post.type else "",
+            "created_at": post.created_at.strftime("%y/%m/%d"),
+            "hits": post.hits,
+            "url": f"/mypage/detail_answer/{post.pk}/",
+        })
+
+    return JsonResponse({
+        "items": items,
+        "has_next": posts.has_next(),
+        "next_page": posts.next_page_number() if posts.has_next() else None,
+        "current_page": page,
+    })
+
+
+@login_required
+def my_questions_list(request):
+    """Separate page for My Questions with infinite scroll"""
+    target_types = ["기본서", "주치의", "주치의 질의"]
+    posts_qs = Post.objects.filter(
+        author=request.user, type__name__in=target_types
+    ).order_by("-created_at")
+
+    paginator = Paginator(posts_qs, 15)
+    page = request.GET.get("page", 1)
+    my_questions = paginator.get_page(page)
+
+    return render(request, "mypage/my_questions_list.html", {
+        "my_questions": my_questions,
+        "total_count": posts_qs.count(),
+    })
+
+
+@login_required
+def exam_history_list(request):
+    """Separate page for Exam History with infinite scroll"""
+    attempts_qs = (
+        UserExamAttempt.objects.filter(user=request.user)
+        .annotate(
+            total_q=Count("results"),
+            correct_q=Count(
+                Case(
+                    When(results__is_correct=True, then=1),
+                    output_field=IntegerField(),
+                )
+            ),
+            wrong_count=Count(
+                Case(
+                    When(results__is_correct=False, then=1),
+                    output_field=IntegerField(),
+                )
+            ),
+        )
+        .order_by("-start_time")
+    )
+
+    paginator = Paginator(attempts_qs, 10)
+    page = request.GET.get("page", 1)
+    attempts = paginator.get_page(page)
+
+    return render(request, "mypage/exam_history_list.html", {
+        "attempts": attempts,
+        "total_count": attempts_qs.count(),
+    })
+
+
+@ajax_login_required
+def exam_history_api(request):
+    """API for infinite scroll of exam history"""
+    page = int(request.GET.get("page", 1))
+    per_page = 10
+
+    attempts_qs = (
+        UserExamAttempt.objects.filter(user=request.user)
+        .annotate(
+            total_q=Count("results"),
+            correct_q=Count(
+                Case(
+                    When(results__is_correct=True, then=1),
+                    output_field=IntegerField(),
+                )
+            ),
+            wrong_count=Count(
+                Case(
+                    When(results__is_correct=False, then=1),
+                    output_field=IntegerField(),
+                )
+            ),
+        )
+        .order_by("-start_time")
+    )
+
+    paginator = Paginator(attempts_qs, per_page)
+    attempts = paginator.get_page(page)
+
+    items = []
+    for attempt in attempts:
+        score = round(attempt.correct_q / attempt.total_q * 100) if attempt.total_q > 0 else 0
+        items.append({
+            "id": attempt.id,
+            "exam_round": attempt.exam.round_number,
+            "start_time": attempt.start_time.strftime("%Y.%m.%d %H:%M"),
+            "total_q": attempt.total_q,
+            "correct_q": attempt.correct_q,
+            "wrong_count": attempt.wrong_count,
+            "score": score,
+            "is_perfect": attempt.correct_q == attempt.total_q,
+        })
+
+    return JsonResponse({
+        "items": items,
+        "has_next": attempts.has_next(),
+        "next_page": attempts.next_page_number() if attempts.has_next() else None,
+        "current_page": page,
+    })
 
 
 @login_required

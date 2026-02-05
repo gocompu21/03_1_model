@@ -172,25 +172,82 @@
             padding-left: 15px;
         }
 
-        /* Info Table Styles */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Info Cards Styles */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
             margin-bottom: 30px;
         }
 
-        .info-table th,
-        .info-table td {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            text-align: left;
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s;
         }
 
-        .info-table th {
-            width: 150px;
+        .info-card:hover {
+            border-color: #2d6a4f;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #e6f4ea 0%, #d4edda 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .info-card-icon i {
+            font-size: 1.3rem;
             color: #2d6a4f;
-            font-weight: bold;
-            background-color: #f8f9fa;
+        }
+
+        .info-card-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .info-card-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 4px;
+        }
+
+        .info-card-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .info-card-value.highlight {
+            color: #2d6a4f;
+        }
+
+        .info-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .info-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .info-actions .btn {
+            flex: 1;
+            text-align: center;
         }
 
         /* History Table - Card Layout */
@@ -1023,6 +1080,7 @@
                 font-size: 1rem !important;
                 box-sizing: border-box !important;
             }
+
         }
 
         /* Extra small devices */
@@ -1209,12 +1267,12 @@
             <div class="menu-item active" onclick="showSection('wrong_answer')">
                 <i class="fas fa-times-circle"></i> 전체 오답 노트
             </div>
-            <div class="menu-item" onclick="showSection('my_questions')">
+            <a href="{% url 'mypage:my_questions_list' %}" class="menu-item">
                 <i class="fas fa-question-circle"></i> 나의 질의응답
-            </div>
-            <div class="menu-item" onclick="showSection('history')">
+            </a>
+            <a href="{% url 'mypage:exam_history_list' %}" class="menu-item">
                 <i class="fas fa-clipboard-list"></i> 기출시험 결과
-            </div>
+            </a>
             <div class="menu-item" onclick="showSection('analysis')">
                 <i class="fas fa-chart-pie"></i> 과목별 실력분석
             </div>
@@ -1333,22 +1391,6 @@
                 </div>
             </div>
             {% endif %}
-
-            <div id="my-questions-section" class="content-section">
-                <div id="question-list-view">
-                    <h1>나의 질의응답</h1>
-                    {% include 'mypage/my_questions_partial.html' %}
-                </div>
-                <div id="question-detail-view" style="display: none;">
-                    <!-- Detail content loaded via AJAX -->
-
-                    <div id="detail-content-area"></div>
-                    <div id="next-questions-list"
-                        style="margin-top: 0px; border-top: 1px solid #eee; padding-top: 10px;">
-                        <!-- Next 3 questions will be rendered here -->
-                    </div>
-                </div>
-            </div>
 
             <!-- Section 1: Member Info -->
             <div id="info-section" class="content-section">
@@ -1767,46 +1809,23 @@
                 if (window.initWrongAnswerInfiniteScroll) {
                     setTimeout(window.initWrongAnswerInfiniteScroll, 100);
                 }
-            } else if (sectionId === 'my_questions') {
-                menuItems[1].classList.add('active');
-                document.getElementById('my-questions-section').classList.add('active');
-                // Reset to list view if it was in detail
-                showListView();
             } else if (sectionId === 'history') {
-                menuItems[2].classList.add('active');
-                document.getElementById('history-section').classList.add('active');
-
-                // Reset to List View
-                const list = document.getElementById('history-list-container');
-                const detail = document.getElementById('history-detail-container');
-                const qDetail = document.getElementById('history-question-detail-container');
-
-                if (list) list.style.display = 'block';
-                if (detail) detail.style.display = 'none';
-                if (qDetail) qDetail.style.display = 'none';
-
-                // Always reload history list
-                fetch('{% url "mypage:index" %}', {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                    .then(response => response.text())
-                    .then(html => {
-                        if (list) list.innerHTML = html;
-                    })
-                    .catch(err => console.error('Failed to reload history:', err));
+                // History section is now a separate page, redirect there
+                window.location.href = '{% url "mypage:exam_history_list" %}';
+                return;
             } else if (sectionId === 'analysis') {
-                menuItems[3].classList.add('active');
+                menuItems[1].classList.add('active');
                 document.getElementById('analysis-section').classList.add('active');
                 updateChartData();
             } else if (sectionId === 'ai_analysis') {
-                menuItems[4].classList.add('active');
+                menuItems[2].classList.add('active');
                 document.getElementById('ai-analysis-section').classList.add('active');
                 resetAIAnalysis();
             } else if (sectionId === 'dashboard') {
-                menuItems[5].classList.add('active');
+                // Dashboard uses separate menu handling
                 document.getElementById('dashboard-section').classList.add('active');
             } else if (sectionId === 'edit_profile' || sectionId === 'info') {
-                menuItems[6].classList.add('active');
+                menuItems[3].classList.add('active');
                 document.getElementById('info-section').classList.add('active');
             } else if (sectionId === 'practice_input') {
                 const menu = document.getElementById('menu-practice-input');

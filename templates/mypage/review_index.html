@@ -617,10 +617,10 @@
             <a href="{% url 'mypage:index' %}?section=wrong_answer" class="menu-item" style="text-decoration: none;">
                 <i class="fas fa-times-circle"></i> 전체 오답 노트
             </a>
-            <a href="{% url 'mypage:index' %}?section=my_questions" class="menu-item" style="text-decoration: none;">
+            <a href="{% url 'mypage:my_questions_list' %}" class="menu-item" style="text-decoration: none;">
                 <i class="fas fa-question-circle"></i> 나의 질의응답
             </a>
-            <a href="{% url 'mypage:index' %}?section=history" class="menu-item" style="text-decoration: none;">
+            <a href="{% url 'mypage:exam_history_list' %}" class="menu-item" style="text-decoration: none;">
                 <i class="fas fa-clipboard-list"></i> 기출시험 결과
             </a>
             <a href="{% url 'mypage:index' %}?section=analysis" class="menu-item" style="text-decoration: none;">

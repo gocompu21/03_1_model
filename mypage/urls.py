@@ -20,6 +20,14 @@ urlpatterns = [
         views.next_wrong_answers_api,
         name="next_wrong_answers_api",
     ),
+    path(
+        "api/my_questions/",
+        views.my_questions_api,
+        name="my_questions_api",
+    ),
+    path("questions/", views.my_questions_list, name="my_questions_list"),
+    path("history/", views.exam_history_list, name="exam_history_list"),
+    path("api/exam_history/", views.exam_history_api, name="exam_history_api"),
     path("analyze/", views.analyze_questions, name="analyze_questions"),
     path(
         "api/analyze_attempt/<int:attempt_id>/",

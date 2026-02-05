@@ -1,174 +1,319 @@
 {% if recent_attempts %}
 <style>
-    .history-table {
-        width: 100%;
-        border-collapse: collapse;
+    .exam-cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
         margin-top: 10px;
-        background-color: white;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
-    .history-table th {
-        background-color: #2d6a4f;
-        color: white;
-        padding: 12px 15px;
-        font-weight: 600;
-        text-align: center;
-        font-size: 0.95rem;
+    .exam-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e8e8e8;
+        transition: all 0.2s;
     }
 
-    .history-table td {
-        padding: 12px 15px;
-        border-bottom: 1px solid #e9ecef;
-        color: #333;
-        vertical-align: middle;
-        text-align: center;
-        font-size: 0.95rem;
+    .exam-card:hover {
+        border-color: #2d6a4f;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .history-table tr:hover {
-        background-color: #f8f9fa;
+    .exam-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #e0e0e0;
     }
 
-    .score-badge {
+    .exam-round {
         font-weight: bold;
-        color: #2d6a4f;
-        background-color: #d8f3dc;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        display: inline-block;
-        min-width: 60px;
-    }
-
-    .btn-icon {
-        border: none;
-        background: none;
-        cursor: pointer;
-        padding: 5px;
         font-size: 1.1rem;
-        transition: transform 0.2s;
+        color: #1b4332;
     }
 
-    .btn-icon:hover {
-        transform: scale(1.1);
+    .exam-date {
+        font-size: 0.85rem;
+        color: #888;
     }
 
-    .btn-note {
+    .exam-card-body {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .score-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .score-circle .score-value {
+        font-size: 1.2rem;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .score-circle .score-label {
+        font-size: 0.65rem;
+        opacity: 0.9;
+    }
+
+    .exam-stats {
+        flex: 1;
+    }
+
+    .progress-bar-container {
+        background: #e9ecef;
+        height: 10px;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 6px;
+    }
+
+    .progress-bar-fill {
+        background: linear-gradient(90deg, #40916c 0%, #2d6a4f 100%);
+        height: 100%;
+        border-radius: 5px;
+        transition: width 0.3s ease;
+    }
+
+    .progress-bar-fill.perfect {
+        background: linear-gradient(90deg, #ffd700 0%, #ffa500 100%);
+    }
+
+    .exam-stats-text {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .exam-card-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .action-btn.note-btn {
+        background: #e6f4ea;
         color: #2d6a4f;
     }
 
-    .btn-del {
+    .action-btn.note-btn:hover {
+        background: #d4edda;
+    }
+
+    .action-btn.delete-btn {
+        background: #fff5f5;
         color: #fa5252;
+    }
+
+    .action-btn.delete-btn:hover {
+        background: #ffe0e0;
+    }
+
+    .action-btn.perfect-btn {
+        background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+        color: #ff8f00;
+    }
+
+    /* Pagination */
+    .pagination {
+        margin-top: 25px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .pagination a, .pagination span {
+        padding: 8px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+
+    .pagination a {
+        color: #495057;
+        background: #f8f9fa;
+    }
+
+    .pagination a:hover {
+        background: #e6f4ea;
+        color: #2d6a4f;
+    }
+
+    .pagination span.active {
+        background: #2d6a4f;
+        color: white;
+        font-weight: bold;
+    }
+
+    /* Mobile Responsive */
+    @media screen and (max-width: 768px) {
+        .exam-card {
+            padding: 14px 16px;
+        }
+
+        .exam-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+        }
+
+        .exam-round {
+            font-size: 1rem;
+        }
+
+        .exam-date {
+            font-size: 0.8rem;
+        }
+
+        .exam-card-body {
+            flex-wrap: wrap;
+        }
+
+        .score-circle {
+            width: 50px;
+            height: 50px;
+        }
+
+        .score-circle .score-value {
+            font-size: 1rem;
+        }
+
+        .exam-stats {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .exam-card-actions {
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #e0e0e0;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 0.9rem;
+        }
+
+        .pagination {
+            gap: 5px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 6px 10px;
+            font-size: 0.85rem;
+        }
     }
 </style>
 
-<div style="text-align: right; margin-bottom: 10px; font-size: 0.85rem; color: #666;">
-    <span style="margin-right: 15px;">
-        <i class="fas fa-book-open" style="color: #2d6a4f;"></i> 오답노트
-    </span>
-    <span>
-        <i class="fas fa-trash-alt" style="color: #fa5252;"></i> 삭제
-    </span>
-</div>
-<div style="overflow-x: auto;">
-    <table class="history-table">
-        <thead>
-            <tr>
-                <th style="width: 15%;">시험 회차</th>
-                <th style="width: 20%;">응시 일시</th>
-                <th style="width: 15%;">점수</th>
-                <th style="width: 30%;">정답률</th>
-                <th style="width: 20%;">관리</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for attempt in recent_attempts %}
-            <tr>
-                <td>
-                    <span style="font-weight: bold; color: #2d6a4f;">{% if attempt.exam.round_number == 0 %}모의고사
-                        {% else%}제{{ attempt.exam.round_number }}회{% endif %}</span>
-                </td>
-                <td style="color: #666;">
-                    {{ attempt.start_time|date:"Y.m.d" }}
-                </td>
-                <td>
-                    <span class="score-badge">{% widthratio attempt.correct_q attempt.total_q 100 %}점</span>
-                </td>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <div
-                            style="flex-grow: 1; background-color: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
-                            <div
-                                style="background-color: #2d6a4f; height: 100%; width: {% widthratio attempt.correct_q attempt.total_q 100 %}%;">
-                            </div>
-                        </div>
-                        <span style="font-size: 0.8rem; color: #666; width: 60px; text-align: right;">
-                            {{ attempt.correct_q }}/{{ attempt.total_q }}
-                        </span>
-                    </div>
-                </td>
-                <td>
-                    <div style="display: flex; justify-content: center; gap: 0;">
-                        <div style="width: 40px; text-align: center;">
-                            {% if attempt.total_q > attempt.correct_q %}
-                            <button onclick="loadWrongAnswersByAttempt({{ attempt.id }})" class="btn-icon btn-note"
-                                title="오답노트 보기">
-                                <i class="fas fa-book-open"></i>
-                            </button>
-                            {% else %}
-                            <span style="color: #2d6a4f; font-size: 1.2rem;" title="만점"><i
-                                    class="fas fa-medal"></i></span>
-                            {% endif %}
-                        </div>
-                        <div style="width: 40px; text-align: center;">
-                            <button onclick="deleteAttempt({{ attempt.id }})" class="btn-icon btn-del" title="기록 삭제">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="exam-cards-container">
+    {% for attempt in recent_attempts %}
+    <div class="exam-card">
+        <div class="exam-card-header">
+            <span class="exam-round">
+                <i class="fas fa-file-alt" style="margin-right: 5px;"></i>
+                {% if attempt.exam.round_number == 0 %}모의고사{% else %}제{{ attempt.exam.round_number }}회{% endif %}
+            </span>
+            <span class="exam-date">
+                <i class="fas fa-calendar-alt"></i> {{ attempt.start_time|date:"Y.m.d H:i" }}
+            </span>
+        </div>
+        <div class="exam-card-body">
+            <div class="score-circle">
+                <span class="score-value">{% widthratio attempt.correct_q attempt.total_q 100 %}</span>
+                <span class="score-label">점</span>
+            </div>
+            <div class="exam-stats">
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill {% if attempt.correct_q == attempt.total_q %}perfect{% endif %}"
+                         style="width: {% widthratio attempt.correct_q attempt.total_q 100 %}%;"></div>
+                </div>
+                <div class="exam-stats-text">
+                    <span>정답 {{ attempt.correct_q }}개 / {{ attempt.total_q }}개</span>
+                    <span>{% if attempt.total_q > attempt.correct_q %}오답 {{ attempt.wrong_count }}개{% else %}<i class="fas fa-crown" style="color: #ffa500;"></i> 만점{% endif %}</span>
+                </div>
+            </div>
+            <div class="exam-card-actions">
+                {% if attempt.total_q > attempt.correct_q %}
+                <button onclick="loadWrongAnswersByAttempt({{ attempt.id }})" class="action-btn note-btn" title="오답노트 보기">
+                    <i class="fas fa-book-open"></i>
+                </button>
+                {% else %}
+                <button class="action-btn perfect-btn" title="만점!" disabled>
+                    <i class="fas fa-medal"></i>
+                </button>
+                {% endif %}
+                <button onclick="deleteAttempt({{ attempt.id }})" class="action-btn delete-btn" title="기록 삭제">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
-<!-- Pagination Controls -->
-<div class="pagination" style="margin-top: 30px; text-align: center;">
+<!-- Pagination -->
+<div class="pagination">
     {% if recent_attempts.has_previous %}
-    <a href="?page=1&tab=history" class="ajax-link" data-page="1" style="margin: 0 5px; color: #2d6a4f;">&laquo; 처음</a>
-    <a href="?page={{ recent_attempts.previous_page_number }}&tab=history" class="ajax-link"
-        data-page="{{ recent_attempts.previous_page_number }}" style="margin: 0 5px; color: #2d6a4f;">이전</a>
-    {% endif%}
+    <a href="?page=1&tab=history" class="ajax-link" data-page="1"><i class="fas fa-angle-double-left"></i></a>
+    <a href="?page={{ recent_attempts.previous_page_number }}&tab=history" class="ajax-link" data-page="{{ recent_attempts.previous_page_number }}"><i class="fas fa-angle-left"></i> 이전</a>
+    {% endif %}
 
     {% for num in recent_attempts.paginator.page_range %}
-    {% if num == recent_attempts.number %}
-    <span class="active" style="margin: 0 5px; font-weight: bold; color: #2d6a4f; text-decoration: underline;">
-        {{ num}}</span>
-    {% elif num > recent_attempts.number|add:'-3' and num < recent_attempts.number|add:'3' %} <a
-        href="?page={{ num }}&tab=history" class="ajax-link" data-page="{{ num }}"
-        style="margin: 0 5px; color: #495057; text-decoration: none;">{{ num }}</a>
+        {% if num == recent_attempts.number %}
+            <span class="active">{{ num }}</span>
+        {% elif num > recent_attempts.number|add:'-3' and num < recent_attempts.number|add:'3' %}
+            <a href="?page={{ num }}&tab=history" class="ajax-link" data-page="{{ num }}">{{ num }}</a>
         {% endif %}
-        {% endfor %}
+    {% endfor %}
 
-        {% if recent_attempts.has_next %}
-        <a href="?page={{ recent_attempts.next_page_number }}&tab=history" class="ajax-link"
-            data-page="{{ recent_attempts.next_page_number }}" style="margin: 0 5px; color: #2d6a4f;">다음</a>
-        <a href="?page={{ recent_attempts.paginator.num_pages }}&tab=history" class="ajax-link"
-            data-page="{{ recent_attempts.paginator.num_pages }}" style="margin: 0 5px; color: #2d6a4f;">마지막 &raquo;</a>
-        {% endif %}
+    {% if recent_attempts.has_next %}
+    <a href="?page={{ recent_attempts.next_page_number }}&tab=history" class="ajax-link" data-page="{{ recent_attempts.next_page_number }}">다음 <i class="fas fa-angle-right"></i></a>
+    <a href="?page={{ recent_attempts.paginator.num_pages }}&tab=history" class="ajax-link" data-page="{{ recent_attempts.paginator.num_pages }}"><i class="fas fa-angle-double-right"></i></a>
+    {% endif %}
 </div>
 
 {% else %}
-<div
-    style="text-align: center; padding: 60px 20px; color: #888; background: #f8f9fa; border-radius: 12px; margin-top: 20px;">
-    <i class="fas fa-seedling" style="font-size: 3rem; color: #dee2e6; margin-bottom: 20px;"></i>
-    <p style="font-size: 1.1rem; margin-bottom: 20px;">아직 응시한 기출시험 기록이 없습니다.<br>나무의사 합격을 위한 첫 걸음을 시작해보세요!</p>
-    <a href="{% url 'exam:index' %}" class="btn"
-        style="background-color: #2d6a4f; color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: opacity 0.2s;">
+<div style="text-align: center; padding: 60px 20px; color: #888; background: white; border-radius: 12px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <i class="fas fa-seedling" style="font-size: 3rem; color: #b7e4c7; margin-bottom: 20px; display: block;"></i>
+    <p style="font-size: 1.1rem; margin-bottom: 20px; line-height: 1.6;">아직 응시한 기출시험 기록이 없습니다.<br>나무의사 합격을 위한 첫 걸음을 시작해보세요!</p>
+    <a href="{% url 'exam:index' %}" style="display: inline-block; background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%); color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none; font-weight: bold; transition: opacity 0.2s;">
         <i class="fas fa-play"></i> 시험 보러 가기
     </a>
 </div>
