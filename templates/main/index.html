@@ -313,7 +313,7 @@
             {% if user.is_staff or user.is_superuser %}
             <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">관리메뉴</a>
             {% endif %}
-            <a href="{% url 'mypage:index' %}">마이페이지</a>
+            <a href="{% url 'mypage:review_index' %}">마이페이지</a>
             <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit"
