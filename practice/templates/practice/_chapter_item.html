@@ -25,7 +25,7 @@
         </span>
     </a>
     {% else %}
-    <span class="chapter-link no-content" style="color: #999; cursor: pointer;" onclick="alert('내용이 없는 목차입니다')">
+    <span class="chapter-link no-content" style="color: #999; cursor: pointer;" onclick="showToast('내용이 없는 목차입니다')">
         <span class="chapter-code">{{ chapter.code }}</span>&nbsp;&nbsp;
         <span class="chapter-title">{{ chapter.title }}</span>
     </span>

@@ -323,6 +323,28 @@
         color: #999;
     }
 
+    /* Toast 알림 */
+    .toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        z-index: 9999;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+    }
+
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+
     .chapter-title {
         flex: 1;
     }
@@ -569,8 +591,22 @@
         {% endfor %}
     </div>
 </div>
+
+<!-- Toast 알림 -->
+<div id="toast" class="toast"></div>
+
 <script>
     const BOOK_ID = "{{ book.id }}";
+
+    // Toast 알림 함수
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
     const STATE_KEY = `chapter_state_book_${BOOK_ID}`;
 
     document.addEventListener('DOMContentLoaded', loadState);
