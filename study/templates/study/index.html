@@ -226,6 +226,12 @@
         color: #666;
     }
 
+    .round-date {
+        font-size: 0.95rem;
+        color: #888;
+        margin-top: 3px;
+    }
+
     .round-badge {
         position: absolute;
         top: 15px;
@@ -647,6 +653,11 @@
             font-size: 0.65rem;
         }
 
+        .round-date {
+            font-size: 0.7rem;
+            margin-top: 2px;
+        }
+
         .round-badge {
             display: none;
         }
@@ -828,6 +839,16 @@
             <a href="{% url 'study:detail' exam.round_number %}" class="round-card">
                 <div class="round-badge">전체 풀기</div>
                 <div class="round-number">{{ exam.round_number }}<span>회</span></div>
+                <div class="round-date">
+                    {% if exam.round_number == 5 %}2021.7
+                    {% elif exam.round_number == 6 %}2021.12
+                    {% elif exam.round_number == 7 %}2022.6
+                    {% elif exam.round_number == 8 %}2022.10
+                    {% elif exam.round_number == 9 %}2023.7
+                    {% elif exam.round_number == 10 %}2024.2
+                    {% elif exam.round_number == 11 %}2024.2
+                    {% endif %}
+                </div>
                 <div class="round-action">문제 풀러가기 &rarr;</div>
             </a>
             {% empty %}
