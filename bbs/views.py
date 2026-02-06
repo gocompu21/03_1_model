@@ -67,7 +67,8 @@ def post_detail(request, pk):
             | Q(author__username__icontains=query)
         )
 
-    related_posts = posts.filter(pk__lt=post.pk)[:10]
+    related_posts = list(posts.filter(pk__lt=post.pk)[:10])
+    has_more_related = len(related_posts) == 10
 
     # Increment View Count (simple logic)
     # Using cookie to prevent refresh spam could be better, but keeping it simple for now
@@ -85,6 +86,7 @@ def post_detail(request, pk):
             "query": query,
             "category": category,
             "related_posts": related_posts,
+            "has_more_related": has_more_related,
         },
     )
 
@@ -195,6 +197,49 @@ def post_list_api(request):
         "has_next": page_obj.has_next(),
         "current_page": page_obj.number,
         "total_pages": paginator.num_pages,
+    })
+
+
+def related_posts_api(request, pk):
+    """API for infinite scroll of related posts below current post."""
+    category = request.GET.get("category", "ALL")
+    query = request.GET.get("q", "")
+    before_pk = int(request.GET.get("before_pk", pk))
+
+    posts = Post.objects.filter(pk__lt=before_pk).order_by("-created_at")
+
+    if category == "BOOK":
+        posts = posts.filter(type__name__in=["수목생리학", "수목병리학", "산림토양학", "수목관리학", "수목해충학"])
+    elif category == "DOCTOR":
+        posts = posts.filter(type__name="주치의")
+    elif category == "GENERAL":
+        posts = posts.filter(type__name="일반 질의")
+
+    if query:
+        posts = posts.filter(
+            Q(title__icontains=query)
+            | Q(content__icontains=query)
+            | Q(author__username__icontains=query)
+        )
+
+    posts = list(posts[:10])
+
+    posts_data = []
+    for p in posts:
+        author_name = p.author.first_name if p.author.first_name else p.author.username
+        posts_data.append({
+            "pk": p.pk,
+            "title": p.title,
+            "type": p.type.name if p.type else None,
+            "author": author_name,
+            "created_at": p.created_at.strftime("%m/%d"),
+            "hits": p.hits,
+            "comment_count": p.comments.count(),
+        })
+
+    return JsonResponse({
+        "posts": posts_data,
+        "has_more": len(posts_data) == 10,
     })
 
 
