@@ -219,6 +219,29 @@
         background: #1b4332;
     }
 
+    /* Subject Toggle Row */
+    .subject-toggle-row {
+        width: 100%;
+        text-align: left;
+        margin-bottom: 5px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .all-subjects-label {
+        font-weight: bold;
+        font-size: 0.95rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .subject-expand-btn {
+        display: none;
+    }
+
     /* 반응형 - 태블릿 */
     @media (max-width: 768px) {
         .custom-main-header {
@@ -291,9 +314,9 @@
             font-weight: 700;
         }
 
-        /* 레이아웃 - 여유 있는 여백 */
+        /* 레이아웃 */
         .study-layout {
-            padding: 80px 16px 100px 16px;
+            padding: 72px 16px 40px 16px;
         }
 
         /* 타이틀 영역 - 심플하게 */
@@ -337,8 +360,9 @@
             border-radius: 16px;
             border: none;
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            overflow: hidden;
+            overflow: visible;
             background: white;
+            position: relative;
         }
 
         .round-card:hover {
@@ -346,54 +370,87 @@
             box-shadow: 0 2px 12px rgba(0,0,0,0.08);
         }
 
-        /* 회차 번호 - 상단 배너 스타일 */
+        /* 회차 번호 + 과목선택 같은 줄 */
         .round-number {
-            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
-            color: white;
+            background: #e8f5e9;
+            color: #1b4332;
             font-size: 1.3rem;
             font-weight: 700;
-            padding: 14px 20px;
+            padding: 10px 20px 10px;
             margin: 0;
-            text-align: left;
             width: 100%;
             box-sizing: border-box;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 4px;
+            position: relative;
         }
 
         .round-number span {
             font-size: 0.8em;
-            color: rgba(255,255,255,0.9);
+            color: #666;
             font-weight: 500;
         }
 
         /* 폼 영역 */
         .exam-form {
-            padding: 16px 20px 20px;
+            padding: 12px 20px 16px;
             width: 100%;
             box-sizing: border-box;
         }
 
-        /* 전과목 선택 - 토글 스타일 */
-        .exam-form > div:first-child {
-            margin-bottom: 12px !important;
+        /* Subject Toggle Row - 회차 번호 오른쪽에 배치 */
+        .subject-toggle-row {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            width: auto;
+            margin: 0;
+            padding: 0;
+            z-index: 1;
         }
 
-        .exam-form > div:first-child label {
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            color: #333;
-            display: flex;
+        .all-subjects-label {
+            display: none;
+        }
+
+        /* Expand Button - visible on mobile */
+        .subject-expand-btn {
+            display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 5px;
+            background: #f0f4f0;
+            border: 1px solid #cdd8cd;
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 0.78rem;
+            color: #555;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
-        /* 과목 옵션 - 그리드 레이아웃 */
-        .subject-options {
-            display: grid;
+        .subject-expand-btn:active {
+            background: #e0e8e0;
+        }
+
+        .expand-arrow {
+            transition: transform 0.25s ease;
+        }
+
+        .exam-form.subjects-expanded .expand-arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Subject Options - collapsed by default on mobile */
+        .exam-form:not(.subjects-expanded) .subject-options {
+            display: none !important;
+        }
+
+        .exam-form.subjects-expanded .subject-options {
+            display: grid !important;
             grid-template-columns: 1fr 1fr;
-            gap: 8px 16px;
+            gap: 6px 16px;
             padding: 14px;
             margin-bottom: 16px;
             max-height: none;
@@ -404,9 +461,9 @@
         }
 
         .subject-options label {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             margin-bottom: 0;
-            padding: 8px 0;
+            padding: 6px 0;
             line-height: 1.3;
             color: #444;
             display: flex;
@@ -415,34 +472,31 @@
         }
 
         .subject-options input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             margin: 0;
             border-radius: 4px;
             flex-shrink: 0;
         }
 
-        /* 전과목 체크박스 */
-        .exam-form > div:first-child input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-        }
-
-        /* 버튼 - 강조 스타일 */
+        /* 버튼 - 아웃라인 스타일 */
         .submit-btn {
-            padding: 16px 20px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
-            box-shadow: 0 4px 12px rgba(45, 106, 79, 0.3);
-            letter-spacing: 0.5px;
+            width: auto;
+            padding: 10px 28px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 8px;
+            background: white;
+            color: #333;
+            border: 1.5px solid #aaa;
+            box-shadow: none;
+            letter-spacing: 0;
             transition: all 0.2s;
         }
 
         .submit-btn:active {
+            background: #f5f5f5;
             transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(45, 106, 79, 0.3);
         }
     }
 </style>
@@ -483,10 +537,13 @@
             <div class="round-number">{{ exam.round_number }}<span>회</span></div>
 
             <form action="{% url 'exam:take' exam.id %}" method="get" class="exam-form">
-                <div style="width: 100%; text-align: left; margin-bottom: 5px;">
-                    <label style="font-weight: bold; font-size: 0.95rem; cursor: pointer;">
+                <div class="subject-toggle-row">
+                    <label class="all-subjects-label">
                         <input type="checkbox" name="all_subjects" checked onchange="toggleSubjects(this)"> 전과목 선택
                     </label>
+                    <button type="button" class="subject-expand-btn" onclick="toggleSubjectPanel(this)">
+                        과목 선택 <svg class="expand-arrow" width="12" height="12" viewBox="0 0 12 12"><path d="M3 4l3 3.5 3-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                 </div>
 
                 <div class="subject-options">
@@ -513,6 +570,11 @@
         const form = totalCheckbox.closest('form');
         const checkboxes = form.querySelectorAll('.subject-options input[type="checkbox"]');
         checkboxes.forEach(cb => cb.checked = totalCheckbox.checked);
+    }
+
+    function toggleSubjectPanel(btn) {
+        const form = btn.closest('.exam-form');
+        form.classList.toggle('subjects-expanded');
     }
 
     function toggleMenu() {
