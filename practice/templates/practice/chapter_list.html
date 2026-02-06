@@ -312,7 +312,17 @@
         display: flex;
         align-items: center;
     }
-    
+
+    .chapter-link.no-content {
+        color: #999;
+        cursor: default;
+        opacity: 0.7;
+    }
+
+    .chapter-link.no-content:hover {
+        color: #999;
+    }
+
     .chapter-title {
         flex: 1;
     }
@@ -596,33 +606,17 @@
     }
 
     function loadState() {
-        const saved = localStorage.getItem(STATE_KEY);
-        if (saved) {
-            try {
-                const expandedIds = JSON.parse(saved);
-                document.querySelectorAll('.chapter-children').forEach(el => {
-                    const id = el.id.replace('children-', '');
-                    const parentDiv = document.getElementById(`chapter-${id}`);
-                    const icon = parentDiv ? parentDiv.querySelector('.toggle-btn i') : null;
-                    
-                    if (expandedIds.includes(id)) {
-                        el.style.display = 'block';
-                        if (icon) {
-                            icon.classList.remove('fa-chevron-right');
-                            icon.classList.add('fa-chevron-down');
-                        }
-                    } else {
-                        el.style.display = 'none';
-                        if (icon) {
-                            icon.classList.remove('fa-chevron-down');
-                            icon.classList.add('fa-chevron-right');
-                        }
-                    }
-                });
-            } catch (e) {
-                console.error('Error loading chapter state:', e);
+        // 모든 메뉴를 기본으로 펼침
+        document.querySelectorAll('.chapter-children').forEach(el => {
+            el.style.display = 'block';
+            const id = el.id.replace('children-', '');
+            const parentDiv = document.getElementById(`chapter-${id}`);
+            const icon = parentDiv ? parentDiv.querySelector('.toggle-btn i') : null;
+            if (icon) {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
             }
-        }
+        });
     }
 </script>
 {% endblock %}

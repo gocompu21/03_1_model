@@ -100,8 +100,10 @@
     }
 </style>
 <header class="custom-header">
-    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-    <button class="menu-toggle" onclick="togglePracticeMenu()" aria-label="메뉴 열기">☰</button>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="menu-toggle" onclick="togglePracticeMenu()" aria-label="메뉴 열기">☰</button>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    </div>
     <nav class="nav-links" id="practiceNavLinks">
         {% if user.is_authenticated %}
         <span>{{ user.username }}님 환영합니다</span>

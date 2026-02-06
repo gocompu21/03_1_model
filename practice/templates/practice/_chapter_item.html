@@ -7,13 +7,14 @@
         </span>
         {% else %}
         <span class="toggle-btn" onclick="toggleChapter('{{ chapter.id }}', this)" style="cursor: pointer; margin-right: 8px; color: #666; width: 14px; display: inline-block; text-align: center;">
-            <i class="fas fa-chevron-right"></i>
+            <i class="fas fa-chevron-down"></i>
         </span>
         {% endif %}
     {% else %}
         <span style="width: 14px; margin-right: 8px; display: inline-block;"></span>
     {% endif %}
     
+    {% if chapter|has_content or user.is_staff %}
     <a href="{% url 'practice:chapter_detail' chapter.id %}" class="chapter-link">
         <span class="chapter-code">{{ chapter.code }}</span>&nbsp;&nbsp;
         <span class="chapter-title">
@@ -23,9 +24,15 @@
             {% endif %}
         </span>
     </a>
+    {% else %}
+    <span class="chapter-link no-content" style="color: #999; cursor: default;">
+        <span class="chapter-code">{{ chapter.code }}</span>&nbsp;&nbsp;
+        <span class="chapter-title">{{ chapter.title }}</span>
+    </span>
+    {% endif %}
 </div>
 {% if chapter.children.all %}
-    <div id="children-{{ chapter.id }}" class="chapter-children" style="transition: all 0.3s ease; overflow: hidden; display: {% if chapter.level < 2 %}block{% else %}none{% endif %};">
+    <div id="children-{{ chapter.id }}" class="chapter-children" style="transition: all 0.3s ease; overflow: hidden; display: block;">
     {% for child in chapter.children.all %}
         {% include 'practice/_chapter_item.html' with chapter=child %}
     {% endfor %}
