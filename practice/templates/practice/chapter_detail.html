@@ -15,11 +15,66 @@
         min-height: 100vh;
         font-size: 1.1rem;
     }
-    
+
     main.container {
         max-width: 1200px;
+        animation: pageFadeIn 0.4s ease-out;
     }
-    
+
+    @keyframes pageFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* 로딩 오버레이 */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(13, 61, 13, 0.95);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .loading-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top-color: #90EE90;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+        color: #90EE90;
+        margin-top: 20px;
+        font-size: 1rem;
+        letter-spacing: 1px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
     .detail-wrapper {
         display: flex;
         gap: 20px;
@@ -704,6 +759,12 @@
     </div>
 </div>
 
+<!-- 로딩 오버레이 -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">불러오는 중...</div>
+</div>
+
 <!-- 라이트박스 모달 -->
 <div class="lightbox-overlay" id="lightbox">
     <button class="lightbox-close" id="lightbox-close">&times;</button>
@@ -715,6 +776,23 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // 페이지 전환 로딩 효과
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    // 사이드바 링크 클릭 시 로딩 표시 (현재 페이지 제외)
+    document.querySelectorAll('.sibling-link:not(.active)').forEach(link => {
+        link.addEventListener('click', function(e) {
+            loadingOverlay.classList.add('active');
+        });
+    });
+
+    // 뒤로가기 시 로딩 오버레이 숨기기
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            loadingOverlay.classList.remove('active');
+        }
+    });
+
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxClose = document.getElementById('lightbox-close');
