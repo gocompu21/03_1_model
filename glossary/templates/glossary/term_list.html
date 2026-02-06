@@ -4,20 +4,6 @@
 {% block title %}찾아보기{% endblock %}
 
 {% block header %}
-<header class="glossary-header">
-    <a href="{% url 'main:index' %}" class="header-logo">🌳 나무의사 합격반</a>
-    <nav class="header-nav">
-        {% if user.is_authenticated %}
-        <span class="user-name">{{ user.username }}님</span>
-        {% if user.is_staff or user.is_superuser %}
-        <a href="{% url 'dashboard:index' %}" class="admin-link">관리</a>
-        {% endif %}
-        <a href="{% url 'mypage:index' %}" class="nav-link">마이페이지</a>
-        {% else %}
-        <a href="{% url 'accounts:user_login' %}" class="nav-link">로그인</a>
-        {% endif %}
-    </nav>
-</header>
 <style>
     .glossary-header {
         background-color: #2d6a4f;
@@ -27,48 +13,128 @@
         align-items: center;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-    .header-logo {
+    .glossary-header .logo {
         color: white;
         font-size: 1.5rem;
         font-weight: bold;
         text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
-    .header-nav {
+    .glossary-header .nav-links {
         display: flex;
         align-items: center;
         gap: 20px;
     }
-    .user-name {
-        color: rgba(255,255,255,0.8);
-    }
-    .admin-link {
-        color: #ffc107;
-        text-decoration: none;
-        font-weight: 500;
-    }
-    .nav-link {
+    .glossary-header .nav-links a {
         color: white;
         text-decoration: none;
         font-weight: 500;
+        transition: color 0.3s;
+    }
+    .glossary-header .nav-links a:hover {
+        color: #b7e4c7;
+    }
+    .glossary-header .nav-links span {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    .glossary-header .nav-links button {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .glossary-header .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 5px;
+        margin-right: 10px;
+    }
+    @media (max-width: 768px) {
+        .glossary-header {
+            padding: 12px 20px;
+            flex-wrap: wrap;
+        }
+        .glossary-header .logo {
+            font-size: 1.2rem;
+        }
+        .glossary-header .menu-toggle {
+            display: block;
+        }
+        .glossary-header .nav-links {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-top: 15px;
+            gap: 12px;
+        }
+        .glossary-header .nav-links.active {
+            display: flex;
+        }
+        .glossary-header .nav-links a {
+            padding: 8px 0;
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glossary-header .nav-links span {
+            padding: 8px 0;
+            display: block;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        .glossary-header .nav-links form {
+            width: 100%;
+        }
+        .glossary-header .nav-links form button {
+            padding: 8px 0 !important;
+            text-align: left;
+        }
     }
     @media (max-width: 480px) {
         .glossary-header {
-            padding: 8px 8px;
+            padding: 10px 15px;
         }
-        .header-logo {
+        .glossary-header .logo {
             font-size: 1rem;
-        }
-        .header-nav {
-            gap: 8px;
-        }
-        .user-name {
-            display: none;
-        }
-        .admin-link, .nav-link {
-            font-size: 0.8rem;
         }
     }
 </style>
+<header class="glossary-header">
+    <div style="display: flex; align-items: center;">
+        <button class="menu-toggle" onclick="toggleGlossaryMenu()" aria-label="메뉴 열기">☰</button>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    </div>
+    <nav class="nav-links" id="glossaryNavLinks">
+        {% if user.is_authenticated %}
+        <span>{{ user.username }}님 환영합니다</span>
+        {% if user.is_staff or user.is_superuser %}
+        <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">관리메뉴</a>
+        {% endif %}
+        <a href="{% url 'mypage:review_index' %}">마이페이지</a>
+        <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit">로그아웃</button>
+        </form>
+        {% else %}
+        <a href="{% url 'accounts:user_login' %}">로그인</a>
+        <a href="{% url 'accounts:user_signup' %}">회원가입</a>
+        {% endif %}
+    </nav>
+</header>
+<script>
+    function toggleGlossaryMenu() {
+        const navLinks = document.getElementById('glossaryNavLinks');
+        navLinks.classList.toggle('active');
+    }
+</script>
 {% endblock %}
 
 {% block content %}
@@ -212,24 +278,6 @@
 
         .page-title {
             font-size: 1.5rem;
-        }
-
-        /* 헤더 숨김 */
-        header {
-            padding: 10px 15px !important;
-        }
-
-        header a[href*="main:index"] {
-            font-size: 1.1rem !important;
-        }
-
-        header nav {
-            gap: 10px !important;
-        }
-
-        header nav span,
-        header nav a {
-            font-size: 0.85rem !important;
         }
 
         /* 과목 버튼 - 한 줄, 짧은 이름 */
