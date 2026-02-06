@@ -33,12 +33,17 @@
 
     .custom-main-header .logo {
         color: white;
-        font-size: 1.5rem;
+        font-size: 24px;
         font-weight: bold;
         text-decoration: none;
         display: flex;
         align-items: center;
         gap: 10px;
+    }
+
+    .custom-main-header .nav-links {
+        display: flex;
+        align-items: center;
     }
 
     .custom-main-header .nav-links a {
@@ -53,6 +58,11 @@
         color: #b7e4c7;
     }
 
+    .custom-main-header .nav-links span {
+        color: rgba(255, 255, 255, 0.8);
+        margin-right: 15px;
+    }
+
     .custom-main-header .nav-links button {
         background: none;
         border: none;
@@ -61,6 +71,17 @@
         font-size: 1rem;
         font-weight: 500;
         margin-left: 15px;
+    }
+
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+        margin-right: 10px;
     }
 
     /* Layout Styles from Study Index */
@@ -198,6 +219,60 @@
         background: #1b4332;
     }
 
+    /* 반응형 - 태블릿 */
+    @media (max-width: 768px) {
+        .custom-main-header {
+            padding: 12px 20px;
+            flex-wrap: wrap;
+        }
+
+        .custom-main-header .logo {
+            font-size: 19px !important;
+        }
+
+        .menu-toggle {
+            display: block;
+        }
+
+        .custom-main-header .nav-links {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-top: 15px;
+            gap: 12px;
+        }
+
+        .custom-main-header .nav-links.active {
+            display: flex;
+        }
+
+        .custom-main-header .nav-links a {
+            margin-left: 0;
+            padding: 8px 0;
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-main-header .nav-links span {
+            margin-right: 0;
+            padding: 8px 0;
+            display: block;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .custom-main-header .nav-links form {
+            width: 100%;
+        }
+
+        .custom-main-header .nav-links form button {
+            padding: 8px 0 !important;
+            margin-left: 0 !important;
+            text-align: left;
+        }
+    }
+
     /* 모바일 최적화 */
     @media (max-width: 480px) {
         body {
@@ -207,30 +282,13 @@
         /* 헤더 - 깔끔한 스타일 */
         .custom-main-header {
             position: fixed;
-            padding: 14px 16px;
+            padding: 12px 16px;
             background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
         }
 
         .custom-main-header .logo {
-            font-size: 1.15rem;
+            font-size: 19px !important;
             font-weight: 700;
-        }
-
-        .custom-main-header .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .custom-main-header .nav-links span {
-            display: none;
-        }
-
-        .custom-main-header .nav-links a,
-        .custom-main-header .nav-links button {
-            font-size: 0.9rem;
-            margin-left: 0;
-            padding: 6px 0;
         }
 
         /* 레이아웃 - 여유 있는 여백 */
@@ -390,11 +448,17 @@
 </style>
 
 <div class="custom-main-header">
-    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-    <nav class="nav-links">
+    <div style="display: flex; align-items: center;">
+        <button class="menu-toggle" onclick="toggleMenu()" aria-label="메뉴 열기">☰</button>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    </div>
+    <nav class="nav-links" id="navLinks">
         {% if user.is_authenticated %}
-        <span style="color: white; margin-right: 10px;">{{ user.username }}님 환영합니다</span>
-        <a href="{% url 'mypage:index' %}">마이페이지</a>
+        <span>{{ user.username }}님 환영합니다</span>
+        {% if user.is_staff or user.is_superuser %}
+        <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">관리메뉴</a>
+        {% endif %}
+        <a href="{% url 'mypage:review_index' %}">마이페이지</a>
         <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
             {% csrf_token %}
             <button type="submit">로그아웃</button>
@@ -449,6 +513,11 @@
         const form = totalCheckbox.closest('form');
         const checkboxes = form.querySelectorAll('.subject-options input[type="checkbox"]');
         checkboxes.forEach(cb => cb.checked = totalCheckbox.checked);
+    }
+
+    function toggleMenu() {
+        const navLinks = document.getElementById('navLinks');
+        navLinks.classList.toggle('active');
     }
 </script>
 {% endblock %}

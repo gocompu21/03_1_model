@@ -47,12 +47,23 @@
 
         .main-header .logo {
             color: white;
-            font-size: 1.5rem;
+            font-size: 24px;
             font-weight: bold;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
         }
 
         .main-header .nav-links {
@@ -422,36 +433,55 @@
 
             /* Header */
             .main-header {
-                padding: 12px 16px;
-                flex-wrap: nowrap;
+                padding: 12px 20px;
+                flex-wrap: wrap;
                 background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
             }
 
             .main-header .logo {
-                font-size: 1.1rem;
+                font-size: 19px !important;
+            }
+
+            .menu-toggle {
+                display: block;
             }
 
             .main-header .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                padding-top: 15px;
+                gap: 12px;
+            }
+
+            .main-header .nav-links.active {
                 display: flex;
-                align-items: center;
-                gap: 5px;
+            }
+
+            .main-header .nav-links a {
+                margin-left: 0;
+                padding: 8px 0;
+                width: 100%;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
             .main-header .nav-links span {
-                display: none;
+                margin-right: 0;
+                padding: 8px 0;
+                display: block;
+                width: 100%;
+                font-size: 0.9rem;
             }
 
-            .main-header .nav-links a,
-            .main-header .nav-links form,
-            .main-header .nav-links button {
-                margin: 0;
-                margin-left: 12px;
-                font-size: 0.8rem;
-                line-height: 1;
-                height: auto;
-                display: inline-flex;
-                align-items: center;
-                vertical-align: middle;
+            .main-header .nav-links form {
+                width: 100%;
+            }
+
+            .main-header .nav-links form button {
+                padding: 8px 0 !important;
+                margin-left: 0 !important;
+                text-align: left;
             }
 
             /* Main Content - flex layout for sticky input */
@@ -750,10 +780,16 @@
 <body>
     <!-- Header -->
     <header class="main-header">
-        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-        <nav class="nav-links">
+        <div style="display: flex; align-items: center;">
+            <button class="menu-toggle" onclick="toggleMenu()" aria-label="메뉴 열기">☰</button>
+            <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        </div>
+        <nav class="nav-links" id="navLinks">
             {% if user.is_authenticated %}
             <span>{{ user.username }}님 환영합니다</span>
+            {% if user.is_staff or user.is_superuser %}
+            <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">관리메뉴</a>
+            {% endif %}
             <a href="{% url 'mypage:review_index' %}">마이페이지</a>
             <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
@@ -765,6 +801,12 @@
             {% endif %}
         </nav>
     </header>
+    <script>
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+    </script>
 
     <!-- Main Wrapper -->
     <div class="main-wrapper">

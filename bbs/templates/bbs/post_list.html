@@ -5,6 +5,11 @@
 
 {% block header %}
 <style>
+    /* Hide default global header (base.html) */
+    body > header {
+        display: none !important;
+    }
+
     /* Header Styles from main/index.html */
     .custom-header {
         background-color: #2d6a4f;
@@ -17,12 +22,17 @@
 
     .custom-header .logo {
         color: white;
-        font-size: 1.5rem;
+        font-size: 24px;
         font-weight: bold;
         text-decoration: none;
         display: flex;
         align-items: center;
         gap: 10px;
+    }
+
+    .custom-header .nav-links {
+        display: flex;
+        align-items: center;
     }
 
     .custom-header .nav-links a {
@@ -35,6 +45,11 @@
 
     .custom-header .nav-links a:hover {
         color: #b7e4c7;
+    }
+
+    .custom-header .nav-links span {
+        color: rgba(255, 255, 255, 0.8);
+        margin-right: 15px;
     }
 
     /* 로그아웃 버튼 - 링크와 동일한 스타일 */
@@ -53,18 +68,82 @@
         color: #b7e4c7;
     }
 
-    .custom-header span {
-        color: rgba(255, 255, 255, 0.9);
-        font-size: 0.95rem;
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+        margin-right: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .custom-header {
+            padding: 12px 20px;
+            flex-wrap: wrap;
+        }
+
+        .custom-header .logo {
+            font-size: 19px !important;
+        }
+
+        .menu-toggle {
+            display: block;
+        }
+
+        .custom-header .nav-links {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            padding-top: 15px;
+            gap: 12px;
+        }
+
+        .custom-header .nav-links.active {
+            display: flex;
+        }
+
+        .custom-header .nav-links a {
+            margin-left: 0;
+            padding: 8px 0;
+            width: 100%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-header .nav-links span {
+            margin-right: 0;
+            padding: 8px 0;
+            display: block;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .custom-header .nav-links form {
+            width: 100%;
+        }
+
+        .custom-header .nav-links form button {
+            padding: 8px 0 !important;
+            margin-left: 0 !important;
+            text-align: left;
+        }
     }
 </style>
 <header class="custom-header">
-    <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-    <nav class="nav-links">
-
+    <div style="display: flex; align-items: center;">
+        <button class="menu-toggle" onclick="toggleBbsMenu()" aria-label="메뉴 열기">☰</button>
+        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+    </div>
+    <nav class="nav-links" id="bbsNavLinks">
         {% if user.is_authenticated %}
         <span>{{ user.username }}님 환영합니다</span>
-        <a href="{% url 'mypage:index' %}">마이페이지</a>
+        {% if user.is_staff or user.is_superuser %}
+        <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">관리메뉴</a>
+        {% endif %}
+        <a href="{% url 'mypage:review_index' %}">마이페이지</a>
         <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
             {% csrf_token %}
             <button type="submit">로그아웃</button>
@@ -75,6 +154,12 @@
         {% endif %}
     </nav>
 </header>
+<script>
+    function toggleBbsMenu() {
+        const navLinks = document.getElementById('bbsNavLinks');
+        navLinks.classList.toggle('active');
+    }
+</script>
 
 {% endblock %}
 
@@ -357,8 +442,10 @@
         .custom-header {
             padding: 12px 16px;
             background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
         }
 
@@ -379,6 +466,7 @@
         /* BBS Wrapper - 깔끔한 배경 */
         .bbs-wrapper {
             padding: 10px 0 !important;
+            padding-top: 60px !important;
             font-size: 0.9rem;
             background: #f8f9fa;
             min-height: calc(100vh - 50px);

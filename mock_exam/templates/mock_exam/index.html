@@ -26,12 +26,17 @@
 
         .logo {
             color: white;
-            font-size: 1.5rem;
+            font-size: 24px;
             font-weight: bold;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
         }
 
         .nav-links a {
@@ -48,6 +53,7 @@
 
         .nav-links span {
             color: rgba(255, 255, 255, 0.8);
+            margin-right: 15px;
         }
 
         .nav-links button {
@@ -58,6 +64,17 @@
             font-size: 1rem;
             font-weight: 500;
             margin-left: 15px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
         }
 
         /* Main Layout */
@@ -240,20 +257,54 @@
         /* Mobile Styles */
         @media screen and (max-width: 768px) {
             header {
-                padding: 12px 16px;
+                padding: 12px 20px;
+                flex-wrap: wrap;
             }
 
             .logo {
-                font-size: 1.2rem;
+                font-size: 19px !important;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+                padding-top: 15px;
+                gap: 12px;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .nav-links a {
+                margin-left: 0;
+                padding: 8px 0;
+                width: 100%;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
             .nav-links span {
-                display: none;
+                margin-right: 0;
+                padding: 8px 0;
+                display: block;
+                width: 100%;
+                font-size: 0.9rem;
             }
 
-            .nav-links a, .nav-links button {
-                font-size: 0.9rem;
-                margin-left: 12px;
+            .nav-links form {
+                width: 100%;
+            }
+
+            .nav-links form button {
+                padding: 8px 0 !important;
+                margin-left: 0 !important;
+                text-align: left;
             }
 
             .main-container {
@@ -291,11 +342,17 @@
 
 <body>
     <header>
-        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
-        <nav class="nav-links">
+        <div style="display: flex; align-items: center;">
+            <button class="menu-toggle" onclick="toggleMenu()" aria-label="메뉴 열기">☰</button>
+            <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        </div>
+        <nav class="nav-links" id="navLinks">
             {% if user.is_authenticated %}
-            <span>{{ user.username }}님</span>
-            <a href="{% url 'mypage:index' %}">마이페이지</a>
+            <span>{{ user.username }}님 환영합니다</span>
+            {% if user.is_staff or user.is_superuser %}
+            <a href="{% url 'dashboard:index' %}" style="color: #ffc107;">관리메뉴</a>
+            {% endif %}
+            <a href="{% url 'mypage:review_index' %}">마이페이지</a>
             <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit">로그아웃</button>
@@ -306,6 +363,12 @@
             {% endif %}
         </nav>
     </header>
+    <script>
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+    </script>
 
     <div class="main-container">
         <!-- Exam Card -->
