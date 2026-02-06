@@ -828,17 +828,17 @@ document.addEventListener('DOMContentLoaded', function() {
     let scale = 1;
     let posX = 0;
     let posY = 0;
-    let lastPosX = 0;
-    let lastPosY = 0;
 
     // 터치 상태
     let startDistance = 0;
     let startScale = 1;
-    let startX = 0;
-    let startY = 0;
+    let startPosX = 0;
+    let startPosY = 0;
+    let startTouchX = 0;
+    let startTouchY = 0;
+    let isPinching = false;
     let isPanning = false;
     let lastTapTime = 0;
-    let animationId = null;
 
     // content-body 내의 모든 이미지에 확대 버튼 추가
     const images = document.querySelectorAll('.content-body img');
@@ -901,21 +901,14 @@ document.addEventListener('DOMContentLoaded', function() {
         scale = 1;
         posX = 0;
         posY = 0;
-        lastPosX = 0;
-        lastPosY = 0;
+        isPinching = false;
         isPanning = false;
         updateCursor();
         applyTransform();
     }
 
     function applyTransform() {
-        if (animationId) {
-            cancelAnimationFrame(animationId);
-        }
-        animationId = requestAnimationFrame(() => {
-            lightboxImg.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
-            animationId = null;
-        });
+        lightboxImg.style.transform = `scale(${scale}) translate(${posX}px, ${posY}px)`;
     }
 
     function updateCursor() {
@@ -935,23 +928,23 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     }
 
-    // 패닝 범위 제한
+    function getTouchCenter(touches) {
+        return {
+            x: (touches[0].clientX + touches[1].clientX) / 2,
+            y: (touches[0].clientY + touches[1].clientY) / 2
+        };
+    }
+
+    // 패닝 범위 제한 (확대된 이미지가 화면 밖으로 벗어나지 않도록)
     function clampPosition() {
         if (scale <= 1) {
             posX = 0;
             posY = 0;
             return;
         }
-
-        const rect = lightboxImg.getBoundingClientRect();
-        const containerRect = lightboxContainer.getBoundingClientRect();
-
-        // 스케일에 따른 최대 이동 거리 계산
-        const maxX = Math.max(0, (rect.width * scale - containerRect.width) / 2 / scale);
-        const maxY = Math.max(0, (rect.height * scale - containerRect.height) / 2 / scale);
-
-        posX = Math.min(Math.max(posX, -maxX), maxX);
-        posY = Math.min(Math.max(posY, -maxY), maxY);
+        const maxPan = (scale - 1) * 150;
+        posX = Math.min(Math.max(posX, -maxPan), maxPan);
+        posY = Math.min(Math.max(posY, -maxPan), maxPan);
     }
 
     // 닫기 버튼
@@ -1006,72 +999,87 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.touches.length === 2) {
             // 핀치 줌 시작
             e.preventDefault();
+            isPinching = true;
             isPanning = false;
             startDistance = getDistance(e.touches);
             startScale = scale;
+            startPosX = posX;
+            startPosY = posY;
         } else if (e.touches.length === 1) {
             // 한 손가락 터치
+            isPinching = false;
             if (scale > 1) {
                 // 확대 상태에서 패닝 시작
                 e.preventDefault();
                 isPanning = true;
-                startX = e.touches[0].clientX - lastPosX;
-                startY = e.touches[0].clientY - lastPosY;
+                startTouchX = e.touches[0].clientX;
+                startTouchY = e.touches[0].clientY;
+                startPosX = posX;
+                startPosY = posY;
                 updateCursor();
             }
         }
     }, { passive: false });
 
     lightboxImg.addEventListener('touchmove', function(e) {
-        if (e.touches.length === 2) {
+        if (e.touches.length === 2 && isPinching) {
             // 핀치 줌
             e.preventDefault();
-            isPanning = false;
             const currentDistance = getDistance(e.touches);
-            const newScale = startScale * (currentDistance / startDistance);
-            scale = Math.min(Math.max(newScale, 1), 5);
-            clampPosition();
+            const scaleRatio = currentDistance / startDistance;
+            scale = Math.min(Math.max(startScale * scaleRatio, 1), 5);
             updateCursor();
             applyTransform();
         } else if (e.touches.length === 1 && isPanning && scale > 1) {
             // 한 손가락 패닝
             e.preventDefault();
-            lastPosX = e.touches[0].clientX - startX;
-            lastPosY = e.touches[0].clientY - startY;
-            posX = lastPosX / scale;
-            posY = lastPosY / scale;
+            const deltaX = (e.touches[0].clientX - startTouchX) / scale;
+            const deltaY = (e.touches[0].clientY - startTouchY) / scale;
+            posX = startPosX + deltaX;
+            posY = startPosY + deltaY;
             clampPosition();
-            posX = posX;
-            posY = posY;
-            lastPosX = posX * scale;
-            lastPosY = posY * scale;
             applyTransform();
         }
     }, { passive: false });
 
     lightboxImg.addEventListener('touchend', function(e) {
-        // 더블탭 감지
-        const now = Date.now();
-        if (now - lastTapTime < 300 && e.changedTouches.length === 1) {
-            handleDoubleTap(e);
-            lastTapTime = 0;
-        } else {
-            lastTapTime = now;
+        // 핀치 줌 종료 시 처리
+        if (isPinching && e.touches.length < 2) {
+            isPinching = false;
+            // 확대된 상태에서 남은 손가락으로 패닝 계속
+            if (e.touches.length === 1 && scale > 1) {
+                isPanning = true;
+                startTouchX = e.touches[0].clientX;
+                startTouchY = e.touches[0].clientY;
+                startPosX = posX;
+                startPosY = posY;
+            }
         }
 
-        isPanning = false;
-        updateCursor();
+        // 모든 손가락 뗐을 때
+        if (e.touches.length === 0) {
+            // 더블탭 감지
+            const now = Date.now();
+            if (now - lastTapTime < 300 && e.changedTouches.length === 1 && !isPinching) {
+                handleDoubleTap(e);
+                lastTapTime = 0;
+            } else {
+                lastTapTime = now;
+            }
 
-        // 스케일이 1 미만이면 리셋
-        if (scale < 1) {
-            lightboxImg.classList.add('animating');
-            setTimeout(() => lightboxImg.classList.remove('animating'), 250);
-            scale = 1;
-            posX = 0;
-            posY = 0;
-            lastPosX = 0;
-            lastPosY = 0;
-            applyTransform();
+            isPinching = false;
+            isPanning = false;
+            updateCursor();
+
+            // 스케일이 1 미만이면 리셋
+            if (scale < 1) {
+                lightboxImg.classList.add('animating');
+                setTimeout(() => lightboxImg.classList.remove('animating'), 250);
+                scale = 1;
+                posX = 0;
+                posY = 0;
+                applyTransform();
+            }
         }
     }, { passive: false });
 
@@ -1096,14 +1104,18 @@ document.addEventListener('DOMContentLoaded', function() {
     let isMouseDown = false;
     let mouseStartX = 0;
     let mouseStartY = 0;
+    let mousePosStartX = 0;
+    let mousePosStartY = 0;
 
     lightboxImg.addEventListener('mousedown', function(e) {
         if (scale > 1 && e.button === 0) {
             e.preventDefault();
             isMouseDown = true;
             isPanning = true;
-            mouseStartX = e.clientX - posX * scale;
-            mouseStartY = e.clientY - posY * scale;
+            mouseStartX = e.clientX;
+            mouseStartY = e.clientY;
+            mousePosStartX = posX;
+            mousePosStartY = posY;
             updateCursor();
         }
     });
@@ -1111,8 +1123,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mousemove', function(e) {
         if (isMouseDown && scale > 1) {
             e.preventDefault();
-            posX = (e.clientX - mouseStartX) / scale;
-            posY = (e.clientY - mouseStartY) / scale;
+            const deltaX = (e.clientX - mouseStartX) / scale;
+            const deltaY = (e.clientY - mouseStartY) / scale;
+            posX = mousePosStartX + deltaX;
+            posY = mousePosStartY + deltaY;
             clampPosition();
             applyTransform();
         }
