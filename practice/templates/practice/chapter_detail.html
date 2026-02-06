@@ -11,9 +11,20 @@
 {% block content %}
 <style>
     body {
-        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        background: #ffffff;
         min-height: 100vh;
         font-size: 1.1rem;
+    }
+
+    /* 페이지 배경 오버레이 */
+    .page-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        z-index: -2;
     }
 
     main.container {
@@ -639,6 +650,9 @@
         }
     }
 </style>
+
+<!-- 페이지 배경 -->
+<div class="page-background"></div>
 
 <div class="detail-wrapper">
     <!-- Main Content -->

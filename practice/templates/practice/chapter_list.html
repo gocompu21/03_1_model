@@ -10,25 +10,35 @@
 <style>
     /* 전체 페이지 배경 */
     body {
-        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        background: #ffffff;
         min-height: 100vh;
         position: relative;
         font-size: 0.95rem;
     }
-    
-    body::before {
-        content: '';
+
+    /* 페이지 배경 오버레이 */
+    .page-background {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: 
+        background: linear-gradient(135deg, #0d3d0d 0%, #1a4a2e 25%, #2d5a3e 50%, #1f4037 75%, #0d2818 100%);
+        z-index: -2;
+    }
+
+    .page-background::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
             radial-gradient(ellipse at 20% 20%, rgba(45, 106, 79, 0.15) 0%, transparent 50%),
             radial-gradient(ellipse at 80% 80%, rgba(26, 83, 92, 0.1) 0%, transparent 50%),
             radial-gradient(ellipse at 50% 50%, rgba(34, 139, 34, 0.05) 0%, transparent 70%);
         pointer-events: none;
-        z-index: 0;
     }
     
     main.container {
@@ -631,9 +641,12 @@
     }
 </style>
 
+<!-- 페이지 배경 -->
+<div class="page-background"></div>
+
 <div class="chapter-container">
     <!-- Header removed as per request -->
-    
+
     <div class="chapter-tree">
         {% for chapter in root_chapters %}
             {% include 'practice/_chapter_item.html' with chapter=chapter %}
