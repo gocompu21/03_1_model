@@ -200,8 +200,8 @@
                     <div style="margin-left: 10px; display: flex; gap: 5px;">
                         <a href="{% url 'bbs:post_update' post.pk %}" class="btn-action btn-edit"
                             style="padding: 5px 10px; font-size: 0.85rem;"><i class="fas fa-edit"></i> 수정</a>
-                        <a href="{% url 'bbs:post_delete' post.pk %}" class="btn-action btn-delete"
-                            style="padding: 5px 10px; font-size: 0.85rem;" onclick="return confirm('정말 삭제하시겠습니까?');"><i
+                        <a href="#" class="btn-action btn-delete"
+                            style="padding: 5px 10px; font-size: 0.85rem;" onclick="showDeleteToast('{% url 'bbs:post_delete' post.pk %}', '게시글을 삭제하시겠습니까?'); return false;"><i
                                 class="fas fa-trash-alt"></i> 삭제</a>
                     </div>
                     {% endif %}
@@ -236,9 +236,9 @@
 
                             {% if user == comment.author %}
                             <div>
-                                <a href="{% url 'bbs:comment_delete' comment.pk %}"
+                                <a href="#"
                                     style="color: #e63946; text-decoration: none;"
-                                    onclick="return confirm('댓글을 삭제하시겠습니까?');">삭제</a>
+                                    onclick="showDeleteToast('{% url 'bbs:comment_delete' comment.pk %}', '댓글을 삭제하시겠습니까?'); return false;">삭제</a>
                             </div>
                             {% endif %}
                         </div>
@@ -747,6 +747,80 @@
         }
     }
 
+    /* Delete Toast */
+    .delete-toast-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+        justify-content: center;
+        align-items: flex-end;
+        padding-bottom: 40px;
+    }
+    .delete-toast-overlay.active {
+        display: flex;
+    }
+    .delete-toast-box {
+        background: white;
+        border-radius: 16px;
+        padding: 24px 28px 20px;
+        width: 320px;
+        max-width: 90vw;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+        text-align: center;
+        animation: toastSlideUp 0.3s ease-out;
+    }
+    @keyframes toastSlideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .delete-toast-msg {
+        font-size: 1rem;
+        color: #333;
+        margin: 0 0 20px 0;
+        font-weight: 500;
+    }
+    .delete-toast-btns {
+        display: flex;
+        gap: 10px;
+    }
+    .delete-toast-cancel {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #ddd;
+        background: #f8f9fa;
+        color: #555;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .delete-toast-cancel:hover {
+        background: #e9ecef;
+    }
+    .delete-toast-confirm {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        background: #e63946;
+        color: white;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+    .delete-toast-confirm:hover {
+        background: #c62828;
+        color: white;
+    }
+
     /* Extra small devices */
     @media screen and (max-width: 400px) {
         .bbs-wrapper {
@@ -782,6 +856,76 @@
         }
     }
 </style>
+
+<!-- Success Toast (삭제 완료 알림) -->
+<style>
+    .success-toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #2d6a4f;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none;
+    }
+    .success-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+</style>
+<div id="success-toast" class="success-toast"></div>
+<script>
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const msg = params.get('msg');
+    if (msg === 'comment_deleted') {
+        const toast = document.getElementById('success-toast');
+        toast.textContent = '댓글이 삭제되었습니다.';
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => toast.classList.remove('show'), 2600);
+        // URL에서 msg 파라미터 제거
+        params.delete('msg');
+        const newUrl = params.toString()
+            ? window.location.pathname + '?' + params.toString()
+            : window.location.pathname;
+        history.replaceState(null, '', newUrl);
+    }
+})();
+</script>
+
+<!-- Delete Confirmation Toast -->
+<div id="delete-toast-overlay" class="delete-toast-overlay" onclick="hideDeleteToast()">
+    <div class="delete-toast-box" onclick="event.stopPropagation()">
+        <p id="delete-toast-msg" class="delete-toast-msg">삭제하시겠습니까?</p>
+        <div class="delete-toast-btns">
+            <button class="delete-toast-cancel" onclick="hideDeleteToast()">취소</button>
+            <a id="delete-toast-confirm" href="#" class="delete-toast-confirm">삭제</a>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Toast Script -->
+<script>
+function showDeleteToast(url, msg) {
+    document.getElementById('delete-toast-msg').textContent = msg;
+    document.getElementById('delete-toast-confirm').href = url;
+    document.getElementById('delete-toast-overlay').classList.add('active');
+}
+function hideDeleteToast() {
+    document.getElementById('delete-toast-overlay').classList.remove('active');
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') hideDeleteToast();
+});
+</script>
 
 <!-- Infinite Scroll for Related Posts -->
 <script>

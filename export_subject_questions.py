@@ -1,5 +1,6 @@
 """
-수목관리학 기출문제를 TXT 파일로 내보내기
+과목별 기출문제를 Markdown 파일로 내보내기
+사용법: python export_subject_questions.py
 """
 import os
 import sys
@@ -11,43 +12,52 @@ django.setup()
 
 from exam.models import Question
 
-# Subject 매핑 확인 (1=수목생리학, 2=수목병리학, 3=수목해충학, 4=산림토양학, 5=수목관리학)
-# 수목관리학 = 5번
-questions = Question.objects.filter(subject=5).select_related('exam').order_by('exam__round_number', 'number')
-print(f"수목관리학 문제 수: {questions.count()}개")
+# ===== 설정 =====
+SUBJECT_NAME = "수목해충학"
+ROUNDS = range(5, 12)  # 5~11회
+# ================
 
-# TXT 파일 생성
+
+def circle_number(n):
+    return {1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤"}.get(n, str(n))
+
+
+questions = (
+    Question.objects.filter(subject__name=SUBJECT_NAME, exam__round_number__in=ROUNDS)
+    .select_related("exam")
+    .order_by("exam__round_number", "number")
+)
+print(f"{SUBJECT_NAME} 문제 수: {questions.count()}개")
+
 output = []
-output.append("=" * 60)
-output.append("수목관리학 기출문제 모음")
-output.append("나무의사 자격시험 5회~11회")
-output.append(f"총 {questions.count()}문제")
-output.append("=" * 60)
-output.append("")
+output.append(f"# {SUBJECT_NAME} 기출문제 ({ROUNDS[0]}~{ROUNDS[-1]}회)\n")
 
+current_round = None
 for q in questions:
-    output.append(f"[{q.exam.round_number}회 {q.number}번]")
-    output.append(f"문제: {q.content}")
-    output.append("")
-    output.append("보기:")
+    if q.exam.round_number != current_round:
+        current_round = q.exam.round_number
+        output.append(f"\n---\n\n## {current_round}회\n")
+
+    output.append(f"### {q.number}번")
+    output.append(f"{q.content}\n")
     output.append(f"① {q.choice1}")
     output.append(f"② {q.choice2}")
     output.append(f"③ {q.choice3}")
     output.append(f"④ {q.choice4}")
-    output.append(f"⑤ {q.choice5}")
-    output.append("")
-    output.append(f"정답: {q.answer}번")
-    output.append("")
-    if q.textbook_chat:
-        output.append("해설:")
-        output.append(q.textbook_chat)
-    output.append("")
-    output.append("-" * 60)
+    output.append(f"⑤ {q.choice5}\n")
+
+    answer_str = ", ".join(circle_number(a) for a in q.answer)
+    output.append(f"**정답:** {answer_str}\n")
+
+    explanation = q.textbook_chat or q.general_chat or ""
+    if explanation.strip():
+        output.append(f"**해설:**\n{explanation.strip()}\n")
+
     output.append("")
 
-# 파일 저장
-filename = "수목관리학_기출문제.txt"
+filename = f"{SUBJECT_NAME}_기출문제_{ROUNDS[0]}-{ROUNDS[-1]}회.md"
 with open(filename, "w", encoding="utf-8") as f:
     f.write("\n".join(output))
 
-print(f"파일 저장 완료: {filename}")
+size_kb = os.path.getsize(filename) / 1024
+print(f"파일 저장 완료: {filename} ({size_kb:.1f} KB)")

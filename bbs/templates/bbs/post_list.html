@@ -696,6 +696,52 @@
     }
 </style>
 
+<!-- Success Toast -->
+<style>
+    .success-toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #2d6a4f;
+        color: white;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none;
+    }
+    .success-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+</style>
+<div id="success-toast" class="success-toast"></div>
+<script>
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const msg = params.get('msg');
+    if (msg === 'post_deleted') {
+        const toast = document.getElementById('success-toast');
+        toast.textContent = '게시글이 삭제되었습니다.';
+        // 약간의 딜레이 후 토스트 표시
+        setTimeout(() => toast.classList.add('show'), 100);
+        // 2.5초 후 자동 숨김
+        setTimeout(() => toast.classList.remove('show'), 2600);
+        // URL에서 msg 파라미터 제거
+        params.delete('msg');
+        const newUrl = params.toString()
+            ? window.location.pathname + '?' + params.toString()
+            : window.location.pathname;
+        history.replaceState(null, '', newUrl);
+    }
+})();
+</script>
+
 <!-- Infinite Scroll Script -->
 <script>
 (function() {

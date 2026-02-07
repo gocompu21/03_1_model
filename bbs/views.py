@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -128,7 +129,7 @@ def post_delete(request, pk):
     post = get_object_or_404(Post, pk=pk)
     if post.author == request.user:
         post.delete()
-    return redirect("bbs:post_list")
+    return redirect(f"{reverse('bbs:post_list')}?msg=post_deleted")
 
 
 @login_required
@@ -150,7 +151,7 @@ def comment_delete(request, pk):
     if comment.author == request.user:
         post_pk = comment.post.pk
         comment.delete()
-        return redirect("bbs:post_detail", pk=post_pk)
+        return redirect(f"{reverse('bbs:post_detail', args=[post_pk])}?msg=comment_deleted")
     return redirect("bbs:post_detail", pk=comment.post.pk)
 
 
