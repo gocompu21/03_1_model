@@ -271,6 +271,39 @@
         }
     }
 
+    /* ========== Page Load Transitions ========== */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(25px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .analysis-header {
+        animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .subject-card {
+        opacity: 0;
+        animation: fadeInUp 0.5s ease-out both;
+    }
+
+    .subject-card:nth-child(1) { animation-delay: 0.15s; }
+    .subject-card:nth-child(2) { animation-delay: 0.25s; }
+    .subject-card:nth-child(3) { animation-delay: 0.35s; }
+    .subject-card:nth-child(4) { animation-delay: 0.45s; }
+    .subject-card:nth-child(5) { animation-delay: 0.55s; }
+    .subject-card:nth-child(6) { animation-delay: 0.65s; }
+
     /* Extra small devices */
     @media screen and (max-width: 400px) {
         .custom-main-header .logo {

@@ -494,6 +494,13 @@
             transition: all 0.2s;
         }
 
+        .submit-btn:hover,
+        .submit-btn:focus {
+            background: white;
+            color: #333;
+            outline: none;
+        }
+
         .submit-btn:active {
             background: #f5f5f5;
             transform: scale(0.98);
@@ -630,11 +637,10 @@
         });
     });
 
-    // 뒤로가기로 돌아왔을 때 오버레이 해제
-    window.addEventListener('pageshow', function(e) {
-        if (e.persisted) {
-            document.getElementById('page-loading').classList.remove('active');
-        }
+    // 뒤로가기로 돌아왔을 때 오버레이 해제 + 버튼 상태 초기화
+    window.addEventListener('pageshow', function() {
+        document.getElementById('page-loading').classList.remove('active');
+        document.querySelectorAll('.submit-btn').forEach(btn => btn.blur());
     });
 </script>
 {% endblock %}

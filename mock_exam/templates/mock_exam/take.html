@@ -62,7 +62,30 @@
     </form>
 </div>
 
+<style>
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card.mb-4 {
+        opacity: 0;
+        animation: fadeInUp 0.4s ease-out both;
+    }
+</style>
+
 <script>
+    // 카드 stagger 애니메이션
+    document.querySelectorAll('.card.mb-4').forEach((el, i) => {
+        el.style.animationDelay = Math.min(i * 0.05, 1) + 's';
+    });
+
     // Elapsed Time Timer
     let startTime = Date.now();
     
