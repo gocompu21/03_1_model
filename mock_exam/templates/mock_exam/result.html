@@ -511,6 +511,48 @@
             display: none;
         }
 
+        /* 모바일 점수 요약 */
+        .score-summary {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+        }
+        .score-summary .avg-block {
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .score-summary .avg-score {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .score-summary .avg-unit {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        .score-summary .subject-scores {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            border-left: 1px solid rgba(255,255,255,0.2);
+            padding-left: 14px;
+        }
+        .score-summary .subj-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .score-summary .subj-name {
+            font-size: 0.72rem;
+            opacity: 0.85;
+        }
+        .score-summary .subj-val {
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
         /* 모바일 최적화 */
         @media (max-width: 768px) {
             body {
@@ -546,17 +588,8 @@
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
 
-            .mobile-header .score-display {
-                font-size: 1.8rem;
-                font-weight: 700;
-                letter-spacing: -0.5px;
-            }
-
-            .mobile-header .score-detail {
-                font-size: 0.9rem;
-                opacity: 0.95;
-                margin-top: 6px;
-                font-weight: 500;
+            .mobile-header .score-summary {
+                padding: 8px 16px;
             }
 
             /* 모바일 홈 버튼 */
@@ -803,8 +836,20 @@
 <body>
     <!-- 모바일 헤더 -->
     <div class="mobile-header">
-        <div class="score-display">{{ average_score }}점</div>
-        <div class="score-detail">모의고사 | {% for s in subject_results %}{{ s.name|slice:":2" }}:{{ s.score }} {% endfor %}</div>
+        <div class="score-summary">
+            <div class="avg-block">
+                <div class="avg-score">{{ average_score }}</div>
+                <div class="avg-unit">평균</div>
+            </div>
+            <div class="subject-scores">
+                {% for s in subject_results %}
+                <div class="subj-row">
+                    <span class="subj-name">{{ s.name }}</span>
+                    <span class="subj-val">{{ s.score }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
 
     <div style="display: flex; width: 100%; min-height: 100vh;">
@@ -949,32 +994,19 @@
                         <span style="font-size: 1.4em; margin-right: 8px;">🌳</span>
                         <span style="font-size: 1.1em;">나무의사 홈</span>
                     </a>
-                    <h3 style="margin: 0 0 10px 0; text-align: center;">📊 과목별 채점 결과</h3>
-                    <div style="padding: 0 10px 10px 10px;">
-                        <table style="width: 100%; border-collapse: collapse; font-size: 0.85em;">
-                            <thead>
-                                <tr style="background: #f3e6e9; border-bottom: 2px solid #d4879c;">
-                                    <th style="padding: 6px 4px; text-align: left;">과목</th>
-                                    <th style="padding: 6px 4px; text-align: center;">정답</th>
-                                    <th style="padding: 6px 4px; text-align: center;">점수</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for s in subject_results %}
-                                <tr style="border-bottom: 1px solid #eee;">
-                                    <td style="padding: 5px 4px;">{{ s.name|truncatechars:6 }}</td>
-                                    <td style="padding: 5px 4px; text-align: center;">{{ s.correct }}/{{ s.total }}</td>
-                                    <td style="padding: 5px 4px; text-align: center; font-weight: bold; {% if s.score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">{{ s.score }}점</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                            <tfoot>
-                                <tr style="background: #ffeeba; border-top: 2px solid #d4879c;">
-                                    <td colspan="2" style="padding: 8px 4px; font-weight: bold;">평균</td>
-                                    <td style="padding: 8px 4px; text-align: center; font-weight: bold; font-size: 1.2em; {% if average_score >= 60 %}color: #28a745;{% else %}color: #dc3545;{% endif %}">{{ average_score }}점</td>
-                                </tr>
-                            </tfoot>
-                        </table>
+                    <!-- 점수 요약 (한 줄 평균 + 과목 리스트) -->
+                    <div style="padding: 6px 10px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-size: 0.75em; color: #999;">평균</span>
+                            <span style="font-size: 1.3em; font-weight: 800; {% if average_score >= 60 %}color: #1b4332;{% else %}color: #555;{% endif %}">{{ average_score }}<span style="font-size: 0.55em; font-weight: 600;">점</span></span>
+                        </div>
+                        {% for s in subject_results %}
+                        <div style="display: flex; align-items: center; padding: 3px 0; {% if not forloop.last %}border-bottom: 1px solid #f5f5f5;{% endif %}">
+                            <span style="flex: 1; font-size: 0.75em; color: #555;">{{ s.name }}</span>
+                            <span style="font-size: 0.7em; color: #aaa; margin-right: 4px;">{{ s.correct }}/{{ s.total }}</span>
+                            <span style="font-size: 0.8em; font-weight: 700; width: 28px; text-align: right; {% if s.score >= 60 %}color: #2d6a4f;{% else %}color: #555;{% endif %}">{{ s.score }}</span>
+                        </div>
+                        {% endfor %}
                     </div>
                     <div class="omr-header" style="border-top: 1px solid #d4879c; border-bottom: none;">
                         <div class="omr-header-num">문항</div>

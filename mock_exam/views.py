@@ -41,7 +41,7 @@ def index(request):
                     data = subject_scores[subject_name]
                     score = data["correct"] * 4
                     subject_results.append({
-                        "name": subject_name[:2],  # Short name for display
+                        "name": subject_name,
                         "score": score,
                     })
                     total_score_sum += score
