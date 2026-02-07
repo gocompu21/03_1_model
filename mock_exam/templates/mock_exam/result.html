@@ -463,44 +463,68 @@
             padding-bottom: 10px;
         }
 
-        /* Image Modal */
-        .image-modal {
+        /* 이미지 라이트박스 모달 */
+        .lightbox-overlay {
             display: none;
             position: fixed;
-            z-index: 2000;
-            padding-top: 50px;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
         }
-
-        .image-modal-content {
-            margin: auto;
-            display: block;
-            width: 80%;
-            max-width: 900px;
-            max-height: 90vh;
-            object-fit: contain;
+        .lightbox-overlay.active {
+            display: flex;
         }
-
-        .image-modal-close {
+        .lightbox-close {
             position: absolute;
             top: 15px;
-            right: 35px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
-            transition: 0.3s;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 24px;
             cursor: pointer;
+            z-index: 10001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-
-        .image-modal-close:hover {
-            color: #bbb;
-            text-decoration: none;
-            cursor: pointer;
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .lightbox-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transform-origin: center center;
+            will-change: transform;
+            touch-action: none;
+            cursor: zoom-in;
+        }
+        .lightbox-img.zoomed {
+            cursor: grab;
+        }
+        .lightbox-img.dragging {
+            cursor: grabbing;
+        }
+        .lightbox-img.animating {
+            transition: transform 0.25s ease-out;
         }
 
         /* 모바일 전용 요소 - 데스크탑에서 숨김 */
@@ -564,7 +588,7 @@
             }
 
             /* 메인 래퍼 */
-            body > div:not(.image-modal):not(.mobile-header) {
+            body > div:not(.lightbox-overlay):not(.mobile-header) {
                 display: block !important;
                 width: 100% !important;
                 min-height: auto !important;
@@ -817,17 +841,10 @@
                 display: none !important;
             }
 
-            /* 이미지 모달 */
-            .image-modal-content {
-                width: 95% !important;
-                max-width: none !important;
-                max-height: 85vh !important;
-            }
-
-            .image-modal-close {
+            /* 라이트박스 */
+            .lightbox-close {
                 top: 10px !important;
-                right: 15px !important;
-                font-size: 32px !important;
+                right: 10px !important;
             }
         }
     </style>
@@ -946,7 +963,7 @@
                         <div style="margin-top:10px; text-align: center;">
                             <img src="{{ mq.question.infographic_image.url }}"
                                 style="border: 2px solid #000; width:100%; cursor: pointer;"
-                                onclick="openImageModal(this.src)">
+                                onclick="openLightbox(this.src)">
                         </div>
                         {% endif %}
                         <div style="text-align: center; margin-top: 10px; cursor: pointer;"
@@ -1041,10 +1058,12 @@
         </div>
     </div>
 
-    <!-- Image Modal -->
-    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
-        <span class="image-modal-close" onclick="closeImageModal()">&times;</span>
-        <img class="image-modal-content" id="modalImage">
+    <!-- 라이트박스 -->
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close" id="lightbox-close">&times;</button>
+        <div class="lightbox-container" id="lightbox-container">
+            <img class="lightbox-img" id="lightbox-img">
+        </div>
     </div>
 
     <!-- 모바일 홈 버튼 -->
@@ -1235,26 +1254,158 @@
             }
         }
 
-        /* Image Modal Functions */
-        function openImageModal(src) {
-            var modal = document.getElementById("imageModal");
-            var modalImg = document.getElementById("modalImage");
-            modal.style.display = "block";
-            modalImg.src = src;
-        }
+        /* 라이트박스 (줌, 패닝) */
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxContainer = document.getElementById('lightbox-container');
 
-        function closeImageModal() {
-            var modal = document.getElementById("imageModal");
-            modal.style.display = "none";
-        }
+        let lbScale = 1, lbPosX = 0, lbPosY = 0;
+        let lbStartDist = 0, lbStartScale = 1;
+        let lbStartPosX = 0, lbStartPosY = 0;
+        let lbStartTouchX = 0, lbStartTouchY = 0;
+        let lbPinching = false, lbPanning = false, lbLastTap = 0;
 
-        // Close modal when clicking outside of image
-        window.onclick = function (event) {
-            var modal = document.getElementById("imageModal");
-            if (event.target == modal) {
-                modal.style.display = "none";
+        function openLightbox(src) {
+            lightboxImg.src = src;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            lbReset(false);
+        }
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+            lbReset(false);
+        }
+        function lbReset(animate) {
+            if (animate) {
+                lightboxImg.classList.add('animating');
+                setTimeout(() => lightboxImg.classList.remove('animating'), 250);
+            }
+            lbScale = 1; lbPosX = 0; lbPosY = 0;
+            lbPinching = false; lbPanning = false;
+            lbUpdateCursor();
+            lbApply();
+        }
+        function lbApply() {
+            lightboxImg.style.transform = `scale(${lbScale}) translate(${lbPosX}px, ${lbPosY}px)`;
+        }
+        function lbUpdateCursor() {
+            lightboxImg.classList.remove('zoomed', 'dragging');
+            if (lbScale > 1) {
+                lightboxImg.classList.add('zoomed');
+                if (lbPanning) lightboxImg.classList.add('dragging');
             }
         }
+        function lbDist(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
+        function lbClamp() {
+            if (lbScale <= 1) { lbPosX = 0; lbPosY = 0; return; }
+            const m = (lbScale - 1) * 150;
+            lbPosX = Math.min(Math.max(lbPosX, -m), m);
+            lbPosY = Math.min(Math.max(lbPosY, -m), m);
+        }
+        function lbDoubleTap(e) {
+            e.preventDefault(); e.stopPropagation();
+            lightboxImg.classList.add('animating');
+            setTimeout(() => lightboxImg.classList.remove('animating'), 250);
+            if (lbScale > 1) { lbReset(true); } else { lbScale = 2.5; lbUpdateCursor(); lbApply(); }
+        }
+
+        lightboxClose.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); closeLightbox(); });
+        lightbox.addEventListener('click', function(e) {
+            if (e.target === lightbox || e.target === lightboxContainer) {
+                if (lbScale > 1) lbReset(true); else closeLightbox();
+            }
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) closeLightbox();
+        });
+        lightboxImg.addEventListener('dblclick', lbDoubleTap);
+
+        // 터치: 핀치 줌 & 패닝
+        lightboxImg.addEventListener('touchstart', function(e) {
+            lightboxImg.classList.remove('animating');
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                lbPinching = true; lbPanning = false;
+                lbStartDist = lbDist(e.touches);
+                lbStartScale = lbScale; lbStartPosX = lbPosX; lbStartPosY = lbPosY;
+            } else if (e.touches.length === 1) {
+                lbPinching = false;
+                if (lbScale > 1) {
+                    e.preventDefault();
+                    lbPanning = true;
+                    lbStartTouchX = e.touches[0].clientX; lbStartTouchY = e.touches[0].clientY;
+                    lbStartPosX = lbPosX; lbStartPosY = lbPosY;
+                    lbUpdateCursor();
+                }
+            }
+        }, { passive: false });
+
+        lightboxImg.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2 && lbPinching) {
+                e.preventDefault();
+                const r = lbDist(e.touches) / lbStartDist;
+                lbScale = Math.min(Math.max(lbStartScale * r, 1), 5);
+                lbUpdateCursor(); lbApply();
+            } else if (e.touches.length === 1 && lbPanning && lbScale > 1) {
+                e.preventDefault();
+                lbPosX = lbStartPosX + (e.touches[0].clientX - lbStartTouchX) / lbScale;
+                lbPosY = lbStartPosY + (e.touches[0].clientY - lbStartTouchY) / lbScale;
+                lbClamp(); lbApply();
+            }
+        }, { passive: false });
+
+        lightboxImg.addEventListener('touchend', function(e) {
+            if (lbPinching && e.touches.length < 2) {
+                lbPinching = false;
+                if (e.touches.length === 1 && lbScale > 1) {
+                    lbPanning = true;
+                    lbStartTouchX = e.touches[0].clientX; lbStartTouchY = e.touches[0].clientY;
+                    lbStartPosX = lbPosX; lbStartPosY = lbPosY;
+                }
+            }
+            if (e.touches.length === 0) {
+                const now = Date.now();
+                if (now - lbLastTap < 300 && e.changedTouches.length === 1 && !lbPinching) {
+                    lbDoubleTap(e); lbLastTap = 0;
+                } else { lbLastTap = now; }
+                lbPinching = false; lbPanning = false; lbUpdateCursor();
+                if (lbScale < 1) {
+                    lightboxImg.classList.add('animating');
+                    setTimeout(() => lightboxImg.classList.remove('animating'), 250);
+                    lbScale = 1; lbPosX = 0; lbPosY = 0; lbApply();
+                }
+            }
+        }, { passive: false });
+
+        // 마우스 휠 줌
+        lightboxContainer.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            lightboxImg.classList.remove('animating');
+            const d = e.deltaY > 0 ? 0.9 : 1.1;
+            const ns = Math.min(Math.max(lbScale * d, 1), 5);
+            if (ns !== lbScale) { lbScale = ns; lbClamp(); lbUpdateCursor(); lbApply(); }
+        }, { passive: false });
+
+        // 마우스 드래그 패닝
+        let lbMouseDown = false, lbMX = 0, lbMY = 0, lbMPX = 0, lbMPY = 0;
+        lightboxImg.addEventListener('mousedown', function(e) {
+            if (lbScale > 1 && e.button === 0) {
+                e.preventDefault(); lbMouseDown = true; lbPanning = true;
+                lbMX = e.clientX; lbMY = e.clientY; lbMPX = lbPosX; lbMPY = lbPosY;
+                lbUpdateCursor();
+            }
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (lbMouseDown && lbScale > 1) {
+                e.preventDefault();
+                lbPosX = lbMPX + (e.clientX - lbMX) / lbScale;
+                lbPosY = lbMPY + (e.clientY - lbMY) / lbScale;
+                lbClamp(); lbApply();
+            }
+        });
+        document.addEventListener('mouseup', function() { lbMouseDown = false; lbPanning = false; lbUpdateCursor(); });
 
         /* TTS (Text-to-Speech) Functions */
         let currentAudio = null;
