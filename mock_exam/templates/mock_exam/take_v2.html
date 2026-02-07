@@ -601,6 +601,77 @@
         .mobile-timer {
             display: none;
         }
+
+        /* 토스트 확인 다이얼로그 */
+        .toast-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.35);
+            z-index: 10000;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 30vh;
+        }
+        .toast-overlay.show {
+            display: flex;
+        }
+        .toast-box {
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+            padding: 24px 28px;
+            min-width: 280px;
+            max-width: 340px;
+            text-align: center;
+            animation: toastIn 0.25s ease-out;
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-20px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .toast-box.closing {
+            animation: toastOut 0.18s ease-in forwards;
+        }
+        @keyframes toastOut {
+            to { opacity: 0; transform: translateY(-20px) scale(0.97); }
+        }
+        .toast-msg {
+            font-size: 1.05em;
+            font-weight: 600;
+            color: #222;
+            margin-bottom: 6px;
+        }
+        .toast-sub {
+            font-size: 0.88em;
+            color: #888;
+            margin-bottom: 20px;
+        }
+        .toast-sub .warn {
+            color: #e55;
+            font-weight: 600;
+        }
+        .toast-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .toast-actions button {
+            flex: 1;
+            padding: 11px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .toast-cancel {
+            background: #f0f0f0;
+            color: #555;
+        }
+        .toast-confirm {
+            background: #007bff;
+            color: #fff;
+        }
     </style>
     <!-- MathJax Configuration -->
     <script>
@@ -623,7 +694,7 @@
                 <span class="round-badge">모의고사</span>
                 <span class="time-display">⏱️ <span id="mobile-elapsed-time">00:00:00</span></span>
             </div>
-            <button type="submit" class="mobile-header-submit" onclick="return confirm('정말 제출하시겠습니까?');">제출하기</button>
+            <button type="button" class="mobile-header-submit" onclick="showSubmitToast()">제출하기</button>
         </div>
 
         <!-- Question Panel (Left) -->
@@ -692,8 +763,8 @@
                     style="position: sticky; top: 0; background: white; z-index: 10; border-bottom: 1px solid #d4879c;">
                     <h3 style="margin: 10px 0 5px 0; text-align: center;">⏱️ 경과 시간: <span id="elapsed-time">00:00:00</span></h3>
                     <div style="padding: 0 10px 10px 10px;">
-                        <button type="submit" class="submit-btn" style="margin: 0;"
-                            onclick="return confirm('정말 제출하시겠습니까?');">제출하기</button>
+                        <button type="button" class="submit-btn" style="margin: 0;"
+                            onclick="showSubmitToast()">제출하기</button>
                     </div>
 
                     <!-- Column Header -->
@@ -724,6 +795,18 @@
             </div>
         </div>
     </form>
+
+    <!-- 토스트 확인 다이얼로그 -->
+    <div class="toast-overlay" id="submitToast" onclick="closeSubmitToast(event)">
+        <div class="toast-box" onclick="event.stopPropagation()">
+            <div class="toast-msg">정말 제출하시겠습니까?</div>
+            <div class="toast-sub" id="toastSub"></div>
+            <div class="toast-actions">
+                <button class="toast-cancel" onclick="closeSubmitToast()">취소</button>
+                <button class="toast-confirm" onclick="doSubmit()">제출</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         const QUESTIONS_PER_PAGE = 4;
@@ -1008,6 +1091,34 @@
 
         // Update every second
         setInterval(updateElapsedTime, 1000);
+
+        // 토스트 확인 다이얼로그
+        function showSubmitToast() {
+            const total = document.querySelectorAll('.question-item').length;
+            const answered = document.querySelectorAll('input[type="radio"]:checked').length;
+            const unanswered = total - answered;
+            const sub = document.getElementById('toastSub');
+            if (unanswered > 0) {
+                sub.innerHTML = '<span class="warn">' + unanswered + '문제 미응답</span> (' + answered + '/' + total + ')';
+            } else {
+                sub.textContent = '전체 ' + total + '문제 응답 완료';
+            }
+            document.getElementById('submitToast').classList.add('show');
+        }
+
+        function closeSubmitToast(e) {
+            if (e && e.target !== e.currentTarget) return;
+            const box = document.querySelector('.toast-box');
+            box.classList.add('closing');
+            setTimeout(() => {
+                document.getElementById('submitToast').classList.remove('show');
+                box.classList.remove('closing');
+            }, 180);
+        }
+
+        function doSubmit() {
+            document.querySelector('form').submit();
+        }
     </script>
 </body>
 
