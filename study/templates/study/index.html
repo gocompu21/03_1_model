@@ -854,7 +854,48 @@
             margin: 0 4px;
         }
     }
+
+    /* 로딩 오버레이 */
+    .page-loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(248, 246, 230, 0.85);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .page-loading-overlay.active {
+        display: flex;
+    }
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #e0e0e0;
+        border-top: 4px solid #2c5f2d;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    .loading-text {
+        font-size: 1rem;
+        color: #555;
+        font-weight: 600;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 </style>
+
+<!-- 로딩 오버레이 -->
+<div class="page-loading-overlay" id="page-loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">문제를 불러오는 중...</div>
+</div>
 
 <div class="study-layout">
     <div class="study-header">
@@ -1077,18 +1118,36 @@
         });
     }
 
+    function showPageLoading() {
+        document.getElementById('page-loading').classList.add('active');
+    }
+
+    // 회차별 풀이 카드 클릭 시 로딩
+    document.querySelectorAll('.round-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            showPageLoading();
+        });
+    });
+
+    // 주제별 풀기 링크 클릭 시 로딩
+    document.querySelectorAll('.btn-solve, .title-cell a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            showPageLoading();
+        });
+    });
+
     function goToSubjectStudy(subjectName, round) {
-        // Navigate to subject detail page
-        // Ensure subjectName is URL encoded in case of special characters (though Korean usually works fine in modern browsers)
-        // Check if round is available, otherwise just go to subject
-
-        // Using Django's URL pattern structure: /study/subject/<subject_name>/
-        // We can construct this manually or use a JS variable for the base URL if needed.
-        // Given existing pattern: path("subject/<str:subject_name>/", views.subject_detail, name="subject_detail")
-
+        showPageLoading();
         const baseUrl = "/study/subject/";
         location.href = baseUrl + subjectName + "/";
     }
+
+    // 뒤로가기로 돌아왔을 때 로딩 오버레이 해제
+    window.addEventListener('pageshow', function(e) {
+        if (e.persisted) {
+            document.getElementById('page-loading').classList.remove('active');
+        }
+    });
 
     function toggleMenu() {
         const navLinks = document.getElementById('navLinks');

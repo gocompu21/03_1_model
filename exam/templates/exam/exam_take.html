@@ -93,66 +93,192 @@
         }
 
 
-        /* Animations - Book Flip */
+        /* 다음 페이지: 현재 페이지가 종이처럼 말려 넘어감 */
         .page-flip-next-leave {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto auto;
-            column-gap: 40px;
+            column-gap: 110px;
             row-gap: 20px;
             z-index: 3;
-            animation: flipOutNext 0.8s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+            animation: curlOutNext 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        /* 접힌 선 그림자 (종이 말림 느낌) */
+        .page-flip-next-leave::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 80px;
+            background: linear-gradient(to left, rgba(0,0,0,0.12) 0%, transparent 100%);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            animation: foldEdgeNext 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
         .page-flip-next-enter {
-            display: block;
             z-index: 1;
+            animation: revealNext 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
+        /* 이전 페이지: 종이가 다시 펼쳐짐 */
         .page-flip-prev-enter {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto auto;
-            column-gap: 40px;
+            column-gap: 110px;
             row-gap: 20px;
             z-index: 3;
-            animation: flipInPrev 0.8s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+            animation: curlInPrev 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .page-flip-prev-enter::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 80px;
+            background: linear-gradient(to left, rgba(0,0,0,0.12) 0%, transparent 100%);
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            animation: foldEdgePrev 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
         .page-flip-prev-leave {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: auto auto;
-            column-gap: 40px;
+            column-gap: 110px;
             row-gap: 20px;
             z-index: 1;
+            animation: fadeOutPrev 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
-        @keyframes flipOutNext {
+        /* 다음으로 넘길 때 - 종이가 들리고 말리며 넘어감 */
+        @keyframes curlOutNext {
             0% {
                 transform: rotateY(0deg);
                 opacity: 1;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+                box-shadow: 0 0 0 rgba(0,0,0,0);
             }
-
+            12% {
+                transform: rotateY(-8deg) translateZ(10px);
+                opacity: 1;
+                box-shadow: -4px 0 10px rgba(0,0,0,0.06);
+            }
+            30% {
+                transform: rotateY(-28deg) translateZ(22px);
+                opacity: 1;
+                box-shadow: -10px 0 22px rgba(0,0,0,0.14);
+            }
+            50% {
+                transform: rotateY(-52deg) translateZ(28px);
+                opacity: 0.95;
+                box-shadow: -16px 0 36px rgba(0,0,0,0.22);
+            }
+            70% {
+                transform: rotateY(-72deg) translateZ(18px);
+                opacity: 0.6;
+                box-shadow: -10px 0 24px rgba(0,0,0,0.16);
+            }
+            88% {
+                transform: rotateY(-84deg) translateZ(6px);
+                opacity: 0.15;
+                box-shadow: -3px 0 8px rgba(0,0,0,0.06);
+            }
             100% {
-                transform: rotateY(-120deg);
+                transform: rotateY(-89deg) translateZ(0);
                 opacity: 0;
-                box-shadow: 20px 0 20px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 0 0 rgba(0,0,0,0);
             }
         }
 
-        @keyframes flipInPrev {
-            0% {
-                transform: rotateY(-120deg);
-                opacity: 0;
-                box-shadow: 20px 0 20px rgba(0, 0, 0, 0.2);
-            }
+        /* 접힌 선이 오른쪽에서 왼쪽으로 이동 */
+        @keyframes foldEdgeNext {
+            0%   { opacity: 0; right: 0; }
+            15%  { opacity: 0.6; right: 3%; }
+            40%  { opacity: 1; right: 20%; }
+            65%  { opacity: 0.8; right: 45%; }
+            85%  { opacity: 0.3; right: 65%; }
+            100% { opacity: 0; right: 80%; }
+        }
 
+        /* 밑에 깔린 새 페이지가 드러남 */
+        @keyframes revealNext {
+            0% {
+                opacity: 0.2;
+                transform: scale(0.98);
+            }
+            60% {
+                opacity: 0.8;
+            }
             100% {
-                transform: rotateY(0deg);
                 opacity: 1;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+                transform: scale(1);
+            }
+        }
+
+        /* 이전으로 - 종이가 펼쳐져 돌아옴 */
+        @keyframes curlInPrev {
+            0% {
+                transform: rotateY(-89deg) translateZ(0);
+                opacity: 0;
+                box-shadow: 0 0 0 rgba(0,0,0,0);
+            }
+            12% {
+                transform: rotateY(-84deg) translateZ(6px);
+                opacity: 0.15;
+                box-shadow: -3px 0 8px rgba(0,0,0,0.06);
+            }
+            30% {
+                transform: rotateY(-72deg) translateZ(18px);
+                opacity: 0.6;
+                box-shadow: -10px 0 24px rgba(0,0,0,0.16);
+            }
+            50% {
+                transform: rotateY(-52deg) translateZ(28px);
+                opacity: 0.95;
+                box-shadow: -16px 0 36px rgba(0,0,0,0.22);
+            }
+            70% {
+                transform: rotateY(-28deg) translateZ(22px);
+                opacity: 1;
+                box-shadow: -10px 0 22px rgba(0,0,0,0.14);
+            }
+            88% {
+                transform: rotateY(-8deg) translateZ(10px);
+                opacity: 1;
+                box-shadow: -4px 0 10px rgba(0,0,0,0.06);
+            }
+            100% {
+                transform: rotateY(0deg) translateZ(0);
+                opacity: 1;
+                box-shadow: 0 0 0 rgba(0,0,0,0);
+            }
+        }
+
+        /* 이전으로 - 접힌 선 역방향 */
+        @keyframes foldEdgePrev {
+            0%   { opacity: 0; right: 80%; }
+            15%  { opacity: 0.3; right: 65%; }
+            40%  { opacity: 0.8; right: 45%; }
+            65%  { opacity: 1; right: 20%; }
+            85%  { opacity: 0.6; right: 3%; }
+            100% { opacity: 0; right: 0; }
+        }
+
+        /* 이전으로 - 현재 페이지가 아래로 사라짐 */
+        @keyframes fadeOutPrev {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0.2;
+                transform: scale(0.98);
             }
         }
 
@@ -896,7 +1022,7 @@
                 isAnimating = false;
                 // scroll top of new page
                 newPageEl.scrollTop = 0;
-            }, 800);
+            }, 720);
         }
 
         function doShowPageImmediate(page) {

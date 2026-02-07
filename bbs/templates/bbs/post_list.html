@@ -159,10 +159,10 @@
 {% endblock %}
 
 {% block content %}
-<div class="bbs-wrapper" style="max-width: 1200px; margin: 0 auto; padding: 5px 10px;">
+<div class="bbs-wrapper">
 
     <!-- Top Toolbar: Categories & Search -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+    <div class="toolbar">
         <!-- Categories -->
         <div class="category-filters">
             <a href="?category=ALL&q={{ query }}" class="filter-btn {% if category == 'ALL' %}active{% endif %}">전체</a>
@@ -173,79 +173,25 @@
 
         <!-- Search Form + Write Button -->
         <div class="search-write-area">
-            <form method="get" action="" style="display: flex; gap: 5px; flex: 1;">
+            <form method="get" action="" class="search-form">
                 <input type="hidden" name="category" value="{{ category }}">
-                <input type="text" name="q" value="{{ query }}" placeholder="검색어를 입력하세요"
-                    style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 20px; width: 200px; font-size: 0.9rem;">
+                <input type="text" name="q" value="{{ query }}" placeholder="검색어를 입력하세요" class="search-input">
                 <button type="submit" class="btn-search-icon">🔍</button>
             </form>
             {% if user.is_authenticated %}
-            <a href="{% url 'bbs:post_create' %}" class="btn-write-top">✏️ 글쓰기</a>
+            <a href="{% url 'bbs:post_create' %}" class="btn-write">✏️ 글쓰기</a>
             {% endif %}
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main Content - Card Layout -->
     <div class="bbs-content">
-
-        <!-- Desktop: List Table -->
-        <div class="table-container desktop-view"
-            style="background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow: hidden; border: 1px solid #e0e0e0;">
-            <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
-                <thead>
-                    <tr style="background-color: #f0f7f4; border-bottom: 2px solid #2d6a4f;">
-                        <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 40px;">번호</th>
-                        <th style="padding: 4px 2px; text-align: center; color: #2d6a4f;">제목</th>
-                        <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 80px;">유형</th>
-                        <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 60px;">작성자</th>
-                        <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 50px;">작성일</th>
-                        <th style="padding: 4px 2px; text-align: center; color: #2d6a4f; width: 40px;">조회</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for post in page_obj %}
-                    <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 2px 2px; text-align: center; color: #888;">{{ post.pk }}</td>
-                        <td style="padding: 2px 2px;">
-                            <a href="{% url 'bbs:post_detail' post.pk %}?category={{ category }}&q={{ query }}"
-                                style="text-decoration: none; color: #333; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                {{ post.title }}
-                                {% if post.comments.count > 0 %}
-                                <span
-                                    style="color: #e63946; font-size: 0.9em; font-weight: normal;">[{{post.comments.count}}]</span>
-                                {% endif %}
-                            </a>
-                        </td>
-                        <td style="padding: 2px 2px; text-align: center; color: #555;">
-                            {% if post.type %}
-                            <span class="post-type-badge">{{ post.type.name }}</span>
-                            {% endif %}
-                        </td>
-                        <td style="padding: 2px 2px; text-align: center; color: #555;">
-                            {% if post.author.first_name %}{{ post.author.first_name }}
-                            {% else%}{{ post.author.username }}{% endif %}
-                        </td>
-                        <td style="padding: 2px 2px; text-align: center; color: #888; font-size: 0.9em;">
-                            {{post.created_at|date:"m/d" }}
-                        </td>
-
-                        <td style="padding: 2px 2px; text-align: center; color: #888;">{{ post.hits }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" style="padding: 40px; text-align: center; color: #888;">등록된 게시글이 없습니다.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Mobile: Card Layout -->
-        <div class="card-container mobile-view">
+        <div class="card-container" id="card-container">
             {% for post in page_obj %}
             <a href="{% url 'bbs:post_detail' post.pk %}?category={{ category }}&q={{ query }}" class="post-card">
                 <div class="card-row-1">
                     <span class="card-title">{{ post.title }}</span>
+                    <span class="card-arrow">›</span>
                     {% if post.comments.count > 0 %}
                     <span class="card-comment-count">{{ post.comments.count }}</span>
                     {% endif %}
@@ -266,38 +212,7 @@
             {% endfor %}
         </div>
 
-        <!-- Pagination & Write Button (Desktop) -->
-        <div class="pagination-area" style="margin-top: 20px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;">
-            <div></div> <!-- Spacer -->
-
-            <div style="text-align: center;">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&category={{ category }}"
-                    class="pagination-link">&laquo; 이전</a>
-                {% endif %}
-
-                {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                <span class="pagination-link active">{{ num }}</span>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
-                    href="?page={{ num }}&q={{ query }}&category={{ category }}" class="pagination-link">{{ num }}</a>
-                    {% endif %}
-                    {% endfor %}
-
-                    {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&category={{ category }}"
-                        class="pagination-link">다음 &raquo;</a>
-                    {% endif %}
-            </div>
-
-            <div style="text-align: right;">
-                {% if user.is_authenticated %}
-                <a href="{% url 'bbs:post_create' %}" class="btn-write">✏️ 글쓰기</a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Loading Indicator (Mobile Infinite Scroll) -->
+        <!-- Loading Indicator (Infinite Scroll) -->
         <div id="scroll-loading" class="scroll-loading" style="display: none;">
             <div class="loading-spinner"></div>
             <span>게시글 불러오는 중...</span>
@@ -307,33 +222,26 @@
         <div id="scroll-end" class="scroll-end" style="display: none;">
             <span>📋 모든 게시글을 불러왔습니다</span>
         </div>
-
-        <!-- Mobile Write Button (Fixed) -->
-        <div class="mobile-write-btn-area">
-            {% if user.is_authenticated %}
-            <a href="{% url 'bbs:post_create' %}" class="btn-write-mobile"></a>
-            {% endif %}
-        </div>
-
     </div>
 </div>
 
 <style>
-    /* Overall font size */
+    /* ========== BBS Wrapper ========== */
     .bbs-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 5px 20px;
         font-size: 1.0rem;
     }
 
-    .bbs-wrapper table {
-        font-size: 1.0rem;
-    }
-
-    .bbs-wrapper th {
-        font-size: 1.0rem;
-    }
-
-    .bbs-wrapper td {
-        font-size: 1.0rem;
+    /* ========== Toolbar ========== */
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
     }
 
     /* Filter Buttons */
@@ -365,15 +273,26 @@
         font-weight: bold;
     }
 
-    /* Post Type Badge Styles - 작성자 열과 동일한 스타일 */
-    .post-type-badge {
-        font-size: inherit;
-        font-weight: normal;
-        white-space: nowrap;
-        color: inherit;
+    /* Search + Write area */
+    .search-write-area {
+        display: flex;
+        gap: 10px;
+        align-items: center;
     }
 
-    /* Search Button */
+    .search-form {
+        display: flex;
+        gap: 5px;
+    }
+
+    .search-input {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        width: 200px;
+        font-size: 0.9rem;
+    }
+
     .btn-search-icon {
         background: none;
         border: none;
@@ -382,20 +301,9 @@
         padding: 0 5px;
         transition: transform 0.2s;
     }
-    
+
     .btn-search-icon:hover {
         transform: scale(1.1);
-    }
-
-    /* Search + Write area (desktop) */
-    .search-write-area {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .btn-write-top {
-        display: none; /* Hidden on desktop, shown on mobile */
     }
 
     .btn-write {
@@ -408,62 +316,169 @@
         font-size: 0.85rem;
         transition: 0.3s;
         display: inline-block;
+        white-space: nowrap;
     }
 
     .btn-write:hover {
         background-color: #1b4332;
     }
 
-    .pagination-link {
-        display: inline-block;
-        padding: 4px 10px;
-        margin: 0 2px;
+    /* ========== Card Layout ========== */
+    .card-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .post-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         background: white;
-        border: 1px solid #ddd;
-        color: #333;
+        border-radius: 0;
+        padding: 11px 18px;
         text-decoration: none;
-        border-radius: 4px;
-        transition: 0.2s;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.15s ease;
+    }
+
+    .post-card:first-child {
+        border-radius: 8px 8px 0 0;
+    }
+
+    .post-card:last-child {
+        border-radius: 0 0 8px 8px;
+        border-bottom: none;
+    }
+
+    .post-card:only-child {
+        border-radius: 8px;
+    }
+
+    .post-card:hover {
+        background: #f8fdf9;
+    }
+
+    .post-card:active {
+        background: #f0f7f4;
+    }
+
+    /* 한 줄 레이아웃: [배지] [제목 + 댓글수] [메타] */
+    .card-row-1 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+        margin-bottom: 0;
+    }
+
+    .card-title {
+        flex: 0 1 auto;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #202124;
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .card-comment-count {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e63946;
+        color: white;
+        font-size: 0.68rem;
+        font-weight: 700;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        padding: 0 5px;
+    }
+
+    /* 메타 정보: 오른쪽 정렬 */
+    .card-row-2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.78rem;
+        color: #999;
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .card-type-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: #d8f3dc;
+        color: #1b4332;
+    }
+
+    .card-meta {
+        color: #999;
+    }
+
+    .card-arrow {
+        flex-shrink: 0;
+        font-size: 1.3rem;
+        color: #ccc;
+        font-weight: 300;
+        line-height: 1;
+        transition: color 0.15s, transform 0.15s;
+    }
+
+    .post-card:hover .card-arrow {
+        color: #2d6a4f;
+        transform: translateX(2px);
+    }
+
+    .empty-card {
+        text-align: center;
+        padding: 40px 20px;
+        color: #888;
+        background: white;
+        border-radius: 12px;
+    }
+
+    /* ========== Infinite Scroll ========== */
+    .scroll-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 20px;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .loading-spinner {
+        width: 24px;
+        height: 24px;
+        border: 3px solid #e0e0e0;
+        border-top-color: #2d6a4f;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .scroll-end {
+        text-align: center;
+        padding: 20px;
+        color: #888;
         font-size: 0.85rem;
     }
 
-    .pagination-link:hover {
-        background: #f0f7f4;
-        border-color: #2d6a4f;
-    }
-
-    .pagination-link.active {
-        background: #2d6a4f;
-        color: white;
-        border-color: #2d6a4f;
-    }
-
-    /* Striped rows (인터레이스드) */
-    tbody tr:nth-child(odd) {
-        background-color: white;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #f8faf9;
-    }
-
-    /* Rows hover */
-    tbody tr:hover {
-        background-color: #e8f5e9 !important;
-    }
-
-    /* Desktop: show table, hide cards */
-    .desktop-view {
-        display: block;
-    }
-
-    .mobile-view {
-        display: none;
-    }
-
-    /* ========== Mobile Responsive - Card Layout ========== */
+    /* ========== Mobile ========== */
     @media screen and (max-width: 768px) {
-        /* main.container 패딩 제거 */
         main.container {
             padding: 0 !important;
         }
@@ -493,17 +508,17 @@
             font-size: 0.8rem;
         }
 
-        /* BBS Wrapper - 깔끔한 배경 */
+        /* BBS Wrapper */
         .bbs-wrapper {
-            padding: 10px 0 !important;
+            padding: 10px 0 20px 0 !important;
             padding-top: 60px !important;
             font-size: 0.9rem;
             background: #f8f9fa;
             min-height: calc(100vh - 50px);
         }
 
-        /* Top Toolbar - 고정 */
-        .bbs-wrapper > div:first-child {
+        /* Toolbar - 고정 */
+        .toolbar {
             flex-direction: column;
             align-items: stretch !important;
             gap: 8px !important;
@@ -516,6 +531,7 @@
             padding: 12px 16px 14px 16px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
             border-bottom: 1px solid #e9ecef;
+            margin-bottom: 0;
         }
 
         /* 고정 헤더 + 툴바 아래 콘텐츠 여백 */
@@ -529,8 +545,6 @@
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             padding: 0;
-            background: transparent;
-            display: flex;
             gap: 8px;
         }
 
@@ -544,16 +558,9 @@
             white-space: nowrap;
             flex-shrink: 0;
             border-radius: 6px;
-            transition: all 0.15s ease;
             background: #f1f3f4;
             border: none;
             color: #5f6368;
-            font-weight: 500;
-        }
-
-        .filter-btn:hover {
-            background: #e8eaed;
-            color: #202124;
         }
 
         .filter-btn.active {
@@ -564,191 +571,90 @@
 
         /* Search + Write area */
         .search-write-area {
-            display: flex;
-            gap: 8px;
-            align-items: center;
             width: 100%;
         }
 
-        .search-write-area form {
+        .search-form {
             flex: 1;
             min-width: 0;
         }
 
-        .bbs-wrapper form[method="get"] input[type="text"] {
+        .search-input {
             flex: 1;
             width: auto !important;
             min-width: 0;
             border: 1px solid #dadce0;
             background: #f8f9fa;
-            transition: all 0.15s ease;
             border-radius: 8px !important;
             padding: 10px 14px !important;
             font-size: 0.9rem;
         }
 
-        .bbs-wrapper form[method="get"] input[type="text"]:focus {
+        .search-input:focus {
             border-color: #2d6a4f;
             background: white;
             outline: none;
             box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.15);
         }
 
-        /* Write Button */
-        .btn-write-top {
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-            background: #2d6a4f;
-            color: white;
-            text-decoration: none;
+        .btn-write {
             font-size: 0.82rem;
             font-weight: 600;
             padding: 10px 16px;
             border-radius: 8px;
             flex-shrink: 0;
-            white-space: nowrap;
-            transition: all 0.15s ease;
         }
 
-        .btn-write-top:active {
+        .btn-write:active {
             transform: scale(0.97);
             background: #245a42;
         }
 
-        /* Hide desktop table, show mobile cards */
-        .desktop-view {
-            display: none !important;
-        }
-
-        .mobile-view {
-            display: flex !important;
-        }
-
-        /* ========== Card Layout ========== */
+        /* Card - 모바일에서는 2줄 카드 형태 */
         .card-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
             padding: 0 16px;
+            gap: 10px;
         }
 
         .post-card {
-            display: block;
-            background: white;
-            border-radius: 12px;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 6px;
             padding: 14px 16px;
-            text-decoration: none;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
             border: 1px solid #e9ecef;
-            transition: all 0.15s ease;
+            border-bottom: 1px solid #e9ecef;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .post-card:first-child,
+        .post-card:last-child,
+        .post-card:only-child {
+            border-radius: 12px;
+        }
+
+        .post-card:hover {
+            background: white;
         }
 
         .post-card:active {
-            transform: scale(0.98);
             background: #fafafa;
         }
 
-        /* 첫째 줄: 제목 */
         .card-row-1 {
-            display: flex;
             align-items: flex-start;
-            gap: 6px;
-            margin-bottom: 8px;
         }
 
         .card-title {
-            flex: 1;
             font-size: 0.88rem;
-            font-weight: 600;
-            color: #202124;
-            line-height: 1.4;
+            white-space: normal;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            overflow: hidden;
         }
 
-        .card-comment-count {
-            flex-shrink: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #e63946;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-            min-width: 18px;
-            height: 18px;
-            border-radius: 9px;
-            padding: 0 5px;
-        }
-
-        /* 둘째 줄: 과목, 일시, 작성자, 조회수 - 오른쪽 정렬 */
         .card-row-2 {
-            display: flex;
-            align-items: center;
             justify-content: flex-end;
-            gap: 10px;
-            font-size: 0.78rem;
-            color: #888;
-        }
-
-        .card-type-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            background: #d8f3dc;
-            color: #1b4332;
-        }
-
-        .card-meta {
-            color: #888;
-        }
-
-        .empty-card {
-            text-align: center;
-            padding: 40px 20px;
-            color: #888;
-            background: white;
-            border-radius: 12px;
-        }
-
-        /* Pagination & Write Button */
-        .bbs-wrapper .bbs-content > div:last-child {
-            display: flex !important;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 15px !important;
-        }
-
-        .pagination-link {
-            padding: 8px 12px;
-            font-size: 0.8rem;
-            margin: 0 2px;
-            border-radius: 6px;
-        }
-
-        .pagination-link.active {
-            background: #2d6a4f;
-        }
-
-        /* 글쓰기 버튼 */
-        .btn-write {
-            width: 100%;
-            text-align: center;
-            padding: 14px 16px;
-            font-size: 0.95rem;
-            background: #2d6a4f;
-            border-radius: 8px;
-            transition: all 0.15s ease;
-        }
-
-        .btn-write:active {
-            transform: scale(0.98);
-            background: #245a42;
         }
     }
 
@@ -768,116 +674,32 @@
             font-size: 0.75rem;
         }
 
-        .bbs-wrapper {
-            padding: 8px 0 !important;
-        }
-
         .filter-btn {
             padding: 7px 12px;
             font-size: 0.78rem;
         }
 
-        .bbs-wrapper > div:first-child {
+        .toolbar {
             top: 64px;
             padding: 10px 12px 12px 12px;
         }
 
-        .bbs-wrapper form[method="get"] input[type="text"] {
+        .search-input {
             padding: 9px 12px !important;
             font-size: 0.85rem !important;
         }
 
-        .btn-write-top {
+        .btn-write {
             font-size: 0.78rem;
             padding: 9px 12px;
-        }
-
-        .bbs-wrapper tbody tr {
-            padding: 12px 14px;
-        }
-
-        .bbs-wrapper td:nth-child(2) a {
-            font-size: 0.9rem !important;
-        }
-
-        .pagination-link {
-            padding: 6px 10px;
-            font-size: 0.75rem;
-        }
-
-        .btn-write {
-            padding: 12px 14px;
-            font-size: 0.9rem;
-        }
-    }
-
-    /* ========== Infinite Scroll Styles ========== */
-    .scroll-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        padding: 20px;
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-    .loading-spinner {
-        width: 24px;
-        height: 24px;
-        border: 3px solid #e0e0e0;
-        border-top-color: #4caf50;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    .scroll-end {
-        text-align: center;
-        padding: 20px;
-        color: #888;
-        font-size: 0.85rem;
-    }
-
-    /* Mobile Write Button - Fixed at bottom */
-    .mobile-write-btn-area {
-        display: none;
-    }
-
-    @media screen and (max-width: 768px) {
-        /* Hide desktop pagination on mobile */
-        .pagination-area {
-            display: none !important;
-        }
-
-        /* Hide FAB - now using top button */
-        .mobile-write-btn-area {
-            display: none !important;
-        }
-
-        /* Add padding at bottom for scroll */
-        .bbs-wrapper {
-            padding-bottom: 20px !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
         }
     }
 </style>
 
-<!-- Infinite Scroll Script (Mobile Only) -->
+<!-- Infinite Scroll Script -->
 <script>
 (function() {
-    // Only enable on mobile
-    function isMobile() {
-        return window.innerWidth <= 768;
-    }
-
-    if (!isMobile()) return;
-
-    const cardContainer = document.querySelector('.card-container');
+    const cardContainer = document.getElementById('card-container');
     const loadingEl = document.getElementById('scroll-loading');
     const endEl = document.getElementById('scroll-end');
 
@@ -887,18 +709,21 @@
     const category = "{{ category }}";
     const query = "{{ query }}";
 
-    // Create post card HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     function createPostCard(post) {
         const card = document.createElement('a');
         card.href = `/bbs/${post.pk}/?category=${category}&q=${encodeURIComponent(query)}`;
         card.className = 'post-card';
 
-        // Comment count badge
         const commentHtml = post.comment_count > 0
             ? `<span class="card-comment-count">${post.comment_count}</span>`
             : '';
 
-        // Type badge
         const typeBadgeHtml = post.type
             ? `<span class="card-type-badge">${escapeHtml(post.type)}</span>`
             : '';
@@ -906,6 +731,7 @@
         card.innerHTML = `
             <div class="card-row-1">
                 <span class="card-title">${escapeHtml(post.title)}</span>
+                <span class="card-arrow">›</span>
                 ${commentHtml}
             </div>
             <div class="card-row-2">
@@ -919,13 +745,6 @@
         return card;
     }
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // Load more posts
     async function loadMore() {
         if (isLoading || !hasNext) return;
 
@@ -954,7 +773,6 @@
         }
     }
 
-    // Scroll detection with throttle
     let ticking = false;
 
     function onScroll() {
@@ -964,8 +782,7 @@
                 const windowHeight = window.innerHeight;
                 const docHeight = document.documentElement.scrollHeight;
 
-                // Load more when 200px from bottom
-                if (scrollTop + windowHeight >= docHeight - 200) {
+                if (scrollTop + windowHeight >= docHeight - 300) {
                     loadMore();
                 }
 
@@ -977,14 +794,18 @@
 
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // Handle resize - reload page if switching between mobile/desktop
-    let wasMobile = isMobile();
-    window.addEventListener('resize', () => {
-        const nowMobile = isMobile();
-        if (wasMobile !== nowMobile) {
-            window.location.reload();
-        }
-    });
+    // 초기 로드: 첫 페이지가 화면보다 짧으면 자동으로 더 불러오기
+    if (!hasNext) {
+        endEl.style.display = 'block';
+    } else {
+        setTimeout(() => {
+            const docHeight = document.documentElement.scrollHeight;
+            const windowHeight = window.innerHeight;
+            if (docHeight <= windowHeight + 300) {
+                loadMore();
+            }
+        }, 100);
+    }
 })();
 </script>
 {% endblock %}
