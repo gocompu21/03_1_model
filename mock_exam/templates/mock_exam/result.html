@@ -68,6 +68,25 @@
             z-index: 2;
         }
 
+        /* 과목 구분 카드가 단독 페이지일 때 중앙 배치 */
+        .question-page.active .subject-divider:only-child {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .question-page.active .subject-divider:only-child .sd-inner {
+            min-width: 420px;
+            padding: 32px 40px;
+        }
+        .question-page.active .subject-divider:only-child .sd-title {
+            font-size: 1.4em;
+        }
+        .question-page.active .subject-divider:only-child .sd-stat-value {
+            font-size: 1.8em;
+        }
+
         .question-page.active::after {
             content: "";
             position: absolute;
@@ -77,6 +96,10 @@
             width: 0.5px;
             background-color: black;
             transform: translateX(-50%);
+        }
+        /* 과목 구분 단독 페이지에는 중앙선 숨김 */
+        .question-page.active:has(.subject-divider:only-child)::after {
+            display: none;
         }
 
         .question-page .question-item:nth-child(1) {
@@ -242,7 +265,7 @@
             left: 50%;
             width: 25px;
             height: 25px;
-            border: 3px solid #d93025;
+            border: 3px solid #222222;
             border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
             transform: translate(-50%, -50%);
             box-sizing: border-box;
@@ -377,26 +400,45 @@
             z-index: 10;
         }
 
+        /* 문제 번호 래퍼 */
+        .q-num-wrap {
+            position: relative;
+            display: inline;
+        }
+        .q-num-wrap .grade-mark {
+            top: 50%;
+            left: 45%;
+        }
+        .q-num-wrap .grade-circle {
+            width: 56px;
+            height: 52px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 56'%3E%3Cellipse cx='30' cy='28' rx='21' ry='17' stroke='%23222222' stroke-width='4' fill='none' transform='rotate(-8 30 28)' stroke-linecap='round' stroke-dasharray='200' stroke-dashoffset='14'/%3E%3Cellipse cx='30' cy='28' rx='21' ry='17' stroke='rgba(0,0,0,0.2)' stroke-width='7' fill='none' transform='rotate(-8 30 28)' stroke-linecap='round' stroke-dasharray='200' stroke-dashoffset='14'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            border: none;
+            transform: translate(-50%, -50%) rotate(3deg);
+        }
+        .q-num-wrap .grade-x {
+            width: 50px;
+            height: 50px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M 8 8 C 16 18, 28 32, 42 42' stroke='rgba(200,30,30,0.25)' stroke-width='7' stroke-linecap='round' fill='none'/%3E%3Cpath d='M 42 10 C 34 18, 20 30, 8 42' stroke='rgba(200,30,30,0.25)' stroke-width='7' stroke-linecap='round' fill='none'/%3E%3Cpath d='M 8 8 C 16 18, 28 32, 42 42' stroke='%23c81e1e' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3Cpath d='M 42 10 C 34 18, 20 30, 8 42' stroke='%23c81e1e' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            border: none;
+            background-color: transparent;
+            transform: translate(-50%, -50%) rotate(-2deg);
+        }
+
+        /* 기존 대형 마크 (사용 안 함) */
         .grade-circle {
-            top: 15%;
-            left: 50%;
-            transform: translate(-50%, -15%);
-            width: 150px;
-            height: 150px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cellipse cx='25' cy='25' rx='16' ry='12' stroke='rgba(0, 0, 0, 0.8)' stroke-width='1.5' fill='none' transform='rotate(-10 25 25)'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
             border: none;
         }
-
         .grade-x {
-            top: 15%;
-            left: 50%;
-            transform: translate(-50%, -15%);
-            width: 150px;
-            height: 150px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M 12 12 Q 25 20 38 38 M 38 12 Q 25 30 12 38' stroke='rgba(255, 0, 0, 0.6)' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
@@ -405,20 +447,22 @@
         }
 
         .omr-num .grade-circle {
-            width: 24px;
+            width: 26px;
             height: 24px;
-            background-image: none;
-            border: 3px solid rgba(0, 0, 0, 0.8);
-            border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 56'%3E%3Cellipse cx='30' cy='28' rx='21' ry='17' stroke='%23222222' stroke-width='3.5' fill='none' transform='rotate(-8 30 28)' stroke-linecap='round' stroke-dasharray='200' stroke-dashoffset='14'/%3E%3Cellipse cx='30' cy='28' rx='21' ry='17' stroke='rgba(0,0,0,0.2)' stroke-width='6' fill='none' transform='rotate(-8 30 28)' stroke-linecap='round' stroke-dasharray='200' stroke-dashoffset='14'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            border: none;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
         }
 
         .omr-num .grade-x {
-            width: 30px;
-            height: 30px;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M 12 12 Q 25 20 38 38 M 38 12 Q 25 30 12 38' stroke='rgba(255, 0, 0, 0.8)' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+            width: 28px;
+            height: 28px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Cpath d='M 8 8 C 16 18, 28 32, 42 42' stroke='rgba(200,30,30,0.25)' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M 42 10 C 34 18, 20 30, 8 42' stroke='rgba(200,30,30,0.25)' stroke-width='6' stroke-linecap='round' fill='none'/%3E%3Cpath d='M 8 8 C 16 18, 28 32, 42 42' stroke='%23c81e1e' stroke-width='3.5' stroke-linecap='round' fill='none'/%3E%3Cpath d='M 42 10 C 34 18, 20 30, 8 42' stroke='%23c81e1e' stroke-width='3.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -527,54 +571,57 @@
             transition: transform 0.25s ease-out;
         }
 
+        /* 과목 구분 카드 */
+        .subject-divider {
+            break-inside: avoid;
+            page-break-inside: avoid;
+            position: relative;
+        }
+        .sd-inner {
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+            color: white;
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .sd-title {
+            font-size: 1.15em;
+            font-weight: 700;
+        }
+        .sd-stats {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+        .sd-stat {
+            text-align: center;
+        }
+        .sd-stat-value {
+            font-size: 1.4em;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .sd-stat-label {
+            font-size: 0.65em;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+        .sd-divider-line {
+            width: 1px;
+            height: 28px;
+            background: rgba(255,255,255,0.25);
+        }
+
         /* 모바일 전용 요소 - 데스크탑에서 숨김 */
         .mobile-header {
             display: none;
         }
         .mobile-home-btn {
             display: none;
-        }
-
-        /* 모바일 점수 요약 */
-        .score-summary {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 10px 16px;
-        }
-        .score-summary .avg-block {
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .score-summary .avg-score {
-            font-size: 1.8rem;
-            font-weight: 800;
-            line-height: 1;
-        }
-        .score-summary .avg-unit {
-            font-size: 0.7rem;
-            opacity: 0.7;
-        }
-        .score-summary .subject-scores {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            border-left: 1px solid rgba(255,255,255,0.2);
-            padding-left: 14px;
-        }
-        .score-summary .subj-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .score-summary .subj-name {
-            font-size: 0.72rem;
-            opacity: 0.85;
-        }
-        .score-summary .subj-val {
-            font-size: 0.75rem;
-            font-weight: 700;
         }
 
         /* 모바일 최적화 */
@@ -599,7 +646,7 @@
                 display: none !important;
             }
 
-            /* 모바일 헤더 - 점수 표시 */
+            /* 모바일 헤더 */
             .mobile-header {
                 display: block !important;
                 position: sticky;
@@ -607,13 +654,20 @@
                 z-index: 100;
                 background: linear-gradient(135deg, #1b4332, #2d6a4f);
                 color: white;
-                padding: 14px 16px;
+                padding: 12px 16px;
                 text-align: center;
+                font-size: 0.95rem;
+                font-weight: 600;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
 
-            .mobile-header .score-summary {
-                padding: 8px 16px;
+            /* 모바일 과목 구분 카드 */
+            .subject-divider {
+                margin-bottom: 8px !important;
+            }
+            .sd-inner {
+                border-radius: 10px !important;
+                padding: 14px 16px !important;
             }
 
             /* 모바일 홈 버튼 */
@@ -694,25 +748,14 @@
                 grid-row: auto !important;
             }
 
-            /* 채점 마크 위치 */
-            .question-item .grade-mark {
-                position: absolute !important;
-                top: 12px !important;
-                right: 12px !important;
-                left: auto !important;
-                transform: none !important;
-                width: 36px !important;
-                height: 36px !important;
+            /* 채점 마크 - 문제 번호 위 */
+            .q-num-wrap .grade-circle {
+                width: 50px !important;
+                height: 46px !important;
             }
-
-            .question-item .grade-circle {
-                background-image: none !important;
-                border: 3px solid rgba(0, 0, 0, 0.6) !important;
-                border-radius: 50% !important;
-            }
-
-            .question-item .grade-x {
-                background-size: contain !important;
+            .q-num-wrap .grade-x {
+                width: 44px !important;
+                height: 44px !important;
             }
 
             /* 문제 내용 */
@@ -722,7 +765,7 @@
                 margin-bottom: 10px !important;
                 padding-left: 1.3em !important;
                 text-indent: -1.3em !important;
-                padding-right: 45px !important;
+                padding-right: 15px !important;
                 font-weight: 600 !important;
             }
 
@@ -772,7 +815,7 @@
             .choices .choice-item .q-mark.correct-answer-circle::before {
                 width: 26px !important;
                 height: 26px !important;
-                border: 3px solid #d93025 !important;
+                border: 3px solid #222222 !important;
             }
 
             /* 버튼 영역 - 우측 정렬 */
@@ -853,20 +896,7 @@
 <body>
     <!-- 모바일 헤더 -->
     <div class="mobile-header">
-        <div class="score-summary">
-            <div class="avg-block">
-                <div class="avg-score">{{ average_score }}</div>
-                <div class="avg-unit">평균</div>
-            </div>
-            <div class="subject-scores">
-                {% for s in subject_results %}
-                <div class="subj-row">
-                    <span class="subj-name">{{ s.name }}</span>
-                    <span class="subj-val">{{ s.score }}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
+        {{ mock_exam.start_time|date:"Y.m.d" }} 모의고사 결과
     </div>
 
     <div style="display: flex; width: 100%; min-height: 100vh;">
@@ -880,17 +910,22 @@
             <div id="questions-container">
                 <!-- Javascript will group these into pages -->
                 {% for mq in questions %}
+                {% ifchanged mq.question.subject.name %}
+                <div class="subject-divider" data-subject="{{ mq.question.subject.name }}">
+                    <div class="sd-inner">
+                        <div class="sd-title">{{ mq.question.subject.name }}</div>
+                        <div class="sd-stats">
+                            <div class="sd-stat"><div class="sd-stat-value sd-correct">-</div><div class="sd-stat-label">정답</div></div>
+                            <div class="sd-divider-line"></div>
+                            <div class="sd-stat"><div class="sd-stat-value sd-score">-</div><div class="sd-stat-label">점수</div></div>
+                        </div>
+                    </div>
+                </div>
+                {% endifchanged %}
                 <div class="question-item" id="q-{{ mq.question.id }}" data-question-index="{{ forloop.counter0 }}"
                     data-subject="{{ mq.question.subject.name }}">
-                    <!-- Grade Mark -->
-                    {% if mq.is_correct %}
-                    <div class="grade-mark grade-circle"></div>
-                    {% else %}
-                    <div class="grade-mark grade-x"></div>
-                    {% endif %}
-
                     <div class="question-content">
-                        {{ forloop.counter }}. {{ mq.question.content|format_question }}
+                        <span class="q-num-wrap">{{ forloop.counter }}.{% if mq.is_correct %}<span class="grade-mark grade-circle"></span>{% else %}<span class="grade-mark grade-x"></span>{% endif %}</span> {{ mq.question.content|format_question }}
                     </div>
                     {% if mq.question.image %}
                     <div style="text-align: center; margin-bottom: 20px;"><img src="{{ mq.question.image.url }}"
@@ -1005,27 +1040,7 @@
             <div class="omr-card">
                 <div
                     style="position: sticky; top: 0; background: white; z-index: 20; border-bottom: 1px solid #d4879c;">
-                    <!-- Branding Home Link -->
-                    <a href="{% url 'main:index' %}" title="초기화면으로 이동"
-                        style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%); color: white; text-decoration: none; padding: 12px; margin-bottom: 10px; font-weight: bold;">
-                        <span style="font-size: 1.4em; margin-right: 8px;">🌳</span>
-                        <span style="font-size: 1.1em;">나무의사 홈</span>
-                    </a>
-                    <!-- 점수 요약 (한 줄 평균 + 과목 리스트) -->
-                    <div style="padding: 6px 10px;">
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-                            <span style="font-size: 0.75em; color: #999;">평균</span>
-                            <span style="font-size: 1.3em; font-weight: 800; {% if average_score >= 60 %}color: #1b4332;{% else %}color: #555;{% endif %}">{{ average_score }}<span style="font-size: 0.55em; font-weight: 600;">점</span></span>
-                        </div>
-                        {% for s in subject_results %}
-                        <div style="display: flex; align-items: center; padding: 3px 0; {% if not forloop.last %}border-bottom: 1px solid #f5f5f5;{% endif %}">
-                            <span style="flex: 1; font-size: 0.75em; color: #555;">{{ s.name }}</span>
-                            <span style="font-size: 0.7em; color: #aaa; margin-right: 4px;">{{ s.correct }}/{{ s.total }}</span>
-                            <span style="font-size: 0.8em; font-weight: 700; width: 28px; text-align: right; {% if s.score >= 60 %}color: #2d6a4f;{% else %}color: #555;{% endif %}">{{ s.score }}</span>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="omr-header" style="border-top: 1px solid #d4879c; border-bottom: none;">
+                    <div class="omr-header">
                         <div class="omr-header-num">문항</div>
                         <div class="omr-header-ans">답 란</div>
                     </div>
@@ -1076,12 +1091,32 @@
         let totalPages = 1;
         let questionToPageMap = {};
 
+        // 과목별 결과 데이터
+        const subjectResults = {
+            {% for s in subject_results %}
+            "{{ s.name }}": { correct: {{ s.correct }}, total: {{ s.total }}, score: {{ s.score }} }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        };
+
+        // 과목 구분 카드에 통계 채우기
+        function populateSubjectDividers() {
+            document.querySelectorAll('.subject-divider').forEach(div => {
+                const name = div.dataset.subject;
+                const data = subjectResults[name];
+                if (data) {
+                    div.querySelector('.sd-correct').textContent = data.correct + '/' + data.total;
+                    div.querySelector('.sd-score').textContent = data.score + '점';
+                }
+            });
+        }
+
         // 모바일 감지
         function isMobile() {
             return window.innerWidth <= 768;
         }
 
         document.addEventListener('DOMContentLoaded', function () {
+            populateSubjectDividers();
             if (isMobile()) {
                 initMobileView();
             } else {
@@ -1104,18 +1139,27 @@
         function initPagination() {
             const container = document.getElementById('questions-container');
             const items = Array.from(container.children);
-            const totalItems = items.length;
-            if (totalItems === 0) return;
+            if (items.length === 0) return;
 
             container.innerHTML = '';
             questionToPageMap = {};
             let pages = [];
             let currentPageItems = [];
             const specialNumbers = [25, 50, 75, 100, 125];
+            let qNum = 0;
 
-            items.forEach((item, index) => {
-                const qNum = index + 1;
+            items.forEach((item) => {
+                // 과목 구분 카드: 새 페이지에 단독 배치
+                if (item.classList.contains('subject-divider')) {
+                    if (currentPageItems.length > 0) {
+                        pages.push(currentPageItems);
+                        currentPageItems = [];
+                    }
+                    pages.push([item]);
+                    return;
+                }
 
+                qNum++;
                 if (specialNumbers.includes(qNum)) {
                     if (currentPageItems.length > 0) {
                         pages.push(currentPageItems);
@@ -1145,8 +1189,10 @@
 
                 pageItems.forEach(item => {
                     pageDiv.appendChild(item);
-                    const qIndex = parseInt(item.getAttribute('data-question-index'));
-                    questionToPageMap[qIndex] = pageNum;
+                    if (item.classList.contains('question-item')) {
+                        const qIndex = parseInt(item.getAttribute('data-question-index'));
+                        questionToPageMap[qIndex] = pageNum;
+                    }
                 });
 
                 container.appendChild(pageDiv);
@@ -1216,13 +1262,13 @@
         }
 
         function updateSubjectTitle(pageEl) {
+            const divider = pageEl.querySelector('.subject-divider');
             const firstQuestion = pageEl.querySelector('.question-item');
-            if (firstQuestion) {
-                const subjectName = firstQuestion.getAttribute('data-subject');
-                const titleSpan = document.getElementById('subject-title');
-                if (titleSpan && subjectName) {
-                    titleSpan.textContent = " - " + subjectName;
-                }
+            const titleSpan = document.getElementById('subject-title');
+            if (titleSpan) {
+                const name = divider ? divider.dataset.subject :
+                             firstQuestion ? firstQuestion.dataset.subject : '';
+                titleSpan.textContent = name ? ' - ' + name : '';
             }
         }
 
