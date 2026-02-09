@@ -714,6 +714,24 @@
         const parent = choiceItem.closest('.q-choices');
         parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
         choiceItem.classList.add('selected');
+
+        // 선지 선택 시 해설 자동 표시
+        const card = choiceItem.closest('.question-card');
+        if (card) {
+            const expEl = card.querySelector('.explanation-section');
+            if (expEl && expEl.style.display === 'none') {
+                expEl.style.display = 'block';
+                // 정답 표시
+                const correctAnswerStr = parent.getAttribute('data-answer');
+                const correctAnswers = JSON.parse(correctAnswerStr);
+                parent.querySelectorAll('.choice-num').forEach(cn => {
+                    cn.classList.remove('correct');
+                    if (correctAnswers.includes(parseInt(cn.getAttribute('data-choice')))) {
+                        cn.classList.add('correct');
+                    }
+                });
+            }
+        }
     }
 
     // Toggle Explanation
