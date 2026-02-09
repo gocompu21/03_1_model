@@ -576,6 +576,24 @@
         const parent = choiceItem.closest('.q-choices');
         parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
         choiceItem.classList.add('selected');
+
+        // 선지 선택 시 해설 자동 표시
+        const card = choiceItem.closest('.question-card');
+        if (card) {
+            const expId = 'exp-' + card.id.replace('question-', '');
+            const expEl = document.getElementById(expId);
+            if (expEl && (expEl.style.display === 'none' || expEl.style.display === '')) {
+                expEl.style.display = 'block';
+                // 정답 표시
+                const correctAnswer = parseInt(parent.getAttribute('data-answer'));
+                parent.querySelectorAll('.choice-num').forEach(cn => {
+                    cn.classList.remove('correct');
+                    if (parseInt(cn.getAttribute('data-choice')) === correctAnswer) {
+                        cn.classList.add('correct');
+                    }
+                });
+            }
+        }
     }
 
     // Toggle Explanation
