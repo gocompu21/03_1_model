@@ -45,7 +45,11 @@ def markdown_format(text):
         #    or simply forces the "no bullet" style by flattening lists to text.
         text = re.sub(r'(?m)^\s*[\*\-]\s+', '', text)
 
-        # 5.5. Remove leading 4-space indentation that causes code block rendering
+        # 5.5. 연속 텍스트 들여쓰기: 6칸 이상 들여쓴 줄은 상위 마커(가, 나 등)의
+        #      본문이므로 indent div로 감싸서 들여쓰기 유지
+        text = re.sub(r'(?m)^[ \t]{6,}(\S.+)$', r'<div class="indent-cont">\1</div>', text)
+
+        # 5.6. Remove leading 4-space indentation that causes code block rendering
         #      This prevents explanation text from being wrapped in <pre><code> tags
         #      which breaks MathJax rendering
         text = re.sub(r'(?m)^    ', '', text)
