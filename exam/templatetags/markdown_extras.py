@@ -58,6 +58,18 @@ def markdown_format(text):
         #    So we match optional <strong> tag at the start of the line.
         text = re.sub(r'(?m)^\s*((?:<strong>\s*)?[\u2460-\u2473].*)$', r'<div class="hanging-indent">\1</div>', text)
 
+        # 7. 숫자)가 단독 줄에 있고 다음 줄에 텍스트가 있는 경우 한 줄로 병합
+        #    예: "1)\n등판(tergum)..." → "1) 등판(tergum)..."
+        text = re.sub(r'(?m)^\s*(\d+\))\s*\n\s*(\S)', r'\1 \2', text)
+
+        # 8. (숫자), 가)~하), 숫자) 패턴에 hanging-indent 적용
+        #    (1) 복부의 기본 구조... → <div class="hi-paren">(1) 복부의...</div>
+        text = re.sub(r'(?m)^\s*(\(\d+\)\s+.+)$', r'<div class="hi-paren">\1</div>', text)
+        #    가) 복부 경판의 특징... → <div class="hi-kr">가) 복부 경판의...</div>
+        text = re.sub(r'(?m)^\s*([가-하]\)\s+.+)$', r'<div class="hi-kr">\1</div>', text)
+        #    1) 등판(tergum)과... → <div class="hi-num">1) 등판(tergum)과...</div>
+        text = re.sub(r'(?m)^\s*(\d+\)\s+.+)$', r'<div class="hi-num">\1</div>', text)
+
     # Convert markdown to HTML
     html = md.markdown(text, extensions=["extra", "nl2br"])
     # If it's a single paragraph, strip the <p> tags to avoid unwanted margins if user requests
