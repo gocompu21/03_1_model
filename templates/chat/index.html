@@ -774,6 +774,21 @@
             }
         }
 
+        /* MathJax inline math sizing - match surrounding text */
+        mjx-container[jax="CHTML"] {
+            font-size: inherit !important;
+            vertical-align: baseline;
+        }
+        mjx-container[jax="CHTML"][display="true"] {
+            font-size: 1.1em !important;
+        }
+        mjx-math {
+            font-size: inherit !important;
+        }
+        mjx-script {
+            font-size: 0.7em !important;
+        }
+
     </style>
 </head>
 
