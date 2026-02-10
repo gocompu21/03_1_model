@@ -880,18 +880,37 @@ document.addEventListener('DOMContentLoaded', function() {
         wrapper.appendChild(zoomBtn);
     });
 
+    let lightboxHistoryPushed = false;
+
     function openLightbox(src) {
         lightboxImg.src = src;
         lightbox.classList.add('active');
         document.body.style.overflow = 'hidden';
         resetTransform(false);
+        // 모바일 뒤로가기로 모달 닫기 위해 히스토리 추가
+        history.pushState({ lightbox: true }, '');
+        lightboxHistoryPushed = true;
     }
 
     function closeLightbox() {
+        if (!lightbox.classList.contains('active')) return;
         lightbox.classList.remove('active');
         document.body.style.overflow = '';
         resetTransform(false);
+        // UI로 닫은 경우 (X버튼, ESC, 배경클릭) 히스토리 엔트리 제거
+        if (lightboxHistoryPushed) {
+            lightboxHistoryPushed = false;
+            history.back();
+        }
     }
+
+    // 모바일 뒤로가기 버튼 처리
+    window.addEventListener('popstate', function(e) {
+        if (lightbox.classList.contains('active')) {
+            lightboxHistoryPushed = false;  // 뒤로가기가 이미 히스토리 처리함
+            closeLightbox();
+        }
+    });
 
     function resetTransform(animate = true) {
         if (animate) {

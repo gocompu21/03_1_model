@@ -823,18 +823,35 @@
     const LB_MAX_SCALE = 5;
     const LB_DOUBLE_TAP_SCALE = 2.5;
 
+    let lightboxHistoryPushed = false;
+
     function openLightbox(src) {
         lbImg.src = src;
         lbOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
         resetLightbox();
+        history.pushState({ lightbox: true }, '');
+        lightboxHistoryPushed = true;
     }
 
     function closeLightbox() {
+        if (!lbOverlay.classList.contains('active')) return;
         lbOverlay.classList.remove('active');
         document.body.style.overflow = '';
         resetLightbox();
+        if (lightboxHistoryPushed) {
+            lightboxHistoryPushed = false;
+            history.back();
+        }
     }
+
+    // 모바일 뒤로가기 버튼 처리
+    window.addEventListener('popstate', function(e) {
+        if (lbOverlay.classList.contains('active')) {
+            lightboxHistoryPushed = false;
+            closeLightbox();
+        }
+    });
 
     function resetLightbox() {
         lbScale = 1;
