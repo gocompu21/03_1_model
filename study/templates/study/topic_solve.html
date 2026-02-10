@@ -138,11 +138,14 @@
         font-size: 1.05em;
         padding: 5px;
         border-radius: 5px;
+    }
+
+    .choice-num {
         cursor: pointer;
     }
 
-    .choice-item:hover {
-        background-color: #f0f7f4;
+    .choice-num:hover {
+        transform: scale(1.2);
     }
 
     .choice-item.selected {
@@ -550,20 +553,20 @@
             {% endif %}
 
             <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
-                <div class="choice-item" onclick="selectChoice(this, 1)">
-                    <span class="choice-num" data-choice="1">①</span> {{ q.choice1|safe }}
+                <div class="choice-item">
+                    <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span> {{ q.choice1|safe }}
                 </div>
-                <div class="choice-item" onclick="selectChoice(this, 2)">
-                    <span class="choice-num" data-choice="2">②</span> {{ q.choice2|safe }}
+                <div class="choice-item">
+                    <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span> {{ q.choice2|safe }}
                 </div>
-                <div class="choice-item" onclick="selectChoice(this, 3)">
-                    <span class="choice-num" data-choice="3">③</span> {{ q.choice3|safe }}
+                <div class="choice-item">
+                    <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span> {{ q.choice3|safe }}
                 </div>
-                <div class="choice-item" onclick="selectChoice(this, 4)">
-                    <span class="choice-num" data-choice="4">④</span> {{ q.choice4|safe }}
+                <div class="choice-item">
+                    <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span> {{ q.choice4|safe }}
                 </div>
-                <div class="choice-item" onclick="selectChoice(this, 5)">
-                    <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5|safe }}
+                <div class="choice-item">
+                    <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span> {{ q.choice5|safe }}
                 </div>
             </div>
 
@@ -716,9 +719,10 @@
         });
     });
 
-    // Select Choice
-    function selectChoice(choiceItem, choiceNum) {
-        const parent = choiceItem.closest('.q-choices');
+    // Select Choice - choice-num(번호) 클릭 시에만 선택
+    function selectChoice(numEl) {
+        const choiceItem = numEl.closest('.choice-item');
+        const parent = numEl.closest('.q-choices');
         parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
         choiceItem.classList.add('selected');
 

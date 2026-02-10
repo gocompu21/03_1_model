@@ -148,7 +148,6 @@
         font-size: 1.05em;
         padding: 8px;
         border-radius: 5px;
-        cursor: pointer;
         transition: background-color 0.2s;
         display: flex;
         align-items: flex-start;
@@ -157,14 +156,15 @@
     .choice-num {
         flex-shrink: 0;
         width: 1.5em;
+        cursor: pointer;
+    }
+
+    .choice-num:hover {
+        transform: scale(1.2);
     }
 
     .choice-text {
         flex: 1;
-    }
-
-    .choice-item:hover {
-        background-color: #f0f7f4;
     }
 
     .choice-item.selected {
@@ -481,20 +481,20 @@
                 </div>
 
                 <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
-                    <div class="choice-item" onclick="selectChoice(this, 1)">
-                        <span class="choice-num" data-choice="1">①</span><span class="choice-text">{{ q.choice1|safe }}</span>
+                    <div class="choice-item">
+                        <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span><span class="choice-text">{{ q.choice1|safe }}</span>
                     </div>
-                    <div class="choice-item" onclick="selectChoice(this, 2)">
-                        <span class="choice-num" data-choice="2">②</span><span class="choice-text">{{ q.choice2|safe }}</span>
+                    <div class="choice-item">
+                        <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span><span class="choice-text">{{ q.choice2|safe }}</span>
                     </div>
-                    <div class="choice-item" onclick="selectChoice(this, 3)">
-                        <span class="choice-num" data-choice="3">③</span><span class="choice-text">{{ q.choice3|safe }}</span>
+                    <div class="choice-item">
+                        <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span><span class="choice-text">{{ q.choice3|safe }}</span>
                     </div>
-                    <div class="choice-item" onclick="selectChoice(this, 4)">
-                        <span class="choice-num" data-choice="4">④</span><span class="choice-text">{{ q.choice4|safe }}</span>
+                    <div class="choice-item">
+                        <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span><span class="choice-text">{{ q.choice4|safe }}</span>
                     </div>
-                    <div class="choice-item" onclick="selectChoice(this, 5)">
-                        <span class="choice-num" data-choice="5">⑤</span><span class="choice-text">{{ q.choice5|safe }}</span>
+                    <div class="choice-item">
+                        <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span><span class="choice-text">{{ q.choice5|safe }}</span>
                     </div>
                 </div>
 
@@ -578,9 +578,10 @@
         }
     });
 
-    // Select Choice
-    function selectChoice(choiceItem, choiceNum) {
-        const parent = choiceItem.closest('.q-choices');
+    // Select Choice - choice-num(번호) 클릭 시에만 선택
+    function selectChoice(numEl) {
+        const choiceItem = numEl.closest('.choice-item');
+        const parent = numEl.closest('.q-choices');
         parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
         choiceItem.classList.add('selected');
 
