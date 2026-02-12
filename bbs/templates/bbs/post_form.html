@@ -187,6 +187,12 @@
             }
         }
     });
+    // 기본 색상: 글자 빨간색, 배경 투명
+    var $titleEditor = $('#summernote-title').next('.note-editor');
+    $titleEditor.find('.note-current-color-button').attr('data-backcolor', 'transparent').attr('data-forecolor', '#ff0000');
+    $titleEditor.find('.note-recent-color').each(function() {
+        $(this).css('background-color', '#ff0000');
+    });
 
     // 내용용 Summernote
     $('#summernote').summernote({
