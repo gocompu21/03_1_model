@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import Q
 import openpyxl
-from .models import Book, Chapter, PracticeQuestion, PracticeAttempt, ChapterContent
+from .models import Book, Chapter, PracticeQuestion, PracticeAttempt, ChapterContent, ChapterPost
 
 
 @login_required
@@ -289,11 +291,17 @@ def chapter_detail(request, chapter_id):
     else:
         nearby_chapters = all_chapters[:11]
     
+    # 연결된 BBS 게시글
+    linked_posts = ChapterPost.objects.filter(
+        chapter=chapter
+    ).select_related('post', 'post__author', 'post__type')
+
     return render(request, 'practice/chapter_detail.html', {
         'chapter': chapter,
         'content': content,
         'questions': questions,
         'siblings': nearby_chapters,  # 이름은 그대로 유지 (템플릿 호환)
+        'linked_posts': linked_posts,
     })
 
 
@@ -359,6 +367,11 @@ def content_create(request):
         else:
             nearby_chapters = all_chapters[:11]
         
+        # 연결된 BBS 게시글
+        linked_posts = ChapterPost.objects.filter(
+            chapter=chapter
+        ).select_related('post', 'post__author', 'post__type')
+
         # 같은 페이지에서 저장 완료 표시 (다른 페이지로 메시지 전파 방지)
         return render(request, 'practice/chapter_detail.html', {
             'chapter': chapter,
@@ -366,6 +379,7 @@ def content_create(request):
             'questions': PracticeQuestion.objects.filter(chapter=chapter).order_by('number'),
             'siblings': nearby_chapters,
             'saved': True,
+            'linked_posts': linked_posts,
         })
     
     return render(request, 'practice/content_form.html', {
@@ -420,6 +434,11 @@ def content_update(request, content_id):
         else:
             nearby_chapters = all_chapters[:11]
         
+        # 연결된 BBS 게시글
+        linked_posts = ChapterPost.objects.filter(
+            chapter=content.chapter
+        ).select_related('post', 'post__author', 'post__type')
+
         # 같은 페이지에서 수정 완료 표시
         return render(request, 'practice/chapter_detail.html', {
             'chapter': content.chapter,
@@ -427,6 +446,7 @@ def content_update(request, content_id):
             'questions': PracticeQuestion.objects.filter(chapter=content.chapter).order_by('number'),
             'siblings': nearby_chapters,
             'saved': True,
+            'linked_posts': linked_posts,
         })
     
     return render(request, 'practice/content_form.html', {
@@ -436,4 +456,108 @@ def content_update(request, content_id):
         'btn_text': '수정하기',
         'is_edit': True,
     })
+
+
+@login_required
+@staff_member_required
+def api_search_bbs_posts(request, chapter_id):
+    """BBS 게시글 검색/목록 API"""
+    chapter = get_object_or_404(Chapter, id=chapter_id)
+    query = request.GET.get('q', '').strip()
+    offset = int(request.GET.get('offset', 0))
+    limit = 10
+
+    from bbs.models import Post
+
+    linked_ids = set(
+        ChapterPost.objects.filter(chapter=chapter).values_list('post_id', flat=True)
+    )
+
+    if query:
+        posts_qs = Post.objects.filter(
+            Q(title__icontains=query) | Q(content__icontains=query)
+        )
+    else:
+        posts_qs = Post.objects.all()
+
+    posts = posts_qs.select_related(
+        'author', 'type'
+    ).order_by('-created_at')[offset:offset + limit]
+
+    has_more = posts_qs.count() > offset + limit
+
+    posts_data = []
+    for post in posts:
+        posts_data.append({
+            'id': post.pk,
+            'title': post.title,
+            'type': post.type.name if post.type else None,
+            'author': post.author.first_name or post.author.username,
+            'created_at': post.created_at.strftime('%Y-%m-%d'),
+            'hits': post.hits,
+            'already_linked': post.pk in linked_ids,
+        })
+
+    return JsonResponse({'posts': posts_data, 'has_more': has_more})
+
+
+@login_required
+@staff_member_required
+def api_link_post(request, chapter_id):
+    """게시글을 목차에 연결"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST만 허용'}, status=405)
+
+    chapter = get_object_or_404(Chapter, id=chapter_id)
+    post_id = request.POST.get('post_id')
+
+    if not post_id:
+        return JsonResponse({'success': False, 'error': '게시글 ID가 없습니다.'})
+
+    from bbs.models import Post
+    post = get_object_or_404(Post, id=post_id)
+
+    if ChapterPost.objects.filter(chapter=chapter, post=post).exists():
+        return JsonResponse({'success': False, 'error': '이미 연결된 게시글입니다.'})
+
+    ChapterPost.objects.create(
+        chapter=chapter,
+        post=post,
+        linked_by=request.user,
+    )
+
+    return JsonResponse({
+        'success': True,
+        'link': {
+            'post_id': post.pk,
+            'title': post.title,
+            'type': post.type.name if post.type else None,
+            'author': post.author.first_name or post.author.username,
+            'created_at': post.created_at.strftime('%Y-%m-%d'),
+            'hits': post.hits,
+        }
+    })
+
+
+@login_required
+@staff_member_required
+def api_unlink_post(request, chapter_id):
+    """게시글 연결 해제"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'POST만 허용'}, status=405)
+
+    chapter = get_object_or_404(Chapter, id=chapter_id)
+    post_id = request.POST.get('post_id')
+
+    if not post_id:
+        return JsonResponse({'success': False, 'error': '게시글 ID가 없습니다.'})
+
+    deleted, _ = ChapterPost.objects.filter(
+        chapter=chapter, post_id=post_id
+    ).delete()
+
+    if deleted == 0:
+        return JsonResponse({'success': False, 'error': '연결 정보를 찾을 수 없습니다.'})
+
+    return JsonResponse({'success': True, 'post_id': int(post_id)})
 

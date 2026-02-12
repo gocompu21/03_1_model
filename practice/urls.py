@@ -15,5 +15,9 @@ urlpatterns = [
     path('upload/chapters/', views.upload_chapters, name='upload_chapters'),
     path('content/create/', views.content_create, name='content_create'),
     path('content/<int:content_id>/edit/', views.content_update, name='content_update'),
+    # BBS 게시글 연결 API
+    path('chapter/<int:chapter_id>/api/search-posts/', views.api_search_bbs_posts, name='api_search_bbs_posts'),
+    path('chapter/<int:chapter_id>/api/link-post/', views.api_link_post, name='api_link_post'),
+    path('chapter/<int:chapter_id>/api/unlink-post/', views.api_unlink_post, name='api_unlink_post'),
 ]
 

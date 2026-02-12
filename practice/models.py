@@ -159,3 +159,35 @@ class ChapterContent(models.Model):
     
     def __str__(self):
         return f"{self.chapter.code} {self.chapter.title} - 컨텐츠"
+
+
+class ChapterPost(models.Model):
+    """목차와 BBS 게시글 연결"""
+    chapter = models.ForeignKey(
+        Chapter,
+        on_delete=models.CASCADE,
+        related_name='linked_posts',
+        verbose_name="목차"
+    )
+    post = models.ForeignKey(
+        'bbs.Post',
+        on_delete=models.CASCADE,
+        related_name='linked_chapters',
+        verbose_name="게시글"
+    )
+    linked_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="연결한 사람"
+    )
+    linked_at = models.DateTimeField(auto_now_add=True, verbose_name="연결일시")
+
+    class Meta:
+        verbose_name = "목차-게시글 연결"
+        verbose_name_plural = "목차-게시글 연결"
+        unique_together = ('chapter', 'post')
+        ordering = ['-linked_at']
+
+    def __str__(self):
+        return f"{self.chapter.code} - {self.post.title}"
