@@ -741,7 +741,9 @@
     }
     .linked-post-item:last-child { border-bottom: none; }
     .linked-post-item:hover { background: #f8fdf9; }
-    .linked-post-info { flex: 1; }
+    .linked-post-info { flex: 1; display: flex; align-items: baseline; }
+    .linked-post-info .linked-post-type { flex-shrink: 0; }
+    .linked-post-info a { flex: 1; }
     .linked-post-info a {
         color: #333;
         text-decoration: none;
