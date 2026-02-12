@@ -183,7 +183,7 @@
 
             <!-- Post Header -->
             <div style="border-bottom: 2px solid #2d6a4f; padding-bottom: 20px; margin-bottom: 30px;">
-                <h1 style="font-size: 1.2rem; color: #333; margin-bottom: 15px;">{{ post.title|linebreaksbr }}</h1>
+                <h1 style="font-size: 1.2rem; color: #333; margin-bottom: 15px;">{{ post.title|safe }}</h1>
                 <div
                     style="display: flex; justify-content: flex-end; align-items: center; color: #666; font-size: 0.95rem; gap: 15px;">
                     <span>{{ post.created_at|timesince }} 전</span>
@@ -277,7 +277,7 @@
                     <a href="{% url 'bbs:post_detail' related.pk %}?category={{ category }}&q={{ query }}"
                        class="related-card" data-pk="{{ related.pk }}">
                         <div class="related-card-row-1">
-                            <span class="related-card-title">{{ related.title }}</span>
+                            <span class="related-card-title">{{ related.title|safe }}</span>
                             {% if related.comments.count > 0 %}
                             <span class="related-card-comment-count">{{ related.comments.count }}</span>
                             {% endif %}
@@ -971,7 +971,7 @@ document.addEventListener('keydown', function(e) {
 
         card.innerHTML = `
             <div class="related-card-row-1">
-                <span class="related-card-title">${escapeHtml(post.title)}</span>
+                <span class="related-card-title">${post.title}</span>
                 ${commentHtml}
             </div>
             <div class="related-card-row-2">

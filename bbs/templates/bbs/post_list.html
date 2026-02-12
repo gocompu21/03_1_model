@@ -190,7 +190,7 @@
             {% for post in page_obj %}
             <a href="{% url 'bbs:post_detail' post.pk %}?category={{ category }}&q={{ query }}" class="post-card">
                 <div class="card-row-1">
-                    <span class="card-title">{{ post.title }}</span>
+                    <span class="card-title">{{ post.title|safe }}</span>
                     <span class="card-arrow">›</span>
                     {% if post.comments.count > 0 %}
                     <span class="card-comment-count">{{ post.comments.count }}</span>
@@ -776,7 +776,7 @@
 
         card.innerHTML = `
             <div class="card-row-1">
-                <span class="card-title">${escapeHtml(post.title)}</span>
+                <span class="card-title">${post.title}</span>
                 <span class="card-arrow">›</span>
                 ${commentHtml}
             </div>

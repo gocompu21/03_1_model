@@ -141,6 +141,22 @@
         .note-editor {
             font-family: 'Noto Sans KR', sans-serif;
         }
+
+        /* 제목용 Summernote 미니 스타일 */
+        #summernote-title + .note-editor {
+            min-height: auto !important;
+        }
+        #summernote-title + .note-editor .note-editing-area .note-editable {
+            min-height: 36px !important;
+            max-height: 50px !important;
+            padding: 6px 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            overflow-y: hidden;
+        }
+        #summernote-title + .note-editor .note-statusbar {
+            display: none;
+        }
     </style>
 </div>
 
@@ -151,6 +167,28 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/lang/summernote-ko-KR.min.js"></script>
 
 <script>
+    // 제목용 Summernote 미니 (색상만)
+    $('#summernote-title').summernote({
+        placeholder: '제목을 입력하세요',
+        height: 36,
+        toolbar: [
+            ['color', ['color']],
+            ['font', ['bold']],
+            ['view', ['codeview']]
+        ],
+        disableResizeEditor: true,
+        lang: 'ko-KR',
+        callbacks: {
+            onKeydown: function(e) {
+                // Enter 키 방지 (제목은 한 줄)
+                if (e.keyCode === 13) {
+                    e.preventDefault();
+                }
+            }
+        }
+    });
+
+    // 내용용 Summernote
     $('#summernote').summernote({
         placeholder: '내용을 입력해주세요.',
         tabsize: 2,

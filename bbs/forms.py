@@ -7,8 +7,8 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ["title", "content"]
         widgets = {
-            "title": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "제목을 입력하세요"}
+            "title": forms.Textarea(
+                attrs={"class": "form-control", "id": "summernote-title", "rows": 1}
             ),
             "content": forms.Textarea(
                 attrs={"class": "form-control", "id": "summernote"}

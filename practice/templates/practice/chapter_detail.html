@@ -948,7 +948,7 @@
                         {% if lp.post.type %}
                         <span class="linked-post-type">{{ lp.post.type.name }}</span>
                         {% endif %}
-                        <a href="{% url 'bbs:post_detail' lp.post.pk %}" target="_blank">{{ lp.post.title }}</a>
+                        <a href="{% url 'bbs:post_detail' lp.post.pk %}" target="_blank">{{ lp.post.title|safe }}</a>
                     </div>
                     {% if user.is_staff %}
                     <button class="unlink-btn" onclick="unlinkPost({{ lp.post.id }})">해제</button>
