@@ -481,7 +481,7 @@
     }
     
     .question-item {
-        padding: 6px 15px;
+        padding: 2px 15px;
         border-bottom: 1px solid #eee;
         position: relative;
         padding-left: 45px;
@@ -500,12 +500,12 @@
         left: 15px;
         font-weight: bold;
         color: #2d6a4f;
-        font-size: 0.875rem;
+        font-size: 0.95rem;
     }
 
     .question-preview {
         color: #555;
-        font-size: 0.875rem;
+        font-size: 0.95rem;
         line-height: 1.5;
     }
     
@@ -724,20 +724,13 @@
         font-size: 1.3rem;
         margin: 0;
     }
-    .post-count-badge {
-        background: linear-gradient(135deg, #2196F3, #1976D2);
-        color: white;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 0.95rem;
-        font-weight: 600;
-    }
     .linked-post-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 2px 10px;
-        line-height: 1.3;
+        line-height: 1.5;
+        border-bottom: 1px solid #eee;
     }
     .linked-post-item:last-child { border-bottom: none; }
     .linked-post-item:hover { background: #f8fdf9; }
@@ -747,7 +740,7 @@
     .linked-post-info a {
         color: #333;
         text-decoration: none;
-        font-weight: 500;
+        font-weight: normal;
         font-size: 0.95rem;
     }
     .linked-post-info a:hover {
@@ -946,9 +939,6 @@
         <div class="linked-posts-card">
             <div class="linked-posts-header">
                 <h2 class="linked-posts-title">💬 관련 Q&A</h2>
-                {% if linked_posts %}
-                <span class="post-count-badge" id="post-count-badge">{{ linked_posts|length }}개</span>
-                {% endif %}
             </div>
 
             <div id="linked-posts-list">
@@ -1557,21 +1547,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     function updateBadge(delta) {
-        let badge = document.getElementById('post-count-badge');
-        if (badge) {
-            let count = parseInt(badge.textContent) + delta;
-            if (count <= 0) badge.remove();
-            else badge.textContent = count + '개';
-        } else if (delta > 0) {
-            const header = document.querySelector('.linked-posts-header');
-            if (header) {
-                badge = document.createElement('span');
-                badge.className = 'post-count-badge';
-                badge.id = 'post-count-badge';
-                badge.textContent = '1개';
-                header.appendChild(badge);
-            }
-        }
+        // no-op: badge removed
     }
 })();
 {% endif %}
