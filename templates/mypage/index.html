@@ -2287,7 +2287,7 @@
         document.addEventListener("DOMContentLoaded", function () {
             // Check URL param for tab
             const urlParams = new URLSearchParams(window.location.search);
-            const activeTab = urlParams.get('tab') || 'wrong_answer'; // Default to wrong_answer
+            const activeTab = urlParams.get('section') || urlParams.get('tab') || 'wrong_answer';
 
             showSection(activeTab);
 
@@ -3589,13 +3589,6 @@
                 // Pass event to function
                 saveQuestions(e); 
             });
-        }
-        
-        // Handle URL section parameter for Dashboard direct access
-        const urlParams = new URLSearchParams(window.location.search);
-        const section = urlParams.get('section');
-        if (section) {
-            showSection(section);
         }
     });
 
