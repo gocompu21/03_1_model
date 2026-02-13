@@ -207,6 +207,14 @@
 
             <h2>로그인</h2>
 
+            {% if messages %}
+            {% for message in messages %}
+            <div class="error-message">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
             <form action="" method="post">
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{{ request.GET.next }}">

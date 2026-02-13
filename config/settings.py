@@ -160,6 +160,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/mypage/"
 LOGIN_URL = "/accounts/login/"
 
+CSRF_FAILURE_VIEW = "config.csrf_views.csrf_failure"
+
 # Increase max upload size to 10MB (default is 2.5MB)
 # 10 * 1024 * 1024 = 10485760
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760
