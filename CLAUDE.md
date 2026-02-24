@@ -46,26 +46,17 @@ python manage.py collectstatic
 
 - **Engine**: PostgreSQL 16
 - **DB**: `namu_doctor`
-- **User**: `namu_user` / Password: `namu1234`
+- **User/Password**: EC2의 `.env` 참조
 - 환경변수 기반 전환: `.env`에 `DB_ENGINE` 등 설정 시 PostgreSQL, 미설정 시 SQLite 폴백 (로컬 개발용)
 - SQLite 백업 파일: `db.sqlite3` (레거시, 52MB)
-
-```sql
-CREATE DATABASE namu_doctor;
-CREATE USER namu_user WITH PASSWORD 'namu1234';
-ALTER ROLE namu_user SET client_encoding TO 'utf8';
-ALTER ROLE namu_user SET default_transaction_isolation TO 'read committed';
-ALTER ROLE namu_user SET timezone TO 'Asia/Seoul';
-GRANT ALL PRIVILEGES ON DATABASE namu_doctor TO namu_user;
-```
 
 #### .env DB 설정 (EC2)
 
 ```
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=namu_doctor
-DB_USER=namu_user
-DB_PASSWORD=namu1234
+DB_USER=<.env 참조>
+DB_PASSWORD=<.env 참조>
 DB_HOST=localhost
 DB_PORT=5432
 ```
