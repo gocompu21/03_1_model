@@ -6,7 +6,9 @@ from .models import StudyQnA
 
 
 @receiver(post_save, sender=NotebookHistory)
-def create_study_qna_from_notebook(sender, instance, created, **kwargs):
+def create_study_qna_from_notebook(sender, instance, created, raw=False, **kwargs):
+    if raw:
+        return
     if created:
         StudyQnA.objects.create(
             user=instance.user,
@@ -19,7 +21,9 @@ def create_study_qna_from_notebook(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=ChatHistory)
-def create_study_qna_from_chat(sender, instance, created, **kwargs):
+def create_study_qna_from_chat(sender, instance, created, raw=False, **kwargs):
+    if raw:
+        return
     if created:
         StudyQnA.objects.create(
             user=instance.user,
