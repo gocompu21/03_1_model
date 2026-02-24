@@ -3,6 +3,13 @@
 from django.db import migrations, models
 
 
+def alter_answer_to_json(apps, schema_editor):
+    if schema_editor.connection.vendor == 'postgresql':
+        schema_editor.execute(
+            'ALTER TABLE exam_question ALTER COLUMN answer TYPE jsonb USING to_jsonb(answer);'
+        )
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,9 +17,16 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='question',
-            name='answer',
-            field=models.JSONField(default=list, verbose_name='정답 (1-5, 복수 가능)'),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[
+                migrations.RunPython(alter_answer_to_json, migrations.RunPython.noop),
+            ],
+            state_operations=[
+                migrations.AlterField(
+                    model_name='question',
+                    name='answer',
+                    field=models.JSONField(default=list, verbose_name='정답 (1-5, 복수 가능)'),
+                ),
+            ],
         ),
     ]
