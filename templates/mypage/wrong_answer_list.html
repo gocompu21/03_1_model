@@ -473,7 +473,7 @@
                 <a href="{% url 'mypage:wrong_answer_detail' result.id %}" class="wrong-answer-card">
                     <div class="wa-question">
                         <strong>{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong>
-                        {{ result.question.content|safe|truncatechars:150 }}
+                        {{ result.question.content|striptags|truncatechars:150 }}
                     </div>
                     <div class="wa-meta">
                         <span class="subject-badge">{{ result.question.subject.name }}</span>
