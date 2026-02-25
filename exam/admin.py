@@ -45,7 +45,7 @@ class UserQuestionResultAdmin(admin.ModelAdmin):
     list_filter = ("is_correct",)
 
 
-from .models import TopicQuestionSet, TopicQuestionSetItem
+from .models import TopicQuestionSet, TopicQuestionSetItem, StudyNote
 
 class TopicQuestionSetItemInline(admin.TabularInline):
     model = TopicQuestionSetItem
@@ -58,4 +58,12 @@ class TopicQuestionSetAdmin(admin.ModelAdmin):
     list_filter = ("subject", "is_public", "created_by")
     search_fields = ("title", "description")
     inlines = [TopicQuestionSetItemInline]
+
+
+@admin.register(StudyNote)
+class StudyNoteAdmin(admin.ModelAdmin):
+    list_display = ("subject", "title", "order", "updated_at")
+    list_filter = ("subject",)
+    list_editable = ("order",)
+    search_fields = ("title", "content")
 

@@ -149,3 +149,25 @@ class UserTopicQuestionResult(models.Model):
     
     def __str__(self):
         return f"{self.attempt} - {self.question} 결과"
+
+
+class StudyNote(models.Model):
+    """쪽집게 노트 - 과목별 핵심정리"""
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE,
+        verbose_name="과목", related_name="study_notes"
+    )
+    title = models.CharField("제목", max_length=200)
+    content = models.TextField("내용")
+    order = models.PositiveIntegerField("순서", default=0)
+    created_at = models.DateTimeField("작성일", auto_now_add=True)
+    updated_at = models.DateTimeField("수정일", auto_now=True)
+
+    class Meta:
+        verbose_name = "쪽집게 노트"
+        verbose_name_plural = "쪽집게 노트"
+        ordering = ["subject", "order"]
+        unique_together = ["subject", "order"]
+
+    def __str__(self):
+        return f"{self.subject.name} - {self.title}"

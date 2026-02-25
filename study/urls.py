@@ -27,4 +27,7 @@ urlpatterns = [
     path("api/reorder_topic_set/", views.api_reorder_topic_set, name="api_reorder_topic_set"),
     # 기본서 학습문제 관리
     path("practice-manage/", views.practice_manage, name="practice_manage"),
+    # 쪽집게 노트
+    path("notes/<int:subject_id>/", views.study_notes, name="study_notes"),
+    path("notes/<int:subject_id>/study/", views.notes_study, name="notes_study"),
 ]

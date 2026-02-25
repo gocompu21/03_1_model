@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쪽집게 노트 - {{ subject.name }} - 나무의사</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f7f4;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background-color: #2d6a4f;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo {
+            color: white; font-size: 1.5rem; font-weight: bold;
+            text-decoration: none; display: flex; align-items: center; gap: 10px;
+        }
+        .nav-links a {
+            color: white; text-decoration: none; margin-left: 20px;
+            font-weight: 500; transition: color 0.3s;
+        }
+        .nav-links a:hover { color: #b7e4c7; }
+
+        /* Main */
+        .main-wrap {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        /* Subject Pills */
+        .subject-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .subject-pill {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 2px solid #2d6a4f;
+            color: #2d6a4f;
+            background: #fff;
+        }
+        .subject-pill:hover {
+            background: #e8f5e9;
+        }
+        .subject-pill.active {
+            background: #1b4332;
+            color: #fff;
+            border-color: #1b4332;
+        }
+
+        /* Toggle All + Back */
+        .top-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .toggle-all-btn {
+            background: none;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            color: #555;
+        }
+        .toggle-all-btn:hover {
+            background: #f0f0f0;
+        }
+        .back-link {
+            font-size: 0.85rem;
+            color: #2d6a4f;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Accordion - Chapter */
+        .chapter-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            cursor: pointer;
+            background: #f8f9fa;
+            border-left: 4px solid #2d6a4f;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1b4332;
+            transition: background 0.15s;
+        }
+        .chapter-header:hover { background: #e8f5e9; }
+        .chapter-chevron {
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+            color: #888;
+        }
+        .chapter-item.open .chapter-chevron {
+            transform: rotate(90deg);
+        }
+        .chapter-body { display: none; }
+        .chapter-item.open .chapter-body { display: block; }
+
+        /* Section */
+        .section-item { border-top: 1px solid #f0f0f0; }
+        .section-header {
+            padding: 12px 18px 12px 32px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.1s;
+        }
+        .section-header:hover { background: #f5f5f5; }
+        .section-chevron {
+            font-size: 0.7rem;
+            transition: transform 0.2s;
+            color: #aaa;
+        }
+        .section-item.open .section-chevron {
+            transform: rotate(90deg);
+        }
+        .section-body {
+            display: none;
+            padding: 0 18px 14px 32px;
+        }
+        .section-item.open .section-body { display: block; }
+
+        /* Subsection */
+        .subsection-title {
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: #1b4332;
+            margin: 12px 0 6px;
+            padding-left: 6px;
+            border-left: 3px solid #b7e4c7;
+        }
+
+        /* Content Box */
+        .content-box {
+            background: #f9fbf9;
+            border: 1px solid #dce8dc;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 8px 0;
+        }
+        .content-box p {
+            font-size: 0.88rem;
+            line-height: 1.75;
+            text-align: justify;
+            color: #333;
+            margin: 0.6em 0;
+        }
+        .content-box p strong { color: #1b4332; }
+        .content-box ul { padding-left: 18px; margin: 6px 0; }
+        .content-box li {
+            font-size: 0.86rem;
+            line-height: 1.6;
+            margin-bottom: 3px;
+        }
+        .content-box li.sub-item {
+            margin-left: 16px;
+            font-size: 0.84rem;
+            color: #555;
+        }
+        .content-box table.tb-summary {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            margin: 8px 0;
+        }
+        .content-box table.tb-summary th,
+        .content-box table.tb-summary td {
+            border: 1px solid #d0d8d0;
+            padding: 6px 10px;
+            text-align: left;
+        }
+        .content-box table.tb-summary th {
+            background: #e8f0e8;
+            font-weight: 700;
+        }
+        .content-box .num-item {
+            display: flex;
+            gap: 6px;
+            font-size: 0.86rem;
+            line-height: 1.6;
+            margin: 2px 0;
+        }
+        .content-box .num-marker {
+            flex-shrink: 0;
+            font-weight: 700;
+        }
+        .content-box .num-sub {
+            margin-left: 20px;
+            color: #555;
+        }
+
+        /* Question Count Badge */
+        .q-count-badge {
+            background: #e6f4ea;
+            color: #2d6a4f;
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-size: 0.68rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        /* Related Questions Box */
+        .q-box {
+            margin-top: 10px;
+            padding: 8px 14px;
+            background: #f8faf8;
+            border: 1px solid #d0d8d0;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .q-box.all-box {
+            background: #f0f4ff;
+            border-color: #c5cae9;
+        }
+        .q-study-btn {
+            display: inline-block;
+            padding: 3px 9px;
+            background: #2d6a4f;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .q-study-btn:hover { background: #1b4332; }
+        .q-study-btn.all { background: #3949ab; }
+        .q-study-btn.all:hover { background: #1a237e; }
+
+        .q-refs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        .q-ref-badge {
+            display: inline-block;
+            padding: 0 3px;
+            background: #e8f5e9;
+            color: #2d6a4f;
+            border-radius: 2px;
+            font-size: 0.58rem;
+            font-weight: 500;
+            line-height: 1.4;
+            cursor: pointer;
+        }
+        .q-ref-badge:hover { opacity: 0.8; }
+
+        /* Round-based badge colors (5~11회) */
+        .q-ref-badge.r5  { background: #3f51b5; color: #fff; }
+        .q-ref-badge.r6  { background: #2196f3; color: #fff; }
+        .q-ref-badge.r7  { background: #009688; color: #fff; }
+        .q-ref-badge.r8  { background: #4caf50; color: #fff; }
+        .q-ref-badge.r9  { background: #ff9800; color: #fff; }
+        .q-ref-badge.r10 { background: #ff5722; color: #fff; }
+        .q-ref-badge.r11 { background: #9c27b0; color: #fff; }
+
+        /* Empty */
+        .empty-msg {
+            text-align: center;
+            padding: 60px 20px;
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            margin-right: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { padding: 12px 16px; }
+            .logo { font-size: 1.1rem; }
+            .menu-toggle { display: block; }
+            .nav-links { display: none; }
+            .nav-links.active {
+                display: flex; flex-direction: column; width: 100%;
+                padding-top: 12px; gap: 10px;
+            }
+            .nav-links a { margin-left: 0; }
+            .main-wrap { margin: 12px auto; padding: 0 10px; }
+            .subject-pills { gap: 6px; }
+            .subject-pill { padding: 5px 12px; font-size: 0.8rem; }
+        }
+        @media (max-width: 480px) {
+            .content-box {
+                background: none;
+                border: none;
+                border-radius: 0;
+                padding: 0;
+                margin: 0;
+            }
+            .chapter-header { padding: 12px 14px; font-size: 0.9rem; }
+            .section-header { padding: 10px 14px 10px 24px; font-size: 0.85rem; }
+            .section-body { padding: 0 10px 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center;">
+            <button class="menu-toggle" onclick="document.getElementById('navLinks').classList.toggle('active')" aria-label="메뉴">☰</button>
+            <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        </div>
+        <nav class="nav-links" id="navLinks">
+            {% if user.is_authenticated %}
+            <a href="{% url 'mypage:review_index' %}">마이페이지</a>
+            {% endif %}
+            <a href="{% url 'main:index' %}">홈</a>
+        </nav>
+    </header>
+
+    <div class="main-wrap">
+        <!-- Subject Pills -->
+        <div class="subject-pills">
+            {% for s in subjects %}
+            <a href="{% url 'study:study_notes' s.pk %}"
+               class="subject-pill{% if s.pk == subject.pk %} active{% endif %}">{{ s.name }}</a>
+            {% endfor %}
+        </div>
+
+        {% if note_chapters %}
+        <!-- Top Actions -->
+        <div class="top-actions">
+            <a href="{% url 'main:index' %}" class="back-link">← 홈으로</a>
+            <button class="toggle-all-btn" id="toggle-all-notes" onclick="toggleAllNotes()">전체 펼치기</button>
+        </div>
+
+        <!-- Accordion -->
+        {% for ch in note_chapters %}
+        <div class="chapter-item open" id="{{ ch.id }}">
+            <div class="chapter-header" onclick="this.parentElement.classList.toggle('open')">
+                <span>{{ ch.title }}</span>
+                <span class="chapter-chevron">&#9654;</span>
+            </div>
+            <div class="chapter-body">
+                {% for sec in ch.sections %}
+                <div class="section-item" id="{{ sec.id }}">
+                    <div class="section-header" onclick="this.parentElement.classList.toggle('open')">
+                        <span>{{ sec.title }}{% if sec.total_questions %}<span class="q-count-badge">{{ sec.total_questions }}문제</span>{% endif %}</span>
+                        <span class="section-chevron">&#9654;</span>
+                    </div>
+                    <div class="section-body">
+                        {% if sec.content_html %}<div class="content-box">{{ sec.content_html|safe }}</div>{% endif %}
+
+                        {% for sub in sec.subsections %}
+                        <div class="subsection-title">{{ sub.title }}</div>
+                        {% if sub.content_html %}<div class="content-box">{{ sub.content_html|safe }}</div>{% endif %}
+                        {% if sub.questions %}
+                        <div class="q-box">
+                            <form method="get" action="{% url 'study:notes_study' subject.pk %}" style="display:inline">{% for qref in sub.questions %}<input type="hidden" name="ref" value="{{ qref }}">{% endfor %}<button type="submit" class="q-study-btn">관련 문제 학습 ({{ sub.questions|length }})</button></form>
+                            <div class="q-refs">{% for qref in sub.questions %}<span class="q-ref-badge">{{ qref }}</span> {% endfor %}</div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if sec.questions and not sec.subsections %}
+                        <div class="q-box">
+                            <form method="get" action="{% url 'study:notes_study' subject.pk %}" style="display:inline">{% for qref in sec.questions %}<input type="hidden" name="ref" value="{{ qref }}">{% endfor %}<button type="submit" class="q-study-btn">관련 문제 학습 ({{ sec.questions|length }})</button></form>
+                            <div class="q-refs">{% for qref in sec.questions %}<span class="q-ref-badge">{{ qref }}</span> {% endfor %}</div>
+                        </div>
+                        {% elif sec.subsections|length > 1 and sec.all_questions %}
+                        <div class="q-box all-box">
+                            <form method="get" action="{% url 'study:notes_study' subject.pk %}" style="display:inline">{% for qref in sec.all_questions %}<input type="hidden" name="ref" value="{{ qref }}">{% endfor %}<button type="submit" class="q-study-btn all">이 절의 전체 문제 학습 ({{ sec.total_questions }})</button></form>
+                            <div class="q-refs">{% for qref in sec.all_questions %}<span class="q-ref-badge">{{ qref }}</span> {% endfor %}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <div class="empty-msg">
+            {{ subject.name }}의 쪽집게 노트가 아직 준비되지 않았습니다.
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Badge formatting: R-N → round-based color class, display round number
+        document.querySelectorAll('.q-refs').forEach(function(box) {
+            box.querySelectorAll('.q-ref-badge').forEach(function(badge) {
+                var ref = badge.textContent.trim();
+                var round = ref.split('-')[0];
+                badge.classList.add('r' + round);
+                badge.textContent = round + '회';
+            });
+        });
+
+        // Toggle all sections
+        var _notesExpanded = false;
+        function toggleAllNotes() {
+            _notesExpanded = !_notesExpanded;
+            var btn = document.getElementById('toggle-all-notes');
+            document.querySelectorAll('.chapter-item').forEach(function(ch) {
+                ch.classList.add('open');
+                ch.querySelectorAll('.section-item').forEach(function(sec) {
+                    if (_notesExpanded) sec.classList.add('open');
+                    else sec.classList.remove('open');
+                });
+            });
+            btn.textContent = _notesExpanded ? '전체 접기' : '전체 펼치기';
+        }
+
+        // URL ?sec=X.Y → auto-scroll to section
+        var params = new URLSearchParams(window.location.search);
+        var secId = params.get('sec');
+        if (secId) {
+            var sections = document.querySelectorAll('.section-item');
+            for (var i = 0; i < sections.length; i++) {
+                var hdr = sections[i].querySelector('.section-header span');
+                if (hdr && hdr.textContent.trim().match(new RegExp('^' + secId.replace('.', '\\.') + '\\b'))) {
+                    var ch = sections[i].closest('.chapter-item');
+                    if (ch) ch.classList.add('open');
+                    sections[i].classList.add('open');
+                    setTimeout(function(el) {
+                        el.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    }.bind(null, sections[i]), 150);
+                    break;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

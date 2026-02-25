@@ -1,10 +1,13 @@
-from django.shortcuts import render, get_object_or_404
-from exam.models import Exam, Question, Subject
+from django.shortcuts import render, get_object_or_404, redirect
+from exam.models import Exam, Question, Subject, StudyNote
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 from django.conf import settings
+from exam.note_parser import parse_note_chapters
 import json
+import re
 import struct
 
 
@@ -992,4 +995,93 @@ from django.contrib.admin.views.decorators import staff_member_required
 def practice_manage(request):
     """기본서 학습문제 입력/수정 관리 페이지 (관리자 전용)"""
     return render(request, 'study/practice_manage.html')
+
+
+# ============================================================================
+# 쪽집게 노트 (StudyNote)
+# ============================================================================
+
+@login_required
+def study_notes(request, subject_id):
+    """과목별 쪽집게 노트 아코디언 표시"""
+    subject = get_object_or_404(Subject, pk=subject_id)
+    subjects = Subject.objects.all().order_by("code")
+
+    notes_qs = StudyNote.objects.filter(subject=subject).order_by("order")
+    note_chapters = []
+
+    if notes_qs.exists():
+        combined = "\n\n".join(n.content for n in notes_qs if n.content)
+        if combined.strip():
+            latest_updated = max(
+                (n.updated_at for n in notes_qs if n.updated_at),
+                default=None,
+            )
+            note_chapters = parse_note_chapters(
+                combined, subject.pk,
+                cache_version=str(latest_updated) if latest_updated else None,
+            )
+
+    return render(request, "study/study_notes.html", {
+        "subject": subject,
+        "subjects": subjects,
+        "note_chapters": note_chapters,
+        "study_notes_count": notes_qs.count(),
+    })
+
+
+@login_required
+def notes_study(request, subject_id):
+    """쪽집게 노트 관련 문제 학습모드 — ref 형식: R-N (회차-문제번호)"""
+    subject = get_object_or_404(Subject, pk=subject_id)
+    refs = request.GET.getlist("ref")
+
+    if not refs:
+        return redirect("study:study_notes", subject_id=subject.pk)
+
+    # R-N 형식 파싱 → (round_number, question_number)
+    q_filters = Q()
+    for ref in refs:
+        parts = ref.split("-")
+        if len(parts) == 2:
+            try:
+                round_num, q_num = int(parts[0]), int(parts[1])
+                q_filters |= Q(
+                    subject=subject,
+                    exam__round_number=round_num,
+                    number=q_num,
+                )
+            except ValueError:
+                continue
+
+    questions = list(
+        Question.objects.filter(q_filters)
+        .select_related("exam", "subject")
+        .order_by("exam__round_number", "number")
+    )
+
+    # 해당 절 제목 찾기 (breadcrumb용)
+    section_title = ""
+    ref_set = set(refs)
+    for note in StudyNote.objects.filter(subject=subject).order_by("order"):
+        for line in note.content.split("\n"):
+            stripped = line.strip()
+            if stripped.startswith("### ") and not stripped.startswith("### 핵심"):
+                current_section = stripped[4:]
+            if "**관련 문제**" in stripped:
+                found_refs = set(re.findall(r"\((\d{1,2}-\d+)\)", stripped))
+                if found_refs & ref_set:
+                    section_title = current_section
+                    break
+        if section_title:
+            break
+
+    return render(request, "study/study_by_subject.html", {
+        "subject_name": subject.name,
+        "current_round": "쪽집게 노트",
+        "exams": Exam.objects.exclude(round_number=0).order_by("round_number"),
+        "questions": questions,
+        "is_notes_study": True,
+        "section_title": section_title,
+    })
 
