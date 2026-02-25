@@ -821,6 +821,9 @@
                 border-radius: 10px !important;
                 padding: 14px 16px !important;
             }
+            .sd-guide {
+                display: none !important;
+            }
 
             /* 모바일 홈 버튼 */
             .mobile-home-btn {
@@ -1073,7 +1076,7 @@
                             <div class="sd-stat"><div class="sd-stat-value sd-score">-</div><div class="sd-stat-label">점수</div></div>
                         </div>
                     </div>
-                    <div style="text-align: center; font-size: 0.8em; color: #999; margin-top: 8px;">아래 &gt; 버튼을 클릭하여 채점 시험지를 확인하세요</div>
+                    <div class="sd-guide" style="text-align: center; font-size: 0.8em; color: #999; margin-top: 8px;">아래 &gt; 버튼을 클릭하여 채점 시험지를 확인하세요</div>
                 </div>
                 {% endifchanged %}
                 <div class="question-item" id="q-{{ mq.question.id }}" data-question-index="{{ forloop.counter0 }}"
