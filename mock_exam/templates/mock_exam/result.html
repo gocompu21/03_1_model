@@ -97,8 +97,9 @@
             background-color: black;
             transform: translateX(-50%);
         }
-        /* 과목 구분 단독 페이지에는 중앙선 숨김 */
-        .question-page.active:has(.subject-divider:only-child)::after {
+        /* 단독 페이지(과목구분/결과요약)에는 중앙선 숨김 */
+        .question-page.active:has(.subject-divider:only-child)::after,
+        .question-page.active:has(.desk-result-box:only-child)::after {
             display: none;
         }
 
@@ -743,29 +744,30 @@
             background: rgba(255,255,255,0.25);
         }
 
-        /* 데스크톱 결과 박스 */
+        /* 데스크톱 결과 박스 (pagination 첫 페이지) */
         .desk-result-box {
-            margin: 0 50px 24px auto;
-            max-width: 360px;
+            break-inside: avoid;
         }
         .desk-result-inner {
             background: linear-gradient(135deg, #1b4332, #2d6a4f);
             color: white;
             border-radius: 12px;
-            padding: 16px 20px;
+            padding: 20px 28px;
+            min-width: 340px;
+            max-width: 400px;
         }
         .desk-result-rows {
             display: flex;
             flex-wrap: wrap;
-            gap: 2px 24px;
+            gap: 4px 28px;
         }
         .desk-result-row {
             display: flex;
             justify-content: space-between;
             gap: 12px;
-            font-size: 0.9rem;
-            padding: 2px 0;
-            min-width: calc(50% - 12px);
+            font-size: 0.95rem;
+            padding: 3px 0;
+            min-width: calc(50% - 14px);
         }
         .desk-result-score {
             font-weight: 700;
@@ -774,17 +776,26 @@
             display: flex;
             justify-content: space-between;
             gap: 12px;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 700;
-            padding-top: 6px;
-            margin-top: 6px;
+            padding-top: 8px;
+            margin-top: 8px;
             border-top: 1px solid rgba(255,255,255,0.3);
         }
         .desk-result-guide {
             text-align: center;
-            font-size: 0.8em;
+            font-size: 0.85em;
             color: #999;
-            margin-top: 8px;
+            margin-top: 10px;
+        }
+        /* 결과 박스가 단독 페이지일 때 중앙 배치 */
+        .question-page.active .desk-result-box:only-child {
+            grid-column: 1 / -1;
+            grid-row: 1 / -1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         /* 모바일 전용 요소 - 데스크탑에서 숨김 */
@@ -1154,18 +1165,19 @@
                 style="text-align: right; font-size: 1.0em; margin-top: 20px; margin-bottom: 22px; font-weight: normal;">
                 {{ mock_exam.start_time|date:"Y-m-d" }} 모의고사 결과 <span id="subject-title"></span>
             </h2>
-            <div class="desk-result-box">
-                <div class="desk-result-inner">
-                    <div class="desk-result-rows">
-                        {% for s in subject_results %}
-                        <div class="desk-result-row"><span>{{ s.name }}</span><span class="desk-result-score">{{ s.score }}점</span></div>
-                        {% endfor %}
-                    </div>
-                    <div class="desk-result-avg"><span>평균</span><span class="desk-result-score">{{ average_score }}점</span></div>
-                </div>
-                <div class="desk-result-guide">아래 &gt; 버튼을 클릭하여 채점 시험지를 확인하세요</div>
-            </div>
             <div id="questions-container">
+                <!-- 결과 요약 (pagination 첫 페이지) -->
+                <div class="desk-result-box">
+                    <div class="desk-result-inner">
+                        <div class="desk-result-rows">
+                            {% for s in subject_results %}
+                            <div class="desk-result-row"><span>{{ s.name }}</span><span class="desk-result-score">{{ s.score }}점</span></div>
+                            {% endfor %}
+                        </div>
+                        <div class="desk-result-avg"><span>평균</span><span class="desk-result-score">{{ average_score }}점</span></div>
+                    </div>
+                    <div class="desk-result-guide">아래 &gt; 버튼을 클릭하여 채점 시험지를 확인하세요</div>
+                </div>
                 <!-- Javascript will group these into pages -->
                 {% for mq in questions %}
                 {% ifchanged mq.question.subject.name %}
@@ -1411,8 +1423,8 @@
             let qNum = 0;
 
             items.forEach((item) => {
-                // 과목 구분 카드: 새 페이지에 단독 배치
-                if (item.classList.contains('subject-divider')) {
+                // 결과 요약 또는 과목 구분 카드: 새 페이지에 단독 배치
+                if (item.classList.contains('desk-result-box') || item.classList.contains('subject-divider')) {
                     if (currentPageItems.length > 0) {
                         pages.push(currentPageItems);
                         currentPageItems = [];
