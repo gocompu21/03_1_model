@@ -743,6 +743,50 @@
             background: rgba(255,255,255,0.25);
         }
 
+        /* 데스크톱 결과 박스 */
+        .desk-result-box {
+            margin: 0 50px 24px auto;
+            max-width: 360px;
+        }
+        .desk-result-inner {
+            background: linear-gradient(135deg, #1b4332, #2d6a4f);
+            color: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+        .desk-result-rows {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px 24px;
+        }
+        .desk-result-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.9rem;
+            padding: 2px 0;
+            min-width: calc(50% - 12px);
+        }
+        .desk-result-score {
+            font-weight: 700;
+        }
+        .desk-result-avg {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            padding-top: 6px;
+            margin-top: 6px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        .desk-result-guide {
+            text-align: center;
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 8px;
+        }
+
         /* 모바일 전용 요소 - 데스크탑에서 숨김 */
         .mobile-header {
             display: none;
@@ -853,6 +897,11 @@
                 padding-top: 4px;
                 margin-top: 4px;
                 border-top: 1px solid rgba(255,255,255,0.25);
+            }
+
+            /* 데스크톱 결과 박스 숨김 */
+            .desk-result-box {
+                display: none !important;
             }
 
             /* 모바일 과목 구분 카드 */
@@ -1105,6 +1154,17 @@
                 style="text-align: right; font-size: 1.0em; margin-top: 20px; margin-bottom: 22px; font-weight: normal;">
                 {{ mock_exam.start_time|date:"Y-m-d" }} 모의고사 결과 <span id="subject-title"></span>
             </h2>
+            <div class="desk-result-box">
+                <div class="desk-result-inner">
+                    <div class="desk-result-rows">
+                        {% for s in subject_results %}
+                        <div class="desk-result-row"><span>{{ s.name }}</span><span class="desk-result-score">{{ s.score }}점</span></div>
+                        {% endfor %}
+                    </div>
+                    <div class="desk-result-avg"><span>평균</span><span class="desk-result-score">{{ average_score }}점</span></div>
+                </div>
+                <div class="desk-result-guide">아래 &gt; 버튼을 클릭하여 채점 시험지를 확인하세요</div>
+            </div>
             <div id="questions-container">
                 <!-- Javascript will group these into pages -->
                 {% for mq in questions %}
