@@ -1,5 +1,4 @@
 {% load static %}
-{% load bbs_extras %}
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -132,65 +131,96 @@
             font-size: 0.9rem;
         }
 
-        /* Wrong Answer Cards */
-        .wrong-answer-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        /* Card Layout (same as review_index) */
+        .history-table {
+            display: block;
+            width: 100%;
             max-width: 900px;
         }
 
-        .wrong-answer-card {
+        .history-table thead {
+            display: none;
+        }
+
+        .history-table tbody {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-table tbody tr {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
             background: white;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 16px 20px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
             border: 1px solid #e8e8e8;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            color: inherit;
-            display: block;
         }
 
-        .wrong-answer-card:hover {
+        .history-table tbody tr:hover {
             border-color: #2d6a4f;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
-        .wa-question {
+        .history-table td {
+            display: block;
+            padding: 0;
+            border: none;
+        }
+
+        /* 문제 (상단 - full width) */
+        .history-table td:nth-child(3) {
+            order: 1;
+            flex: 0 0 100%;
+            width: 100%;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #e0e0e0;
             font-size: 1rem;
             color: #333;
-            margin-bottom: 10px;
             line-height: 1.6;
         }
 
-        .wa-question strong {
-            color: #2d6a4f;
+        .history-table td:nth-child(3) > div {
+            white-space: normal !important;
+            overflow: visible !important;
         }
 
-        .wa-meta {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px;
+        /* 문제 내용 내부 보기 박스 스타일 */
+        .history-table td:nth-child(3) div div {
+            display: block !important;
+            clear: both;
+            border: 1px solid #ddd !important;
+            padding: 8px 12px !important;
+            margin: 8px 0 !important;
+            background: #f9f9f9 !important;
+            border-radius: 4px;
+        }
+
+        .history-table td:nth-child(3) div div:first-of-type {
+            margin-top: 12px;
+        }
+
+        /* 시험 일시 (하단 왼쪽) */
+        .history-table td:nth-child(1) {
+            order: 2;
             font-size: 0.85rem;
             color: #888;
+            margin-left: auto;
         }
 
-        .wa-meta span {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .wa-meta .subject-badge {
-            background: #e6f4ea;
+        /* 과목 (하단 오른쪽) */
+        .history-table td:nth-child(2) {
+            order: 3;
+            font-size: 0.85rem;
             color: #2d6a4f;
-            padding: 2px 8px;
+            font-weight: bold;
+            background: #e6f4ea;
+            padding: 3px 10px;
             border-radius: 4px;
-            font-weight: 500;
-            font-size: 0.8rem;
+            margin-left: 10px;
         }
 
         /* Loading & Empty States */
@@ -342,17 +372,23 @@
                 font-size: 1.2rem;
             }
 
-            .wrong-answer-card {
-                padding: 14px 16px;
+            /* Mobile Card Adjustments */
+            .history-table tbody tr {
+                padding: 14px;
             }
 
-            .wa-question {
-                font-size: 0.95rem;
+            .history-table td:nth-child(3) {
+                margin-bottom: 6px;
+                padding-bottom: 6px;
             }
 
-            .wa-meta {
-                font-size: 0.8rem;
-                flex-wrap: wrap;
+            .history-table td:nth-child(1) {
+                font-size: 0.75rem !important;
+            }
+
+            .history-table td:nth-child(2) {
+                font-size: 0.75rem !important;
+                padding: 1px 6px !important;
             }
 
             .scroll-top-btn {
@@ -395,12 +431,8 @@
                 font-size: 1.1rem;
             }
 
-            .wrong-answer-card {
+            .history-table tbody tr {
                 padding: 12px;
-            }
-
-            .wa-question {
-                font-size: 0.9rem;
             }
         }
     </style>
@@ -468,28 +500,40 @@
                  data-next-page="{{ wrong_answers.next_page_number|default:'' }}"
                  style="display: none;"></div>
 
-            <div class="wrong-answer-container" id="wrong-answer-container">
-                {% for result in wrong_answers %}
-                <a href="{% url 'mypage:wrong_answer_detail' result.id %}" class="wrong-answer-card">
-                    <div class="wa-question">
-                        <strong>{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong>
-                        {{ result.question.content|striptags|truncatechars:150 }}
-                    </div>
-                    <div class="wa-meta">
-                        <span class="subject-badge">{{ result.question.subject.name }}</span>
-                        <span><i class="fas fa-calendar"></i> {{ result.attempt.start_time|date:"y/m/d H:i" }}</span>
-                    </div>
-                </a>
-                {% empty %}
-                <div class="empty-state">
-                    <i class="fas fa-medal"></i>
-                    <p>틀린 문제가 없습니다. 훌륭합니다!</p>
-                    <a href="{% url 'exam:index' %}" class="start-btn">
-                        <i class="fas fa-play"></i> 시험 보러 가기
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
+            <table class="history-table" id="wrong-answer-container">
+                <thead>
+                    <tr>
+                        <th>시험 일시</th>
+                        <th>과목</th>
+                        <th>문제</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in wrong_answers %}
+                    <tr>
+                        <td style="white-space: nowrap;">{{ result.attempt.start_time|date:"y/m/d H:i" }}</td>
+                        <td style="white-space: nowrap;">{{ result.question.subject.name }}</td>
+                        <td>
+                            <div>
+                                <strong style="color: #2d6a4f;">{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong> {{ result.question.content|safe }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3">
+                            <div class="empty-state">
+                                <i class="fas fa-medal"></i>
+                                <p>틀린 문제가 없습니다. 훌륭합니다!</p>
+                                <a href="{% url 'exam:index' %}" class="start-btn">
+                                    <i class="fas fa-play"></i> 시험 보러 가기
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
             <!-- Loading Indicator -->
             <div id="loading" class="loading" style="display: none;">
@@ -543,14 +587,14 @@
                     const temp = document.createElement('div');
                     temp.innerHTML = html;
 
-                    // Extract new cards
-                    const newCards = temp.querySelectorAll('.wrong-answer-card');
+                    // Extract new rows from tbody
+                    const newRows = temp.querySelectorAll('.history-table tbody tr');
                     const newScrollData = temp.querySelector('#scroll-data');
 
-                    // Append new cards
-                    const container = document.getElementById('wrong-answer-container');
-                    newCards.forEach(card => {
-                        container.appendChild(card.cloneNode(true));
+                    // Append new rows to existing tbody
+                    const tbody = document.querySelector('#wrong-answer-container tbody');
+                    newRows.forEach(row => {
+                        tbody.appendChild(row.cloneNode(true));
                     });
 
                     // Update scroll data
