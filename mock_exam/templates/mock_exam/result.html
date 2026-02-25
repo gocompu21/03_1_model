@@ -1057,9 +1057,10 @@
         <!-- Question Panel (Left) -->
         <div class="question-panel">
             <h2
-                style="text-align: right; font-size: 1.0em; margin-top: 20px; margin-bottom: 22px; font-weight: normal;">
+                style="text-align: right; font-size: 1.0em; margin-top: 20px; margin-bottom: 6px; font-weight: normal;">
                 {{ mock_exam.start_time|date:"Y-m-d" }} 모의고사 결과 <span id="subject-title"></span>
             </h2>
+            <div style="text-align: right; font-size: 0.85em; color: #888; margin-bottom: 16px;">아래 &gt; 버튼을 클릭하여 채점 시험지를 확인하세요</div>
             <div id="questions-container">
                 <!-- Javascript will group these into pages -->
                 {% for mq in questions %}
