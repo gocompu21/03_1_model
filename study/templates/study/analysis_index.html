@@ -304,6 +304,47 @@
     .subject-card:nth-child(5) { animation-delay: 0.55s; }
     .subject-card:nth-child(6) { animation-delay: 0.65s; }
 
+    /* Loading Overlay */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.4);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+    .loading-overlay.active {
+        display: flex;
+    }
+    .loading-box {
+        background: white;
+        border-radius: 16px;
+        padding: 40px 50px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #e0e0e0;
+        border-top: 4px solid #2c5f2d;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 16px;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    .loading-text {
+        color: #2c5f2d;
+        font-weight: 600;
+        font-size: 1.05rem;
+    }
+
     /* Extra small devices */
     @media screen and (max-width: 400px) {
         .custom-main-header .logo {
@@ -406,6 +447,14 @@
     </div>
 </div>
 
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">분석 데이터 로딩 중...</div>
+    </div>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const header = document.querySelector('header');
@@ -413,6 +462,13 @@ document.addEventListener("DOMContentLoaded", function() {
         header.style.display = 'none';
         header.remove();
     }
+
+    // Show loading overlay when clicking a subject card
+    document.querySelectorAll('a.subject-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        });
+    });
 });
 
 function toggleMenu() {
