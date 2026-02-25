@@ -471,6 +471,13 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+// Hide loading overlay when returning via back button (bfcache)
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted) {
+        document.getElementById('loadingOverlay').classList.remove('active');
+    }
+});
+
 function toggleMenu() {
     const navLinks = document.getElementById('navLinks');
     navLinks.classList.toggle('active');
