@@ -79,9 +79,13 @@
 
         /* Main Layout */
         .main-container {
-            max-width: 500px;
+            max-width: 960px;
             margin: 0 auto;
             padding: 40px 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
         }
 
         /* Exam Card */
@@ -90,7 +94,7 @@
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
+            margin-bottom: 0;
         }
 
         .exam-card-header {
@@ -364,6 +368,17 @@
 
         /* Mobile Styles */
         @media screen and (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px 16px;
+                max-width: 500px;
+            }
+
+            .exam-card {
+                margin-bottom: 0;
+            }
+
             header {
                 padding: 12px 20px;
                 flex-wrap: wrap;
@@ -413,10 +428,6 @@
                 padding: 8px 0 !important;
                 margin-left: 0 !important;
                 text-align: left;
-            }
-
-            .main-container {
-                padding: 20px 16px;
             }
 
             .exam-card-header {
