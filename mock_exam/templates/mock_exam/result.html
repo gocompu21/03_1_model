@@ -750,7 +750,7 @@
         .mobile-home-btn {
             display: none;
         }
-        .mh-scores {
+        .mh-box {
             display: none;
         }
 
@@ -818,25 +818,41 @@
                 opacity: 0.8;
                 margin-bottom: 6px;
             }
-            .mh-scores {
-                display: flex !important;
+            .mh-box {
+                display: block !important;
+                background: rgba(255,255,255,0.12);
+                border-radius: 10px;
+                padding: 8px 14px;
+                margin-top: 8px;
+            }
+            .mh-rows {
+                display: flex;
                 flex-wrap: wrap;
-                justify-content: flex-start;
-                gap: 5px;
+                gap: 2px 16px;
             }
-            .mh-pill {
-                background: rgba(255,255,255,0.15);
-                border-radius: 20px;
-                padding: 3px 10px;
-                font-size: 0.75rem;
+            .mh-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 8px;
+                font-size: 0.8rem;
+                padding: 2px 0;
+                min-width: calc(50% - 8px);
             }
-            .mh-pill b {
+            .mh-name {
+                opacity: 0.85;
+            }
+            .mh-score {
                 font-weight: 700;
             }
-            .mh-avg {
-                background: none;
-                margin-left: auto;
-                padding-right: 0;
+            .mh-avg-row {
+                display: flex;
+                justify-content: space-between;
+                gap: 8px;
+                font-size: 0.85rem;
+                font-weight: 700;
+                padding-top: 4px;
+                margin-top: 4px;
+                border-top: 1px solid rgba(255,255,255,0.25);
             }
 
             /* 모바일 과목 구분 카드 */
@@ -1075,7 +1091,10 @@
     <!-- 모바일 헤더 -->
     <div class="mobile-header">
         <div class="mh-title">{{ mock_exam.start_time|date:"Y.m.d" }} 모의고사 결과</div>
-        <div class="mh-scores">{% for s in subject_results %}<span class="mh-pill">{{ s.name }} <b>{{ s.score }}점</b></span>{% endfor %}<span class="mh-pill mh-avg">평균 <b>{{ average_score }}점</b></span></div>
+        <div class="mh-box">
+            <div class="mh-rows">{% for s in subject_results %}<div class="mh-row"><span class="mh-name">{{ s.name }}</span><span class="mh-score">{{ s.score }}점</span></div>{% endfor %}</div>
+            <div class="mh-avg-row"><span class="mh-name">평균</span><span class="mh-score">{{ average_score }}점</span></div>
+        </div>
     </div>
 
     <div style="display: flex; width: 100%; min-height: 100vh;">
