@@ -801,7 +801,7 @@
                 display: none !important;
             }
 
-            /* 모바일 헤더 (과목 통계 통합) */
+            /* 모바일 헤더 (과목+점수만) */
             .mobile-header {
                 display: block !important;
                 position: sticky;
@@ -809,10 +809,8 @@
                 z-index: 100;
                 background: linear-gradient(135deg, #1b4332, #2d6a4f);
                 color: white;
-                padding: 12px 16px;
+                padding: 8px 12px;
                 text-align: center;
-                font-size: 0.95rem;
-                font-weight: 600;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
             .mh-subjects {
@@ -820,20 +818,17 @@
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 6px;
-                margin-top: 8px;
             }
             .mh-subj {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: 5px;
                 background: rgba(255,255,255,0.15);
                 border-radius: 20px;
-                padding: 4px 12px;
-                font-size: 0.78em;
-                font-weight: 400;
+                padding: 5px 12px;
+                font-size: 0.8em;
             }
             .mh-subj-name { opacity: 0.9; }
-            .mh-subj-stats { font-weight: 700; }
             .mh-subj-score { font-weight: 700; }
 
             /* 모바일 과목 구분 - 간소화 (텍스트만) */
@@ -1083,10 +1078,9 @@
 <body>
     <!-- 모바일 헤더 -->
     <div class="mobile-header">
-        {{ mock_exam.start_time|date:"Y.m.d" }} 모의고사 결과
         <div class="mh-subjects">
             {% for s in subject_results %}
-            <div class="mh-subj"><span class="mh-subj-name">{{ s.name }}</span> <span class="mh-subj-stats">{{ s.correct }}/{{ s.total }}</span> <span class="mh-subj-score">{{ s.score }}점</span></div>
+            <div class="mh-subj"><span class="mh-subj-name">{{ s.name }}</span> <span class="mh-subj-score">{{ s.score }}점</span></div>
             {% endfor %}
         </div>
     </div>
