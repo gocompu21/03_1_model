@@ -21,6 +21,9 @@ from exam.models import Subject, StudyNote
 SUBJECT_CONFIG = {
     "수목병리학": {"search": "수목병리", "prefix": "pathology"},
     "수목해충학": {"search": "수목해충", "prefix": "entomology"},
+    "수목생리학": {"search": "수목생리", "prefix": "physiology"},
+    "산림토양학": {"search": "산림토양", "prefix": "soil"},
+    "수목관리학": {"search": "수목관리", "prefix": "management"},
 }
 
 # 명령줄 인수로 과목 선택
