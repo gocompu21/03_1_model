@@ -812,8 +812,16 @@
     // Select Choice
     function selectChoice(choiceItem, choiceNum) {
         const parent = choiceItem.closest('.q-choices');
+        const card = choiceItem.closest('.question-card');
         parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
         choiceItem.classList.add('selected');
+
+        // Auto-show explanation when choice is selected
+        const expSection = card.querySelector('.explanation-section');
+        if (expSection && window.getComputedStyle(expSection).display === 'none') {
+            const expId = expSection.id;
+            toggleExplanation(expId);
+        }
     }
 
     // Toggle Explanation
