@@ -750,6 +750,9 @@
         .mobile-home-btn {
             display: none;
         }
+        .mh-subjects {
+            display: none;
+        }
 
         /* ========== Page Load Transitions (Mobile) ========== */
         @keyframes fadeInUp {
@@ -798,7 +801,7 @@
                 display: none !important;
             }
 
-            /* 모바일 헤더 */
+            /* 모바일 헤더 (과목 통계 통합) */
             .mobile-header {
                 display: block !important;
                 position: sticky;
@@ -812,14 +815,43 @@
                 font-weight: 600;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             }
+            .mh-subjects {
+                display: flex !important;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 6px;
+                margin-top: 8px;
+            }
+            .mh-subj {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(255,255,255,0.15);
+                border-radius: 20px;
+                padding: 4px 12px;
+                font-size: 0.78em;
+                font-weight: 400;
+            }
+            .mh-subj-name { opacity: 0.9; }
+            .mh-subj-stats { font-weight: 700; }
+            .mh-subj-score { font-weight: 700; }
 
-            /* 모바일 과목 구분 카드 */
+            /* 모바일 과목 구분 - 간소화 (텍스트만) */
             .subject-divider {
-                margin-bottom: 8px !important;
+                margin-bottom: 4px !important;
             }
             .sd-inner {
-                border-radius: 10px !important;
-                padding: 14px 16px !important;
+                background: transparent !important;
+                color: #1b4332 !important;
+                padding: 12px 8px 4px !important;
+                border-radius: 0 !important;
+                justify-content: center !important;
+            }
+            .sd-stats { display: none !important; }
+            .sd-title {
+                font-size: 0.85em !important;
+                border-bottom: 2px solid #2d6a4f;
+                padding-bottom: 2px;
             }
             .sd-guide {
                 display: none !important;
@@ -1052,7 +1084,11 @@
     <!-- 모바일 헤더 -->
     <div class="mobile-header">
         {{ mock_exam.start_time|date:"Y.m.d" }} 모의고사 결과
-        <div style="font-size: 0.75em; font-weight: 400; opacity: 0.85; margin-top: 4px;">아래 &gt; 버튼을 클릭하여 채점 시험지를 확인하세요</div>
+        <div class="mh-subjects">
+            {% for s in subject_results %}
+            <div class="mh-subj"><span class="mh-subj-name">{{ s.name }}</span> <span class="mh-subj-stats">{{ s.correct }}/{{ s.total }}</span> <span class="mh-subj-score">{{ s.score }}점</span></div>
+            {% endfor %}
+        </div>
     </div>
 
     <div style="display: flex; width: 100%; min-height: 100vh;">
