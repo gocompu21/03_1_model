@@ -1,9 +1,13 @@
 """
 쪽집게 노트 마크다운 파일을 DB에 import.
-EC2에서 실행: python save_study_note.py
+EC2에서 실행: python save_study_note.py [과목]
 
-data/ 디렉토리에서 수목병리학_note_ch*.md 파일을 읽어서
+data/ 디렉토리에서 {prefix}_note_ch*.md 파일을 읽어서
 StudyNote 모델에 update_or_create로 저장.
+
+사용법:
+  python save_study_note.py              # 수목병리학 (기본)
+  python save_study_note.py 수목해충학   # 수목해충학
 """
 import os, sys, glob, re, django
 
@@ -13,18 +17,29 @@ django.setup()
 
 from exam.models import Subject, StudyNote
 
-# 과목명 → Subject 매핑
-SUBJECT_NAME = "수목병리학"
+# 과목별 설정
+SUBJECT_CONFIG = {
+    "수목병리학": {"search": "수목병리", "prefix": "pathology"},
+    "수목해충학": {"search": "수목해충", "prefix": "entomology"},
+}
 
-subject = Subject.objects.get(name__contains=SUBJECT_NAME.replace("학", ""))
+# 명령줄 인수로 과목 선택
+arg = sys.argv[1] if len(sys.argv) > 1 else "수목병리학"
+config = SUBJECT_CONFIG.get(arg)
+if not config:
+    print(f"지원하지 않는 과목: {arg}")
+    print(f"사용 가능: {', '.join(SUBJECT_CONFIG.keys())}")
+    sys.exit(1)
+
+subject = Subject.objects.get(name__contains=config["search"])
 print(f"과목: {subject.name} (pk={subject.pk})")
 
 # data/ 디렉토리에서 note_ch*.md 파일 찾기
 base_dir = os.path.dirname(os.path.abspath(__file__))
 data_dir = os.path.join(base_dir, "data")
 
-# 패턴: pathology_note_ch1.md, pathology_note_ch2.md, ...
-pattern = os.path.join(data_dir, "pathology_note_ch*.md")
+# 패턴: {prefix}_note_ch1.md, {prefix}_note_ch2.md, ...
+pattern = os.path.join(data_dir, f"{config['prefix']}_note_ch*.md")
 files = sorted(glob.glob(pattern), key=lambda f: int(re.search(r"ch(\d+)", f).group(1)))
 
 if not files:
