@@ -833,6 +833,9 @@
             .mh-pill b {
                 font-weight: 700;
             }
+            .mh-avg {
+                background: rgba(255,255,255,0.35);
+            }
 
             /* 모바일 과목 구분 카드 */
             .subject-divider {
@@ -1070,7 +1073,7 @@
     <!-- 모바일 헤더 -->
     <div class="mobile-header">
         <div class="mh-title">{{ mock_exam.start_time|date:"Y.m.d" }} 모의고사 결과</div>
-        <div class="mh-scores">{% for s in subject_results %}<span class="mh-pill">{{ s.name }} <b>{{ s.score }}점</b></span>{% endfor %}</div>
+        <div class="mh-scores">{% for s in subject_results %}<span class="mh-pill">{{ s.name }} <b>{{ s.score }}점</b></span>{% endfor %}<span class="mh-pill mh-avg">평균 <b>{{ average_score }}점</b></span></div>
     </div>
 
     <div style="display: flex; width: 100%; min-height: 100vh;">
