@@ -24,10 +24,62 @@
         body {
             margin: 0;
             display: flex;
+            flex-direction: column;
             height: 100vh;
             font-family: sans-serif;
             overflow: hidden;
             background: #f8f6e6;
+        }
+
+        /* Header */
+        .site-header {
+            background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 100%);
+            padding: 10px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .site-header .logo {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .site-header .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .site-header .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .site-header .nav-links a:hover {
+            color: #b7e4c7;
+        }
+        .site-header .nav-links span {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+        }
+        .site-header .nav-links button {
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .exam-wrapper {
+            flex: 1;
+            display: flex;
+            min-height: 0;
         }
 
         /* Layout: Question Flexible, OMR Fixed */
@@ -830,6 +882,13 @@
 
         /* 모바일 최적화 */
         @media (max-width: 768px) {
+            .site-header {
+                display: none !important;
+            }
+            .exam-wrapper {
+                display: block !important;
+            }
+
             .mobile-header {
                 animation: fadeInUp 0.4s ease-out both;
             }
@@ -1164,7 +1223,22 @@
         </div>
     </div>
 
-    <div style="display: flex; width: 100%; min-height: 100vh;">
+    <!-- Header -->
+    <header class="site-header">
+        <a href="{% url 'mock_exam:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <nav class="nav-links">
+            {% if user.is_authenticated %}
+            <span>{{ user.username }}님</span>
+            <a href="{% url 'mock_exam:index' %}">모의고사</a>
+            <a href="{% url 'mypage:review_index' %}">마이페이지</a>
+            <form action="{% url 'accounts:user_logout' %}" method="post" style="display:inline;">{% csrf_token %}<button type="submit">로그아웃</button></form>
+            {% else %}
+            <a href="{% url 'accounts:user_login' %}">로그인</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <div class="exam-wrapper">
 
         <!-- Question Panel (Left) -->
         <div class="question-panel">
