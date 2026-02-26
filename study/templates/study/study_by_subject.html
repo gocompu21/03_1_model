@@ -614,7 +614,7 @@
 
         {% if is_notes_study %}
         <!-- 쪽집게 노트 절 제목 -->
-        <div style="flex:1; font-size:0.92rem; color:#1b4332; font-weight:600; padding:0 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ section_title }}</div>
+        <div style="flex:1; font-size:1rem; color:#1565c0; font-weight:600; padding:0 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ section_title }}</div>
         <!-- 내용으로 버튼 -->
         <a href="{% url 'study:study_notes' subject_id %}" class="tab-btn" style="background-color:#1b4332; color:#fff;" id="back-to-notes-btn" data-section="{{ section_title }}">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right:4px;">
