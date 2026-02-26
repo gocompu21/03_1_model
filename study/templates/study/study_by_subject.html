@@ -640,7 +640,7 @@
         <div class="question-card" data-subject="{{ q.subject.name }}">
             <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
                 <div style="margin-bottom: 10px;">
-                    <span class="q-badge" style="float: right;">{{ q.subject.name }}</span>
+                    <span class="q-badge" style="float: right;">{% if is_notes_study %}{{ q.exam.round_number }}회{% else %}{{ q.subject.name }}{% endif %}</span>
                 </div>
                 <div class="q-content">
                     {{ q.number }}. {{ q.content|safe|linebreaksbr }}
