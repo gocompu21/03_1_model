@@ -1083,5 +1083,6 @@ def notes_study(request, subject_id):
         "questions": questions,
         "is_notes_study": True,
         "section_title": section_title,
+        "subject_id": subject.pk,
     })
 

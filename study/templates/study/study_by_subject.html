@@ -592,6 +592,7 @@
 <div class="study-container">
     <!-- Tabs Header Container -->
     <div class="tabs-header">
+        {% if not is_notes_study %}
         <!-- 모바일 햄버거 메뉴 버튼 -->
         <button class="hamburger-menu" id="hamburger-btn" onclick="toggleMobileMenu()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -609,7 +610,19 @@
             </a>
             {% endfor %}
         </div>
+        {% endif %}
 
+        {% if is_notes_study %}
+        <!-- 쪽집게 노트 절 제목 -->
+        <div style="flex:1; font-size:0.92rem; color:#1b4332; font-weight:600; padding:0 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ section_title }}</div>
+        <!-- 내용으로 버튼 -->
+        <a href="{% url 'study:study_notes' subject_id %}" class="tab-btn" style="background-color:#1b4332; color:#fff;" id="back-to-notes-btn" data-section="{{ section_title }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right:4px;">
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>내용으로</span>
+        </a>
+        {% else %}
         <!-- Back Button -->
         <a href="{% url 'study:index' %}" class="tab-btn" style="background-color: #f7f7f7; color: #555;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right:5px;">
@@ -618,6 +631,7 @@
             </svg>
             <span>기출학습</span>
         </a>
+        {% endif %}
     </div>
 
     <!-- Questions Content -->
@@ -768,6 +782,7 @@
     <div class="lightbox-hint">더블탭: 확대 | 두 손가락: 핀치 줌 | 드래그: 이동</div>
 </div>
 
+{% if not is_notes_study %}
 <!-- Mobile Menu Overlay -->
 <div class="mobile-menu-overlay" id="mobile-overlay" onclick="toggleMobileMenu()"></div>
 
@@ -788,6 +803,7 @@
         </a>
     </ul>
 </div>
+{% endif %}
 
 <script>
     // Highlight Text Logic & MathJax
@@ -806,6 +822,19 @@
             window.MathJax.typesetPromise();
         } else if (window.MathJax && window.MathJax.typesetPromise) {
             window.MathJax.typesetPromise();
+        }
+
+        // "내용으로" 버튼: 쪽집게 노트 해당 절로 이동
+        var backBtn = document.getElementById('back-to-notes-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                var sectionTitle = this.getAttribute('data-section') || '';
+                var secNum = sectionTitle.match(/^(\d+\.\d+)/);
+                var href = this.getAttribute('href');
+                if (secNum) href += '?sec=' + secNum[1];
+                window.location.href = href;
+            });
         }
     });
 
