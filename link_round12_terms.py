@@ -38,12 +38,7 @@ def get_question_text(question):
     for i in range(1, 6):
         choice = getattr(question, f'choice{i}', '') or ''
         parts.append(choice)
-    # 기본서 해설
-    if hasattr(question, 'textbook_chat') and question.textbook_chat:
-        parts.append(question.textbook_chat)
-    # 일반 해설
-    if hasattr(question, 'general_chat') and question.general_chat:
-        parts.append(question.general_chat)
+    # 해설은 제외 — 문제 지문과 보기에 등장하는 용어만 연결
     return ' '.join(parts)
 
 
@@ -59,6 +54,19 @@ def main():
     except Exam.DoesNotExist:
         print(f"[X] {ROUND}회 시험이 없습니다")
         return
+
+    # 기존 12회 참조 삭제
+    q_ids = list(Question.objects.filter(exam=exam).values_list('id', flat=True))
+    old_count = TermReference.objects.filter(
+        source_type='question', source_id__in=q_ids
+    ).count()
+    if old_count and not dry_run:
+        TermReference.objects.filter(
+            source_type='question', source_id__in=q_ids
+        ).delete()
+        print(f"[삭제] 기존 {ROUND}회 참조 {old_count}개 삭제")
+    elif old_count:
+        print(f"[삭제 예정] 기존 {ROUND}회 참조 {old_count}개")
 
     subjects = ["수목병리학", "수목해충학", "수목생리학", "산림토양학", "수목관리학"]
     total_created = 0
