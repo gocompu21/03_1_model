@@ -3,396 +3,106 @@
 
 {% block content %}
 <style>
-    body {
-        background-color: #f8f6e6;
-        font-family: 'Noto Sans KR', sans-serif;
-    }
-
-    body>header {
-        display: none !important;
-    }
+    body { background-color: #f8f6e6; font-family: 'Noto Sans KR', sans-serif; }
+    body>header { display: none !important; }
 
     .custom-main-header {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        background-color: #2d6a4f;
-        padding: 15px 40px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        box-sizing: border-box;
-        z-index: 1000;
+        position: absolute; top: 0; left: 0; width: 100%;
+        background-color: #2d6a4f; padding: 15px 40px;
+        display: flex; justify-content: space-between; align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1); box-sizing: border-box; z-index: 1000;
     }
-
     .custom-main-header .logo {
-        color: white;
-        font-size: 24px;
-        font-weight: bold;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        color: white; font-size: 24px; font-weight: bold; text-decoration: none;
+        display: flex; align-items: center; gap: 10px;
     }
-
     .custom-main-header .nav-links a {
-        color: white;
-        text-decoration: none;
-        margin-left: 20px;
-        font-weight: 500;
-        transition: color 0.3s;
+        color: white; text-decoration: none; margin-left: 20px; font-weight: 500; transition: color 0.3s;
     }
-
-    .custom-main-header .nav-links a:hover {
-        color: #b7e4c7;
-    }
-
+    .custom-main-header .nav-links a:hover { color: #b7e4c7; }
     .custom-main-header .nav-links button {
-        background: none;
-        border: none;
-        color: rgba(255, 255, 255, 0.8);
-        cursor: pointer;
-        font-size: 1rem;
-        font-weight: 500;
-        margin-left: 15px;
+        background: none; border: none; color: rgba(255,255,255,0.8); cursor: pointer;
+        font-size: 1rem; font-weight: 500; margin-left: 15px;
     }
-
-    .custom-main-header .nav-links span {
-        color: rgba(255, 255, 255, 0.8);
-        margin-right: 15px;
-    }
-
+    .custom-main-header .nav-links span { color: rgba(255,255,255,0.8); margin-right: 15px; }
     .menu-toggle {
-        display: none;
-        background: none;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-        padding: 5px;
-        margin-right: 10px;
+        display: none; background: none; border: none; color: white;
+        font-size: 24px; cursor: pointer; padding: 5px; margin-right: 10px;
     }
 
-    .analysis-layout {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 100px 20px 40px 20px;
-        min-height: 80vh;
+    .analysis-layout { max-width: 900px; margin: 0 auto; padding: 100px 20px 40px 20px; min-height: 80vh; }
+    .analysis-header { text-align: center; margin-bottom: 40px; }
+    .analysis-header h1 { font-size: 2.2rem; color: #2c5f2d; margin-bottom: 10px; font-weight: 800; letter-spacing: -1px; }
+    .analysis-header p { color: #555; font-size: 1.05rem; }
+    .header-deco { width: 60px; height: 4px; background: #97bc62; margin: 20px auto; border-radius: 2px; }
+
+    .round-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+    .round-card {
+        background: white; border-radius: 14px; padding: 28px 24px;
+        text-decoration: none; color: #333; border: 2px solid #e0e0e0;
+        transition: all 0.3s ease; display: flex; flex-direction: column; gap: 16px;
     }
-
-    .analysis-header {
-        text-align: center;
-        margin-bottom: 40px;
+    .round-card:hover {
+        transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-color: #2c5f2d;
     }
-
-    .analysis-header h1 {
-        font-size: 2.5rem;
-        color: #2c5f2d;
-        margin-bottom: 10px;
-        font-weight: 800;
-        letter-spacing: -1px;
+    .round-badge {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: linear-gradient(135deg, #2c5f2d, #40916c);
+        color: white; font-size: 1.5rem; font-weight: 800;
+        padding: 8px 18px; border-radius: 10px; align-self: flex-start;
     }
+    .round-scores { display: flex; gap: 16px; }
+    .score-item { flex: 1; text-align: center; padding: 12px 8px; border-radius: 8px; }
+    .score-item.past { background: #fff3e0; }
+    .score-item.textbook { background: #e8f5e9; }
+    .score-label { font-size: 0.75rem; color: #777; margin-bottom: 4px; }
+    .score-value { font-size: 1.6rem; font-weight: 800; }
+    .score-item.past .score-value { color: #e65100; }
+    .score-item.textbook .score-value { color: #2e7d32; }
+    .score-unit { font-size: 0.8rem; font-weight: 400; }
+    .round-desc { font-size: 0.85rem; color: #888; line-height: 1.5; }
 
-    .analysis-header p {
-        color: #555;
-        font-size: 1.1rem;
-    }
+    .empty-state { text-align: center; color: #aaa; padding: 60px 0; font-size: 1.1rem; }
 
-    .header-deco {
-        width: 60px;
-        height: 4px;
-        background: #97bc62;
-        margin: 20px auto;
-        border-radius: 2px;
-    }
-
-    .subject-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 20px;
-    }
-
-    .subject-card {
-        background: white;
-        border-radius: 12px;
-        padding: 30px 20px;
-        text-align: center;
-        text-decoration: none;
-        color: #333;
-        border: 2px solid #e0e0e0;
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .subject-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        border-color: #2c5f2d;
-    }
-
-    .subject-icon {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, #d8f3dc, #b7e4c7);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-    }
-
-    .subject-name {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: #2c5f2d;
-    }
-
-    .subject-desc {
-        font-size: 0.9rem;
-        color: #777;
-    }
-
-    .back-link {
-        display: inline-block;
-        margin-bottom: 30px;
-        color: #2c5f2d;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .back-link:hover {
-        text-decoration: underline;
-    }
-
-    /* ========== Mobile Responsive ========== */
-    @media screen and (max-width: 768px) {
-        .custom-main-header {
-            padding: 12px 20px;
-            flex-wrap: wrap;
-        }
-
-        .custom-main-header .logo {
-            font-size: 19px !important;
-        }
-
-        .menu-toggle {
-            display: block;
-        }
-
-        .custom-main-header .nav-links {
-            display: none;
-            width: 100%;
-            flex-direction: column;
-            align-items: flex-start;
-            padding-top: 15px;
-            gap: 12px;
-        }
-
-        .custom-main-header .nav-links.active {
-            display: flex;
-        }
-
-        .custom-main-header .nav-links a {
-            margin-left: 0;
-            padding: 8px 0;
-            width: 100%;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .custom-main-header .nav-links span {
-            margin-right: 0;
-            padding: 8px 0;
-            display: block;
-            width: 100%;
-            font-size: 0.9rem;
-        }
-
-        .custom-main-header .nav-links form {
-            width: 100%;
-        }
-
-        .custom-main-header .nav-links form button {
-            padding: 8px 0 !important;
-            margin-left: 0 !important;
-            text-align: left;
-        }
-
-        .analysis-layout {
-            padding: 70px 12px 30px 12px;
-        }
-
-        .analysis-header {
-            margin-bottom: 24px;
-        }
-
-        .analysis-header h1 {
-            font-size: 1.5rem;
-        }
-
-        .analysis-header p {
-            font-size: 0.9rem;
-            padding: 0 10px;
-        }
-
-        .header-deco {
-            width: 40px;
-            height: 3px;
-            margin: 12px auto;
-        }
-
-        .subject-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-
-        .subject-card {
-            padding: 20px 12px;
-            border-radius: 10px;
-            gap: 10px;
-        }
-
-        .subject-icon {
-            width: 56px;
-            height: 56px;
-            font-size: 1.8rem;
-        }
-
-        .subject-name {
-            font-size: 1rem;
-        }
-
-        .subject-desc {
-            font-size: 0.75rem;
-        }
-    }
-
-    /* ========== Page Load Transitions ========== */
     @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(25px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(25px); }
+        to { opacity: 1; transform: translateY(0); }
     }
+    .analysis-header { animation: fadeInUp 0.6s ease-out both; }
+    .round-card { opacity: 0; animation: fadeInUp 0.5s ease-out both; }
+    .round-card:nth-child(1) { animation-delay: 0.15s; }
+    .round-card:nth-child(2) { animation-delay: 0.25s; }
+    .round-card:nth-child(3) { animation-delay: 0.35s; }
+    .round-card:nth-child(4) { animation-delay: 0.45s; }
 
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .analysis-header {
-        animation: fadeInUp 0.6s ease-out both;
-    }
-
-    .subject-card {
-        opacity: 0;
-        animation: fadeInUp 0.5s ease-out both;
-    }
-
-    .subject-card:nth-child(1) { animation-delay: 0.15s; }
-    .subject-card:nth-child(2) { animation-delay: 0.25s; }
-    .subject-card:nth-child(3) { animation-delay: 0.35s; }
-    .subject-card:nth-child(4) { animation-delay: 0.45s; }
-    .subject-card:nth-child(5) { animation-delay: 0.55s; }
-    .subject-card:nth-child(6) { animation-delay: 0.65s; }
-
-    /* Loading Overlay */
-    .loading-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.4);
-        z-index: 9999;
-        justify-content: center;
-        align-items: center;
-    }
-    .loading-overlay.active {
-        display: flex;
-    }
-    .loading-box {
-        background: white;
-        border-radius: 16px;
-        padding: 40px 50px;
-        text-align: center;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-    .loading-spinner {
-        width: 48px;
-        height: 48px;
-        border: 4px solid #e0e0e0;
-        border-top: 4px solid #2c5f2d;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin: 0 auto 16px;
-    }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    .loading-text {
-        color: #2c5f2d;
-        font-weight: 600;
-        font-size: 1.05rem;
-    }
-
-    /* Extra small devices */
-    @media screen and (max-width: 400px) {
-        .custom-main-header .logo {
-            font-size: 0.95rem;
+    @media screen and (max-width: 768px) {
+        .custom-main-header { padding: 12px 20px; flex-wrap: wrap; }
+        .custom-main-header .logo { font-size: 19px !important; }
+        .menu-toggle { display: block; }
+        .custom-main-header .nav-links {
+            display: none; width: 100%; flex-direction: column;
+            align-items: flex-start; padding-top: 15px; gap: 12px;
         }
-
-        .custom-main-header .nav-links a,
-        .custom-main-header .nav-links button {
-            margin-left: 8px;
-            font-size: 0.75rem;
-        }
-
-        .analysis-header h1 {
-            font-size: 1.3rem;
-        }
-
-        .analysis-header p {
-            font-size: 0.85rem;
-        }
-
-        .subject-grid {
-            gap: 10px;
-        }
-
-        .subject-card {
-            padding: 16px 10px;
-        }
-
-        .subject-icon {
-            width: 48px;
-            height: 48px;
-            font-size: 1.5rem;
-        }
-
-        .subject-name {
-            font-size: 0.9rem;
-        }
-
-        .subject-desc {
-            font-size: 0.7rem;
-        }
+        .custom-main-header .nav-links.active { display: flex; }
+        .custom-main-header .nav-links a { margin-left: 0; padding: 8px 0; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .custom-main-header .nav-links span { margin-right: 0; padding: 8px 0; display: block; width: 100%; font-size: 0.9rem; }
+        .custom-main-header .nav-links form { width: 100%; }
+        .custom-main-header .nav-links form button { padding: 8px 0 !important; margin-left: 0 !important; text-align: left; }
+        .analysis-layout { padding: 70px 12px 30px 12px; }
+        .analysis-header { margin-bottom: 24px; }
+        .analysis-header h1 { font-size: 1.5rem; }
+        .analysis-header p { font-size: 0.9rem; }
+        .round-grid { grid-template-columns: 1fr; gap: 14px; }
+        .round-card { padding: 20px 16px; gap: 12px; }
+        .round-badge { font-size: 1.2rem; padding: 6px 14px; }
+        .score-value { font-size: 1.3rem; }
     }
 </style>
 
 <div class="custom-main-header">
     <div style="display: flex; align-items: center;">
-        <button class="menu-toggle" onclick="toggleMenu()" aria-label="메뉴 열기">☰</button>
-        <a href="{% url 'main:index' %}" class="logo">🌳 나무의사 합격반</a>
+        <button class="menu-toggle" onclick="toggleMenu()" aria-label="메뉴 열기">&#9776;</button>
+        <a href="{% url 'main:index' %}" class="logo">&#127795; 나무의사 합격반</a>
     </div>
     <nav class="nav-links" id="navLinks">
         {% if user.is_authenticated %}
@@ -413,74 +123,43 @@
 </div>
 
 <div class="analysis-layout">
-    
     <div class="analysis-header">
-        <h1>📊 기출분석</h1>
+        <h1>&#128202; 회차별 출제 동향 분석</h1>
         <div class="header-deco"></div>
-        <p>문제와 관련된 용어들을 살펴보고 기출 빈도수를 참고합니다.</p>
+        <p>기출 학습과 교과서 숙지 시 예상 점수를 회차별로 분석합니다.</p>
     </div>
 
-    <div class="subject-grid">
-        {% for subject in subjects %}
-        {% if subject.name == '수목병리학' %}
-        <a href="{% url 'study:analysis_subject' subject.id %}" class="subject-card">
-            <div class="subject-icon">🦠</div>
-            <div class="subject-name">{{ subject.name }}</div>
-            <div class="subject-desc">기출문제 용어 분석</div>
-        </a>
-        {% else %}
-        <div class="subject-card" style="opacity: 0.5; cursor: not-allowed; pointer-events: none;">
-            <div class="subject-icon" style="background: linear-gradient(135deg, #e0e0e0, #ccc);">
-                {% if subject.name == '수목해충학' %}🐛
-                {% elif subject.name == '수목생리학' %}🌿
-                {% elif subject.name == '산림토양학' %}🪨
-                {% elif subject.name == '수목관리학' %}🛠️
-                {% else %}📚{% endif %}
+    {% if analyses %}
+    <div class="round-grid">
+        {% for a in analyses %}
+        <a href="{% url 'study:analysis_detail' a.exam.round_number %}" class="round-card">
+            <div class="round-badge">{{ a.exam.round_number }}회</div>
+            <div class="round-scores">
+                <div class="score-item past">
+                    <div class="score-label">기출 학습</div>
+                    <div class="score-value">{{ a.past_exam_avg_score }}<span class="score-unit">점</span></div>
+                </div>
+                <div class="score-item textbook">
+                    <div class="score-label">교과서 숙지</div>
+                    <div class="score-value">{{ a.textbook_avg_score|floatformat:1 }}<span class="score-unit">점</span></div>
+                </div>
             </div>
-            <div class="subject-name" style="color: #999;">{{ subject.name }}</div>
-            <div class="subject-desc">준비 중</div>
-        </div>
-        {% endif %}
-        {% empty %}
-        <div style="text-align: center; color: #888; grid-column: 1/-1;">등록된 과목이 없습니다.</div>
+            <div class="round-desc">5과목 125문제 분석 &middot; 교과서 PDF RAG 기반</div>
+        </a>
         {% endfor %}
     </div>
-</div>
-
-<!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-box">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">분석 데이터 로딩 중...</div>
-    </div>
+    {% else %}
+    <div class="empty-state">아직 등록된 분석 데이터가 없습니다.</div>
+    {% endif %}
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const header = document.querySelector('header');
-    if (header) {
-        header.style.display = 'none';
-        header.remove();
-    }
-
-    // Show loading overlay when clicking a subject card
-    document.querySelectorAll('a.subject-card').forEach(card => {
-        card.addEventListener('click', function() {
-            document.getElementById('loadingOverlay').classList.add('active');
-        });
-    });
+    var header = document.querySelector('body > header');
+    if (header) header.remove();
 });
-
-// Hide loading overlay when returning via back button (bfcache)
-window.addEventListener('pageshow', function(e) {
-    if (e.persisted) {
-        document.getElementById('loadingOverlay').classList.remove('active');
-    }
-});
-
 function toggleMenu() {
-    const navLinks = document.getElementById('navLinks');
-    navLinks.classList.toggle('active');
+    document.getElementById('navLinks').classList.toggle('active');
 }
 </script>
 {% endblock %}

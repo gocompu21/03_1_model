@@ -1,8 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from exam.models import Exam, Question, Subject, StudyNote
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.db.models import Q
 from django.conf import settings
 from exam.note_parser import parse_note_chapters
@@ -493,92 +494,119 @@ def api_question_terms(request, question_id):
 
 @login_required
 def analysis_index(request):
-    """과목 선택 화면"""
-    subjects = Subject.objects.all().order_by("code")
-    return render(request, "study/analysis_index.html", {"subjects": subjects})
+    """회차 선택 화면"""
+    from study.models import RoundAnalysis
+    analyses = RoundAnalysis.objects.select_related("exam").order_by("-exam__round_number")
+    return render(request, "study/analysis_index.html", {"analyses": analyses})
+
+
+def _clean_summary(content):
+    """문제 지문에서 보기·HTML 제거 후 핵심 질문만 추출"""
+    # <div> 블록(보기 영역) 제거
+    text = re.sub(r'<div[^>]*>.*?</div>', '', content, flags=re.DOTALL)
+    # 나머지 HTML 태그 제거
+    text = re.sub(r'<[^>]+>', ' ', text)
+    # HTML 엔티티
+    import html as _html
+    text = _html.unescape(text)
+    # 줄바꿈 → 공백, 연속 공백 정리
+    text = re.sub(r'\s+', ' ', text).strip()
+    # 80자 제한
+    return text[:80] if len(text) > 80 else text
 
 
 @login_required
-def analysis_subject(request, subject_id):
-    """과목별 전체 회차 문제 및 관련 용어 리스트"""
-    from glossary.models import TermReference, Term
+def analysis_detail(request, round_number):
+    """회차별 출제 동향 분석 상세"""
+    from study.models import RoundAnalysis, QuestionAnalysis
     from collections import OrderedDict
-    
-    subject = get_object_or_404(Subject, id=subject_id)
-    
-    # 해당 과목의 모든 문제 (회차 0 제외)
-    questions = Question.objects.filter(
-        subject=subject
-    ).exclude(exam__round_number=0).select_related('exam').order_by('exam__round_number', 'number')
-    
-    # 회차별로 그룹화
-    rounds_data = OrderedDict()
-    for q in questions:
-        round_num = q.exam.round_number
-        if round_num not in rounds_data:
-            rounds_data[round_num] = []
-        
-        # 용어 조회
-        term_refs = TermReference.objects.filter(
-            source_type='question',
-            source_id=q.id
-        ).select_related('term')
-        terms = [ref.term for ref in term_refs]
-        
-        # 용어의 reference_count 계산
-        for term in terms:
-            term.reference_count = TermReference.objects.filter(term=term).count()
-        
-        rounds_data[round_num].append({
-            "question": q,
-            "terms": terms
-        })
-    
-    # 사용 가능한 회차 목록
-    available_rounds = list(rounds_data.keys())
-    
-    context = {
-        "subject": subject,
-        "rounds_data": rounds_data,
-        "available_rounds": available_rounds,
-        "total_questions": questions.count(),
-    }
-    return render(request, "study/analysis_subject.html", context)
 
-
-@login_required
-def analysis_round(request, subject_id, round_number):
-    """회차별 문제와 관련 용어 리스트"""
-    from glossary.models import TermReference
-    
-    subject = get_object_or_404(Subject, id=subject_id)
     exam = get_object_or_404(Exam, round_number=round_number)
-    
-    # 해당 과목, 회차의 모든 문제
-    questions = Question.objects.filter(
-        subject=subject, exam=exam
-    ).order_by("number")
-    
-    # 각 문제에 연결된 용어 조회
-    questions_with_terms = []
+    round_analysis = get_object_or_404(RoundAnalysis, exam=exam)
+
+    # 과목별 문항 + 분석 데이터 조회
+    questions = (
+        Question.objects.filter(exam=exam)
+        .select_related("subject")
+        .order_by("subject__code", "number")
+    )
+    # prefetch 분석 데이터
+    qa_map = {}
+    for qa in QuestionAnalysis.objects.filter(question__exam=exam):
+        qa_map[qa.question_id] = qa
+
+    subjects = Subject.objects.all().order_by("code")
+    subject_order = {s.name: s.code for s in subjects}
+
+    # 과목별 그룹화
+    subjects_data = OrderedDict()
     for q in questions:
-        term_refs = TermReference.objects.filter(
-            source_type='question',
-            source_id=q.id
-        ).select_related('term')
-        terms = [ref.term for ref in term_refs]
-        questions_with_terms.append({
-            "question": q,
-            "terms": terms
+        sname = q.subject.name
+        if sname not in subjects_data:
+            subjects_data[sname] = {
+                "questions": [],
+                "possible": 0,
+                "impossible": 0,
+            }
+        qa = qa_map.get(q.id)
+        possible = qa.textbook_possible if qa else True
+        reason = qa.textbook_reason if qa else ""
+        subjects_data[sname]["questions"].append({
+            "number": q.number,
+            "summary": q.summary or _clean_summary(q.content),
+            "possible": possible,
+            "reason": reason,
         })
-    
+        if possible:
+            subjects_data[sname]["possible"] += 1
+        else:
+            subjects_data[sname]["impossible"] += 1
+
+    # 과목별 교과서 예상 점수 계산
+    for sname, sd in subjects_data.items():
+        total = sd["possible"] + sd["impossible"]
+        sd["score"] = round(sd["possible"] / total * 100) if total else 0
+
+    # past_exam_data를 과목 코드 순으로 정렬 + 퍼센트 계산
+    past_exam_data = round_analysis.past_exam_data
+    sorted_past = OrderedDict()
+    for sname in sorted(past_exam_data.keys(), key=lambda x: subject_order.get(x, 99)):
+        d = dict(past_exam_data[sname])
+        total = d.get("similar", 0) + d.get("related", 0) + d.get("new", 0)
+        if total:
+            d["similar_pct"] = round(d.get("similar", 0) / total * 100)
+            d["related_pct"] = round(d.get("related", 0) / total * 100)
+            d["new_pct"] = round(d.get("new", 0) / total * 100)
+        sorted_past[sname] = d
+
+    # 합계 계산
+    total_possible = sum(sd["possible"] for sd in subjects_data.values())
+    total_impossible = sum(sd["impossible"] for sd in subjects_data.values())
+    gap = round(round_analysis.textbook_avg_score - round_analysis.past_exam_avg_score)
+
+    # 요약 텍스트를 줄 단위로 분리
+    insights = [line.strip() for line in round_analysis.summary.split("\n") if line.strip()]
+
+    # detail_content 파싱
+    dc = round_analysis.detail_content or {}
+
     context = {
-        "subject": subject,
         "exam": exam,
-        "round_number": round_number,
-        "questions_with_terms": questions_with_terms,
+        "round_analysis": round_analysis,
+        "subjects_data": subjects_data,
+        "past_exam_data": sorted_past,
+        "subject_names": list(subjects_data.keys()),
+        "total_possible": total_possible,
+        "total_impossible": total_impossible,
+        "gap": gap,
+        "insights": insights,
+        "subject_areas": dc.get("subject_areas", {}),
+        "impossible_categories": dc.get("impossible_categories", []),
+        "trends": dc.get("trends", []),
+        "priority": dc.get("priority", []),
+        "strategy": dc.get("strategy", []),
     }
-    return render(request, "study/analysis_round.html", context)
+    return render(request, "study/analysis_detail.html", context)
 
 
 @login_required
@@ -1085,4 +1113,34 @@ def notes_study(request, subject_id):
         "section_title": section_title,
         "subject_id": subject.pk,
     })
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+@require_POST
+def question_update(request, question_id):
+    """AJAX: 문제 인라인 수정 (staff only)"""
+    question = get_object_or_404(Question, pk=question_id)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"ok": False, "error": "잘못된 요청"}, status=400)
+
+    question.content = data.get("content", question.content)
+    question.choice1 = data.get("choice1", question.choice1)
+    question.choice2 = data.get("choice2", question.choice2)
+    question.choice3 = data.get("choice3", question.choice3)
+    question.choice4 = data.get("choice4", question.choice4)
+    question.choice5 = data.get("choice5", question.choice5)
+
+    if "answer" in data:
+        ans = data["answer"]
+        question.answer = ans if isinstance(ans, list) else [int(ans)]
+
+    if "general_chat" in data:
+        question.general_chat = data["general_chat"]
+
+    question.save()
+    return JsonResponse({"ok": True})
 

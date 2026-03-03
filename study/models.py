@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from notebook.models import NotebookHistory
 from chat.models import ChatHistory
+from exam.models import Exam, Question
 
 
 class StudyQnA(models.Model):
@@ -63,3 +64,42 @@ class StudyViewLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.exam_round}회 학습 ({self.viewed_at})"
+
+
+class RoundAnalysis(models.Model):
+    """회차별 출제 동향 분석"""
+    exam = models.OneToOneField(
+        Exam, on_delete=models.CASCADE, related_name="analysis", verbose_name="회차"
+    )
+    # 기출 학습 분석 (과목별 집계)
+    # {"수목병리학": {"similar": 12, "related": 8, "new": 5, "score": 66}, ...}
+    past_exam_data = models.JSONField(default=dict, verbose_name="기출 학습 분석 데이터")
+    past_exam_avg_score = models.IntegerField(verbose_name="기출 학습 평균 예상 점수")
+    textbook_avg_score = models.FloatField(verbose_name="교과서 평균 예상 점수")
+    summary = models.TextField(blank=True, verbose_name="분석 요약")
+    # 상세 콘텐츠: 출제 영역, 경향 변화, 학습 전략 등
+    detail_content = models.JSONField(default=dict, blank=True, verbose_name="상세 분석 콘텐츠")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
+
+    class Meta:
+        verbose_name = "회차별 분석"
+        verbose_name_plural = "회차별 분석"
+
+    def __str__(self):
+        return f"{self.exam.round_number}회 분석"
+
+
+class QuestionAnalysis(models.Model):
+    """문항별 교과서 커버리지 분석"""
+    question = models.OneToOneField(
+        Question, on_delete=models.CASCADE, related_name="analysis", verbose_name="문항"
+    )
+    textbook_possible = models.BooleanField(default=True, verbose_name="교과서 풀이 가능")
+    textbook_reason = models.TextField(blank=True, default="", verbose_name="근거")
+
+    class Meta:
+        verbose_name = "문항 분석"
+        verbose_name_plural = "문항 분석"
+
+    def __str__(self):
+        return f"Q{self.question.number} {'O' if self.textbook_possible else 'X'}"

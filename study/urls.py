@@ -10,10 +10,10 @@ urlpatterns = [
     path("tts/", views.tts_generate, name="tts_generate"),
     path("api/question/<int:question_id>/", views.api_question, name="api_question"),
     path("api/question/<int:question_id>/terms/", views.api_question_terms, name="api_question_terms"),
+    path("api/question/<int:question_id>/update/", views.question_update, name="question_update"),
     # 기출분석 URLs
     path("analysis/", views.analysis_index, name="analysis_index"),
-    path("analysis/<int:subject_id>/", views.analysis_subject, name="analysis_subject"),
-    path("analysis/<int:subject_id>/<int:round_number>/", views.analysis_round, name="analysis_round"),
+    path("analysis/<int:round_number>/", views.analysis_detail, name="analysis_detail"),
     # 주제별 학습 URLs
     path("topic/<int:set_id>/", views.topic_solve, name="topic_solve"),
     path("topic/<int:set_id>/result/<int:attempt_id>/", views.topic_result, name="topic_result"),
