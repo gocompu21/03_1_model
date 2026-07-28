@@ -519,12 +519,12 @@
                         document.getElementById('content-prompt-box').style.display = 'block';
                     }
                 } else {
-                    alert('오류: ' + data.error);
+                    showToast('오류: ' + data.error, 'error');
                 }
             })
             .catch(err => {
                 hideLoading();
-                alert('통신 오류: ' + err.message);
+                showToast('통신 오류: ' + err.message, 'error');
             });
         }
         
@@ -694,14 +694,14 @@
                     
                     // 에디터 최상단에 삽입
                     $('#content-editor').summernote('pasteHTML', imgTag);
-                    alert('이미지가 생성되어 본문 상단에 추가되었습니다.');
+                    showToast('이미지가 생성되어 본문 상단에 추가되었습니다.', 'success');
                 } else {
-                    alert('이미지 생성 실패: ' + data.error);
+                    showToast('이미지 생성 실패: ' + data.error, 'error');
                 }
             })
             .catch(err => {
                 hideLoading();
-                alert('통신 오류: ' + err.message);
+                showToast('통신 오류: ' + err.message, 'error');
             });
         }
         
@@ -757,12 +757,12 @@
                     $('#content-editor').summernote('code', html);
                     showToast('내용이 포맷팅되었습니다.', 'success');
                 } else {
-                    alert('포맷팅 실패: ' + data.error);
+                    showToast('포맷팅 실패: ' + data.error, 'error');
                 }
             })
             .catch(err => {
                 hideLoading();
-                alert('통신 오류: ' + err.message);
+                showToast('통신 오류: ' + err.message, 'error');
             });
         }
         
@@ -796,12 +796,12 @@
                         document.getElementById('quiz-prompt-box').style.display = 'block';
                     }
                 } else {
-                    alert('오류: ' + data.error);
+                    showToast('오류: ' + data.error, 'error');
                 }
             })
             .catch(err => {
                 hideLoading();
-                alert('통신 오류: ' + err.message);
+                showToast('통신 오류: ' + err.message, 'error');
             });
         }
         
@@ -901,16 +901,16 @@
             .then(data => {
                 hideLoading();
                 if (data.success) {
-                    alert(`${data.created_count}개 문제가 저장되었습니다.`);
+                    showToast(`${data.created_count}개 문제가 저장되었습니다.`, 'success');
                     generatedQuestions = [];
                     renderQuizCards();
                 } else {
-                    alert('저장 실패: ' + data.error);
+                    showToast('저장 실패: ' + data.error, 'error');
                 }
             })
             .catch(err => {
                 hideLoading();
-                alert('저장 오류: ' + err.message);
+                showToast('저장 오류: ' + err.message, 'error');
             });
         }
 
