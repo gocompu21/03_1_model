@@ -114,25 +114,26 @@ def index(request):
                 is_success=is_success,
             )
 
-            # Auto-create BBS Post (Tree Doctor)
-            try:
-                from bbs.models import Post, PostType
-                import os
+            # Auto-create BBS Post (Tree Doctor) - 실패한 응답은 게시하지 않음
+            if is_success:
+                try:
+                    from bbs.models import Post, PostType
+                    import os
 
-                post_type, _ = PostType.objects.get_or_create(name="주치의 질의")
+                    post_type, _ = PostType.objects.get_or_create(name="주치의 질의")
 
-                p = Post.objects.create(
-                    author=request.user,
-                    title=f"[나무주치의] {user_input}"[:200],
-                    content=str(response_text),
-                    type=post_type,
-                )
-                with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
-                    f.write(f"Success (Index): Created Post {p.id}\n")
-            except Exception as e:
-                with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
-                    f.write(f"Error (Index): {e}\n")
-                print(f"Failed to auto-create BBS Post: {e}")
+                    p = Post.objects.create(
+                        author=request.user,
+                        title=f"[나무주치의] {user_input}"[:200],
+                        content=str(response_text),
+                        type=post_type,
+                    )
+                    with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
+                        f.write(f"Success (Index): Created Post {p.id}\n")
+                except Exception as e:
+                    with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
+                        f.write(f"Error (Index): {e}\n")
+                    print(f"Failed to auto-create BBS Post: {e}")
 
             # Redirect to show the result cleanly (Post/Redirect/Get pattern is better but simple render is okay for now)
             # Staying on page to show result
@@ -205,25 +206,26 @@ def chat_api(request):
             is_success=is_success,
         )
 
-        # Auto-create BBS Post (Tree Doctor)
-        try:
-            from bbs.models import Post, PostType
-            import os
+        # Auto-create BBS Post (Tree Doctor) - 실패한 응답은 게시하지 않음
+        if is_success:
+            try:
+                from bbs.models import Post, PostType
+                import os
 
-            post_type, _ = PostType.objects.get_or_create(name="주치의")
+                post_type, _ = PostType.objects.get_or_create(name="주치의")
 
-            p = Post.objects.create(
-                author=request.user,
-                title=user_input[:200],
-                content=str(response_text),
-                type=post_type,
-            )
-            with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
-                f.write(f"Success: Created Post {p.id}\n")
-        except Exception as e:
-            with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
-                f.write(f"Error: {e}\n")
-            print(f"Failed to auto-create BBS Post: {e}")
+                p = Post.objects.create(
+                    author=request.user,
+                    title=user_input[:200],
+                    content=str(response_text),
+                    type=post_type,
+                )
+                with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
+                    f.write(f"Success: Created Post {p.id}\n")
+            except Exception as e:
+                with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
+                    f.write(f"Error: {e}\n")
+                print(f"Failed to auto-create BBS Post: {e}")
 
         return JsonResponse(
             {
