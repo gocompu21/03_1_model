@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.name }} - 해충 식별</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            padding-bottom: 30px;
+        }
+        header {
+            background: #2d6a4f;
+            color: #fff;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        header a { color: #fff; text-decoration: none; }
+        .progress-text { font-size: 0.88rem; font-weight: 600; }
+        .bar-outer { height: 4px; background: #1b4332; }
+        .bar-inner { height: 100%; background: #95d5b2; width: 0; transition: width 0.3s; }
+
+        .container { max-width: 560px; margin: 0 auto; padding: 16px; }
+
+        .photo {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .photo img { width: 100%; height: 100%; object-fit: contain; }
+
+        .field {
+            background: #fff;
+            border-radius: 11px;
+            padding: 15px;
+            margin-bottom: 11px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.04);
+        }
+        .field-label {
+            font-size: 0.82rem;
+            color: #2d6a4f;
+            font-weight: 600;
+            margin-bottom: 9px;
+        }
+        .opts { display: grid; gap: 7px; }
+        .opt {
+            padding: 12px 14px;
+            border: 1.5px solid #e3ece7;
+            border-radius: 8px;
+            background: #fff;
+            text-align: left;
+            font-size: 0.92rem;
+            font-family: inherit;
+            cursor: pointer;
+            color: #333;
+        }
+        .opt:hover:not(:disabled) { background: #f4f9f6; border-color: #b7d9c5; }
+        .opt.correct { background: #d8f3dc; border-color: #40916c; color: #1b4332; font-weight: 600; }
+        .opt.wrong { background: #fde8e8; border-color: #e07070; color: #8b1f1f; }
+        .opt:disabled { cursor: default; }
+
+        .typing-row { display: flex; gap: 7px; }
+        .typing-row input {
+            flex: 1;
+            padding: 12px;
+            border: 1.5px solid #e3ece7;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+        .typing-row input:focus { outline: none; border-color: #74c69d; }
+        .typing-row input.correct { background: #d8f3dc; border-color: #40916c; }
+        .typing-row input.wrong { background: #fde8e8; border-color: #e07070; }
+        .typing-row button {
+            padding: 12px 17px;
+            background: #2d6a4f;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .answer-hint {
+            margin-top: 8px;
+            font-size: 0.84rem;
+            color: #1b4332;
+            background: #f0f9f3;
+            padding: 8px 11px;
+            border-radius: 6px;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2d6a4f;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+        .next-btn:hover { background: #1b4332; }
+        .hidden { display: none !important; }
+
+        .result {
+            background: #fff;
+            border-radius: 14px;
+            padding: 40px 24px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        }
+        .result .score { font-size: 3rem; font-weight: 700; color: #2d6a4f; }
+        .result .detail { color: #666; margin: 10px 0 24px; }
+        .result-actions { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; }
+        .result-actions a {
+            padding: 12px 20px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 0.92rem;
+        }
+        .btn-main { background: #2d6a4f; color: #fff; }
+        .btn-sub { background: #eef2ef; color: #40684f; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'pestid:index' %}"><i class="fas fa-xmark"></i></a>
+        <span class="progress-text"><span id="cur">1</span> / {{ total }}</span>
+        <span style="font-size: 0.82rem; opacity: 0.85;">
+            {% if mode == 'choice' %}객관식{% else %}주관식{% endif %}
+        </span>
+    </header>
+    <div class="bar-outer"><div class="bar-inner" id="bar"></div></div>
+
+    <div class="container">
+        <div id="quiz">
+            <div class="photo"><img id="photo" src="" alt="해충 사진"></div>
+            <div id="fields"></div>
+            <button class="next-btn hidden" id="nextBtn">다음 문제</button>
+        </div>
+
+        <div id="result" class="result hidden">
+            <div class="score"><span id="scoreVal">0</span>%</div>
+            <div class="detail"><span id="okCnt">0</span> / <span id="allCnt">0</span> 정답</div>
+            <div class="result-actions">
+                <a href="" id="retryBtn" class="btn-main"><i class="fas fa-rotate-right"></i> 다시 풀기</a>
+                <a href="{% url 'pestid:index' %}" class="btn-sub">코스 목록</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const QUESTIONS = {{ questions_json|safe }};
+        const COURSE_ID = {{ course.id }};
+        const MODE = "{{ mode }}";
+        const CSRF = "{{ csrf_token }}";
+
+        let idx = 0;         // 현재 문제 번호
+        let totalFields = 0; // 채점 대상 항목 총 개수
+        let okFields = 0;    // 맞힌 항목 개수
+        let solvedInQ = 0;   // 현재 문제에서 판정 끝난 항목 수
+
+        const $fields = document.getElementById('fields');
+        const $next = document.getElementById('nextBtn');
+
+        function post(url, body) {
+            return fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify(body),
+            }).then(r => r.json());
+        }
+
+        function render() {
+            const q = QUESTIONS[idx];
+            document.getElementById('photo').src = q.image;
+            document.getElementById('cur').textContent = idx + 1;
+            document.getElementById('bar').style.width = ((idx / QUESTIONS.length) * 100) + '%';
+
+            solvedInQ = 0;
+            $next.classList.add('hidden');
+            $fields.innerHTML = '';
+
+            q.fields.forEach(f => {
+                const box = document.createElement('div');
+                box.className = 'field';
+                box.innerHTML = `<div class="field-label">${f.label}</div>`;
+
+                if (f.type === 'choice') {
+                    const wrap = document.createElement('div');
+                    wrap.className = 'opts';
+                    f.options.forEach(opt => {
+                        const b = document.createElement('button');
+                        b.className = 'opt';
+                        b.textContent = opt;
+                        b.onclick = () => judge(q.id, f.key, opt, box, b);
+                        wrap.appendChild(b);
+                    });
+                    box.appendChild(wrap);
+                } else {
+                    const row = document.createElement('div');
+                    row.className = 'typing-row';
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = f.label + ' 입력';
+                    const btn = document.createElement('button');
+                    btn.textContent = '확인';
+                    const submit = () => judge(q.id, f.key, input.value, box, null, input, btn);
+                    btn.onclick = submit;
+                    input.onkeydown = e => { if (e.key === 'Enter') submit(); };
+                    row.appendChild(input);
+                    row.appendChild(btn);
+                    box.appendChild(row);
+                }
+                $fields.appendChild(box);
+            });
+
+            totalFieldsThisQ = q.fields.length;
+        }
+
+        function judge(qid, key, value, box, btn, input, submitBtn) {
+            if (box.dataset.done) return;
+            if (input && !value.trim()) return;
+
+            post("{% url 'pestid:grade' %}", { question_id: qid, key: key, answer: value })
+                .then(res => {
+                    box.dataset.done = '1';
+                    totalFields++;
+                    if (res.correct) okFields++;
+
+                    if (btn) {
+                        box.querySelectorAll('.opt').forEach(b => {
+                            b.disabled = true;
+                            if (b.textContent === value) {
+                                b.classList.add(res.correct ? 'correct' : 'wrong');
+                            }
+                        });
+                    }
+                    if (input) {
+                        input.disabled = true;
+                        input.classList.add(res.correct ? 'correct' : 'wrong');
+                        if (submitBtn) submitBtn.disabled = true;
+                    }
+
+                    if (!res.correct) {
+                        const hint = document.createElement('div');
+                        hint.className = 'answer-hint';
+                        hint.innerHTML = '<i class="fas fa-lightbulb"></i> 정답: ' + res.answer;
+                        box.appendChild(hint);
+                    }
+
+                    solvedInQ++;
+                    if (solvedInQ >= totalFieldsThisQ) {
+                        $next.classList.remove('hidden');
+                        $next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                })
+                .catch(() => alert('채점 중 오류가 발생했습니다. 다시 시도해 주세요.'));
+        }
+
+        let totalFieldsThisQ = 0;
+
+        $next.onclick = () => {
+            idx++;
+            if (idx >= QUESTIONS.length) {
+                showResult();
+            } else {
+                render();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        function showResult() {
+            document.getElementById('bar').style.width = '100%';
+            document.getElementById('quiz').classList.add('hidden');
+            const pct = totalFields ? Math.round(okFields * 100 / totalFields) : 0;
+            document.getElementById('scoreVal').textContent = pct;
+            document.getElementById('okCnt').textContent = okFields;
+            document.getElementById('allCnt').textContent = totalFields;
+            document.getElementById('retryBtn').href = window.location.href;
+            document.getElementById('result').classList.remove('hidden');
+
+            post("{% url 'pestid:finish' %}", {
+                course_id: COURSE_ID, mode: MODE,
+                total: totalFields, correct: okFields,
+            }).catch(() => { /* 기록 실패해도 결과는 보여준다 */ });
+        }
+
+        if (QUESTIONS.length) {
+            render();
+        }
+    </script>
+</body>
+</html>

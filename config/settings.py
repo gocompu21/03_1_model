@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     "practice",
     "glossary",
     "dashboard",
+    "pestid",
 ]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

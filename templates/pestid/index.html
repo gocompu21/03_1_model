@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>해충 식별 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            padding-bottom: 40px;
+        }
+        header {
+            background: #2d6a4f;
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 720px; margin: 0 auto; padding: 20px; }
+
+        .intro {
+            background: #fff;
+            border-radius: 14px;
+            padding: 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .intro h2 { font-size: 1.15rem; color: #1b4332; margin-bottom: 8px; }
+        .intro p { color: #666; font-size: 0.9rem; line-height: 1.6; }
+
+        .err {
+            background: #fde8e8;
+            color: #8b1f1f;
+            padding: 13px 16px;
+            border-radius: 9px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .course {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .course-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 14px;
+            gap: 12px;
+        }
+        .course-name { font-size: 1.08rem; font-weight: 700; color: #1b4332; }
+        .course-desc { color: #888; font-size: 0.85rem; margin-top: 3px; }
+        .meta { text-align: right; flex-shrink: 0; }
+        .meta .cnt { color: #2d6a4f; font-size: 0.85rem; font-weight: 600; }
+        .meta .best { color: #999; font-size: 0.78rem; margin-top: 3px; }
+
+        .modes { display: flex; gap: 8px; }
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 9px;
+            text-decoration: none;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .mode-choice { background: #d8f3dc; color: #1b4332; }
+        .mode-choice:hover { background: #c3ebca; }
+        .mode-typing { background: #eef2ef; color: #40684f; }
+        .mode-typing:hover { background: #e2e9e4; }
+        .mode-btn small { display: block; font-weight: 400; font-size: 0.75rem; opacity: 0.75; margin-top: 2px; }
+
+        .empty {
+            background: #fff;
+            border-radius: 14px;
+            padding: 50px 20px;
+            text-align: center;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'main:index' %}"><i class="fas fa-arrow-left"></i> 홈</a>
+        <strong>해충 식별</strong>
+        <span></span>
+    </header>
+
+    <div class="container">
+        {% if error %}<div class="err">{{ error }}</div>{% endif %}
+
+        <div class="intro">
+            <h2><i class="fas fa-bug" style="color: #2d6a4f;"></i> 사진으로 해충 익히기</h2>
+            <p>
+                해충 사진을 보고 이름과 생태 정보를 맞히는 연습입니다.
+                처음에는 <strong>객관식</strong>으로 눈에 익히고,
+                익숙해지면 <strong>주관식</strong>으로 시험처럼 풀어보세요.
+            </p>
+        </div>
+
+        {% for c in courses %}
+        <div class="course">
+            <div class="course-top">
+                <div>
+                    <div class="course-name">{{ c.name }}</div>
+                    {% if c.description %}<div class="course-desc">{{ c.description }}</div>{% endif %}
+                </div>
+                <div class="meta">
+                    <div class="cnt">{{ c.q_count }}문제</div>
+                    {% if c.my_best is not None %}
+                    <div class="best">최고 {{ c.my_best }}개 정답</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modes">
+                <a href="{% url 'pestid:play' c.id %}?mode=choice" class="mode-btn mode-choice">
+                    <i class="fas fa-list-ul"></i> 객관식
+                    <small>보기 중에서 고르기</small>
+                </a>
+                <a href="{% url 'pestid:play' c.id %}?mode=typing" class="mode-btn mode-typing">
+                    <i class="fas fa-keyboard"></i> 주관식
+                    <small>직접 입력하기</small>
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty">
+            <i class="fas fa-bug" style="font-size: 2.4rem; color: #ddd;"></i><br><br>
+            아직 등록된 해충 식별 코스가 없습니다.
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

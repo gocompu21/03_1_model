@@ -42,6 +42,7 @@ urlpatterns = [
     path("mock_exam/", include("mock_exam.urls")),
     path("practice/", include("practice.urls")),
     path("glossary/", include("glossary.urls")),
+    path("pestid/", include("pestid.urls")),
     path("dashboard/", include("dashboard.urls")),
 ]
 
