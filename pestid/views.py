@@ -13,10 +13,12 @@ from .models import PestAttempt, PestCourse, PestQuestion
 @login_required
 def index(request):
     """코스 목록과 내 최고 기록."""
+    # annotate가 GROUP BY를 만들면 Meta.ordering이 적용되지 않으므로 직접 정렬한다
     courses = (
         PestCourse.objects.filter(is_active=True)
         .annotate(q_count=Count("questions"))
         .filter(q_count__gt=0)
+        .order_by("order", "id")
     )
 
     best = {
