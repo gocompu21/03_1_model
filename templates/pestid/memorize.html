@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>해충 암기 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            padding-bottom: 96px;
+        }
+        header {
+            background: #2d6a4f;
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        header .order-toggle {
+            font-size: 0.8rem;
+            font-weight: 500;
+            background: rgba(255,255,255,0.18);
+            padding: 5px 11px;
+            border-radius: 12px;
+        }
+        .container { max-width: 620px; margin: 0 auto; padding: 16px 20px; }
+
+        .progress-bar { height: 4px; background: #dfe7e1; }
+        .progress-fill {
+            height: 100%;
+            background: #2d6a4f;
+            width: 0;
+            transition: width 0.25s ease-out;
+        }
+        .counter {
+            text-align: center;
+            color: #888;
+            font-size: 0.85rem;
+            margin: 14px 0 10px;
+        }
+        .counter strong { color: #2d6a4f; font-size: 1rem; }
+
+        .photo-wrap {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .photo-wrap img {
+            width: 100%;
+            display: block;
+            cursor: zoom-in;
+        }
+
+        .info {
+            background: #fff;
+            border-radius: 14px;
+            margin-top: 14px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .info.hidden { display: none; }
+        .pest-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1b4332;
+            margin-bottom: 4px;
+            word-break: keep-all;
+        }
+        .pest-course { color: #999; font-size: 0.82rem; margin-bottom: 16px; }
+        .row {
+            display: flex;
+            gap: 12px;
+            padding: 11px 0;
+            border-top: 1px solid #eef2ef;
+            font-size: 0.95rem;
+        }
+        .row .label {
+            color: #7a8b80;
+            flex-shrink: 0;
+            width: 88px;
+            font-size: 0.88rem;
+        }
+        .row .value { color: #222; font-weight: 600; word-break: keep-all; }
+
+        .hint {
+            text-align: center;
+            color: #9aa8a0;
+            font-size: 0.88rem;
+            margin-top: 20px;
+        }
+
+        .controls {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            background: #fff;
+            border-top: 1px solid #e6ece8;
+            padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+            display: flex;
+            gap: 10px;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .btn-next { background: #2d6a4f; color: #fff; }
+        .btn-next:active { background: #245a41; }
+        .btn-prev {
+            flex: 0 0 88px;
+            background: #eef2ef;
+            color: #40684f;
+        }
+        .btn:disabled { opacity: 0.4; cursor: default; }
+
+        .done {
+            background: #fff;
+            border-radius: 14px;
+            padding: 46px 24px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .done h2 { color: #1b4332; margin: 14px 0 8px; }
+        .done p { color: #888; font-size: 0.9rem; margin-bottom: 20px; }
+        .done a {
+            display: inline-block;
+            padding: 12px 22px;
+            background: #d8f3dc;
+            color: #1b4332;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 4px;
+        }
+
+        /* 사진 확대 (라이트박스) */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            touch-action: none;
+            will-change: transform;
+            transform-origin: center center;
+        }
+        .lightbox-img.animating { transition: transform 0.25s ease-out; }
+        .lightbox-close {
+            position: absolute;
+            top: 16px; right: 20px;
+            color: #fff;
+            font-size: 1.7rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'main:dvd' %}"><i class="fas fa-arrow-left"></i> DVD</a>
+        <strong>해충 암기</strong>
+        {% if order == 'random' %}
+        <a href="{% url 'pestid:memorize' %}" class="order-toggle"><i class="fas fa-list-ol"></i> 순서대로</a>
+        {% else %}
+        <a href="{% url 'pestid:memorize' %}?order=random" class="order-toggle"><i class="fas fa-shuffle"></i> 섞기</a>
+        {% endif %}
+    </header>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <div class="container">
+        <div id="card">
+            <div class="counter"><strong id="pos">1</strong> / {{ total }}</div>
+
+            <div class="photo-wrap">
+                <img id="photo" src="" alt="해충 사진">
+            </div>
+
+            <div class="info hidden" id="info">
+                <div class="pest-name" id="name"></div>
+                <div class="pest-course" id="course"></div>
+                <div id="rows"></div>
+            </div>
+
+            <p class="hint" id="hint">사진을 보고 해충명을 떠올린 뒤 <strong>다음</strong>을 누르세요</p>
+        </div>
+
+        <div class="done" id="done" style="display: none;">
+            <div style="font-size: 3rem;">🎉</div>
+            <h2>{{ total }}종을 모두 넘겼습니다</h2>
+            <p>이어서 퀴즈로 확인해 보세요.</p>
+            <a href="{% url 'pestid:memorize' %}?order=random"><i class="fas fa-rotate-right"></i> 섞어서 다시</a>
+            <a href="{% url 'pestid:index' %}"><i class="fas fa-list-ul"></i> 퀴즈 풀기</a>
+        </div>
+    </div>
+
+    <div class="controls" id="controls">
+        <button class="btn btn-prev" id="prev" type="button"><i class="fas fa-chevron-left"></i> 이전</button>
+        <button class="btn btn-next" id="next" type="button">다음</button>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose" type="button">&times;</button>
+        <img class="lightbox-img" id="lightboxImg" src="" alt="확대 사진">
+    </div>
+
+<script>
+const CARDS = {{ cards_json|safe }};
+
+const photo = document.getElementById('photo');
+const info = document.getElementById('info');
+const nameEl = document.getElementById('name');
+const courseEl = document.getElementById('course');
+const rowsEl = document.getElementById('rows');
+const posEl = document.getElementById('pos');
+const hintEl = document.getElementById('hint');
+const progress = document.getElementById('progress');
+const nextBtn = document.getElementById('next');
+const prevBtn = document.getElementById('prev');
+
+let index = 0;
+let revealed = false;
+
+function render() {
+    const card = CARDS[index];
+    photo.src = card.image;
+    posEl.textContent = index + 1;
+    progress.style.width = ((index + (revealed ? 1 : 0.5)) / CARDS.length * 100) + '%';
+
+    if (revealed) {
+        nameEl.textContent = card.name || '(이름 미상)';
+        courseEl.textContent = card.course;
+        rowsEl.innerHTML = card.fields.map(f =>
+            `<div class="row"><span class="label">${f.label}</span><span class="value">${f.value}</span></div>`
+        ).join('');
+        info.classList.remove('hidden');
+        hintEl.textContent = '다음 해충으로 넘어가려면 다음을 누르세요';
+        nextBtn.innerHTML = (index === CARDS.length - 1)
+            ? '완료 <i class="fas fa-check"></i>'
+            : '다음 해충 <i class="fas fa-chevron-right"></i>';
+    } else {
+        info.classList.add('hidden');
+        hintEl.innerHTML = '사진을 보고 해충명을 떠올린 뒤 <strong>다음</strong>을 누르세요';
+        nextBtn.innerHTML = '정답 보기';
+    }
+
+    prevBtn.disabled = (index === 0 && !revealed);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goNext() {
+    if (!revealed) {
+        revealed = true;
+    } else if (index < CARDS.length - 1) {
+        index += 1;
+        revealed = false;
+    } else {
+        document.getElementById('card').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('done').style.display = 'block';
+        progress.style.width = '100%';
+        return;
+    }
+    render();
+}
+
+function goPrev() {
+    if (revealed) {
+        revealed = false;
+    } else if (index > 0) {
+        index -= 1;
+        revealed = true;
+    }
+    render();
+}
+
+nextBtn.addEventListener('click', goNext);
+prevBtn.addEventListener('click', goPrev);
+
+document.addEventListener('keydown', (e) => {
+    if (lightbox.classList.contains('open')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); goNext(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+});
+
+/* ---- 사진 확대 ---- */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+let scale = 1, posX = 0, posY = 0;
+let startDistance = 0, startScale = 1;
+let isPinching = false, isPanning = false;
+let panStartX = 0, panStartY = 0;
+let lastTap = 0;
+
+function applyTransform() {
+    lightboxImg.style.transform = `scale(${scale}) translate(${posX}px, ${posY}px)`;
+}
+function resetZoom() {
+    scale = 1; posX = 0; posY = 0;
+    applyTransform();
+}
+function clampPan() {
+    const maxPan = (scale - 1) * 150;
+    posX = Math.min(Math.max(posX, -maxPan), maxPan);
+    posY = Math.min(Math.max(posY, -maxPan), maxPan);
+}
+
+photo.addEventListener('click', () => {
+    lightboxImg.src = photo.src;
+    resetZoom();
+    lightbox.classList.add('open');
+});
+function closeLightbox() { lightbox.classList.remove('open'); }
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+});
+
+lightboxImg.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+        isPinching = true; isPanning = false;
+        startDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        startScale = scale;
+    } else if (e.touches.length === 1) {
+        const now = Date.now();
+        if (now - lastTap < 300) {
+            lightboxImg.classList.add('animating');
+            if (scale > 1) { resetZoom(); } else { scale = 2.5; applyTransform(); }
+            setTimeout(() => lightboxImg.classList.remove('animating'), 260);
+            lastTap = 0;
+            return;
+        }
+        lastTap = now;
+        if (scale > 1) {
+            isPanning = true;
+            panStartX = e.touches[0].clientX - posX * scale;
+            panStartY = e.touches[0].clientY - posY * scale;
+        }
+    }
+}, { passive: false });
+
+lightboxImg.addEventListener('touchmove', (e) => {
+    if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        scale = Math.min(Math.max(startScale * (dist / startDistance), 1), 5);
+        clampPan();
+        applyTransform();
+    } else if (isPanning && e.touches.length === 1) {
+        e.preventDefault();
+        posX = (e.touches[0].clientX - panStartX) / scale;
+        posY = (e.touches[0].clientY - panStartY) / scale;
+        clampPan();
+        applyTransform();
+    }
+}, { passive: false });
+
+lightboxImg.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) { isPinching = false; isPanning = false; }
+});
+
+lightboxImg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    scale = Math.min(Math.max(scale - e.deltaY * 0.002, 1), 5);
+    clampPan();
+    applyTransform();
+}, { passive: false });
+
+let mouseDown = false, mouseStartX = 0, mouseStartY = 0;
+lightboxImg.addEventListener('mousedown', (e) => {
+    if (scale <= 1) return;
+    e.preventDefault();
+    mouseDown = true;
+    mouseStartX = e.clientX - posX * scale;
+    mouseStartY = e.clientY - posY * scale;
+});
+window.addEventListener('mousemove', (e) => {
+    if (!mouseDown) return;
+    posX = (e.clientX - mouseStartX) / scale;
+    posY = (e.clientY - mouseStartY) / scale;
+    clampPan();
+    applyTransform();
+});
+window.addEventListener('mouseup', () => { mouseDown = false; });
+lightboxImg.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    lightboxImg.classList.add('animating');
+    if (scale > 1) { resetZoom(); } else { scale = 2.5; applyTransform(); }
+    setTimeout(() => lightboxImg.classList.remove('animating'), 260);
+});
+
+render();
+</script>
+</body>
+</html>

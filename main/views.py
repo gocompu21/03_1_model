@@ -1,7 +1,7 @@
 from django.db.models import Count
 from django.shortcuts import render
 
-from pestid.models import PestCourse
+from pestid.models import PestCourse, PestQuestion
 
 
 def index(request):
@@ -17,4 +17,9 @@ def dvd(request):
         .count()
     )
 
-    return render(request, "main/dvd.html", {"pest_course_count": pest_course_count})
+    pest_question_count = PestQuestion.objects.filter(course__is_active=True).count()
+
+    return render(request, "main/dvd.html", {
+        "pest_course_count": pest_course_count,
+        "pest_question_count": pest_question_count,
+    })

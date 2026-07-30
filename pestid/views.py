@@ -37,6 +37,44 @@ def index(request):
 
 
 @login_required
+def memorize(request):
+    """해충 암기. 코스 구분 없이 전체 해충을 사진 -> 정보 순으로 넘겨본다.
+
+    채점이 없으므로 정답 정보를 그대로 내려준다.
+    """
+    questions = list(
+        PestQuestion.objects.filter(course__is_active=True)
+        .select_related("course")
+        .order_by("course__order", "order", "id")
+    )
+
+    payload = [
+        {
+            "image": q.image.url,
+            "name": q.name,
+            "fields": [
+                {"label": label, "value": value}
+                for key, label, value in q.answer_fields()
+                if key != "name"
+            ],
+            "course": q.course.name,
+        }
+        for q in questions
+    ]
+
+    order = "sequence"
+    if request.GET.get("order") == "random":
+        random.shuffle(payload)
+        order = "random"
+
+    return render(request, "pestid/memorize.html", {
+        "cards_json": json.dumps(payload, ensure_ascii=False),
+        "total": len(payload),
+        "order": order,
+    })
+
+
+@login_required
 def play(request, course_id):
     """퀴즈 화면. 문제 데이터를 JSON으로 함께 내려준다.
 
