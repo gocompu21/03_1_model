@@ -15,4 +15,8 @@ urlpatterns = [
     path("attendance/qr.png", attendance.attendance_qr_png, name="attendance_qr_png"),
     path("attendance/check/", attendance.attendance_check, name="attendance_check"),
     path("attendance/my/", attendance.my_attendance, name="my_attendance"),
+    path("attendance/add/", attendance.attendance_add, name="attendance_add"),
+    path("attendance/delete/", attendance.attendance_delete, name="attendance_delete"),
+    path("attendance/stats/", attendance.attendance_stats, name="attendance_stats"),
+    path("attendance/monthly/", attendance.attendance_monthly, name="attendance_monthly"),
 ]

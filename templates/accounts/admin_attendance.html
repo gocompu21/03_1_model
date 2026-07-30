@@ -24,39 +24,78 @@
         header a { color: #fff; text-decoration: none; font-weight: 600; }
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
 
+        .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+        .tab {
+            padding: 9px 16px;
+            background: #fff;
+            border: 1px solid #dfe8e3;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #40684f;
+            font-size: 0.88rem;
+        }
+        .tab.active { background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
+        .tab:hover:not(.active) { background: #eef4f0; }
+
+        .msg { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+        .msg.success { background: #d8f3dc; color: #1b4332; }
+        .msg.info { background: #e7f1fb; color: #1c4f78; }
+        .msg.error { background: #fde8e8; color: #8b1f1f; }
+
+        .date-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: #fff;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .date-nav a, .date-nav button {
+            background: #eef4f0;
+            border: none;
+            color: #2d6a4f;
+            padding: 8px 13px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+        .date-nav a:hover { background: #dce9e2; }
+        .date-nav .cur { font-size: 1.05rem; font-weight: 700; color: #1b4332; }
+        .date-nav input[type=date] {
+            border: 1px solid #dfe8e3;
+            border-radius: 7px;
+            padding: 7px 10px;
+            font-size: 0.88rem;
+            font-family: inherit;
+        }
+
         .qr-card {
             background: #fff;
             border-radius: 14px;
-            padding: 28px 20px;
+            padding: 26px 20px;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
-        .qr-date {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1b4332;
-            margin-bottom: 4px;
-        }
-        .qr-guide { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+        .qr-guide { color: #666; font-size: 0.9rem; margin-bottom: 18px; }
         .qr-img {
-            width: 300px;
-            max-width: 80vw;
+            width: 280px;
+            max-width: 78vw;
             height: auto;
             border: 1px solid #e3ece7;
             border-radius: 10px;
             padding: 10px;
             background: #fff;
         }
-        .qr-url {
-            margin-top: 16px;
-            font-size: 0.75rem;
-            color: #999;
-            word-break: break-all;
-        }
+        .qr-url { margin-top: 14px; font-size: 0.72rem; color: #aaa; word-break: break-all; }
         .btn-print {
             display: inline-block;
-            margin-top: 18px;
+            margin-top: 16px;
             background: #2d6a4f;
             color: #fff;
             border: none;
@@ -67,10 +106,19 @@
         }
         .btn-print:hover { background: #1b4332; }
 
+        .past-notice {
+            background: #fff8e6;
+            color: #7a5c00;
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            margin-bottom: 18px;
+        }
+
         .section-title {
-            font-size: 1.1rem;
+            font-size: 1.02rem;
             color: #1b4332;
-            margin-bottom: 12px;
+            margin: 22px 0 10px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -78,7 +126,7 @@
         .count-badge {
             background: #d8f3dc;
             color: #1b4332;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             padding: 2px 10px;
             border-radius: 10px;
         }
@@ -86,10 +134,50 @@
         th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.88rem; }
         th { background: #f8fdf9; color: #2d6a4f; font-weight: 600; }
         tbody tr:hover { background: #f0f7f4; }
-        .empty { text-align: center; color: #999; padding: 30px; }
+        .empty { text-align: center; color: #999; padding: 28px; }
+        .btn-del {
+            background: #fdf0f0;
+            color: #b02a2a;
+            border: none;
+            padding: 5px 11px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .btn-del:hover { background: #f9dcdc; }
+
+        .add-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .add-box select {
+            flex: 1;
+            min-width: 180px;
+            padding: 9px 11px;
+            border: 1px solid #dfe8e3;
+            border-radius: 7px;
+            font-size: 0.9rem;
+            font-family: inherit;
+        }
+        .btn-add {
+            background: #2d6a4f;
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            font-size: 0.88rem;
+            cursor: pointer;
+        }
+        .btn-add:hover { background: #1b4332; }
 
         @media print {
-            header, .btn-print, .attend-list, .qr-url { display: none; }
+            header, .tabs, .date-nav, .btn-print, .attend-list, .qr-url, .add-box, .section-title, .past-notice { display: none; }
             body { background: #fff; }
             .qr-img { width: 420px; }
         }
@@ -103,30 +191,67 @@
     </header>
 
     <div class="container">
+        <div class="tabs">
+            <a href="{% url 'accounts:admin_attendance' %}" class="tab active">
+                <i class="fas fa-qrcode"></i> 일자별 출석
+            </a>
+            <a href="{% url 'accounts:attendance_stats' %}" class="tab">
+                <i class="fas fa-chart-bar"></i> 학생별 통계
+            </a>
+            <a href="{% url 'accounts:attendance_monthly' %}" class="tab">
+                <i class="fas fa-calendar-alt"></i> 월별 출석부
+            </a>
+        </div>
+
+        {% if messages %}
+            {% for m in messages %}
+            <div class="msg {{ m.tags }}">{{ m }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="date-nav">
+            <a href="?date={{ prev_date|date:'Y-m-d' }}"><i class="fas fa-chevron-left"></i> 이전</a>
+            <span class="cur">{{ view_date|date:"Y년 n월 j일" }} ({{ view_date|date:"D" }})</span>
+            <a href="?date={{ next_date|date:'Y-m-d' }}">다음 <i class="fas fa-chevron-right"></i></a>
+            <form method="get" style="display: flex; gap: 6px; align-items: center;">
+                <input type="date" name="date" value="{{ view_date|date:'Y-m-d' }}" onchange="this.form.submit()">
+            </form>
+            {% if not is_today %}
+            <a href="{% url 'accounts:admin_attendance' %}"><i class="fas fa-rotate-left"></i> 오늘</a>
+            {% endif %}
+        </div>
+
+        {% if is_today %}
         <div class="qr-card">
-            <div class="qr-date">{{ today|date:"Y년 n월 j일" }} ({{ today|date:"D" }})</div>
             <div class="qr-guide">학생들이 휴대폰 카메라로 이 QR을 스캔하면 출석이 기록됩니다.</div>
-
             <img src="{{ qr_src }}" alt="오늘의 출석 QR 코드" class="qr-img">
-
             <div class="qr-url">{{ check_url }}</div>
             <button class="btn-print" onclick="window.print()">
                 <i class="fas fa-print"></i> QR 인쇄
             </button>
         </div>
+        {% else %}
+        <div class="past-notice">
+            <i class="fas fa-circle-info"></i>
+            지난 날짜입니다. QR 코드는 당일에만 유효하므로 표시되지 않습니다.
+            필요하면 아래에서 수동으로 출석을 추가할 수 있습니다.
+        </div>
+        {% endif %}
 
         <div class="attend-list">
             <div class="section-title">
-                <i class="fas fa-clipboard-check"></i> 오늘 출석
+                <i class="fas fa-clipboard-check"></i> 출석 명단
                 <span class="count-badge">{{ record_count }}명</span>
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 60px;">순번</th>
+                        <th style="width: 56px;">순번</th>
                         <th>이름</th>
                         <th>아이디</th>
                         <th>체크 시각</th>
+                        <th>등록 방식</th>
+                        <th style="width: 80px;"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -136,17 +261,47 @@
                         <td style="font-weight: 500;">{{ r.user.first_name|default:r.user.username }}</td>
                         <td style="color: #777;">{{ r.user.username }}</td>
                         <td>{{ r.checked_at|date:"H:i" }}</td>
+                        <td style="font-size: 0.8rem; color: #888;">
+                            {% if r.user_agent == "관리자 수동 등록" %}수동{% else %}QR{% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'accounts:attendance_delete' %}"
+                                  onsubmit="return confirm('{{ r.user.first_name|default:r.user.username }} 님의 출석을 취소하시겠습니까?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="record_id" value="{{ r.id }}">
+                                <button type="submit" class="btn-del">취소</button>
+                            </form>
+                        </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="4" class="empty">아직 출석한 학생이 없습니다.</td></tr>
+                    <tr><td colspan="6" class="empty">이 날짜에 출석한 학생이 없습니다.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
+
+            <div class="section-title">
+                <i class="fas fa-user-plus"></i> 수동 출석 추가
+                <span class="count-badge">미출석 {{ absentee_count }}명</span>
+            </div>
+            <form method="post" action="{% url 'accounts:attendance_add' %}" class="add-box">
+                {% csrf_token %}
+                <input type="hidden" name="date" value="{{ view_date|date:'Y-m-d' }}">
+                <select name="user_id" required>
+                    <option value="">-- 학생 선택 --</option>
+                    {% for u in absentees %}
+                    <option value="{{ u.id }}">{{ u.first_name|default:u.username }} ({{ u.username }})</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn-add">
+                    <i class="fas fa-check"></i> 출석 처리
+                </button>
+            </form>
         </div>
     </div>
 
+    {% if is_today %}
     <script>
-        // 출석 현황을 30초마다 갱신 (QR 화면을 띄워둔 상태에서 실시간 확인)
+        // 오늘 화면에서만 출석 현황을 30초마다 갱신
         setInterval(function () {
             fetch(window.location.href, { cache: 'no-store' })
                 .then(function (r) { return r.text(); })
@@ -160,5 +315,6 @@
                 .catch(function () { /* 네트워크 오류는 다음 주기에 재시도 */ });
         }, 30000);
     </script>
+    {% endif %}
 </body>
 </html>

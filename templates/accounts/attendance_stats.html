@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학생별 출석 통계 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            padding-bottom: 40px;
+        }
+        header {
+            background: #2d6a4f;
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+        .tab {
+            padding: 9px 16px;
+            background: #fff;
+            border: 1px solid #dfe8e3;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #40684f;
+            font-size: 0.88rem;
+        }
+        .tab.active { background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
+        .tab:hover:not(.active) { background: #eef4f0; }
+
+        .summary {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 18px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .summary strong { font-size: 1.6rem; color: #1b4332; }
+        .summary span { color: #777; font-size: 0.9rem; }
+
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.88rem; }
+        th { background: #f8fdf9; color: #2d6a4f; font-weight: 600; }
+        tbody tr:hover { background: #f0f7f4; }
+        .empty { text-align: center; color: #999; padding: 30px; }
+
+        .bar-wrap { display: flex; align-items: center; gap: 8px; }
+        .bar {
+            height: 8px;
+            background: #d8f3dc;
+            border-radius: 4px;
+            min-width: 2px;
+            flex-shrink: 0;
+        }
+        .bar.zero { background: #eee; }
+        .rate { color: #888; font-size: 0.8rem; }
+        .zero-row td { color: #aaa; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'dashboard:index' %}"><i class="fas fa-arrow-left"></i> 대시보드</a>
+        <strong>학생별 출석 통계</strong>
+        <span></span>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <a href="{% url 'accounts:admin_attendance' %}" class="tab">
+                <i class="fas fa-qrcode"></i> 일자별 출석
+            </a>
+            <a href="{% url 'accounts:attendance_stats' %}" class="tab active">
+                <i class="fas fa-chart-bar"></i> 학생별 통계
+            </a>
+            <a href="{% url 'accounts:attendance_monthly' %}" class="tab">
+                <i class="fas fa-calendar-alt"></i> 월별 출석부
+            </a>
+        </div>
+
+        <div class="summary">
+            <strong>{{ total_days }}</strong>일<br>
+            <span>지금까지 출석이 기록된 날짜 수</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 56px;">순위</th>
+                    <th>이름</th>
+                    <th>아이디</th>
+                    <th style="width: 200px;">출석 일수</th>
+                    <th>최근 출석</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in stats %}
+                <tr {% if not s.attend_count %}class="zero-row"{% endif %}>
+                    <td>{{ forloop.counter }}</td>
+                    <td style="font-weight: 500;">{{ s.first_name|default:s.username }}</td>
+                    <td style="color: #777;">{{ s.username }}</td>
+                    <td>
+                        <div class="bar-wrap">
+                            {% if total_days %}
+                            <div class="bar {% if not s.attend_count %}zero{% endif %}"
+                                 style="width: {% widthratio s.attend_count total_days 120 %}px;"></div>
+                            {% endif %}
+                            <span>{{ s.attend_count }}일</span>
+                            {% if total_days %}
+                            <span class="rate">({% widthratio s.attend_count total_days 100 %}%)</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>{{ s.last_attend|date:"Y-m-d"|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="empty">사용자가 없습니다.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>월별 출석부 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            padding-bottom: 40px;
+        }
+        header {
+            background: #2d6a4f;
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+        .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+        .tab {
+            padding: 9px 16px;
+            background: #fff;
+            border: 1px solid #dfe8e3;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #40684f;
+            font-size: 0.88rem;
+        }
+        .tab.active { background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
+        .tab:hover:not(.active) { background: #eef4f0; }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background: #fff;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .month-nav a {
+            background: #eef4f0;
+            color: #2d6a4f;
+            padding: 8px 14px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 0.88rem;
+        }
+        .month-nav a:hover { background: #dce9e2; }
+        .month-nav .cur { font-size: 1.1rem; font-weight: 700; color: #1b4332; }
+
+        .table-scroll {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 8px 6px; text-align: center; border-bottom: 1px solid #eee; font-size: 0.85rem; white-space: nowrap; }
+        th { background: #f8fdf9; color: #2d6a4f; font-weight: 600; }
+        .name-col {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background: #fff;
+            font-weight: 500;
+            min-width: 110px;
+            border-right: 1px solid #eee;
+        }
+        thead .name-col { background: #f8fdf9; z-index: 1; }
+        tbody tr:hover td { background: #f0f7f4; }
+        tbody tr:hover .name-col { background: #f0f7f4; }
+        .present { color: #28a745; font-weight: 600; }
+        .absent { color: #ddd; }
+        .total-col { background: #f8fdf9; font-weight: 600; color: #1b4332; }
+        .empty { text-align: center; color: #999; padding: 40px; }
+        .legend { margin-top: 12px; color: #888; font-size: 0.82rem; text-align: center; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'dashboard:index' %}"><i class="fas fa-arrow-left"></i> 대시보드</a>
+        <strong>월별 출석부</strong>
+        <span></span>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <a href="{% url 'accounts:admin_attendance' %}" class="tab">
+                <i class="fas fa-qrcode"></i> 일자별 출석
+            </a>
+            <a href="{% url 'accounts:attendance_stats' %}" class="tab">
+                <i class="fas fa-chart-bar"></i> 학생별 통계
+            </a>
+            <a href="{% url 'accounts:attendance_monthly' %}" class="tab active">
+                <i class="fas fa-calendar-alt"></i> 월별 출석부
+            </a>
+        </div>
+
+        <div class="month-nav">
+            <a href="?year={{ prev_year }}&month={{ prev_month }}">
+                <i class="fas fa-chevron-left"></i> 이전 달
+            </a>
+            <span class="cur">{{ year }}년 {{ month }}월</span>
+            <a href="?year={{ next_year }}&month={{ next_month }}">
+                다음 달 <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+
+        {% if rows %}
+        <div class="table-scroll">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="name-col">이름</th>
+                        {% for d in active_days %}
+                        <th>{{ d|date:"j" }}<br><span style="font-weight: 400; font-size: 0.72rem; color: #999;">{{ d|date:"D" }}</span></th>
+                        {% endfor %}
+                        <th class="total-col">계</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <td class="name-col">{{ row.user.first_name|default:row.user.username }}</td>
+                        {% for c in row.cells %}
+                        <td class="{% if c.present %}present{% else %}absent{% endif %}">
+                            {% if c.present %}O{% else %}·{% endif %}
+                        </td>
+                        {% endfor %}
+                        <td class="total-col">{{ row.count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="legend">
+            출석이 있었던 날짜만 표시됩니다. 이 달에 출석 기록이 없는 학생은 목록에서 제외됩니다.
+        </div>
+        {% else %}
+        <div class="table-scroll">
+            <div class="empty">
+                <i class="fas fa-calendar-xmark" style="font-size: 2rem; color: #ddd;"></i><br><br>
+                {{ year }}년 {{ month }}월에는 출석 기록이 없습니다.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
