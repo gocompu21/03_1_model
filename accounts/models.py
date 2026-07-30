@@ -136,3 +136,30 @@ class UserSession(models.Model):
             '기타': 'fas fa-globe',
         }
         return icons.get(device, 'fas fa-globe')
+
+
+class Attendance(models.Model):
+    """QR 코드 출석 기록.
+
+    관리자 화면에 표시된 당일자 QR을 학생이 스캔하면 한 건 생성된다.
+    같은 날 중복 스캔은 unique_together로 막고, 두 번째 스캔부터는
+    새 기록을 만들지 않는다.
+    """
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="attendances", verbose_name="사용자"
+    )
+    date = models.DateField(verbose_name="출석일")
+    checked_at = models.DateTimeField(auto_now_add=True, verbose_name="체크 시각")
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP")
+    user_agent = models.CharField(max_length=500, blank=True, default="", verbose_name="기기 정보")
+
+    class Meta:
+        verbose_name = "출석"
+        verbose_name_plural = "출석"
+        unique_together = ("user", "date")
+        ordering = ["-date", "-checked_at"]
+        indexes = [models.Index(fields=["-date"])]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}"

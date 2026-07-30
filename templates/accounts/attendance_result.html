@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석 체크 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 40px 28px;
+            text-align: center;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .icon { font-size: 4rem; margin-bottom: 18px; }
+        .icon.ok { color: #28a745; }
+        .icon.warn { color: #f0a020; }
+        .icon.err { color: #dc3545; }
+        h1 { font-size: 1.4rem; color: #1b4332; margin-bottom: 10px; }
+        p { color: #666; line-height: 1.6; font-size: 0.95rem; }
+        .time {
+            margin-top: 20px;
+            padding: 14px;
+            background: #f8fdf9;
+            border-radius: 10px;
+            color: #1b4332;
+            font-size: 0.9rem;
+        }
+        .time strong { font-size: 1.1rem; }
+        .actions { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            display: inline-block;
+            padding: 11px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        .btn-primary { background: #2d6a4f; color: #fff; }
+        .btn-primary:hover { background: #1b4332; }
+        .btn-sub { background: #eef2ef; color: #40684f; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        {% if status == 'success' %}
+            <div class="icon ok"><i class="fas fa-circle-check"></i></div>
+            <h1>출석 완료</h1>
+            <p>{{ today|date:"Y년 n월 j일" }} 출석이 기록되었습니다.</p>
+            {% if record %}
+            <div class="time">체크 시각 <strong>{{ record.checked_at|date:"H:i" }}</strong></div>
+            {% endif %}
+
+        {% elif status == 'already' %}
+            <div class="icon warn"><i class="fas fa-circle-info"></i></div>
+            <h1>이미 출석했습니다</h1>
+            <p>오늘은 이미 출석 체크가 완료되어 있습니다.</p>
+            {% if record %}
+            <div class="time">체크 시각 <strong>{{ record.checked_at|date:"H:i" }}</strong></div>
+            {% endif %}
+
+        {% elif status == 'expired' %}
+            <div class="icon warn"><i class="fas fa-clock"></i></div>
+            <h1>만료된 QR 코드</h1>
+            <p>오늘 날짜의 QR 코드가 아닙니다.<br>강의실 화면의 QR을 다시 스캔해 주세요.</p>
+
+        {% else %}
+            <div class="icon err"><i class="fas fa-circle-xmark"></i></div>
+            <h1>유효하지 않은 QR 코드</h1>
+            <p>출석 정보를 확인할 수 없습니다.<br>강의실 화면의 QR을 다시 스캔해 주세요.</p>
+        {% endif %}
+
+        <div class="actions">
+            <a href="{% url 'accounts:my_attendance' %}" class="btn btn-primary">
+                <i class="fas fa-calendar-check"></i> 내 출석 현황
+            </a>
+            <a href="{% url 'main:index' %}" class="btn btn-sub">홈으로</a>
+        </div>
+    </div>
+</body>
+</html>
