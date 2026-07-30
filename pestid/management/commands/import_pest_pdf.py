@@ -57,8 +57,11 @@ OCCURRENCE_RE = re.compile(
 # 이미지 합성 설정
 MAX_PHOTOS = 6
 MIN_PHOTO_AREA = 20000  # 이보다 작으면 아이콘/장식으로 보고 버린다
-SHEET_WIDTH = 900
+SHEET_WIDTH = 1000
 CELL_GAP = 8
+# 원본 사진 폭의 중앙값이 약 720px이라 2열로 깔면 사진이 절반으로 줄어든다.
+# 사진이 이 수 이하면 세로로 쌓아 한 장을 최대한 크게 보여준다.
+SINGLE_COLUMN_MAX = 3
 
 
 class Command(BaseCommand):
@@ -309,26 +312,33 @@ class Command(BaseCommand):
             return None
 
         photos = photos[:MAX_PHOTOS]
-        cols = 1 if len(photos) == 1 else 2
+        cols = 1 if len(photos) <= SINGLE_COLUMN_MAX else 2
         rows = (len(photos) + cols - 1) // cols
         cell_w = (SHEET_WIDTH - CELL_GAP * (cols + 1)) // cols
-        cell_h = int(cell_w * 0.75)
+        cell_h = int(cell_w * (0.72 if cols == 1 else 0.75))
+
+        # 각 사진을 셀에 맞춰 축소한 뒤, 실제로 쓰인 높이만큼만 시트를 잡는다
+        for photo in photos:
+            photo.thumbnail((cell_w, cell_h), Image.LANCZOS)
+        row_heights = [
+            max(p.height for p in photos[r * cols : (r + 1) * cols]) for r in range(rows)
+        ]
 
         sheet = Image.new(
             "RGB",
-            (SHEET_WIDTH, CELL_GAP + rows * (cell_h + CELL_GAP)),
+            (SHEET_WIDTH, CELL_GAP + sum(h + CELL_GAP for h in row_heights)),
             (255, 255, 255),
         )
 
-        for i, photo in enumerate(photos):
-            photo.thumbnail((cell_w, cell_h), Image.LANCZOS)
-            col, row = i % cols, i // cols
-            x = CELL_GAP + col * (cell_w + CELL_GAP) + (cell_w - photo.width) // 2
-            y = CELL_GAP + row * (cell_h + CELL_GAP) + (cell_h - photo.height) // 2
-            sheet.paste(photo, (x, y))
+        y = CELL_GAP
+        for r in range(rows):
+            for c, photo in enumerate(photos[r * cols : (r + 1) * cols]):
+                x = CELL_GAP + c * (cell_w + CELL_GAP) + (cell_w - photo.width) // 2
+                sheet.paste(photo, (x, y + (row_heights[r] - photo.height) // 2))
+            y += row_heights[r] + CELL_GAP
 
         buffer = io.BytesIO()
-        sheet.save(buffer, format="JPEG", quality=85)
+        sheet.save(buffer, format="JPEG", quality=80, optimize=True, progressive=True)
         return buffer.getvalue()
 
     # ------------------------------------------------------------------ 출력
