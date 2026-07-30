@@ -31,6 +31,7 @@ python manage.py collectstatic
 - **study**: 학습 기록 및 Q&A (StudyQnA, StudyViewLog 모델)
 - **chat**: AI 채팅 기록 (ChatHistory 모델). Gemini API 기반
 - **practice**: 연습문제
+- **pestid**: 해충 식별 퀴즈 (PestCourse, PestQuestion, PestAttempt 모델). 사진 보고 해충명/생태 맞히기
 - **mock_exam**: 모의고사
 - **notebook**: 학습 노트
 - **bbs**: 게시판
@@ -285,6 +286,85 @@ cd ~/myproject/03_1_model && git pull
 python load_exam12.py              # DB import
 sudo systemctl restart gunicorn    # 서비스 재시작
 ```
+
+## 해충 식별 퀴즈 (pestid 앱)
+
+해충 사진을 보고 **해충명 / 연 발생횟수 / 월동태 / 여름기주**를 맞추는 퀴즈.
+객관식·주관식 두 모드가 있고, 채점은 서버(`pestid/views.py:grade`)에서만 한다.
+
+- `PestCourse`: 코스(분류군 단위) / `PestQuestion`: 사진 1장 + 정답 4항목 / `PestAttempt`: 도전 기록
+- 정답 필드는 **쉼표가 별해 구분자**다. 첫 값이 객관식 보기와 정답 표시에 쓰이고,
+  나머지는 주관식에서 정답으로 인정된다. 채점 시 공백은 무시한다.
+  예: `3령약충 또는 성충, 3령약충, 성충`
+- 따라서 한 덩어리인 값에 쉼표를 넣으면 정답이 잘려 보인다 (`3령약충,성충` → 표시 `3령약충`)
+
+### PDF → 퀴즈 임포트
+
+`pestid/management/commands/import_pest_pdf.py` — '2026 해충 식별 공부' 형식 PDF 전용.
+2026-07-30 기준 v1.0(176종, 204쪽)을 18개 코스로 적재 완료.
+
+```bash
+python manage.py import_pest_pdf "2026 해충식별공부 v1.0(게시용).pdf" --dry-run  # 파싱 검증
+python manage.py import_pest_pdf "2026 해충식별공부 v1.0(게시용).pdf"            # 적재
+python manage.py import_pest_pdf "..." --replace                              # 기존 문제 교체
+```
+
+파싱 전제 (PDF 구조가 바뀌면 여기부터 확인):
+
+- 종별 상세 페이지에 사진과 `기주:` `여름기주:` `연 발생횟수:` `월동태:` 라벨이 있고,
+  페이지 어딘가에 **종 번호가 홀로** 적혀 있다 (`01`, `17`, `176`). 번호 없는 페이지는
+  직전 종의 추가 사진 페이지로 묶인다
+- **해충명은 상세 페이지에 없다.** 분류군별 요약표(`해충명 연 발생횟수 월동태 비고`)에서만 얻는다
+- 요약표 표기를 대표 정답으로, 상세 페이지 표기를 별해로 합친다 (요약 `유충` + 상세 `노숙유충`)
+- 상세 페이지 텍스트에는 정답이 그대로 적혀 있으므로 **페이지를 통째로 렌더링하면 안 된다.**
+  사진만 추출해 한 장으로 합성한다 (`_build_image`)
+
+### 서버 배포 (픽스처 이전 방식)
+
+서버는 가용 메모리가 약 275MB뿐이라 40MB PDF를 서버에서 파싱하지 않는다.
+**로컬에서 임포트 → 픽스처와 이미지를 전송**한다. 이미지는 `.gitignore`에 있어 git으로 가지 않는다.
+
+```bash
+# 1. 로컬: 임포트 후 픽스처 추출 (PestAttempt는 제외 — 사용자 기록 덮어쓰기 방지)
+python manage.py dumpdata pestid.PestCourse pestid.PestQuestion --indent=2 -o pestid_fixture.json
+tar -czf pestid_media.tar.gz -C media pestid    # Git Bash에서 /c/... POSIX 경로 사용
+
+# 2. 전송
+scp -i "C:\AWS\myServer-key-pair.pem" pestid_media.tar.gz pestid_fixture.json ubuntu@studynamu.com:/tmp/
+
+# 3. 서버 (venv 자동 활성화가 비대화형 SSH에는 적용되지 않으므로 절대경로로 호출)
+cd ~/myproject/03_1_model
+rm -rf media/pestid                             # 이미지를 새로 만들었으면 통째로 교체
+tar -xzf /tmp/pestid_media.tar.gz -C media
+~/myproject/venv/bin/python manage.py loaddata /tmp/pestid_fixture.json
+```
+
+- **재임포트(`--replace`) 후 배포할 때는 서버의 기존 문제를 먼저 지워야 한다.**
+  `--replace`는 기존 행을 지우고 새로 넣으므로 **PK가 새로 발급된다.** 따라서 픽스처를
+  그냥 올리면 덮어써지지 않고 **옛 레코드가 그대로 남아 문제가 2배가 된다.**
+  이미지는 교체된 뒤라 옛 레코드는 사진이 깨진다 (2026-07-30 실제 발생, 352개로 중복됨)
+
+  ```bash
+  # 서버: loaddata 전에 실행
+  ~/myproject/venv/bin/python -c "
+  import os,django; os.environ['DJANGO_SETTINGS_MODULE']='config.settings'; django.setup()
+  from pestid.models import PestQuestion; PestQuestion.objects.all().delete()"
+  ```
+
+  코스는 PK가 유지되므로(get_or_create) 지우지 않아도 된다. 오히려 코스를 지우면
+  `PestAttempt`가 cascade로 함께 사라지니 **사용자 기록을 지우지 않으려면 코스는 두고 문제만 지운다.**
+- 사고 후 검증: 문제 수 176, `order`가 1~176 연속, 이미지 파일 누락 0건, 중복 이미지 0건
+- 뷰·템플릿을 고쳤으면 `sudo systemctl restart gunicorn` 필요 (데이터만 바뀌면 불필요)
+- 로컬 재임포트 시 이전 이미지가 고아로 남는다. DB가 참조하지 않는 `media/pestid/` 파일은 삭제할 것
+
+### 사진 크기
+
+- 원본 PDF 사진은 폭 중앙값 약 720px. **2열로 합성하면 사진이 절반으로 줄어 작아 보인다**
+- 그래서 3장 이하는 세로 1열로 쌓는다 (`SINGLE_COLUMN_MAX`). 시트 폭 `SHEET_WIDTH = 1000`
+- 암기 화면 컨테이너는 960px. 사진 한 장이 데스크탑 약 945px, 모바일 약 344px로 보인다
+- 세로가 길어진 대신 사진 위 **'한 화면' 토글**로 `max-height`를 걸어 스크롤 없이 볼 수 있다
+- 전체 이미지 용량 약 33MB (JPEG quality 80, optimize, progressive)
+- 검증: 176문제의 이미지 파일 존재 확인 → `/pestid/` 200 → `/media/pestid/<파일>` 200
 
 ## 알려진 주의사항
 

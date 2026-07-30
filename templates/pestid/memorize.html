@@ -301,7 +301,14 @@ function render() {
     }
 
     prevBtn.disabled = (index === 0 && !revealed);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // 정답을 열면 정보가 보이도록 내려주고, 새 사진으로 넘어가면 맨 위로 올린다.
+    // 사진이 세로로 길어 정답이 화면 밖에 있는 경우가 많다.
+    if (revealed) {
+        info.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 function goNext() {
