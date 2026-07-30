@@ -138,6 +138,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "gocompu21@gmail.com"
 EMAIL_HOST_PASSWORD = "mubv opng wibe mnan"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# 신규 가입 등 관리자 알림 수신 주소
+ADMIN_NOTIFY_EMAIL = os.getenv("ADMIN_NOTIFY_EMAIL", "gocompu21@gmail.com")
 
 
 LANGUAGE_CODE = "ko-kr"

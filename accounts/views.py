@@ -1,3 +1,5 @@
+import logging
+
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import render
@@ -5,9 +7,13 @@ from django.contrib.auth import login, logout, authenticate, update_session_auth
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 from django.utils import timezone
 from .forms import SignUpForm, LoginForm
 from .models import UserSession
+
+logger = logging.getLogger(__name__)
 
 
 def get_client_ip(request):
@@ -18,6 +24,41 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+
+
+def notify_admin_new_signup(user, request):
+    """신규 가입 시 관리자에게 알림 메일 발송.
+
+    메일 실패가 가입 자체를 막아서는 안 되므로 예외는 로그만 남기고 삼킨다.
+    """
+    to = getattr(settings, "ADMIN_NOTIFY_EMAIL", "")
+    if not to:
+        return
+
+    joined = timezone.localtime(user.date_joined).strftime("%Y-%m-%d %H:%M")
+    total = User.objects.count()
+    body = (
+        f"나무의사 합격반에 새 회원이 가입했습니다.\n\n"
+        f"이름     : {user.first_name or '-'}\n"
+        f"아이디   : {user.username}\n"
+        f"이메일   : {user.email or '-'}\n"
+        f"가입시각 : {joined}\n"
+        f"IP       : {get_client_ip(request) or '-'}\n"
+        f"기기정보 : {request.META.get('HTTP_USER_AGENT', '-')[:200]}\n\n"
+        f"현재 총 회원수: {total}명\n"
+        f"관리자 대시보드: https://studynamu.com/dashboard/\n"
+    )
+
+    try:
+        send_mail(
+            subject=f"[나무의사] 신규 가입: {user.first_name or user.username} ({user.username})",
+            message=body,
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
+            recipient_list=[to],
+            fail_silently=False,
+        )
+    except Exception as e:
+        logger.warning("신규 가입 알림 메일 발송 실패 (%s): %s", user.username, e)
 
 
 def user_signup(request):
@@ -38,7 +79,10 @@ def user_signup(request):
                         'logout_time': None,
                     }
                 )
-            
+
+            # 관리자에게 신규 가입 알림
+            notify_admin_new_signup(user, request)
+
             return redirect("main:index")
     else:
         form = SignUpForm()
