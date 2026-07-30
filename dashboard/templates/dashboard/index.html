@@ -179,6 +179,38 @@
             background: #f0f7f4;
         }
 
+        /* 정렬 가능한 헤더 */
+        .data-table th.sortable {
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+            padding-right: 16px;
+            position: relative;
+        }
+
+        .data-table th.sortable:hover {
+            background: #eef7f1;
+        }
+
+        .data-table th.sortable::after {
+            content: '\f0dc';  /* fa-sort */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 0.7rem;
+            color: #bbb;
+            margin-left: 4px;
+        }
+
+        .data-table th.sortable.asc::after {
+            content: '\f0de';  /* fa-sort-up */
+            color: #2d6a4f;
+        }
+
+        .data-table th.sortable.desc::after {
+            content: '\f0dd';  /* fa-sort-down */
+            color: #2d6a4f;
+        }
+
         /* Hamburger Button */
         .hamburger-btn {
             display: none;
@@ -605,27 +637,27 @@
         <!-- User Stats Table (Moved Up) -->
         <div class="section">
             <h2 class="section-title"><i class="fas fa-user-graduate"></i> 사용자별 학습 현황</h2>
-            <table class="data-table">
+            <table class="data-table sortable-table" id="userStatsTable">
                 <thead>
                     <tr>
-                        <th style="width: 60px;">상태</th>
-                        <th>사용자</th>
-                        <th>최근 로그인</th>
-                        <th>로그아웃</th>
-                        <th>활동시각</th>
-                        <th style="text-align: center;">기기</th>
-                        <th>활동내용</th>
-                        <th>시험</th>
-                        <th>기출</th>
-                        <th>복습</th>
-                        <th>오늘</th>
-                        <th>누적</th>
+                        <th style="width: 60px;" class="sortable" data-type="number">상태</th>
+                        <th class="sortable" data-type="text">사용자</th>
+                        <th class="sortable" data-type="number">최근 로그인</th>
+                        <th class="sortable" data-type="number">로그아웃</th>
+                        <th class="sortable" data-type="number">활동시각</th>
+                        <th style="text-align: center;" class="sortable" data-type="text">기기</th>
+                        <th class="sortable" data-type="text">활동내용</th>
+                        <th class="sortable" data-type="number">시험</th>
+                        <th class="sortable" data-type="number">기출</th>
+                        <th class="sortable" data-type="number">복습</th>
+                        <th class="sortable" data-type="number">오늘</th>
+                        <th class="sortable" data-type="number">누적</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in admin_dashboard.user_stats %}
                     <tr>
-                        <td>
+                        <td data-sort="{% if user.is_online %}1{% else %}0{% endif %}">
                             {% if user.is_online %}
                             <span style="display: inline-flex; align-items: center; gap: 5px; color: #28a745; font-size: 0.8rem;">
                                 <span style="width: 6px; height: 6px; background: #28a745; border-radius: 50%; display: inline-block;"></span>
@@ -639,16 +671,16 @@
                             {% endif %}
                         </td>
                         <td style="font-weight: 500;">{{ user.first_name|default:user.username }}</td>
-                        <td style="font-size: 0.8rem; color: #666;">
+                        <td style="font-size: 0.8rem; color: #666;" data-sort="{{ user.last_login|date:"U"|default:"0" }}">
                             {{ user.last_login|date:"m/d H:i"|default:"-" }}
                         </td>
-                        <td style="font-size: 0.8rem; color: #666;">
+                        <td style="font-size: 0.8rem; color: #666;" data-sort="{{ user.last_logout|date:"U"|default:"0" }}">
                             {{ user.last_logout|date:"m/d H:i"|default:"-" }}
                         </td>
-                        <td style="font-size: 0.8rem; color: #2d6a4f;">
+                        <td style="font-size: 0.8rem; color: #2d6a4f;" data-sort="{{ user.last_activity|date:"U"|default:"0" }}">
                             {{ user.last_activity|date:"m/d H:i"|default:"-" }}
                         </td>
-                        <td style="text-align: center;" title="{{ user.device_type }}">
+                        <td style="text-align: center;" title="{{ user.device_type }}" data-sort="{{ user.device_type }}">
                             <i class="{{ user.device_icon }}" style="color: #888; font-size: 0.9rem;"></i>
                         </td>
                         <td>
@@ -657,8 +689,8 @@
                         <td>{{ user.exam_count }}</td>
                         <td>{{ user.study_count }}</td>
                         <td>{{ user.review_count }}</td>
-                        <td>{{ user.today_duration }}</td>
-                        <td>{{ user.total_duration }}</td>
+                        <td data-sort="{{ user.today_minutes_raw|default:"0" }}">{{ user.today_duration }}</td>
+                        <td data-sort="{{ user.total_minutes_raw|default:"0" }}">{{ user.total_duration }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -765,6 +797,65 @@
             overlay.classList.toggle('active');
             document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
         }
+
+        // 테이블 헤더 정렬
+        (function initTableSort() {
+            const table = document.getElementById('userStatsTable');
+            if (!table) return;
+
+            const tbody = table.tBodies[0];
+            const headers = table.querySelectorAll('thead th.sortable');
+
+            // "데이터가 없습니다" 안내 행만 있으면 정렬 대상 아님
+            function getRows() {
+                return Array.from(tbody.rows).filter(r => !r.querySelector('td[colspan]'));
+            }
+
+            // 정렬용 값 추출: data-sort 우선, 없으면 표시 텍스트
+            function cellValue(row, index, type) {
+                const cell = row.cells[index];
+                if (!cell) return type === 'number' ? 0 : '';
+                const raw = cell.dataset.sort !== undefined
+                    ? cell.dataset.sort
+                    : cell.textContent.trim();
+                if (type === 'number') {
+                    const n = parseFloat(raw);
+                    return isNaN(n) ? 0 : n;
+                }
+                return raw === '-' ? '' : raw;
+            }
+
+            headers.forEach((th, index) => {
+                th.addEventListener('click', () => {
+                    const rows = getRows();
+                    if (rows.length < 2) return;
+
+                    const type = th.dataset.type || 'text';
+                    // 같은 헤더 재클릭 시 방향 반전, 새 헤더는 오름차순부터
+                    const asc = !th.classList.contains('asc');
+
+                    headers.forEach(h => h.classList.remove('asc', 'desc'));
+                    th.classList.add(asc ? 'asc' : 'desc');
+
+                    rows.sort((a, b) => {
+                        const va = cellValue(a, index, type);
+                        const vb = cellValue(b, index, type);
+                        let cmp;
+                        if (type === 'number') {
+                            cmp = va - vb;
+                        } else {
+                            // 빈 값은 방향과 무관하게 항상 뒤로
+                            if (va === '' && vb !== '') return 1;
+                            if (vb === '' && va !== '') return -1;
+                            cmp = va.localeCompare(vb, 'ko');
+                        }
+                        return asc ? cmp : -cmp;
+                    });
+
+                    rows.forEach(r => tbody.appendChild(r));
+                });
+            });
+        })();
     </script>
 </body>
 </html>
