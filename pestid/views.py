@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
-from .models import PestAttempt, PestCourse, PestQuestion
+from .models import PestAttempt, PestBookmark, PestCourse, PestQuestion
 
 
 @login_required
@@ -45,16 +45,26 @@ def memorize(request):
     base = PestQuestion.objects.filter(course__is_active=True).select_related("course")
     total_all = base.count()
 
-    # 시험이 가까울 때는 기출 종만 추려 보는 편이 효율적이다
-    only_past = request.GET.get("scope") == "past"
-    questions = list(
-        (base.filter(exam_stars__gt=0) if only_past else base).order_by(
-            "course__order", "order", "id"
-        )
+    marked_ids = set(
+        PestBookmark.objects.filter(user=request.user).values_list("question_id", flat=True)
     )
+
+    # 시험이 가까울 때는 기출 종만, 또는 내가 등록한 관심 해충만 추려 본다
+    scope = request.GET.get("scope", "all")
+    if scope == "past":
+        selected = base.filter(exam_stars__gt=0)
+    elif scope == "marked":
+        selected = base.filter(id__in=marked_ids)
+    else:
+        scope = "all"
+        selected = base
+
+    questions = list(selected.order_by("course__order", "order", "id"))
 
     payload = [
         {
+            "id": q.id,
+            "marked": q.id in marked_ids,
             "image": q.image.url,
             "name": q.name,
             # 쉼표 뒤는 같은 뜻의 별해라 사진 위에서는 대표값만 보여준다
@@ -89,9 +99,39 @@ def memorize(request):
         "cards_json": json.dumps(payload, ensure_ascii=False),
         "total": len(payload),
         "order": order,
-        "scope": "past" if only_past else "all",
+        "scope": scope,
         "past_count": base.filter(exam_stars__gt=0).count(),
+        "marked_count": len(marked_ids),
         "total_all": total_all,
+    })
+
+
+@login_required
+def bookmark(request):
+    """관심 해충 등록/해제 API."""
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "invalid json"}, status=400)
+
+    question = PestQuestion.objects.filter(id=body.get("question_id")).first()
+    if not question:
+        return JsonResponse({"error": "not found"}, status=404)
+
+    if body.get("marked"):
+        PestBookmark.objects.get_or_create(user=request.user, question=question)
+        marked = True
+    else:
+        PestBookmark.objects.filter(user=request.user, question=question).delete()
+        marked = False
+
+    return JsonResponse({
+        "ok": True,
+        "marked": marked,
+        "count": PestBookmark.objects.filter(user=request.user).count(),
     })
 
 

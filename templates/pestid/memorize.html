@@ -11,7 +11,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
             background: #f4f7f5;
             color: #333;
-            padding-bottom: 96px;
+            padding-bottom: 128px;
         }
         header {
             background: #2d6a4f;
@@ -91,10 +91,9 @@
         }
         /* 기본은 폭을 꽉 채워 사진을 크게 본다. '한 화면' 모드에서는 높이를 맞춰
            스크롤 없이 전체를 훑을 수 있게 한다 */
-        /* 헤더(50) + 진행바(4) + 위 여백(16) + 하단 버튼바(75) 만큼만 뺀다.
-           카운터와 안내문을 없애 사진이 그만큼 커졌다 */
+        /* 헤더(50) + 진행바(4) + 위 여백(16) + 하단 바(버튼75 + 관심체크 32) */
         .photo-wrap.fit img {
-            max-height: calc(100vh - 155px);
+            max-height: calc(100vh - 187px);
             object-fit: contain;
             object-position: top;
             background: #fafbfa;
@@ -217,10 +216,27 @@
             left: 0; right: 0; bottom: 0;
             background: #fff;
             border-top: 1px solid #e6ece8;
-            padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+            padding: 10px 20px calc(12px + env(safe-area-inset-bottom));
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
+        /* 관심 등록 체크박스 */
+        .mark-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 620px;
+            width: 100%;
+            margin: 0 auto;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.88rem;
+            color: #6b7a71;
+        }
+        .mark-row input { width: 17px; height: 17px; accent-color: #2d6a4f; cursor: pointer; }
+        .mark-row.on { color: #b8860b; font-weight: 600; }
+        .mark-text i { margin-right: 3px; }
         .controls-inner {
             display: flex;
             align-items: center;
@@ -334,6 +350,12 @@
         .list-row.past { background: #fffdf3; }
         .list-row.past.current { background: #e7f4ea; }
         .list-row.filtered { display: none; }
+        .mark-dot {
+            color: #e6e9e7;
+            margin-right: 4px;
+            font-size: 0.8rem;
+        }
+        .mark-dot.on { color: #f0ad00; }
 
         /* 목록 상단 기출 필터 */
         .list-filter { display: flex; gap: 6px; padding: 0 20px 10px; }
@@ -419,19 +441,23 @@
 <body>
     <header>
         <a href="{% url 'main:dvd' %}"><i class="fas fa-arrow-left"></i> DVD</a>
-        <strong>해충 암기{% if scope == 'past' %} <span class="scope-tag">기출</span>{% endif %}</strong>
+        <strong>해충 암기{% if scope == 'past' %} <span class="scope-tag">기출</span>{% elif scope == 'marked' %} <span class="scope-tag">관심</span>{% endif %}</strong>
         <span class="header-btns">
-            {% if scope == 'past' %}
+            {% if scope == 'all' %}
+            <a href="?scope=past{% if order == 'random' %}&order=random{% endif %}"
+               class="order-toggle"><i class="fas fa-star"></i> 기출 {{ past_count }}</a>
+            {% if marked_count %}
+            <a href="?scope=marked{% if order == 'random' %}&order=random{% endif %}"
+               class="order-toggle"><i class="fas fa-bookmark"></i> 관심 {{ marked_count }}</a>
+            {% endif %}
+            {% else %}
             <a href="{% url 'pestid:memorize' %}{% if order == 'random' %}?order=random{% endif %}"
                class="order-toggle">전체 {{ total_all }}</a>
-            {% else %}
-            <a href="{% url 'pestid:memorize' %}?scope=past{% if order == 'random' %}&order=random{% endif %}"
-               class="order-toggle"><i class="fas fa-star"></i> 기출 {{ past_count }}</a>
             {% endif %}
             {% if order == 'random' %}
-            <a href="?{% if scope == 'past' %}scope=past{% endif %}" class="order-toggle"><i class="fas fa-list-ol"></i></a>
+            <a href="?{% if scope != 'all' %}scope={{ scope }}{% endif %}" class="order-toggle"><i class="fas fa-list-ol"></i></a>
             {% else %}
-            <a href="?order=random{% if scope == 'past' %}&scope=past{% endif %}" class="order-toggle"><i class="fas fa-shuffle"></i></a>
+            <a href="?order=random{% if scope != 'all' %}&scope={{ scope }}{% endif %}" class="order-toggle"><i class="fas fa-shuffle"></i></a>
             {% endif %}
         </span>
     </header>
@@ -461,15 +487,22 @@
             <div style="font-size: 3rem;">🎉</div>
             <h2>{{ total }}종을 모두 넘겼습니다</h2>
             <p>이어서 퀴즈로 확인해 보세요.</p>
-            <a href="?order=random{% if scope == 'past' %}&scope=past{% endif %}"><i class="fas fa-rotate-right"></i> 섞어서 다시</a>
+            <a href="?order=random{% if scope != 'all' %}&scope={{ scope }}{% endif %}"><i class="fas fa-rotate-right"></i> 섞어서 다시</a>
             {% if scope != 'past' %}
             <a href="{% url 'pestid:memorize' %}?scope=past"><i class="fas fa-star"></i> 기출 {{ past_count }}종만</a>
+            {% endif %}
+            {% if scope != 'marked' and marked_count %}
+            <a href="{% url 'pestid:memorize' %}?scope=marked"><i class="fas fa-bookmark"></i> 관심 {{ marked_count }}종만</a>
             {% endif %}
             <a href="{% url 'pestid:index' %}"><i class="fas fa-list-ul"></i> 퀴즈 풀기</a>
         </div>
     </div>
 
     <div class="controls" id="controls">
+        <label class="mark-row" id="markRow">
+            <input type="checkbox" id="markChk">
+            <span class="mark-text"><i class="far fa-star"></i> 관심 해충으로 등록</span>
+        </label>
         <div class="controls-inner">
             <button class="btn btn-prev" id="prev" type="button" aria-label="이전">
                 <i class="fas fa-chevron-left"></i>
@@ -510,6 +543,7 @@
 
 <script>
 const CARDS = {{ cards_json|safe }};
+const CSRF = '{{ csrf_token }}';
 
 const photo = document.getElementById('photo');
 const info = document.getElementById('info');
@@ -560,6 +594,7 @@ function render() {
     }
 
     prevBtn.disabled = (index === 0 && !revealed);
+    syncMark();
 
     // 정답은 사진 아래쪽에 겹쳐 나오므로 사진 끝이 보이게 내려주고,
     // 새 사진으로 넘어가면 맨 위로 올린다. (세로로 긴 사진이 많다)
@@ -599,6 +634,44 @@ function goPrev() {
 nextBtn.addEventListener('click', goNext);
 prevBtn.addEventListener('click', goPrev);
 
+/* ---- 관심 해충 등록 ---- */
+const markRow = document.getElementById('markRow');
+const markChk = document.getElementById('markChk');
+
+function syncMark() {
+    const on = !!CARDS[index].marked;
+    markChk.checked = on;
+    markRow.classList.toggle('on', on);
+    markRow.querySelector('.mark-text').innerHTML = on
+        ? '<i class="fas fa-star"></i> 관심 해충'
+        : '<i class="far fa-star"></i> 관심 해충으로 등록';
+}
+
+markChk.addEventListener('change', () => {
+    const card = CARDS[index];
+    const want = markChk.checked;
+    card.marked = want;          // 응답을 기다리지 않고 화면부터 반영한다
+    syncMark();
+    syncListMark(index, want);
+
+    fetch('{% url "pestid:bookmark" %}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ question_id: card.id, marked: want }),
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.ok) throw new Error('실패');
+        card.marked = d.marked;
+    })
+    .catch(() => {               // 실패하면 되돌린다
+        card.marked = !want;
+        syncMark();
+        syncListMark(index, !want);
+        alert('관심 해충 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    });
+});
+
 /* ---- 전체 목록 ---- */
 const listPanel = document.getElementById('listPanel');
 const listBody = document.getElementById('listBody');
@@ -611,13 +684,20 @@ function fieldOf(card, label) {
 listBody.innerHTML = CARDS.map((card, i) => `
     <div class="list-row${card.stars ? ' past' : ''}" data-i="${i}" data-past="${card.stars ? 1 : 0}">
         <span class="c-no">${i + 1}</span>
-        <span class="c-name">${card.name || '(이름 미상)'}${
+        <span class="c-name"><span class="mark-dot${card.marked ? ' on' : ''}">★</span>${card.name || '(이름 미상)'}${
             card.stars ? `<span class="stars" title="기출 ${card.exam}">${'★'.repeat(card.stars)}</span>` : ''
         }</span>
         <span class="c-tax">${card.taxon || '-'}</span>
         <span class="c-occ">${fieldOf(card, '연발생횟수')}</span>
         <span class="c-ow">${fieldOf(card, '월동태')}</span>
     </div>`).join('');
+
+function syncListMark(i, on) {
+    const row = listBody.children[i];
+    if (!row) return;
+    const dot = row.querySelector('.mark-dot');
+    if (dot) dot.classList.toggle('on', on);
+}
 
 const filterAll = document.getElementById('filterAll');
 const filterPast = document.getElementById('filterPast');

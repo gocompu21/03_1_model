@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("memorize/", views.memorize, name="memorize"),
     path("play/<int:course_id>/", views.play, name="play"),
+    path("api/bookmark/", views.bookmark, name="bookmark"),
     path("api/grade/", views.grade, name="grade"),
     path("api/finish/", views.finish, name="finish"),
 ]

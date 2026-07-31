@@ -107,6 +107,27 @@ class PestQuestion(models.Model):
         return cleaned in self.accepted_answers(key)
 
 
+class PestBookmark(models.Model):
+    """사용자가 관심 해충으로 등록한 문제."""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="pest_bookmarks", verbose_name="사용자"
+    )
+    question = models.ForeignKey(
+        PestQuestion, on_delete=models.CASCADE, related_name="bookmarks", verbose_name="문제"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="등록 시각")
+
+    class Meta:
+        verbose_name = "관심 해충"
+        verbose_name_plural = "관심 해충"
+        unique_together = ("user", "question")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question.name}"
+
+
 class PestAttempt(models.Model):
     """사용자의 코스 1회 도전 기록."""
 
