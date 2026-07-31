@@ -359,12 +359,19 @@
         .list-row.past { background: #fffdf3; }
         .list-row.past.current { background: #e7f4ea; }
         .list-row.filtered { display: none; }
-        .mark-dot {
-            color: #e6e9e7;
-            margin-right: 4px;
-            font-size: 0.8rem;
+        .mark-badge {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 1px 7px;
+            border-radius: 9px;
+            background: #f0ad00;
+            color: #3d2c00;
+            font-size: 0.68rem;
+            font-weight: 700;
+            vertical-align: middle;
+            white-space: nowrap;
         }
-        .mark-dot.on { color: #f0ad00; }
+        .mark-badge.off { display: none; }
 
         /* 목록 상단 기출 필터 */
         .list-filter { display: flex; gap: 6px; padding: 0 20px 10px; }
@@ -699,9 +706,9 @@ function fieldOf(card, label) {
 listBody.innerHTML = CARDS.map((card, i) => `
     <div class="list-row${card.stars ? ' past' : ''}" data-i="${i}" data-past="${card.stars ? 1 : 0}">
         <span class="c-no">${i + 1}</span>
-        <span class="c-name"><span class="mark-dot${card.marked ? ' on' : ''}">★</span>${card.name || '(이름 미상)'}${
+        <span class="c-name">${card.name || '(이름 미상)'}${
             card.stars ? `<span class="stars" title="기출 ${card.exam}">${'★'.repeat(card.stars)}</span>` : ''
-        }</span>
+        }<span class="mark-badge${card.marked ? '' : ' off'}">관심</span></span>
         <span class="c-tax">${card.taxon || '-'}</span>
         <span class="c-occ">${fieldOf(card, '연발생횟수')}</span>
         <span class="c-ow">${fieldOf(card, '월동태')}</span>
@@ -710,8 +717,8 @@ listBody.innerHTML = CARDS.map((card, i) => `
 function syncListMark(i, on) {
     const row = listBody.children[i];
     if (!row) return;
-    const dot = row.querySelector('.mark-dot');
-    if (dot) dot.classList.toggle('on', on);
+    const badge = row.querySelector('.mark-badge');
+    if (badge) badge.classList.toggle('off', !on);
 }
 
 const filterAll = document.getElementById('filterAll');
