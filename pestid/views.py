@@ -59,6 +59,7 @@ def memorize(request):
                 if key != "name"
             ],
             "course": q.course.name,
+            "taxon": " ".join(x for x in (q.taxon_order, q.taxon_family) if x),
         }
         for q in questions
     ]

@@ -229,9 +229,9 @@
         .list-sheet {
             position: absolute;
             left: 0; right: 0; bottom: 0;
-            max-width: 720px;
+            max-width: 860px;
             margin: 0 auto;
-            height: min(78vh, 640px);
+            height: min(80vh, 680px);
             background: #fff;
             border-radius: 18px 18px 0 0;
             display: flex;
@@ -261,7 +261,7 @@
         }
         .list-cols, .list-row {
             display: grid;
-            grid-template-columns: 44px 1fr 84px 108px;
+            grid-template-columns: 40px 1fr 1fr 76px 96px;
             gap: 8px;
             align-items: baseline;
             padding: 8px 20px;
@@ -282,10 +282,23 @@
         .list-row.current { background: #e7f4ea; }
         .list-row .c-no { color: #9aa8a0; font-variant-numeric: tabular-nums; }
         .list-row .c-name { font-weight: 600; color: #1b4332; word-break: keep-all; }
+        .list-row .c-tax { color: #7a8b80; font-size: 0.82rem; word-break: keep-all; }
         .list-row .c-occ, .list-row .c-ow { color: #555; word-break: keep-all; }
-        @media (max-width: 480px) {
-            .list-cols, .list-row { grid-template-columns: 36px 1fr 72px 92px; padding: 8px 14px; gap: 6px; }
+        /* 좁은 화면에서는 목/과를 해충명 아래로 접어 넣는다 */
+        @media (max-width: 560px) {
+            .list-cols, .list-row {
+                grid-template-columns: 34px 1fr 68px 84px;
+                padding: 8px 14px;
+                gap: 6px;
+            }
             .list-row { font-size: 0.82rem; }
+            .list-cols .c-tax { display: none; }
+            .list-row .c-tax {
+                grid-column: 2;
+                grid-row: 2;
+                font-size: 0.72rem;
+                margin-top: 1px;
+            }
         }
 
         .done {
@@ -400,7 +413,7 @@
                 <button class="list-close" id="listClose" type="button">&times;</button>
             </div>
             <div class="list-cols">
-                <span class="c-no">번호</span><span class="c-name">해충명</span><span class="c-occ">연발생횟수</span><span class="c-ow">월동태</span>
+                <span class="c-no">번호</span><span class="c-name">해충명</span><span class="c-tax">목 / 과</span><span class="c-occ">연발생횟수</span><span class="c-ow">월동태</span>
             </div>
             <div class="list-body" id="listBody"></div>
         </div>
@@ -507,6 +520,7 @@ listBody.innerHTML = CARDS.map((card, i) => `
     <div class="list-row" data-i="${i}">
         <span class="c-no">${i + 1}</span>
         <span class="c-name">${card.name || '(이름 미상)'}</span>
+        <span class="c-tax">${card.taxon || '-'}</span>
         <span class="c-occ">${fieldOf(card, '연발생횟수')}</span>
         <span class="c-ow">${fieldOf(card, '월동태')}</span>
     </div>`).join('');

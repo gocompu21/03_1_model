@@ -40,6 +40,10 @@ DETAIL_LABELS = [
 ]
 LABEL_RE = re.compile(r"(여름기주|겨울기주|기주|연\s*발생횟수|월동태|월동처)\s*:")
 
+# 상세 페이지의 분류 표기. 예: "거미강 응애목 혹응애과", "메뚜기목 여치과"
+# 강(綱)은 있을 때도 없을 때도 있어 목/과만 취한다. 속(屬)은 PDF에 없다.
+TAXON_RE = re.compile(r"(?:^|\s)(\S*?목)\s+(\S*?(?:과|상과))(?=\s|$|,)")
+
 SUMMARY_HEADER = "해충명"
 SUMMARY_ROW_RE = re.compile(r"^(\d{3})\s+(\S+)\s+(.*)$")
 NOTE_RE = re.compile(r"\s*기출\s*([★☆*]*)\s*$")
@@ -194,9 +198,12 @@ class Command(BaseCommand):
                 continue
 
             detail = {}
+            taxon = ("", "")
             for _, tx in pending:
                 for key, value in self._parse_fields(tx).items():
                     detail.setdefault(key, value)
+                if not taxon[0]:
+                    taxon = self._parse_taxon(tx)
 
             row = summary.get(expected, {})
             items.append(
@@ -213,6 +220,8 @@ class Command(BaseCommand):
                         row.get("overwinter", ""), detail.get("overwinter", "")
                     ),
                     "host": detail.get("host", ""),
+                    "taxon_order": taxon[0],
+                    "taxon_family": taxon[1],
                     "pages": [p for p, _ in pending],
                 }
             )
@@ -220,6 +229,19 @@ class Command(BaseCommand):
             expected += 1
 
         return items
+
+    @staticmethod
+    def _parse_taxon(text):
+        """상세 페이지 분류 표기에서 (목, 과)를 뽑는다. 없으면 빈 문자열."""
+        for line in text.split("\n"):
+            # 기출 표시의 괄호 주석에도 '월동태:' 같은 라벨이 들어 있어 먼저 지운다
+            # 예: "기출★★ [4회(월동태: 약충)] [9회]   노린재목 가루깍지벌레과"
+            cleaned = re.sub(r"\[[^\]]*\]", " ", line)
+            head = LABEL_RE.split(cleaned)[0]
+            m = TAXON_RE.search(head)
+            if m:
+                return m.group(1), m.group(2)
+        return "", ""
 
     @staticmethod
     def _has_number(text, n):
@@ -410,6 +432,8 @@ class Command(BaseCommand):
                     occurrence=item.get("occurrence", ""),
                     overwinter=item.get("overwinter", ""),
                     host=item.get("host", ""),
+                    taxon_order=item.get("taxon_order", ""),
+                    taxon_family=item.get("taxon_family", ""),
                 )
                 digest = hashlib.sha256(blob).hexdigest()[:12]
                 question.image.save(

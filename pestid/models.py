@@ -43,6 +43,10 @@ class PestQuestion(models.Model):
     overwinter = models.CharField(max_length=200, blank=True, default="", verbose_name="월동태")
     host = models.CharField(max_length=200, blank=True, default="", verbose_name="여름기주")
 
+    # 분류 (출제 대상은 아니고 목록에서 참고용으로만 보여준다)
+    taxon_order = models.CharField(max_length=50, blank=True, default="", verbose_name="목")
+    taxon_family = models.CharField(max_length=50, blank=True, default="", verbose_name="과")
+
     source_key = models.CharField(
         max_length=200, blank=True, default="", db_index=True,
         verbose_name="원본 식별자", help_text="임포트 시 중복 방지용 (원본 파일명 등)",
