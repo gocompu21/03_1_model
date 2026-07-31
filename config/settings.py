@@ -144,6 +144,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # 신규 가입 등 관리자 알림 수신 주소
 ADMIN_NOTIFY_EMAIL = os.getenv("ADMIN_NOTIFY_EMAIL", "gocompu21@gmail.com")
 
+# 메일 본문에 넣을 절대 주소 (승인 링크 등)
+SITE_URL = os.getenv("SITE_URL", "https://studynamu.com")
+
 
 LANGUAGE_CODE = "ko-kr"
 

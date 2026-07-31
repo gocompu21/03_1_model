@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가입 승인 관리 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            padding-bottom: 40px;
+        }
+        header {
+            background: #2d6a4f;
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 820px; margin: 0 auto; padding: 20px; }
+
+        h2 {
+            font-size: 1rem;
+            color: #1b4332;
+            margin: 22px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        h2 .cnt {
+            background: #d8f3dc;
+            color: #1b4332;
+            font-size: 0.78rem;
+            padding: 2px 10px;
+            border-radius: 11px;
+        }
+        .empty {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            color: #9aa8a0;
+            font-size: 0.92rem;
+        }
+        .row {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .who { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+        .who .name { font-size: 1.02rem; font-weight: 700; color: #1b4332; }
+        .who .id { color: #7a8b80; font-size: 0.86rem; }
+        .meta {
+            color: #8a9a90;
+            font-size: 0.83rem;
+            line-height: 1.6;
+            margin-top: 6px;
+            word-break: break-all;
+        }
+        .acts { display: flex; gap: 8px; margin-top: 13px; }
+        .acts button {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .ok { background: #2d6a4f; color: #fff; }
+        .no { background: #f4e6e6; color: #a83232; }
+
+        .decided { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+        .tag { font-size: 0.76rem; padding: 2px 9px; border-radius: 10px; white-space: nowrap; }
+        .tag.approved { background: #d8f3dc; color: #1b4332; }
+        .tag.rejected { background: #fde8e8; color: #8b2f2f; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'main:index' %}"><i class="fas fa-arrow-left"></i> 홈</a>
+        <strong>가입 승인 관리</strong>
+        <span></span>
+    </header>
+
+    <div class="container">
+        <h2><i class="fas fa-hourglass-half"></i> 승인 대기 <span class="cnt">{{ pending|length }}</span></h2>
+
+        {% for a in pending %}
+        <div class="row">
+            <div class="who">
+                <span class="name">{{ a.user.first_name|default:a.user.username }}</span>
+                <span class="id">{{ a.user.username }}</span>
+            </div>
+            <div class="meta">
+                {{ a.user.email|default:"이메일 없음" }}<br>
+                신청 {{ a.created_at|date:"Y-m-d H:i" }} · IP {{ a.ip_address|default:"-" }}<br>
+                {{ a.user_agent|truncatechars:70 }}
+            </div>
+            <form method="post" class="acts">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{ a.id }}">
+                <button type="submit" name="action" value="approve" class="ok">
+                    <i class="fas fa-check"></i> 승인
+                </button>
+                <button type="submit" name="action" value="reject" class="no"
+                        onclick="return confirm('이 신청을 거부할까요?');">
+                    <i class="fas fa-xmark"></i> 거부
+                </button>
+            </form>
+        </div>
+        {% empty %}
+        <div class="empty">대기 중인 가입 신청이 없습니다.</div>
+        {% endfor %}
+
+        {% if decided %}
+        <h2><i class="fas fa-clock-rotate-left"></i> 최근 처리</h2>
+        {% for a in decided %}
+        <div class="row decided">
+            <div>
+                <div class="who">
+                    <span class="name">{{ a.user.first_name|default:a.user.username }}</span>
+                    <span class="id">{{ a.user.username }}</span>
+                </div>
+                <div class="meta">
+                    {{ a.decided_at|date:"Y-m-d H:i" }}
+                    {% if a.decided_by %} · {{ a.decided_by }}{% endif %}
+                </div>
+            </div>
+            <span class="tag {{ a.status }}">{{ a.get_status_display }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</body>
+</html>

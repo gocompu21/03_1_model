@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가입 신청 완료 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            max-width: 440px;
+            width: 100%;
+            padding: 40px 32px;
+            text-align: center;
+        }
+        .icon {
+            width: 68px; height: 68px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: #d8f3dc;
+            color: #2d6a4f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.9rem;
+        }
+        h1 { font-size: 1.3rem; color: #1b4332; margin-bottom: 10px; }
+        .lead { color: #666; font-size: 0.94rem; line-height: 1.7; }
+        .info {
+            background: #f7faf8;
+            border: 1px solid #e6ece8;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin: 22px 0;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .info div { display: flex; gap: 10px; padding: 4px 0; }
+        .info .k { color: #7a8b80; width: 62px; flex-shrink: 0; }
+        .info .v { color: #222; font-weight: 600; word-break: break-all; }
+        .note {
+            color: #8a9a90;
+            font-size: 0.84rem;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 13px 26px;
+            background: #2d6a4f;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 9px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .btn:hover { background: #245a41; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon"><i class="fas fa-paper-plane"></i></div>
+        <h1>가입 신청이 접수되었습니다</h1>
+        <p class="lead">
+            관리자 승인 후 로그인할 수 있습니다.<br>
+            승인되면 등록하신 이메일로 알려드립니다.
+        </p>
+
+        <div class="info">
+            <div><span class="k">이름</span><span class="v">{{ user_obj.first_name|default:"-" }}</span></div>
+            <div><span class="k">아이디</span><span class="v">{{ user_obj.username }}</span></div>
+            <div><span class="k">이메일</span><span class="v">{{ user_obj.email|default:"-" }}</span></div>
+        </div>
+
+        <p class="note">
+            승인 전에 로그인을 시도하면 승인 대기 중이라고 안내됩니다.
+        </p>
+
+        <a href="{% url 'accounts:user_login' %}" class="btn">로그인 화면으로</a>
+    </div>
+</body>
+</html>

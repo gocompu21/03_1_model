@@ -1,6 +1,66 @@
+import secrets
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+
+
+class SignupApproval(models.Model):
+    """신규 가입 승인 대기.
+
+    가입 시 계정을 is_active=False로 만들고 이 레코드를 생성한다.
+    관리자가 메일 링크나 관리 페이지에서 승인해야 로그인할 수 있다.
+    """
+
+    STATUS_CHOICES = [
+        ("pending", "대기"),
+        ("approved", "승인"),
+        ("rejected", "거부"),
+    ]
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="signup_approval", verbose_name="사용자"
+    )
+    token = models.CharField(max_length=64, unique=True, db_index=True, verbose_name="승인 토큰")
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default="pending", db_index=True,
+        verbose_name="상태",
+    )
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="가입 IP")
+    user_agent = models.CharField(max_length=500, blank=True, default="", verbose_name="기기 정보")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="요청 시각")
+    decided_at = models.DateTimeField(null=True, blank=True, verbose_name="처리 시각")
+    decided_by = models.CharField(max_length=150, blank=True, default="", verbose_name="처리자")
+
+    class Meta:
+        verbose_name = "가입 승인"
+        verbose_name_plural = "가입 승인"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} ({self.get_status_display()})"
+
+    @staticmethod
+    def new_token():
+        return secrets.token_urlsafe(32)
+
+    def approve(self, by=""):
+        """계정을 활성화하고 승인 처리."""
+        self.user.is_active = True
+        self.user.save(update_fields=["is_active"])
+        self.status = "approved"
+        self.decided_at = timezone.now()
+        self.decided_by = by
+        self.save(update_fields=["status", "decided_at", "decided_by"])
+
+    def reject(self, by=""):
+        """계정을 비활성으로 두고 거부 처리."""
+        self.user.is_active = False
+        self.user.save(update_fields=["is_active"])
+        self.status = "rejected"
+        self.decided_at = timezone.now()
+        self.decided_by = by
+        self.save(update_fields=["status", "decided_at", "decided_by"])
 
 
 class UserSession(models.Model):

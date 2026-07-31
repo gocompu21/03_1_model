@@ -6,6 +6,10 @@ app_name = "accounts"
 
 urlpatterns = [
     path("signup/", views.user_signup, name="user_signup"),
+    # 가입 승인 (메일 링크 + 관리 페이지)
+    path("approve/<str:token>/", views.approve_signup, name="approve_signup"),
+    path("reject/<str:token>/", views.reject_signup, name="reject_signup"),
+    path("approvals/", views.approval_list, name="approval_list"),
     path("login/", views.user_login, name="user_login"),
     path("logout/", views.user_logout, name="user_logout"),
     path("password_reset/", views.password_reset_request, name="password_reset"),
