@@ -208,7 +208,85 @@
             color: #40684f;
         }
         .btn-prev:active { background: #e2e9e4; }
+        .btn-list {
+            flex: 0 0 54px;
+            padding: 15px 0;
+            background: #eef2ef;
+            color: #40684f;
+        }
+        .btn-list:active { background: #e2e9e4; }
         .btn:disabled { opacity: 0.35; cursor: default; }
+
+        /* 전체 목록 패널 (아래에서 올라오는 시트) */
+        .list-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            z-index: 60;
+        }
+        .list-panel.open { display: block; }
+        .list-sheet {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            max-width: 720px;
+            margin: 0 auto;
+            height: min(78vh, 640px);
+            background: #fff;
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            flex-direction: column;
+            animation: sheetUp 0.22s ease-out;
+        }
+        @keyframes sheetUp {
+            from { transform: translateY(40px); opacity: 0.5; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .list-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 10px;
+            color: #1b4332;
+            font-size: 1.05rem;
+        }
+        .list-close {
+            border: none;
+            background: none;
+            font-size: 1.6rem;
+            line-height: 1;
+            color: #999;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .list-cols, .list-row {
+            display: grid;
+            grid-template-columns: 44px 1fr 84px 108px;
+            gap: 8px;
+            align-items: baseline;
+            padding: 8px 20px;
+        }
+        .list-cols {
+            font-size: 0.75rem;
+            color: #9aa8a0;
+            border-bottom: 1px solid #eef2ef;
+            padding-bottom: 9px;
+        }
+        .list-body { overflow-y: auto; flex: 1; padding-bottom: 20px; }
+        .list-row {
+            font-size: 0.88rem;
+            border-bottom: 1px solid #f4f7f5;
+            cursor: pointer;
+        }
+        .list-row:active { background: #f0f5f1; }
+        .list-row.current { background: #e7f4ea; }
+        .list-row .c-no { color: #9aa8a0; font-variant-numeric: tabular-nums; }
+        .list-row .c-name { font-weight: 600; color: #1b4332; word-break: keep-all; }
+        .list-row .c-occ, .list-row .c-ow { color: #555; word-break: keep-all; }
+        @media (max-width: 480px) {
+            .list-cols, .list-row { grid-template-columns: 36px 1fr 72px 92px; padding: 8px 14px; gap: 6px; }
+            .list-row { font-size: 0.82rem; }
+        }
 
         .done {
             background: #fff;
@@ -309,6 +387,22 @@
                 <span class="counter-now" id="pos">1</span><span class="counter-total">/ {{ total }}</span>
             </div>
             <button class="btn btn-next" id="next" type="button">다음</button>
+            <button class="btn btn-list" id="listBtn" type="button" aria-label="전체 목록">
+                <i class="fas fa-list-ul"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="list-panel" id="listPanel">
+        <div class="list-sheet">
+            <div class="list-head">
+                <strong>전체 목록</strong>
+                <button class="list-close" id="listClose" type="button">&times;</button>
+            </div>
+            <div class="list-cols">
+                <span class="c-no">번호</span><span class="c-name">해충명</span><span class="c-occ">연발생횟수</span><span class="c-ow">월동태</span>
+            </div>
+            <div class="list-body" id="listBody"></div>
         </div>
     </div>
 
@@ -400,6 +494,44 @@ function goPrev() {
 nextBtn.addEventListener('click', goNext);
 prevBtn.addEventListener('click', goPrev);
 
+/* ---- 전체 목록 ---- */
+const listPanel = document.getElementById('listPanel');
+const listBody = document.getElementById('listBody');
+
+function fieldOf(card, label) {
+    const f = card.fields.find(x => x.label === label);
+    return f ? f.value : '-';
+}
+
+listBody.innerHTML = CARDS.map((card, i) => `
+    <div class="list-row" data-i="${i}">
+        <span class="c-no">${i + 1}</span>
+        <span class="c-name">${card.name || '(이름 미상)'}</span>
+        <span class="c-occ">${fieldOf(card, '연발생횟수')}</span>
+        <span class="c-ow">${fieldOf(card, '월동태')}</span>
+    </div>`).join('');
+
+function openList() {
+    listPanel.classList.add('open');
+    const rows = listBody.children;
+    for (const row of rows) row.classList.toggle('current', Number(row.dataset.i) === index);
+    if (rows[index]) rows[index].scrollIntoView({ block: 'center' });
+}
+function closeList() { listPanel.classList.remove('open'); }
+
+document.getElementById('listBtn').addEventListener('click', openList);
+document.getElementById('listClose').addEventListener('click', closeList);
+listPanel.addEventListener('click', (e) => { if (e.target === listPanel) closeList(); });
+
+listBody.addEventListener('click', (e) => {
+    const row = e.target.closest('.list-row');
+    if (!row) return;
+    index = Number(row.dataset.i);
+    revealed = true;  // 목록에서 이미 정답을 봤으므로 바로 정보까지 보여준다
+    closeList();
+    render();
+});
+
 /* ---- 사진 크게 보기 / 한 화면에 맞추기 ---- */
 const photoWrap = document.getElementById('photoWrap');
 const fitToggle = document.getElementById('fitToggle');
@@ -422,6 +554,10 @@ fitToggle.addEventListener('click', () => {
 });
 
 document.addEventListener('keydown', (e) => {
+    if (listPanel.classList.contains('open')) {
+        if (e.key === 'Escape') closeList();
+        return;
+    }
     if (lightbox.classList.contains('open')) return;
     if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); goNext(); }
     if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
