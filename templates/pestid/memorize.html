@@ -361,11 +361,11 @@
         .list-row.filtered { display: none; }
         .mark-badge {
             display: inline-block;
-            margin-left: 6px;
+            margin-right: 6px;
             padding: 1px 7px;
             border-radius: 9px;
-            background: #f0ad00;
-            color: #3d2c00;
+            background: #1d6fd0;
+            color: #fff;
             font-size: 0.68rem;
             font-weight: 700;
             vertical-align: middle;
@@ -706,9 +706,9 @@ function fieldOf(card, label) {
 listBody.innerHTML = CARDS.map((card, i) => `
     <div class="list-row${card.stars ? ' past' : ''}" data-i="${i}" data-past="${card.stars ? 1 : 0}">
         <span class="c-no">${i + 1}</span>
-        <span class="c-name">${card.name || '(이름 미상)'}${
+        <span class="c-name"><span class="mark-badge${card.marked ? '' : ' off'}">관심</span>${card.name || '(이름 미상)'}${
             card.stars ? `<span class="stars" title="기출 ${card.exam}">${'★'.repeat(card.stars)}</span>` : ''
-        }<span class="mark-badge${card.marked ? '' : ' off'}">관심</span></span>
+        }</span>
         <span class="c-tax">${card.taxon || '-'}</span>
         <span class="c-occ">${fieldOf(card, '연발생횟수')}</span>
         <span class="c-ow">${fieldOf(card, '월동태')}</span>
