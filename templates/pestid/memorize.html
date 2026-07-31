@@ -81,8 +81,10 @@
         }
         /* 기본은 폭을 꽉 채워 사진을 크게 본다. '한 화면' 모드에서는 높이를 맞춰
            스크롤 없이 전체를 훑을 수 있게 한다 */
+        /* 헤더(50) + 진행바(4) + 위 여백(16) + 하단 버튼바(75) 만큼만 뺀다.
+           카운터와 안내문을 없애 사진이 그만큼 커졌다 */
         .photo-wrap.fit img {
-            max-height: calc(100vh - 230px);
+            max-height: calc(100vh - 155px);
             object-fit: contain;
             object-position: top;
             background: #fafbfa;
@@ -168,13 +170,6 @@
             font-size: 0.98rem;
             word-break: keep-all;
             text-shadow: 0 1px 6px rgba(0,0,0,0.7);
-        }
-
-        .hint {
-            text-align: center;
-            color: #9aa8a0;
-            font-size: 0.88rem;
-            margin-top: 20px;
         }
 
         .controls {
@@ -294,7 +289,6 @@
                 </div>
             </div>
 
-            <p class="hint" id="hint">사진을 보고 해충명을 떠올린 뒤 <strong>다음</strong>을 누르세요</p>
         </div>
 
         <div class="done" id="done" style="display: none;">
@@ -332,7 +326,6 @@ const nameEl = document.getElementById('name');
 const courseEl = document.getElementById('course');
 const rowsEl = document.getElementById('rows');
 const posEl = document.getElementById('pos');
-const hintEl = document.getElementById('hint');
 const progress = document.getElementById('progress');
 const nextBtn = document.getElementById('next');
 const prevBtn = document.getElementById('prev');
@@ -359,13 +352,11 @@ function render() {
             `<div class="row"><span class="label">${f.label}</span><span class="value">${f.value}</span></div>`
         ).join('');
         info.classList.remove('hidden');
-        hintEl.textContent = '사진을 누르면 가려진 부분까지 크게 볼 수 있습니다';
         nextBtn.innerHTML = (index === CARDS.length - 1)
             ? '완료 <i class="fas fa-check"></i>'
             : '다음 해충 <i class="fas fa-chevron-right"></i>';
     } else {
         info.classList.add('hidden');
-        hintEl.innerHTML = '사진을 보고 해충명을 떠올린 뒤 <strong>다음</strong>을 누르세요';
         nextBtn.innerHTML = '정답 보기';
     }
 
