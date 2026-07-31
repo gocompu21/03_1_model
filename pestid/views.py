@@ -67,6 +67,15 @@ def memorize(request):
             "taxon": " ".join(x for x in (q.taxon_order, q.taxon_family) if x),
             "stars": q.exam_stars,
             "exam": q.exam_note,
+            # 채점 항목은 아니지만 함께 외우면 좋은 참고 정보
+            "extra": [
+                {"label": label, "value": value}
+                for label, value in (
+                    ("기주", q.main_host),
+                    ("월동처", q.overwinter_place),
+                )
+                if value
+            ],
         }
         for q in questions
     ]

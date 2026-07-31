@@ -43,9 +43,13 @@ class PestQuestion(models.Model):
     overwinter = models.CharField(max_length=200, blank=True, default="", verbose_name="월동태")
     host = models.CharField(max_length=200, blank=True, default="", verbose_name="여름기주")
 
-    # 분류 (출제 대상은 아니고 목록에서 참고용으로만 보여준다)
+    # 참고 정보 (채점 대상은 아니고 정답을 열었을 때 함께 보여준다)
     taxon_order = models.CharField(max_length=50, blank=True, default="", verbose_name="목")
     taxon_family = models.CharField(max_length=50, blank=True, default="", verbose_name="과")
+    main_host = models.CharField(max_length=200, blank=True, default="", verbose_name="기주")
+    overwinter_place = models.CharField(
+        max_length=200, blank=True, default="", verbose_name="월동처"
+    )
 
     # 기출 이력 (원본 PDF의 "기출★★ [5회(월동태)] [9회]" 표기에서 추출)
     exam_stars = models.IntegerField(default=0, db_index=True, verbose_name="기출 중요도")

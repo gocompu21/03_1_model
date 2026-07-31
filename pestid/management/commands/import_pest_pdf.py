@@ -30,13 +30,15 @@ from django.db import transaction
 from pestid.models import PestCourse, PestQuestion
 
 # 상세 페이지에서 뽑아낼 라벨 -> 모델 필드
+# '기주'와 '겨울기주'는 같은 자리(주 기주)를 가리킨다. 물푸레면충처럼
+# 겨울기주만 적힌 종이 있어 둘 다 main_host로 받는다.
 DETAIL_LABELS = [
     ("여름기주", "host"),
-    ("겨울기주", None),
-    ("기주", None),
+    ("겨울기주", "main_host"),
+    ("기주", "main_host"),
     ("연 발생횟수", "occurrence"),
     ("월동태", "overwinter"),
-    ("월동처", None),
+    ("월동처", "overwinter_place"),
 ]
 LABEL_RE = re.compile(r"(여름기주|겨울기주|기주|연\s*발생횟수|월동태|월동처)\s*:")
 
@@ -235,6 +237,8 @@ class Command(BaseCommand):
                         row.get("overwinter", ""), detail.get("overwinter", "")
                     ),
                     "host": detail.get("host", ""),
+                    "main_host": detail.get("main_host", ""),
+                    "overwinter_place": detail.get("overwinter_place", ""),
                     "taxon_order": taxon[0],
                     "taxon_family": taxon[1],
                     # 요약표는 별을 누락한 경우가 있어(18번) 상세 페이지를 우선한다
@@ -479,6 +483,8 @@ class Command(BaseCommand):
                     occurrence=item.get("occurrence", ""),
                     overwinter=item.get("overwinter", ""),
                     host=item.get("host", ""),
+                    main_host=item.get("main_host", ""),
+                    overwinter_place=item.get("overwinter_place", ""),
                     taxon_order=item.get("taxon_order", ""),
                     taxon_family=item.get("taxon_family", ""),
                     exam_stars=item.get("exam_stars", 0),

@@ -181,6 +181,26 @@
             word-break: keep-all;
             text-shadow: 0 1px 6px rgba(0,0,0,0.7);
         }
+        /* 사진 위 참고 정보 (기주, 월동처) — 채점 항목이 아니라 톤을 낮춘다 */
+        .extra-lines { margin-top: 9px; }
+        .extra-lines:empty { display: none; }
+        .extra-lines .extra {
+            display: flex;
+            gap: 8px;
+            font-size: 0.86rem;
+            line-height: 1.45;
+            color: rgba(255,255,255,0.94);
+            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+        }
+        .extra-lines .extra + .extra { margin-top: 3px; }
+        .extra-lines .k {
+            color: rgba(255,255,255,0.62);
+            flex-shrink: 0;
+            width: 46px;
+            font-size: 0.8rem;
+        }
+        .extra-lines .v { word-break: keep-all; }
+
         /* 사진 위 기출 이력 */
         .exam-line {
             margin-top: 10px;
@@ -430,6 +450,7 @@
                     <div class="pest-name" id="name"></div>
                     <div class="pest-course" id="course"></div>
                     <div id="rows"></div>
+                    <div class="extra-lines" id="extra"></div>
                     <div class="exam-line" id="exam"></div>
                 </div>
             </div>
@@ -496,6 +517,7 @@ const nameEl = document.getElementById('name');
 const courseEl = document.getElementById('course');
 const rowsEl = document.getElementById('rows');
 const posEl = document.getElementById('pos');
+const extraEl = document.getElementById('extra');
 const examEl = document.getElementById('exam');
 const progress = document.getElementById('progress');
 const nextBtn = document.getElementById('next');
@@ -521,6 +543,9 @@ function render() {
         courseEl.textContent = card.course;
         rowsEl.innerHTML = card.fields.map(f =>
             `<div class="row"><span class="label">${f.label}</span><span class="value">${f.value}</span></div>`
+        ).join('');
+        extraEl.innerHTML = (card.extra || []).map(e =>
+            `<div class="extra"><span class="k">${e.label}</span><span class="v">${e.value}</span></div>`
         ).join('');
         examEl.innerHTML = card.stars
             ? `<span class="stars">${'★'.repeat(card.stars)}</span>기출 ${card.exam}`
