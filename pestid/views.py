@@ -52,8 +52,9 @@ def memorize(request):
         {
             "image": q.image.url,
             "name": q.name,
+            # 쉼표 뒤는 같은 뜻의 별해라 사진 위에서는 대표값만 보여준다
             "fields": [
-                {"label": label, "value": value}
+                {"label": label, "value": value.split(",")[0].strip()}
                 for key, label, value in q.answer_fields()
                 if key != "name"
             ],

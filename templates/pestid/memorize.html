@@ -64,8 +64,12 @@
         .photo-wrap.fit img {
             max-height: calc(100vh - 230px);
             object-fit: contain;
+            object-position: top;
             background: #fafbfa;
         }
+        /* 한 화면 모드에서는 사진이 줄어든 만큼 아래 여백이 생기므로
+           오버레이도 그 위(사진 끝)에 붙도록 그라데이션을 짧게 잡는다 */
+        .photo-wrap.fit .info { padding-top: 44px; }
         .fit-toggle {
             position: absolute;
             top: 10px; right: 10px;
@@ -81,37 +85,70 @@
         }
         .fit-toggle:hover { background: rgba(27,67,50,0.92); }
 
+        /* 정답은 사진 위에 글자로 겹쳐 보여준다. 사진 아래쪽에서 어둡게 깔아
+           밝은 사진에서도 글자가 읽히도록 한다 */
         .info {
-            background: #fff;
-            border-radius: 14px;
-            margin: 14px auto 0;
-            padding: 20px;
-            max-width: 620px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            padding: 60px 22px 20px;
+            background: linear-gradient(
+                to top,
+                rgba(0,0,0,0.86) 0%,
+                rgba(0,0,0,0.72) 45%,
+                rgba(0,0,0,0.34) 75%,
+                rgba(0,0,0,0) 100%
+            );
+            color: #fff;
+            pointer-events: none;
+            animation: fadeUp 0.22s ease-out;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .info.hidden { display: none; }
         .pest-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1b4332;
-            margin-bottom: 4px;
+            font-size: clamp(1.5rem, 4.2vw, 2.1rem);
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.01em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.75);
             word-break: keep-all;
         }
-        .pest-course { color: #999; font-size: 0.82rem; margin-bottom: 16px; }
+        .pest-course {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            margin-top: 3px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+        }
+        #rows {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            margin-top: 12px;
+        }
         .row {
             display: flex;
-            gap: 12px;
-            padding: 11px 0;
-            border-top: 1px solid #eef2ef;
-            font-size: 0.95rem;
+            align-items: baseline;
+            gap: 7px;
+            background: rgba(0,0,0,0.42);
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 8px;
+            padding: 6px 12px;
+            backdrop-filter: blur(4px);
         }
         .row .label {
-            color: #7a8b80;
+            color: rgba(255,255,255,0.72);
+            font-size: 0.78rem;
             flex-shrink: 0;
-            width: 88px;
-            font-size: 0.88rem;
         }
-        .row .value { color: #222; font-weight: 600; word-break: keep-all; }
+        .row .value {
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.98rem;
+            word-break: keep-all;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        }
 
         .hint {
             text-align: center;
@@ -228,12 +265,12 @@
                 <button class="fit-toggle" id="fitToggle" type="button">
                     <i class="fas fa-compress"></i> 한 화면
                 </button>
-            </div>
 
-            <div class="info hidden" id="info">
-                <div class="pest-name" id="name"></div>
-                <div class="pest-course" id="course"></div>
-                <div id="rows"></div>
+                <div class="info hidden" id="info">
+                    <div class="pest-name" id="name"></div>
+                    <div class="pest-course" id="course"></div>
+                    <div id="rows"></div>
+                </div>
             </div>
 
             <p class="hint" id="hint">사진을 보고 해충명을 떠올린 뒤 <strong>다음</strong>을 누르세요</p>
@@ -290,7 +327,7 @@ function render() {
             `<div class="row"><span class="label">${f.label}</span><span class="value">${f.value}</span></div>`
         ).join('');
         info.classList.remove('hidden');
-        hintEl.textContent = '다음 해충으로 넘어가려면 다음을 누르세요';
+        hintEl.textContent = '사진을 누르면 가려진 부분까지 크게 볼 수 있습니다';
         nextBtn.innerHTML = (index === CARDS.length - 1)
             ? '완료 <i class="fas fa-check"></i>'
             : '다음 해충 <i class="fas fa-chevron-right"></i>';
@@ -302,10 +339,10 @@ function render() {
 
     prevBtn.disabled = (index === 0 && !revealed);
 
-    // 정답을 열면 정보가 보이도록 내려주고, 새 사진으로 넘어가면 맨 위로 올린다.
-    // 사진이 세로로 길어 정답이 화면 밖에 있는 경우가 많다.
+    // 정답은 사진 아래쪽에 겹쳐 나오므로 사진 끝이 보이게 내려주고,
+    // 새 사진으로 넘어가면 맨 위로 올린다. (세로로 긴 사진이 많다)
     if (revealed) {
-        info.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        info.scrollIntoView({ behavior: 'smooth', block: 'end' });
     } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
