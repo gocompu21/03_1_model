@@ -313,6 +313,7 @@
         }
         .list-row.past { background: #fffdf3; }
         .list-row.past.current { background: #e7f4ea; }
+        .list-row.filtered { display: none; }
 
         /* 목록 상단 기출 필터 */
         .list-filter { display: flex; gap: 6px; padding: 0 20px 10px; }
@@ -468,10 +469,12 @@
                 <strong>전체 목록</strong>
                 <button class="list-close" id="listClose" type="button">&times;</button>
             </div>
+            {% if scope != 'past' %}
             <div class="list-filter">
-                <button class="filter-btn on" id="filterAll" type="button">전체</button>
-                <button class="filter-btn" id="filterPast" type="button">기출만</button>
+                <button class="filter-btn on" id="filterAll" type="button">전체 {{ total_all }}</button>
+                <button class="filter-btn" id="filterPast" type="button">기출만 {{ past_count }}</button>
             </div>
+            {% endif %}
             <div class="list-cols">
                 <span class="c-no">번호</span><span class="c-name">해충명</span><span class="c-tax">목 / 과</span><span class="c-occ">연발생횟수</span><span class="c-ow">월동태</span>
             </div>
@@ -599,18 +602,23 @@ function applyFilter(mode) {
     listFilter = mode;
     filterAll.classList.toggle('on', mode === 'all');
     filterPast.classList.toggle('on', mode === 'past');
+    // display를 직접 건드리면 CSS의 grid 레이아웃이 복원되지 않아 클래스로 숨긴다
     for (const row of listBody.children) {
-        row.style.display = (mode === 'past' && row.dataset.past === '0') ? 'none' : '';
+        row.classList.toggle('filtered', mode === 'past' && row.dataset.past === '0');
     }
 }
-filterAll.addEventListener('click', () => applyFilter('all'));
-filterPast.addEventListener('click', () => applyFilter('past'));
+
+// 기출 모드에서는 전부 기출이라 필터 버튼 자체를 넣지 않는다
+if (filterAll && filterPast) {
+    filterAll.addEventListener('click', () => applyFilter('all'));
+    filterPast.addEventListener('click', () => applyFilter('past'));
+}
 
 function openList() {
     listPanel.classList.add('open');
     const rows = listBody.children;
     for (const row of rows) row.classList.toggle('current', Number(row.dataset.i) === index);
-    if (rows[index] && rows[index].style.display !== 'none') {
+    if (rows[index] && !rows[index].classList.contains('filtered')) {
         rows[index].scrollIntoView({ block: 'center' });
     }
 }
