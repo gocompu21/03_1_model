@@ -39,13 +39,33 @@
             width: 0;
             transition: width 0.25s ease-out;
         }
+        /* 진행 표시는 하단 버튼 사이에 둔다 (이전 버튼 오른쪽) */
         .counter {
-            text-align: center;
-            color: #888;
-            font-size: 0.85rem;
-            margin: 14px 0 10px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 3px;
+            padding: 0 14px;
+            font-variant-numeric: tabular-nums;
+            user-select: none;
         }
-        .counter strong { color: #2d6a4f; font-size: 1rem; }
+        .counter-now {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1b4332;
+            line-height: 1;
+        }
+        .counter-now.bump { animation: bump 0.24s ease-out; }
+        @keyframes bump {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.22); }
+            100% { transform: scale(1); }
+        }
+        .counter-total {
+            font-size: 0.85rem;
+            color: #9aa8a0;
+            font-weight: 500;
+        }
 
         .photo-wrap {
             background: #fff;
@@ -168,7 +188,8 @@
         }
         .controls-inner {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             width: 100%;
             max-width: 620px;
             margin: 0 auto;
@@ -186,11 +207,13 @@
         .btn-next { background: #2d6a4f; color: #fff; }
         .btn-next:active { background: #245a41; }
         .btn-prev {
-            flex: 0 0 88px;
+            flex: 0 0 54px;
+            padding: 15px 0;
             background: #eef2ef;
             color: #40684f;
         }
-        .btn:disabled { opacity: 0.4; cursor: default; }
+        .btn-prev:active { background: #e2e9e4; }
+        .btn:disabled { opacity: 0.35; cursor: default; }
 
         .done {
             background: #fff;
@@ -258,8 +281,6 @@
 
     <div class="container">
         <div id="card">
-            <div class="counter"><strong id="pos">1</strong> / {{ total }}</div>
-
             <div class="photo-wrap" id="photoWrap">
                 <img id="photo" src="" alt="해충 사진">
                 <button class="fit-toggle" id="fitToggle" type="button">
@@ -287,7 +308,12 @@
 
     <div class="controls" id="controls">
         <div class="controls-inner">
-            <button class="btn btn-prev" id="prev" type="button"><i class="fas fa-chevron-left"></i> 이전</button>
+            <button class="btn btn-prev" id="prev" type="button" aria-label="이전">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="counter" id="counter">
+                <span class="counter-now" id="pos">1</span><span class="counter-total">/ {{ total }}</span>
+            </div>
             <button class="btn btn-next" id="next" type="button">다음</button>
         </div>
     </div>
@@ -317,7 +343,13 @@ let revealed = false;
 function render() {
     const card = CARDS[index];
     photo.src = card.image;
-    posEl.textContent = index + 1;
+
+    if (posEl.textContent !== String(index + 1)) {
+        posEl.textContent = index + 1;
+        posEl.classList.remove('bump');
+        void posEl.offsetWidth;  // 애니메이션 재생을 위해 리플로우를 강제한다
+        posEl.classList.add('bump');
+    }
     progress.style.width = ((index + (revealed ? 1 : 0.5)) / CARDS.length * 100) + '%';
 
     if (revealed) {
