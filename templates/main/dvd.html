@@ -98,21 +98,21 @@
         </div>
 
         <div class="grid">
-            <a href="{% url 'pestid:index' %}" class="item">
-                <div class="emoji">🐛</div>
-                <h3>해충 식별</h3>
-                <p>사진을 보고 해충명과<br>생태 정보를 맞혀보세요</p>
-                {% if pest_course_count %}
-                <span class="count">{{ pest_course_count }}개 코스</span>
-                {% endif %}
-            </a>
-
             <a href="{% url 'pestid:memorize' %}" class="item">
                 <div class="emoji">📖</div>
                 <h3>해충 암기</h3>
                 <p>사진을 보고 정답을 확인하며<br>전체를 넘겨보세요</p>
                 {% if pest_question_count %}
                 <span class="count">{{ pest_question_count }}종</span>
+                {% endif %}
+            </a>
+
+            <a href="{% url 'pestid:index' %}" class="item">
+                <div class="emoji">🐛</div>
+                <h3>해충 식별</h3>
+                <p>사진을 보고 해충명과<br>생태 정보를 맞혀보세요</p>
+                {% if pest_course_count %}
+                <span class="count">{{ pest_course_count }}개 코스</span>
                 {% endif %}
             </a>
 
