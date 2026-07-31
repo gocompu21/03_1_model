@@ -47,6 +47,13 @@ class PestQuestion(models.Model):
     taxon_order = models.CharField(max_length=50, blank=True, default="", verbose_name="목")
     taxon_family = models.CharField(max_length=50, blank=True, default="", verbose_name="과")
 
+    # 기출 이력 (원본 PDF의 "기출★★ [5회(월동태)] [9회]" 표기에서 추출)
+    exam_stars = models.IntegerField(default=0, db_index=True, verbose_name="기출 중요도")
+    exam_note = models.CharField(
+        max_length=200, blank=True, default="", verbose_name="기출 회차",
+        help_text="예: 5회(여름기주) · 9회(월동태) · 11회(여름기주)",
+    )
+
     source_key = models.CharField(
         max_length=200, blank=True, default="", db_index=True,
         verbose_name="원본 식별자", help_text="임포트 시 중복 방지용 (원본 파일명 등)",
@@ -68,6 +75,11 @@ class PestQuestion(models.Model):
 
     def __str__(self):
         return f"{self.course.name} #{self.order} - {self.name or '(이름없음)'}"
+
+    @property
+    def is_past(self):
+        """기출 출제 이력이 있는지."""
+        return self.exam_stars > 0
 
     def answer_fields(self):
         """값이 채워진 정답 항목만 [(키, 라벨, 정답문자열)] 로 반환."""

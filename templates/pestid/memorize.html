@@ -29,6 +29,16 @@
             background: rgba(255,255,255,0.18);
             padding: 5px 11px;
             border-radius: 12px;
+            white-space: nowrap;
+        }
+        .header-btns { display: flex; gap: 6px; flex-shrink: 0; }
+        .scope-tag {
+            font-size: 0.7rem;
+            background: #ffd166;
+            color: #5c4300;
+            padding: 2px 7px;
+            border-radius: 9px;
+            vertical-align: middle;
         }
         .container { max-width: 960px; margin: 0 auto; padding: 16px 20px; }
 
@@ -171,6 +181,16 @@
             word-break: keep-all;
             text-shadow: 0 1px 6px rgba(0,0,0,0.7);
         }
+        /* 사진 위 기출 이력 */
+        .exam-line {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #ffe9a8;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+            word-break: keep-all;
+        }
+        .exam-line:empty { display: none; }
+        .exam-line .stars { color: #ffd166; letter-spacing: 1px; margin-right: 6px; }
 
         .controls {
             position: fixed;
@@ -284,6 +304,29 @@
         .list-row .c-name { font-weight: 600; color: #1b4332; word-break: keep-all; }
         .list-row .c-tax { color: #7a8b80; font-size: 0.82rem; word-break: keep-all; }
         .list-row .c-occ, .list-row .c-ow { color: #555; word-break: keep-all; }
+        .list-row .c-name .stars {
+            color: #e0a80a;
+            font-size: 0.72rem;
+            letter-spacing: -0.5px;
+            margin-left: 4px;
+            white-space: nowrap;
+        }
+        .list-row.past { background: #fffdf3; }
+        .list-row.past.current { background: #e7f4ea; }
+
+        /* 목록 상단 기출 필터 */
+        .list-filter { display: flex; gap: 6px; padding: 0 20px 10px; }
+        .filter-btn {
+            border: 1px solid #dde5e0;
+            background: #fff;
+            color: #40684f;
+            border-radius: 14px;
+            padding: 5px 13px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .filter-btn.on { background: #2d6a4f; border-color: #2d6a4f; color: #fff; }
         /* 좁은 화면에서는 목/과를 해충명 아래로 접어 넣는다 */
         @media (max-width: 560px) {
             .list-cols, .list-row {
@@ -355,12 +398,21 @@
 <body>
     <header>
         <a href="{% url 'main:dvd' %}"><i class="fas fa-arrow-left"></i> DVD</a>
-        <strong>해충 암기</strong>
-        {% if order == 'random' %}
-        <a href="{% url 'pestid:memorize' %}" class="order-toggle"><i class="fas fa-list-ol"></i> 순서대로</a>
-        {% else %}
-        <a href="{% url 'pestid:memorize' %}?order=random" class="order-toggle"><i class="fas fa-shuffle"></i> 섞기</a>
-        {% endif %}
+        <strong>해충 암기{% if scope == 'past' %} <span class="scope-tag">기출</span>{% endif %}</strong>
+        <span class="header-btns">
+            {% if scope == 'past' %}
+            <a href="{% url 'pestid:memorize' %}{% if order == 'random' %}?order=random{% endif %}"
+               class="order-toggle">전체 {{ total_all }}</a>
+            {% else %}
+            <a href="{% url 'pestid:memorize' %}?scope=past{% if order == 'random' %}&order=random{% endif %}"
+               class="order-toggle"><i class="fas fa-star"></i> 기출 {{ past_count }}</a>
+            {% endif %}
+            {% if order == 'random' %}
+            <a href="?{% if scope == 'past' %}scope=past{% endif %}" class="order-toggle"><i class="fas fa-list-ol"></i></a>
+            {% else %}
+            <a href="?order=random{% if scope == 'past' %}&scope=past{% endif %}" class="order-toggle"><i class="fas fa-shuffle"></i></a>
+            {% endif %}
+        </span>
     </header>
 
     <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
@@ -377,6 +429,7 @@
                     <div class="pest-name" id="name"></div>
                     <div class="pest-course" id="course"></div>
                     <div id="rows"></div>
+                    <div class="exam-line" id="exam"></div>
                 </div>
             </div>
 
@@ -386,7 +439,10 @@
             <div style="font-size: 3rem;">🎉</div>
             <h2>{{ total }}종을 모두 넘겼습니다</h2>
             <p>이어서 퀴즈로 확인해 보세요.</p>
-            <a href="{% url 'pestid:memorize' %}?order=random"><i class="fas fa-rotate-right"></i> 섞어서 다시</a>
+            <a href="?order=random{% if scope == 'past' %}&scope=past{% endif %}"><i class="fas fa-rotate-right"></i> 섞어서 다시</a>
+            {% if scope != 'past' %}
+            <a href="{% url 'pestid:memorize' %}?scope=past"><i class="fas fa-star"></i> 기출 {{ past_count }}종만</a>
+            {% endif %}
             <a href="{% url 'pestid:index' %}"><i class="fas fa-list-ul"></i> 퀴즈 풀기</a>
         </div>
     </div>
@@ -412,6 +468,10 @@
                 <strong>전체 목록</strong>
                 <button class="list-close" id="listClose" type="button">&times;</button>
             </div>
+            <div class="list-filter">
+                <button class="filter-btn on" id="filterAll" type="button">전체</button>
+                <button class="filter-btn" id="filterPast" type="button">기출만</button>
+            </div>
             <div class="list-cols">
                 <span class="c-no">번호</span><span class="c-name">해충명</span><span class="c-tax">목 / 과</span><span class="c-occ">연발생횟수</span><span class="c-ow">월동태</span>
             </div>
@@ -433,6 +493,7 @@ const nameEl = document.getElementById('name');
 const courseEl = document.getElementById('course');
 const rowsEl = document.getElementById('rows');
 const posEl = document.getElementById('pos');
+const examEl = document.getElementById('exam');
 const progress = document.getElementById('progress');
 const nextBtn = document.getElementById('next');
 const prevBtn = document.getElementById('prev');
@@ -458,6 +519,9 @@ function render() {
         rowsEl.innerHTML = card.fields.map(f =>
             `<div class="row"><span class="label">${f.label}</span><span class="value">${f.value}</span></div>`
         ).join('');
+        examEl.innerHTML = card.stars
+            ? `<span class="stars">${'★'.repeat(card.stars)}</span>기출 ${card.exam}`
+            : '';
         info.classList.remove('hidden');
         nextBtn.innerHTML = (index === CARDS.length - 1)
             ? '완료 <i class="fas fa-check"></i>'
@@ -517,19 +581,38 @@ function fieldOf(card, label) {
 }
 
 listBody.innerHTML = CARDS.map((card, i) => `
-    <div class="list-row" data-i="${i}">
+    <div class="list-row${card.stars ? ' past' : ''}" data-i="${i}" data-past="${card.stars ? 1 : 0}">
         <span class="c-no">${i + 1}</span>
-        <span class="c-name">${card.name || '(이름 미상)'}</span>
+        <span class="c-name">${card.name || '(이름 미상)'}${
+            card.stars ? `<span class="stars" title="기출 ${card.exam}">${'★'.repeat(card.stars)}</span>` : ''
+        }</span>
         <span class="c-tax">${card.taxon || '-'}</span>
         <span class="c-occ">${fieldOf(card, '연발생횟수')}</span>
         <span class="c-ow">${fieldOf(card, '월동태')}</span>
     </div>`).join('');
 
+const filterAll = document.getElementById('filterAll');
+const filterPast = document.getElementById('filterPast');
+let listFilter = 'all';
+
+function applyFilter(mode) {
+    listFilter = mode;
+    filterAll.classList.toggle('on', mode === 'all');
+    filterPast.classList.toggle('on', mode === 'past');
+    for (const row of listBody.children) {
+        row.style.display = (mode === 'past' && row.dataset.past === '0') ? 'none' : '';
+    }
+}
+filterAll.addEventListener('click', () => applyFilter('all'));
+filterPast.addEventListener('click', () => applyFilter('past'));
+
 function openList() {
     listPanel.classList.add('open');
     const rows = listBody.children;
     for (const row of rows) row.classList.toggle('current', Number(row.dataset.i) === index);
-    if (rows[index]) rows[index].scrollIntoView({ block: 'center' });
+    if (rows[index] && rows[index].style.display !== 'none') {
+        rows[index].scrollIntoView({ block: 'center' });
+    }
 }
 function closeList() { listPanel.classList.remove('open'); }
 

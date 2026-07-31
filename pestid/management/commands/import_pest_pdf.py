@@ -44,6 +44,18 @@ LABEL_RE = re.compile(r"(여름기주|겨울기주|기주|연\s*발생횟수|월
 # 강(綱)은 있을 때도 없을 때도 있어 목/과만 취한다. 속(屬)은 PDF에 없다.
 TAXON_RE = re.compile(r"(?:^|\s)(\S*?목)\s+(\S*?(?:과|상과))(?=\s|$|,)")
 
+# 상세 페이지의 기출 표기.
+# 예: "기출★★★ [5회(여름 기주)] [9회(월동태)] [11회(여름 기주)]"
+# 별 개수가 중요도, 대괄호가 출제 회차와 물어본 항목이다.
+# 기출 표기는 "기출★★ [5회(월동태)] [9회]" 형태. 별 개수가 중요도다.
+EXAM_RE = re.compile(r"기출\s*([★☆]*)")
+# 회차는 '['로 열리고 "N회"로 시작한다. 원본이 고르지 않아 다음을 감안한다.
+#  - 닫는 ']'가 빠진 곳 (81번)
+#  - 줄 끝에서 잘려 "[11" 처럼 회차만 남은 곳 (77번)
+#  - "[1회] [11월]" 처럼 '회'가 '월'로 잘못 적힌 곳 (29번)
+EXAM_ROUND_RE = re.compile(r"\[\s*(\d+\s*[회월][^\[\]\n]*)", re.M)
+EXAM_TRUNCATED_RE = re.compile(r"\[\s*(\d+)\s*$")
+
 SUMMARY_HEADER = "해충명"
 SUMMARY_ROW_RE = re.compile(r"^(\d{3})\s+(\S+)\s+(.*)$")
 NOTE_RE = re.compile(r"\s*기출\s*([★☆*]*)\s*$")
@@ -199,11 +211,14 @@ class Command(BaseCommand):
 
             detail = {}
             taxon = ("", "")
+            exam = (0, "")
             for _, tx in pending:
                 for key, value in self._parse_fields(tx).items():
                     detail.setdefault(key, value)
                 if not taxon[0]:
                     taxon = self._parse_taxon(tx)
+                if not exam[0]:
+                    exam = self._parse_exam(tx)
 
             row = summary.get(expected, {})
             items.append(
@@ -222,6 +237,9 @@ class Command(BaseCommand):
                     "host": detail.get("host", ""),
                     "taxon_order": taxon[0],
                     "taxon_family": taxon[1],
+                    # 요약표는 별을 누락한 경우가 있어(18번) 상세 페이지를 우선한다
+                    "exam_stars": exam[0] or row.get("stars", 0),
+                    "exam_note": exam[1],
                     "pages": [p for p, _ in pending],
                 }
             )
@@ -242,6 +260,35 @@ class Command(BaseCommand):
             if m:
                 return m.group(1), m.group(2)
         return "", ""
+
+    @staticmethod
+    def _parse_exam(text):
+        """기출 표기에서 (별 개수, '5회(여름기주) · 9회(월동태)') 를 만든다."""
+        m = EXAM_RE.search(text)
+        if not m or not m.group(1):
+            return 0, ""
+
+        # 기출 표기가 있는 줄에서만 회차를 읽는다 (다른 줄의 대괄호와 섞이지 않게)
+        line = text[: m.end()].split("\n")[-1] + text[m.end() :].split("\n")[0]
+
+        rounds = []
+        for raw in EXAM_ROUND_RE.findall(line):
+            # "5회(여름 기주)" 처럼 항목 안 공백이 제각각이라 정리한다
+            label = re.sub(r"\s+", "", raw).replace("(", " (")
+            # "[11월]"은 "[11회]"의 오기다. 회차 자리의 '월'만 바로잡는다
+            label = re.sub(r"^(\d+)월", r"\1회", label)
+            # 61번처럼 문항 내용까지 적힌 경우가 있어 너무 길면 회차만 남긴다
+            if len(label) > 24:
+                label = re.match(r"\d+회", label).group(0)
+            if label and label not in rounds:
+                rounds.append(label)
+
+        # 줄 끝에서 잘려 "[11" 만 남은 회차를 살린다 (77번)
+        tail = EXAM_TRUNCATED_RE.search(line)
+        if tail and f"{tail.group(1)}회" not in rounds:
+            rounds.append(f"{tail.group(1)}회")
+
+        return len(m.group(1)), " · ".join(rounds)
 
     @staticmethod
     def _has_number(text, n):
@@ -434,6 +481,8 @@ class Command(BaseCommand):
                     host=item.get("host", ""),
                     taxon_order=item.get("taxon_order", ""),
                     taxon_family=item.get("taxon_family", ""),
+                    exam_stars=item.get("exam_stars", 0),
+                    exam_note=item.get("exam_note", ""),
                 )
                 digest = hashlib.sha256(blob).hexdigest()[:12]
                 question.image.save(

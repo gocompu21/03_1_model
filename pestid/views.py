@@ -42,10 +42,15 @@ def memorize(request):
 
     채점이 없으므로 정답 정보를 그대로 내려준다.
     """
+    base = PestQuestion.objects.filter(course__is_active=True).select_related("course")
+    total_all = base.count()
+
+    # 시험이 가까울 때는 기출 종만 추려 보는 편이 효율적이다
+    only_past = request.GET.get("scope") == "past"
     questions = list(
-        PestQuestion.objects.filter(course__is_active=True)
-        .select_related("course")
-        .order_by("course__order", "order", "id")
+        (base.filter(exam_stars__gt=0) if only_past else base).order_by(
+            "course__order", "order", "id"
+        )
     )
 
     payload = [
@@ -60,6 +65,8 @@ def memorize(request):
             ],
             "course": q.course.name,
             "taxon": " ".join(x for x in (q.taxon_order, q.taxon_family) if x),
+            "stars": q.exam_stars,
+            "exam": q.exam_note,
         }
         for q in questions
     ]
@@ -73,6 +80,9 @@ def memorize(request):
         "cards_json": json.dumps(payload, ensure_ascii=False),
         "total": len(payload),
         "order": order,
+        "scope": "past" if only_past else "all",
+        "past_count": base.filter(exam_stars__gt=0).count(),
+        "total_all": total_all,
     })
 
 
