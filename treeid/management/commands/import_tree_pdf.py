@@ -22,6 +22,13 @@ import hashlib
 import io
 import re
 
+# PDF는 이미지를 배치할 때 변환행렬(cm)로 회전시킬 수 있다.
+# 원본 이미지만 뽑으면 그 회전이 빠져 사진이 누워 보인다.
+CM_OR_DO_RE = re.compile(
+    r"([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+cm"
+    r"|/(\w+)\s+Do"
+)
+
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -177,9 +184,37 @@ class Command(BaseCommand):
 
     # ------------------------------------------------------------------ 이미지
 
+    @staticmethod
+    def _page_rotations(page):
+        """이미지 이름 -> 페이지에 배치될 때의 회전각(도)을 구한다.
+
+        PDF 변환행렬이 [a b c d]일 때 b, c가 0이 아니면 회전이다.
+        a=0, b<0, c>0 이면 시계방향 90도로 놓인 것이라 되돌려야 한다.
+        """
+        rotations = {}
+        try:
+            data = page.get_contents().get_data().decode("latin-1")
+        except Exception:
+            return rotations
+
+        current = None
+        for m in CM_OR_DO_RE.finditer(data):
+            if m.group(7):
+                if current:
+                    a, b, c, d = current
+                    if abs(b) > 0.01 or abs(c) > 0.01:
+                        # 화면에 놓인 방향을 되돌리는 각도 (PIL rotate는 반시계)
+                        rotations[m.group(7)] = 270 if (b < 0 and c > 0) else 90
+            else:
+                current = [float(x) for x in m.groups()[:4]]
+
+        return rotations
+
     def _build_image(self, item):
-        """종의 사진들을 한 장으로 합성."""
+        """종의 사진들을 한 장으로 합성. PDF가 회전 배치한 사진은 되돌린다."""
         from PIL import Image
+
+        rotations = self._page_rotations(item["page"])
 
         photos = []
         for embedded in item["page"].images:
@@ -190,6 +225,11 @@ class Command(BaseCommand):
                 continue
             if img.width * img.height < MIN_PHOTO_AREA:
                 continue
+
+            angle = rotations.get(embedded.name.rsplit(".", 1)[0])
+            if angle:
+                img = img.rotate(angle, expand=True)
+
             photos.append(img.convert("RGB"))
 
         if not photos:
