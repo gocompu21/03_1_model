@@ -37,9 +37,14 @@ INDEX_TAIL = "수록 수목"  # 가나다순 목록 페이지 표시
 # 종당 코스 묶음 크기 (목차가 10종씩 끊겨 있다)
 COURSE_SIZE = 10
 
-# 페이지 렌더링 폭(px). 원본 페이지가 약 369pt라 3배 정도로 잡는다.
-RENDER_WIDTH = 1100
-# 표지·판권 등을 걸러낼 때 쓰는 최소 사진 크기
+# 사진 한 칸의 렌더링 폭(px). 2열로 놓으므로 전체 폭은 약 950px이 된다.
+# 모바일에서 한 칸이 화면 절반을 차지해 글자가 읽힌다.
+CELL_WIDTH = 470
+CELL_GAP = 8
+MAX_PHOTOS = 8
+# 장식용 작은 도형을 거르는 최소 배치 영역 (pt^2)
+MIN_BOX_AREA = 500
+# 표지·판권 등을 걸러낼 때 쓰는 최소 사진 크기 (px^2)
 MIN_PHOTO_AREA = 20000
 
 
@@ -185,23 +190,67 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------ 이미지
 
     def _build_image(self, item, doc):
-        """페이지를 통째로 렌더링한다.
+        """사진 칸 단위로 렌더링해 세로로 이어 붙인다.
 
-        사진 위에 얹힌 설명 글자가 학습 자료의 핵심이라 사진만 뽑지 않는다.
-        페이지 렌더링이므로 PDF가 회전 배치한 사진도 자연히 바로 선다.
+        페이지를 통째로 렌더링하면 모바일에서 글자가 너무 작아지고,
+        사진만 추출하면 사진 위에 얹힌 설명 글자가 빠진다. 그래서
+        사진이 놓인 영역을 글자까지 포함해 잘라낸 뒤 크게 쌓는다.
+        영역 렌더링이므로 PDF가 회전 배치한 사진도 자연히 바로 선다.
         """
         import pymupdf
         from PIL import Image
 
         page = doc[item["page_no"] - 1]
-        zoom = RENDER_WIDTH / page.rect.width
-        pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom))
 
-        img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+        # 사진이 놓인 영역을 페이지 안으로 잘라 정렬 (위 -> 아래, 왼 -> 오)
+        boxes = []
+        for info in page.get_image_info():
+            box = pymupdf.Rect(info["bbox"]) & page.rect
+            if box.width * box.height > MIN_BOX_AREA:
+                boxes.append(box)
+        boxes.sort(key=lambda b: (round(b.y0), round(b.x0)))
+        boxes = self._dedupe_boxes(boxes)
+
+        if not boxes:  # 배치 정보를 못 읽으면 페이지 전체로 대체
+            boxes = [page.rect]
+
+        crops = []
+        for box in boxes[:MAX_PHOTOS]:
+            zoom = CELL_WIDTH / box.width
+            pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), clip=box)
+            crops.append(Image.frombytes("RGB", (pix.width, pix.height), pix.samples))
+
+        # 2열로 쌓는다. 1열로 세우면 세로가 7000px에 육박해 넘겨보기 어렵다.
+        cols = 1 if len(crops) == 1 else 2
+        rows = (len(crops) + cols - 1) // cols
+        row_heights = [
+            max(c.height for c in crops[r * cols:(r + 1) * cols]) for r in range(rows)
+        ]
+
+        width = CELL_WIDTH * cols + CELL_GAP * (cols + 1)
+        height = CELL_GAP + sum(h + CELL_GAP for h in row_heights)
+        sheet = Image.new("RGB", (width, height), (255, 255, 255))
+
+        y = CELL_GAP
+        for r in range(rows):
+            for c, crop in enumerate(crops[r * cols:(r + 1) * cols]):
+                x = CELL_GAP + c * (CELL_WIDTH + CELL_GAP) + (CELL_WIDTH - crop.width) // 2
+                sheet.paste(crop, (x, y))
+            y += row_heights[r] + CELL_GAP
 
         buffer = io.BytesIO()
-        img.save(buffer, format="JPEG", quality=82, optimize=True, progressive=True)
+        sheet.save(buffer, format="JPEG", quality=78, optimize=True, progressive=True)
         return buffer.getvalue()
+
+    @staticmethod
+    def _dedupe_boxes(boxes):
+        """같은 자리에 겹쳐 놓인 영역은 하나만 남긴다."""
+        kept = []
+        for box in boxes:
+            if any(abs(box.x0 - k.x0) < 3 and abs(box.y0 - k.y0) < 3 for k in kept):
+                continue
+            kept.append(box)
+        return kept
 
     # ------------------------------------------------------------------ 출력
 
