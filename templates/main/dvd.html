@@ -98,6 +98,15 @@
         </div>
 
         <div class="grid">
+            <a href="{% url 'diseaseid:memorize' %}" class="item">
+                <div class="emoji">🍂</div>
+                <h3>병해 암기</h3>
+                <p>사진을 보고 병명과<br>병원균을 확인하세요</p>
+                {% if disease_question_count %}
+                <span class="count">{{ disease_question_count }}종</span>
+                {% endif %}
+            </a>
+
             <a href="{% url 'pestid:memorize' %}" class="item">
                 <div class="emoji">📖</div>
                 <h3>해충 암기</h3>
@@ -113,15 +122,6 @@
                 <p>사진을 보고 해충명과<br>생태 정보를 맞혀보세요</p>
                 {% if pest_course_count %}
                 <span class="count">{{ pest_course_count }}개 코스</span>
-                {% endif %}
-            </a>
-
-            <a href="{% url 'diseaseid:memorize' %}" class="item">
-                <div class="emoji">🍂</div>
-                <h3>병해 암기</h3>
-                <p>사진을 보고 병명과<br>병원균을 확인하세요</p>
-                {% if disease_question_count %}
-                <span class="count">{{ disease_question_count }}종</span>
                 {% endif %}
             </a>
         </div>
