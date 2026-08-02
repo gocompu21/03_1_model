@@ -116,11 +116,14 @@
                 {% endif %}
             </a>
 
-            <div class="soon">
+            <a href="{% url 'diseaseid:memorize' %}" class="item">
                 <div class="emoji">🍂</div>
-                <h3>병해 식별</h3>
-                <p>준비 중입니다</p>
-            </div>
+                <h3>병해 암기</h3>
+                <p>사진을 보고 병명과<br>병원균을 확인하세요</p>
+                {% if disease_question_count %}
+                <span class="count">{{ disease_question_count }}종</span>
+                {% endif %}
+            </a>
         </div>
     </div>
 </body>

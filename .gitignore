@@ -15,6 +15,7 @@ media/chapter_content/
 media/uploads/
 media/temp_infographics/
 media/pestid/
+media/diseaseid/
 chapter_*.html
 !**/chapter_detail.html
 !**/chapter_list.html

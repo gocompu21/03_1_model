@@ -43,6 +43,7 @@ urlpatterns = [
     path("practice/", include("practice.urls")),
     path("glossary/", include("glossary.urls")),
     path("pestid/", include("pestid.urls")),
+    path("diseaseid/", include("diseaseid.urls")),
     path("dashboard/", include("dashboard.urls")),
 ]
 

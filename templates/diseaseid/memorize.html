@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>병해 암기 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5;
+            color: #333;
+            padding-bottom: 128px;
+        }
+        header {
+            background: #2d6a4f;
+            color: #fff;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        header .order-toggle {
+            font-size: 0.78rem;
+            font-weight: 500;
+            background: rgba(255,255,255,0.18);
+            padding: 5px 9px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+        .header-btns { display: flex; gap: 5px; flex-shrink: 0; }
+        /* 좁은 화면에서 버튼이 셋이면 제목이 눌리므로 제목을 줄인다 */
+        header > strong { min-width: 0; }
+        @media (max-width: 430px) {
+            header { padding: 12px 12px; gap: 8px; }
+            header .order-toggle { font-size: 0.72rem; padding: 5px 7px; }
+            header > strong { font-size: 0.9rem; }
+        }
+        .scope-tag {
+            font-size: 0.7rem;
+            padding: 2px 7px;
+            border-radius: 9px;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .scope-tag.all { background: rgba(255,255,255,0.22); color: #fff; }
+        .scope-tag.past { background: #ffd166; color: #5c4300; }
+        .scope-tag.marked { background: #f0ad00; color: #3d2c00; }
+        .container { max-width: 960px; margin: 0 auto; padding: 16px 20px; }
+
+        .progress-bar { height: 4px; background: #dfe7e1; }
+        .progress-fill {
+            height: 100%;
+            background: #2d6a4f;
+            width: 0;
+            transition: width 0.25s ease-out;
+        }
+        /* 진행 표시는 하단 버튼 사이에 둔다 (이전 버튼 오른쪽) */
+        .counter {
+            flex-shrink: 0;
+            display: flex;
+            align-items: baseline;
+            gap: 3px;
+            padding: 0 14px;
+            font-variant-numeric: tabular-nums;
+            user-select: none;
+        }
+        .counter-now {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1b4332;
+            line-height: 1;
+        }
+        .counter-now.bump { animation: bump 0.24s ease-out; }
+        @keyframes bump {
+            0% { transform: scale(1); }
+            45% { transform: scale(1.22); }
+            100% { transform: scale(1); }
+        }
+        .counter-total {
+            font-size: 0.85rem;
+            color: #9aa8a0;
+            font-weight: 500;
+        }
+
+        .photo-wrap {
+            background: #fff;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .photo-wrap { position: relative; }
+        .photo-wrap img {
+            width: 100%;
+            display: block;
+            cursor: zoom-in;
+        }
+        /* 기본은 폭을 꽉 채워 사진을 크게 본다. '한 화면' 모드에서는 높이를 맞춰
+           스크롤 없이 전체를 훑을 수 있게 한다 */
+        /* 헤더(50) + 진행바(4) + 위 여백(16) + 하단 바(버튼75 + 관심체크 32) */
+        .photo-wrap.fit img {
+            max-height: calc(100vh - 187px);
+            object-fit: contain;
+            object-position: top;
+            background: #fafbfa;
+        }
+        /* 한 화면 모드에서는 사진이 줄어든 만큼 아래 여백이 생기므로
+           오버레이도 그 위(사진 끝)에 붙도록 그라데이션을 짧게 잡는다 */
+        .photo-wrap.fit .info { padding-top: 44px; }
+        .fit-toggle {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(27,67,50,0.78);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            cursor: pointer;
+            backdrop-filter: blur(2px);
+        }
+        .fit-toggle:hover { background: rgba(27,67,50,0.92); }
+
+        /* 정답은 사진 위에 글자로 겹쳐 보여준다. 사진 아래쪽에서 어둡게 깔아
+           밝은 사진에서도 글자가 읽히도록 한다 */
+        .info {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            padding: 60px 22px 20px;
+            background: linear-gradient(
+                to top,
+                rgba(0,0,0,0.86) 0%,
+                rgba(0,0,0,0.72) 45%,
+                rgba(0,0,0,0.34) 75%,
+                rgba(0,0,0,0) 100%
+            );
+            color: #fff;
+            pointer-events: none;
+            animation: fadeUp 0.22s ease-out;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .info.hidden { display: none; }
+        .pest-name {
+            font-size: clamp(1.5rem, 4.2vw, 2.1rem);
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.01em;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.75);
+            word-break: keep-all;
+        }
+        .pest-course {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            margin-top: 3px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+        }
+        #rows {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            margin-top: 12px;
+        }
+        .row {
+            display: flex;
+            align-items: baseline;
+            gap: 7px;
+            background: rgba(0,0,0,0.42);
+            border: 1px solid rgba(255,255,255,0.22);
+            border-radius: 8px;
+            padding: 6px 12px;
+            backdrop-filter: blur(4px);
+        }
+        .row .label {
+            color: rgba(255,255,255,0.72);
+            font-size: 0.78rem;
+            flex-shrink: 0;
+        }
+        .row .value {
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.98rem;
+            word-break: keep-all;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+        }
+        /* 사진 위 참고 정보 (기주, 월동처) — 채점 항목이 아니라 톤을 낮춘다 */
+        .extra-lines { margin-top: 9px; }
+        .extra-lines:empty { display: none; }
+        .extra-lines .extra {
+            display: flex;
+            gap: 8px;
+            font-size: 0.86rem;
+            line-height: 1.45;
+            color: rgba(255,255,255,0.94);
+            text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+        }
+        .extra-lines .extra + .extra { margin-top: 3px; }
+        .extra-lines .k {
+            color: rgba(255,255,255,0.62);
+            flex-shrink: 0;
+            width: 46px;
+            font-size: 0.8rem;
+        }
+        .extra-lines .v { word-break: keep-all; }
+
+        /* 사진 위 기출 이력 */
+        .exam-line {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #ffe9a8;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+            word-break: keep-all;
+        }
+        .exam-line:empty { display: none; }
+        .exam-line .stars { color: #ffd166; letter-spacing: 1px; margin-right: 6px; }
+
+        .controls {
+            position: fixed;
+            left: 0; right: 0; bottom: 0;
+            background: #fff;
+            border-top: 1px solid #e6ece8;
+            padding: 10px 20px calc(12px + env(safe-area-inset-bottom));
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        /* 관심 등록 체크박스 */
+        .mark-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 620px;
+            width: 100%;
+            margin: 0 auto;
+            cursor: pointer;
+            user-select: none;
+            font-size: 0.88rem;
+            color: #6b7a71;
+        }
+        .mark-row input { width: 17px; height: 17px; accent-color: #2d6a4f; cursor: pointer; }
+        .mark-row.on { color: #b8860b; font-weight: 600; }
+        .mark-text i { margin-right: 3px; }
+        .controls-inner {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 620px;
+            margin: 0 auto;
+        }
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .btn-next { background: #2d6a4f; color: #fff; }
+        .btn-next:active { background: #245a41; }
+        .btn-prev {
+            flex: 0 0 54px;
+            padding: 15px 0;
+            background: #eef2ef;
+            color: #40684f;
+        }
+        .btn-prev:active { background: #e2e9e4; }
+        .btn-list {
+            flex: 0 0 54px;
+            padding: 15px 0;
+            background: #eef2ef;
+            color: #40684f;
+        }
+        .btn-list:active { background: #e2e9e4; }
+        .btn:disabled { opacity: 0.35; cursor: default; }
+
+        /* 전체 목록 패널 (아래에서 올라오는 시트) */
+        .list-panel {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            display: none;
+            z-index: 60;
+        }
+        .list-panel.open { display: block; }
+        .list-sheet {
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            max-width: 860px;
+            margin: 0 auto;
+            height: min(80vh, 680px);
+            background: #fff;
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            flex-direction: column;
+            animation: sheetUp 0.22s ease-out;
+        }
+        @keyframes sheetUp {
+            from { transform: translateY(40px); opacity: 0.5; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .list-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px 10px;
+            color: #1b4332;
+            font-size: 1.05rem;
+        }
+        .list-close {
+            border: none;
+            background: none;
+            font-size: 1.6rem;
+            line-height: 1;
+            color: #999;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .list-cols, .list-row {
+            display: grid;
+            grid-template-columns: 40px 1.2fr 1fr 1.1fr;
+            gap: 8px;
+            align-items: baseline;
+            padding: 8px 20px;
+        }
+        .list-cols {
+            font-size: 0.75rem;
+            color: #9aa8a0;
+            border-bottom: 1px solid #eef2ef;
+            padding-bottom: 9px;
+        }
+        .list-body { overflow-y: auto; flex: 1; padding-bottom: 20px; }
+        .list-row {
+            font-size: 0.88rem;
+            border-bottom: 1px solid #f4f7f5;
+            cursor: pointer;
+        }
+        .list-row:active { background: #f0f5f1; }
+        .list-row.current { background: #e7f4ea; }
+        .list-row .c-no { color: #9aa8a0; font-variant-numeric: tabular-nums; }
+        .list-row .c-name { font-weight: 600; color: #1b4332; word-break: keep-all; }
+        .list-row .c-tax { color: #7a8b80; font-size: 0.82rem; word-break: keep-all; }
+        .list-row .c-occ, .list-row .c-ow { color: #555; word-break: keep-all; }
+        .list-row .c-name .stars {
+            color: #e0a80a;
+            font-size: 0.72rem;
+            letter-spacing: -0.5px;
+            margin-left: 4px;
+            white-space: nowrap;
+        }
+        .list-row.past { background: #fffdf3; }
+        .list-row.past.current { background: #e7f4ea; }
+        .list-row.filtered { display: none; }
+        .mark-badge {
+            display: inline-block;
+            margin-right: 6px;
+            padding: 1px 7px;
+            border-radius: 9px;
+            background: #1d6fd0;
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        .mark-badge.off { display: none; }
+
+        /* 목록 상단 기출 필터 */
+        .list-filter { display: flex; gap: 6px; padding: 0 20px 10px; }
+        .filter-btn {
+            border: 1px solid #dde5e0;
+            background: #fff;
+            color: #40684f;
+            border-radius: 14px;
+            padding: 5px 13px;
+            font-size: 0.8rem;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        .filter-btn.on { background: #2d6a4f; border-color: #2d6a4f; color: #fff; }
+        /* 좁은 화면에서는 병원균(라틴 학명)을 병명 아래로 접어 넣는다 */
+        @media (max-width: 560px) {
+            .list-cols, .list-row {
+                grid-template-columns: 34px 1.3fr 1fr;
+                padding: 8px 14px;
+                gap: 6px;
+            }
+            .list-row { font-size: 0.82rem; }
+            .list-cols .c-ow { display: none; }
+            .list-row .c-ow {
+                grid-column: 2 / -1;
+                grid-row: 2;
+                font-size: 0.72rem;
+                color: #7a8b80;
+                margin-top: 1px;
+            }
+        }
+
+        .done {
+            background: #fff;
+            border-radius: 14px;
+            padding: 46px 24px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .done h2 { color: #1b4332; margin: 14px 0 8px; }
+        .done p { color: #888; font-size: 0.9rem; margin-bottom: 20px; }
+        .done a {
+            display: inline-block;
+            padding: 12px 22px;
+            background: #d8f3dc;
+            color: #1b4332;
+            border-radius: 9px;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 4px;
+        }
+
+        /* 사진 확대 (라이트박스) */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 100%;
+            touch-action: none;
+            will-change: transform;
+            transform-origin: center center;
+        }
+        .lightbox-img.animating { transition: transform 0.25s ease-out; }
+        .lightbox-close {
+            position: absolute;
+            top: 16px; right: 20px;
+            color: #fff;
+            font-size: 1.7rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'main:dvd' %}"><i class="fas fa-arrow-left"></i> DVD</a>
+        <strong>병해 암기
+            {% if scope == 'past' %}<span class="scope-tag past">기출</span>
+            {% elif scope == 'marked' %}<span class="scope-tag marked">관심</span>
+            {% else %}<span class="scope-tag all">전체</span>{% endif %}
+        </strong>
+        <span class="header-btns">
+            {# 현재 모드를 뺀 나머지로 언제든 바로 옮길 수 있게 한다 #}
+            {% if scope != 'all' %}
+            <a href="?{% if order == 'random' %}order=random{% endif %}"
+               class="order-toggle">전체 {{ total_all }}</a>
+            {% endif %}
+            {% if scope != 'past' %}
+            <a href="?scope=past{% if order == 'random' %}&order=random{% endif %}"
+               class="order-toggle"><i class="fas fa-star"></i> 기출 {{ past_count }}</a>
+            {% endif %}
+            {% if scope != 'marked' and marked_count %}
+            <a href="?scope=marked{% if order == 'random' %}&order=random{% endif %}"
+               class="order-toggle"><i class="fas fa-bookmark"></i> 관심 {{ marked_count }}</a>
+            {% endif %}
+            {% if order == 'random' %}
+            <a href="?{% if scope != 'all' %}scope={{ scope }}{% endif %}" class="order-toggle"><i class="fas fa-list-ol"></i></a>
+            {% else %}
+            <a href="?order=random{% if scope != 'all' %}&scope={{ scope }}{% endif %}" class="order-toggle"><i class="fas fa-shuffle"></i></a>
+            {% endif %}
+        </span>
+    </header>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <div class="container">
+        <div id="card">
+            <div class="photo-wrap" id="photoWrap">
+                <img id="photo" src="" alt="병해 사진">
+                <button class="fit-toggle" id="fitToggle" type="button">
+                    <i class="fas fa-compress"></i> 한 화면
+                </button>
+
+                <div class="info hidden" id="info">
+                    <div class="pest-name" id="name"></div>
+                    <div class="pest-course" id="course"></div>
+                    <div id="rows"></div>
+                    <div class="extra-lines" id="extra"></div>
+                    <div class="exam-line" id="exam"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="done" id="done" style="display: none;">
+            <div style="font-size: 3rem;">🎉</div>
+            <h2>{{ total }}종을 모두 넘겼습니다</h2>
+            <p>이어서 퀴즈로 확인해 보세요.</p>
+            <a href="?order=random{% if scope != 'all' %}&scope={{ scope }}{% endif %}"><i class="fas fa-rotate-right"></i> 섞어서 다시</a>
+            {% if scope != 'past' %}
+            <a href="{% url 'diseaseid:memorize' %}?scope=past"><i class="fas fa-star"></i> 기출 {{ past_count }}종만</a>
+            {% endif %}
+            {% if scope != 'marked' and marked_count %}
+            <a href="{% url 'diseaseid:memorize' %}?scope=marked"><i class="fas fa-bookmark"></i> 관심 {{ marked_count }}종만</a>
+            {% endif %}
+            <a href="{% url 'main:dvd' %}"><i class="fas fa-photo-film"></i> DVD로</a>
+        </div>
+    </div>
+
+    <div class="controls" id="controls">
+        <label class="mark-row" id="markRow">
+            <input type="checkbox" id="markChk">
+            <span class="mark-text"><i class="far fa-star"></i> 관심 병해으로 등록</span>
+        </label>
+        <div class="controls-inner">
+            <button class="btn btn-prev" id="prev" type="button" aria-label="이전">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="counter" id="counter">
+                <span class="counter-now" id="pos">1</span><span class="counter-total">/ {{ total }}</span>
+            </div>
+            <button class="btn btn-next" id="next" type="button">다음</button>
+            <button class="btn btn-list" id="listBtn" type="button" aria-label="전체 목록">
+                <i class="fas fa-list-ul"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="list-panel" id="listPanel">
+        <div class="list-sheet">
+            <div class="list-head">
+                <strong>전체 목록</strong>
+                <button class="list-close" id="listClose" type="button">&times;</button>
+            </div>
+            {% if scope != 'past' %}
+            <div class="list-filter">
+                <button class="filter-btn on" id="filterAll" type="button">전체 {{ total_all }}</button>
+                <button class="filter-btn" id="filterPast" type="button">기출만 {{ past_count }}</button>
+            </div>
+            {% endif %}
+            <div class="list-cols">
+                <span class="c-no">번호</span><span class="c-name">병명</span><span class="c-occ">기주</span><span class="c-ow">병원균</span>
+            </div>
+            <div class="list-body" id="listBody"></div>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose" type="button">&times;</button>
+        <img class="lightbox-img" id="lightboxImg" src="" alt="확대 사진">
+    </div>
+
+<script>
+const CARDS = {{ cards_json|safe }};
+const CSRF = '{{ csrf_token }}';
+
+const photo = document.getElementById('photo');
+const info = document.getElementById('info');
+const nameEl = document.getElementById('name');
+const courseEl = document.getElementById('course');
+const rowsEl = document.getElementById('rows');
+const posEl = document.getElementById('pos');
+const extraEl = document.getElementById('extra');
+const examEl = document.getElementById('exam');
+const progress = document.getElementById('progress');
+const nextBtn = document.getElementById('next');
+const prevBtn = document.getElementById('prev');
+
+let index = 0;
+let revealed = false;
+
+function render() {
+    const card = CARDS[index];
+    photo.src = card.image;
+
+    if (posEl.textContent !== String(index + 1)) {
+        posEl.textContent = index + 1;
+        posEl.classList.remove('bump');
+        void posEl.offsetWidth;  // 애니메이션 재생을 위해 리플로우를 강제한다
+        posEl.classList.add('bump');
+    }
+    progress.style.width = ((index + (revealed ? 1 : 0.5)) / CARDS.length * 100) + '%';
+
+    if (revealed) {
+        nameEl.textContent = card.name || '(이름 미상)';
+        courseEl.textContent = card.course;
+        rowsEl.innerHTML = card.fields.map(f =>
+            `<div class="row"><span class="label">${f.label}</span><span class="value">${f.value}</span></div>`
+        ).join('');
+        extraEl.innerHTML = (card.extra || []).map(e =>
+            `<div class="extra"><span class="k">${e.label}</span><span class="v">${e.value}</span></div>`
+        ).join('');
+        examEl.innerHTML = card.stars
+            ? `<span class="stars">${'★'.repeat(card.stars)}</span>기출 ${card.exam}`
+            : '';
+        info.classList.remove('hidden');
+        nextBtn.innerHTML = (index === CARDS.length - 1)
+            ? '완료 <i class="fas fa-check"></i>'
+            : '다음 병해 <i class="fas fa-chevron-right"></i>';
+    } else {
+        info.classList.add('hidden');
+        nextBtn.innerHTML = '정답 보기';
+    }
+
+    prevBtn.disabled = (index === 0 && !revealed);
+    syncMark();
+
+    // 정답은 사진 아래쪽에 겹쳐 나오므로 사진 끝이 보이게 내려주고,
+    // 새 사진으로 넘어가면 맨 위로 올린다. (세로로 긴 사진이 많다)
+    if (revealed) {
+        // 오버레이가 표시된 뒤의 실제 위치로 계산해야 한다
+        requestAnimationFrame(scrollInfoIntoView);
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// 정답 오버레이는 사진 안에 겹쳐 있고 하단 바가 고정되어 있어,
+// scrollIntoView만으로는 바에 가린다. 바 높이만큼 더 내려준다.
+function scrollInfoIntoView() {
+    const bar = document.getElementById('controls');
+    const barH = bar ? bar.getBoundingClientRect().height : 0;
+    const gap = 12;
+    const infoBottom = info.getBoundingClientRect().bottom;
+    const visibleBottom = window.innerHeight - barH - gap;
+    const delta = infoBottom - visibleBottom;
+    if (delta > 0) window.scrollBy({ top: delta, behavior: 'smooth' });
+}
+
+// 사진이 아직 로딩 중이면 높이가 확정되지 않아 위치가 어긋난다
+photo.addEventListener('load', () => {
+    if (revealed) scrollInfoIntoView();
+});
+
+function goNext() {
+    if (!revealed) {
+        revealed = true;
+    } else if (index < CARDS.length - 1) {
+        index += 1;
+        revealed = false;
+    } else {
+        document.getElementById('card').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('done').style.display = 'block';
+        progress.style.width = '100%';
+        return;
+    }
+    render();
+}
+
+function goPrev() {
+    if (revealed) {
+        revealed = false;
+    } else if (index > 0) {
+        index -= 1;
+        revealed = true;
+    }
+    render();
+}
+
+nextBtn.addEventListener('click', goNext);
+prevBtn.addEventListener('click', goPrev);
+
+/* ---- 관심 병해 등록 ---- */
+const markRow = document.getElementById('markRow');
+const markChk = document.getElementById('markChk');
+
+function syncMark() {
+    const on = !!CARDS[index].marked;
+    markChk.checked = on;
+    markRow.classList.toggle('on', on);
+    markRow.querySelector('.mark-text').innerHTML = on
+        ? '<i class="fas fa-star"></i> 관심 병해'
+        : '<i class="far fa-star"></i> 관심 병해으로 등록';
+}
+
+markChk.addEventListener('change', () => {
+    const card = CARDS[index];
+    const want = markChk.checked;
+    card.marked = want;          // 응답을 기다리지 않고 화면부터 반영한다
+    syncMark();
+    syncListMark(index, want);
+
+    fetch('{% url "diseaseid:bookmark" %}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ question_id: card.id, marked: want }),
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.ok) throw new Error('실패');
+        card.marked = d.marked;
+    })
+    .catch(() => {               // 실패하면 되돌린다
+        card.marked = !want;
+        syncMark();
+        syncListMark(index, !want);
+        alert('관심 병해 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+    });
+});
+
+/* ---- 전체 목록 ---- */
+const listPanel = document.getElementById('listPanel');
+const listBody = document.getElementById('listBody');
+
+function fieldOf(card, label) {
+    const f = card.fields.find(x => x.label === label);
+    return f ? f.value : '-';
+}
+
+listBody.innerHTML = CARDS.map((card, i) => `
+    <div class="list-row${card.stars ? ' past' : ''}" data-i="${i}" data-past="${card.stars ? 1 : 0}">
+        <span class="c-no">${i + 1}</span>
+        <span class="c-name"><span class="mark-badge${card.marked ? '' : ' off'}">관심</span>${card.name || '(이름 미상)'}${
+            card.stars ? `<span class="stars" title="기출 ${card.exam}">${'★'.repeat(card.stars)}</span>` : ''
+        }</span>
+        <span class="c-occ">${fieldOf(card, '기주')}</span>
+        <span class="c-ow">${fieldOf(card, '병원균')}</span>
+    </div>`).join('');
+
+function syncListMark(i, on) {
+    const row = listBody.children[i];
+    if (!row) return;
+    const badge = row.querySelector('.mark-badge');
+    if (badge) badge.classList.toggle('off', !on);
+}
+
+const filterAll = document.getElementById('filterAll');
+const filterPast = document.getElementById('filterPast');
+let listFilter = 'all';
+
+function applyFilter(mode) {
+    listFilter = mode;
+    filterAll.classList.toggle('on', mode === 'all');
+    filterPast.classList.toggle('on', mode === 'past');
+    // display를 직접 건드리면 CSS의 grid 레이아웃이 복원되지 않아 클래스로 숨긴다
+    for (const row of listBody.children) {
+        row.classList.toggle('filtered', mode === 'past' && row.dataset.past === '0');
+    }
+}
+
+// 기출 모드에서는 전부 기출이라 필터 버튼 자체를 넣지 않는다
+if (filterAll && filterPast) {
+    filterAll.addEventListener('click', () => applyFilter('all'));
+    filterPast.addEventListener('click', () => applyFilter('past'));
+}
+
+function openList() {
+    listPanel.classList.add('open');
+    const rows = listBody.children;
+    for (const row of rows) row.classList.toggle('current', Number(row.dataset.i) === index);
+    if (rows[index] && !rows[index].classList.contains('filtered')) {
+        rows[index].scrollIntoView({ block: 'center' });
+    }
+}
+function closeList() { listPanel.classList.remove('open'); }
+
+document.getElementById('listBtn').addEventListener('click', openList);
+document.getElementById('listClose').addEventListener('click', closeList);
+listPanel.addEventListener('click', (e) => { if (e.target === listPanel) closeList(); });
+
+listBody.addEventListener('click', (e) => {
+    const row = e.target.closest('.list-row');
+    if (!row) return;
+    index = Number(row.dataset.i);
+    revealed = true;  // 목록에서 이미 정답을 봤으므로 바로 정보까지 보여준다
+    closeList();
+    render();
+});
+
+/* ---- 사진 크게 보기 / 한 화면에 맞추기 ---- */
+const photoWrap = document.getElementById('photoWrap');
+const fitToggle = document.getElementById('fitToggle');
+
+function applyFit(fit) {
+    photoWrap.classList.toggle('fit', fit);
+    fitToggle.innerHTML = fit
+        ? '<i class="fas fa-expand"></i> 크게'
+        : '<i class="fas fa-compress"></i> 한 화면';
+    try { localStorage.setItem('diseaseidFit', fit ? '1' : '0'); } catch (e) {}
+}
+
+let fitMode = false;
+try { fitMode = localStorage.getItem('diseaseidFit') === '1'; } catch (e) {}
+applyFit(fitMode);
+
+fitToggle.addEventListener('click', () => {
+    fitMode = !fitMode;
+    applyFit(fitMode);
+});
+
+document.addEventListener('keydown', (e) => {
+    if (listPanel.classList.contains('open')) {
+        if (e.key === 'Escape') closeList();
+        return;
+    }
+    if (lightbox.classList.contains('open')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); goNext(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+});
+
+/* ---- 사진 확대 ---- */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+let scale = 1, posX = 0, posY = 0;
+let startDistance = 0, startScale = 1;
+let isPinching = false, isPanning = false;
+let panStartX = 0, panStartY = 0;
+let lastTap = 0;
+
+function applyTransform() {
+    lightboxImg.style.transform = `scale(${scale}) translate(${posX}px, ${posY}px)`;
+}
+function resetZoom() {
+    scale = 1; posX = 0; posY = 0;
+    applyTransform();
+}
+function clampPan() {
+    const maxPan = (scale - 1) * 150;
+    posX = Math.min(Math.max(posX, -maxPan), maxPan);
+    posY = Math.min(Math.max(posY, -maxPan), maxPan);
+}
+
+photo.addEventListener('click', () => {
+    lightboxImg.src = photo.src;
+    resetZoom();
+    lightbox.classList.add('open');
+});
+function closeLightbox() { lightbox.classList.remove('open'); }
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('open')) closeLightbox();
+});
+
+lightboxImg.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+        isPinching = true; isPanning = false;
+        startDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        startScale = scale;
+    } else if (e.touches.length === 1) {
+        const now = Date.now();
+        if (now - lastTap < 300) {
+            lightboxImg.classList.add('animating');
+            if (scale > 1) { resetZoom(); } else { scale = 2.5; applyTransform(); }
+            setTimeout(() => lightboxImg.classList.remove('animating'), 260);
+            lastTap = 0;
+            return;
+        }
+        lastTap = now;
+        if (scale > 1) {
+            isPanning = true;
+            panStartX = e.touches[0].clientX - posX * scale;
+            panStartY = e.touches[0].clientY - posY * scale;
+        }
+    }
+}, { passive: false });
+
+lightboxImg.addEventListener('touchmove', (e) => {
+    if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        scale = Math.min(Math.max(startScale * (dist / startDistance), 1), 5);
+        clampPan();
+        applyTransform();
+    } else if (isPanning && e.touches.length === 1) {
+        e.preventDefault();
+        posX = (e.touches[0].clientX - panStartX) / scale;
+        posY = (e.touches[0].clientY - panStartY) / scale;
+        clampPan();
+        applyTransform();
+    }
+}, { passive: false });
+
+lightboxImg.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) { isPinching = false; isPanning = false; }
+});
+
+lightboxImg.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    scale = Math.min(Math.max(scale - e.deltaY * 0.002, 1), 5);
+    clampPan();
+    applyTransform();
+}, { passive: false });
+
+let mouseDown = false, mouseStartX = 0, mouseStartY = 0;
+lightboxImg.addEventListener('mousedown', (e) => {
+    if (scale <= 1) return;
+    e.preventDefault();
+    mouseDown = true;
+    mouseStartX = e.clientX - posX * scale;
+    mouseStartY = e.clientY - posY * scale;
+});
+window.addEventListener('mousemove', (e) => {
+    if (!mouseDown) return;
+    posX = (e.clientX - mouseStartX) / scale;
+    posY = (e.clientY - mouseStartY) / scale;
+    clampPan();
+    applyTransform();
+});
+window.addEventListener('mouseup', () => { mouseDown = false; });
+lightboxImg.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    lightboxImg.classList.add('animating');
+    if (scale > 1) { resetZoom(); } else { scale = 2.5; applyTransform(); }
+    setTimeout(() => lightboxImg.classList.remove('animating'), 260);
+});
+
+render();
+</script>
+</body>
+</html>

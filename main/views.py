@@ -1,6 +1,7 @@
 from django.db.models import Count
 from django.shortcuts import render
 
+from diseaseid.models import DiseaseQuestion
 from pestid.models import PestCourse, PestQuestion
 
 
@@ -18,8 +19,10 @@ def dvd(request):
     )
 
     pest_question_count = PestQuestion.objects.filter(course__is_active=True).count()
+    disease_question_count = DiseaseQuestion.objects.filter(course__is_active=True).count()
 
     return render(request, "main/dvd.html", {
         "pest_course_count": pest_course_count,
         "pest_question_count": pest_question_count,
+        "disease_question_count": disease_question_count,
     })
