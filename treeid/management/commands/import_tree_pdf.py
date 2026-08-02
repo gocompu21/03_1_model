@@ -9,8 +9,9 @@ PDF 구조 (전제):
       상세 페이지 1장이 1종이며 목차 순서와 일치한다.
     - 맨 뒤 가나다순 목록과 판권 페이지는 제외한다.
 
-설명문에는 수목명이 없어 사진과 함께 보여줘도 정답이 새지 않는다.
-다만 페이지 렌더링이 아니라 사진만 추출해 합성한다(레이아웃 일관성).
+사진 위에 얹힌 설명 글자("잎은 2개씩 모여난다" 등)가 학습에 중요하므로
+페이지를 통째로 렌더링해 이미지로 만든다. 수목명은 페이지에 적혀 있지
+않아(목차에만 있음) 정답이 새지 않는다.
 
 사용 예:
     python manage.py import_tree_pdf "2025 수목 식별 공부2.pdf" --dry-run
@@ -22,12 +23,6 @@ import hashlib
 import io
 import re
 
-# PDF는 이미지를 배치할 때 변환행렬(cm)로 회전시킬 수 있다.
-# 원본 이미지만 뽑으면 그 회전이 빠져 사진이 누워 보인다.
-CM_OR_DO_RE = re.compile(
-    r"([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+cm"
-    r"|/(\w+)\s+Do"
-)
 
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand, CommandError
@@ -42,12 +37,10 @@ INDEX_TAIL = "수록 수목"  # 가나다순 목록 페이지 표시
 # 종당 코스 묶음 크기 (목차가 10종씩 끊겨 있다)
 COURSE_SIZE = 10
 
-# 이미지 합성 설정
-MAX_PHOTOS = 8
+# 페이지 렌더링 폭(px). 원본 페이지가 약 369pt라 3배 정도로 잡는다.
+RENDER_WIDTH = 1100
+# 표지·판권 등을 걸러낼 때 쓰는 최소 사진 크기
 MIN_PHOTO_AREA = 20000
-SHEET_WIDTH = 1000
-CELL_GAP = 8
-SINGLE_COLUMN_MAX = 3
 
 
 class Command(BaseCommand):
@@ -93,7 +86,13 @@ class Command(BaseCommand):
             self._report(items)
             return
 
-        self._save(items, opts)
+        try:
+            import pymupdf
+        except ImportError:
+            raise CommandError("pymupdf가 필요합니다: pip install pymupdf")
+
+        with pymupdf.open(opts["pdf_file"]) as doc:
+            self._save(items, opts, doc)
 
     # ------------------------------------------------------------------ 파싱
 
@@ -152,6 +151,7 @@ class Command(BaseCommand):
                 "name": names.get(expected, ""),
                 "description": self._clean_description(text, expected),
                 "page": page,
+                "page_no": i,  # 페이지 렌더링에 쓴다 (1-based)
             })
             expected += 1
 
@@ -184,82 +184,23 @@ class Command(BaseCommand):
 
     # ------------------------------------------------------------------ 이미지
 
-    @staticmethod
-    def _page_rotations(page):
-        """이미지 이름 -> 페이지에 배치될 때의 회전각(도)을 구한다.
+    def _build_image(self, item, doc):
+        """페이지를 통째로 렌더링한다.
 
-        PDF 변환행렬이 [a b c d]일 때 b, c가 0이 아니면 회전이다.
-        a=0, b<0, c>0 이면 시계방향 90도로 놓인 것이라 되돌려야 한다.
+        사진 위에 얹힌 설명 글자가 학습 자료의 핵심이라 사진만 뽑지 않는다.
+        페이지 렌더링이므로 PDF가 회전 배치한 사진도 자연히 바로 선다.
         """
-        rotations = {}
-        try:
-            data = page.get_contents().get_data().decode("latin-1")
-        except Exception:
-            return rotations
-
-        current = None
-        for m in CM_OR_DO_RE.finditer(data):
-            if m.group(7):
-                if current:
-                    a, b, c, d = current
-                    if abs(b) > 0.01 or abs(c) > 0.01:
-                        # 화면에 놓인 방향을 되돌리는 각도 (PIL rotate는 반시계)
-                        rotations[m.group(7)] = 270 if (b < 0 and c > 0) else 90
-            else:
-                current = [float(x) for x in m.groups()[:4]]
-
-        return rotations
-
-    def _build_image(self, item):
-        """종의 사진들을 한 장으로 합성. PDF가 회전 배치한 사진은 되돌린다."""
+        import pymupdf
         from PIL import Image
 
-        rotations = self._page_rotations(item["page"])
+        page = doc[item["page_no"] - 1]
+        zoom = RENDER_WIDTH / page.rect.width
+        pix = page.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom))
 
-        photos = []
-        for embedded in item["page"].images:
-            try:
-                img = Image.open(io.BytesIO(embedded.data))
-                img.load()
-            except Exception:
-                continue
-            if img.width * img.height < MIN_PHOTO_AREA:
-                continue
-
-            angle = rotations.get(embedded.name.rsplit(".", 1)[0])
-            if angle:
-                img = img.rotate(angle, expand=True)
-
-            photos.append(img.convert("RGB"))
-
-        if not photos:
-            return None
-
-        photos = photos[:MAX_PHOTOS]
-        cols = 1 if len(photos) <= SINGLE_COLUMN_MAX else 2
-        rows = (len(photos) + cols - 1) // cols
-        cell_w = (SHEET_WIDTH - CELL_GAP * (cols + 1)) // cols
-        cell_h = int(cell_w * (0.72 if cols == 1 else 0.75))
-
-        for photo in photos:
-            photo.thumbnail((cell_w, cell_h), Image.LANCZOS)
-        row_heights = [
-            max(p.height for p in photos[r * cols:(r + 1) * cols]) for r in range(rows)
-        ]
-
-        sheet = Image.new(
-            "RGB", (SHEET_WIDTH, CELL_GAP + sum(h + CELL_GAP for h in row_heights)),
-            (255, 255, 255),
-        )
-        y = CELL_GAP
-        for r in range(rows):
-            for c, photo in enumerate(photos[r * cols:(r + 1) * cols]):
-                x = CELL_GAP + c * (cell_w + CELL_GAP) + (cell_w - photo.width) // 2
-                sheet.paste(photo, (x, y + (row_heights[r] - photo.height) // 2))
-            y += row_heights[r] + CELL_GAP
+        img = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
 
         buffer = io.BytesIO()
-        sheet.save(buffer, format="JPEG", quality=80, optimize=True, progressive=True)
+        img.save(buffer, format="JPEG", quality=82, optimize=True, progressive=True)
         return buffer.getvalue()
 
     # ------------------------------------------------------------------ 출력
@@ -276,7 +217,7 @@ class Command(BaseCommand):
     # ------------------------------------------------------------------ 저장
 
     @transaction.atomic
-    def _save(self, items, opts):
+    def _save(self, items, opts, doc):
         prefix = opts["prefix"]
         total_added = 0
 
@@ -308,7 +249,7 @@ class Command(BaseCommand):
                 if key in existing:
                     continue
 
-                blob = self._build_image(item)
+                blob = self._build_image(item, doc)
                 if not blob:
                     self.stderr.write(f"  [{item['no']}] 사진이 없어 건너뜀")
                     continue
