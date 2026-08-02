@@ -35,7 +35,7 @@ def memorize(request):
             "name": q.name,
             # 수목은 정해진 정답 항목이 없어 설명을 줄 단위로 보여준다
             "lines": q.description_lines(),
-            "course": q.course.name,
+            # 코스명에 수목명이 들어 있어(예: "01. 소철 ~ 노간주나무") 내려주지 않는다
         }
         for q in questions
     ]
