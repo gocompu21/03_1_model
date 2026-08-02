@@ -44,6 +44,7 @@ urlpatterns = [
     path("glossary/", include("glossary.urls")),
     path("pestid/", include("pestid.urls")),
     path("diseaseid/", include("diseaseid.urls")),
+    path("treeid/", include("treeid.urls")),
     path("dashboard/", include("dashboard.urls")),
 ]
 

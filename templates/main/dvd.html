@@ -107,6 +107,15 @@
                 {% endif %}
             </a>
 
+            <a href="{% url 'treeid:memorize' %}" class="item">
+                <div class="emoji">🌳</div>
+                <h3>수목 암기</h3>
+                <p>사진을 보고 수목명과<br>특징을 확인하세요</p>
+                {% if tree_question_count %}
+                <span class="count">{{ tree_question_count }}종</span>
+                {% endif %}
+            </a>
+
             <a href="{% url 'pestid:memorize' %}" class="item">
                 <div class="emoji">📖</div>
                 <h3>해충 암기</h3>

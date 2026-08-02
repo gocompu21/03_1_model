@@ -3,6 +3,7 @@ from django.shortcuts import render
 
 from diseaseid.models import DiseaseQuestion
 from pestid.models import PestCourse, PestQuestion
+from treeid.models import TreeQuestion
 
 
 def index(request):
@@ -20,9 +21,11 @@ def dvd(request):
 
     pest_question_count = PestQuestion.objects.filter(course__is_active=True).count()
     disease_question_count = DiseaseQuestion.objects.filter(course__is_active=True).count()
+    tree_question_count = TreeQuestion.objects.filter(course__is_active=True).count()
 
     return render(request, "main/dvd.html", {
         "pest_course_count": pest_course_count,
         "pest_question_count": pest_question_count,
         "disease_question_count": disease_question_count,
+        "tree_question_count": tree_question_count,
     })
