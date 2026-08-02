@@ -44,8 +44,8 @@ CELL_GAP = 8
 MAX_PHOTOS = 8
 # 장식용 작은 도형을 거르는 최소 배치 영역 (pt^2)
 MIN_BOX_AREA = 500
-# 표지·판권 등을 걸러낼 때 쓰는 최소 사진 크기 (px^2)
-MIN_PHOTO_AREA = 20000
+# 종별 페이지로 인정할 최소 사진 칸 수 (표지는 배경 1~2장뿐)
+MIN_PHOTOS_PER_PAGE = 3
 
 
 class Command(BaseCommand):
@@ -60,43 +60,42 @@ class Command(BaseCommand):
 
     def handle(self, *args, **opts):
         try:
-            from pypdf import PdfReader
-        except ImportError:
-            raise CommandError("pypdf가 필요합니다: pip install pypdf")
-
-        try:
-            reader = PdfReader(opts["pdf_file"])
-        except FileNotFoundError:
-            raise CommandError(f"파일을 찾을 수 없습니다: {opts['pdf_file']}")
-
-        pages = [(p, p.extract_text() or "") for p in reader.pages]
-        self.stdout.write(f"페이지 {len(pages)}개")
-
-        names, index_pages = self._parse_index(pages)
-        self.stdout.write(f"목차에서 수목명 {len(names)}종 수집")
-        if not names:
-            raise CommandError("목차를 찾지 못했습니다. PDF 구조를 확인하세요.")
-
-        items = self._parse_details(pages, names, index_pages)
-        self.stdout.write(f"상세 페이지에서 {len(items)}종 파싱")
-
-        missing = sorted(set(names) - {it["no"] for it in items})
-        if missing:
-            self.stderr.write(self.style.WARNING(f"상세를 못 찾은 번호: {missing[:20]}"))
-
-        if opts["limit"]:
-            items = items[: opts["limit"]]
-
-        if opts["dry_run"]:
-            self._report(items)
-            return
-
-        try:
             import pymupdf
         except ImportError:
             raise CommandError("pymupdf가 필요합니다: pip install pymupdf")
 
-        with pymupdf.open(opts["pdf_file"]) as doc:
+        try:
+            doc = pymupdf.open(opts["pdf_file"])
+        except Exception:
+            raise CommandError(f"PDF를 열 수 없습니다: {opts['pdf_file']}")
+
+        with doc:
+            # (텍스트, 문단 블록 목록) 을 페이지 순서대로 모은다
+            pages = [
+                (page.get_text() or "", [b[4] for b in page.get_text("blocks")])
+                for page in doc
+            ]
+            self.stdout.write(f"페이지 {len(pages)}개")
+
+            names, index_pages = self._parse_index(pages)
+            self.stdout.write(f"목차에서 수목명 {len(names)}종 수집")
+            if not names:
+                raise CommandError("목차를 찾지 못했습니다. PDF 구조를 확인하세요.")
+
+            items = self._parse_details(doc, pages, names, index_pages)
+            self.stdout.write(f"상세 페이지에서 {len(items)}종 파싱")
+
+            missing = sorted(set(names) - {it["no"] for it in items})
+            if missing:
+                self.stderr.write(self.style.WARNING(f"상세를 못 찾은 번호: {missing[:20]}"))
+
+            if opts["limit"]:
+                items = items[: opts["limit"]]
+
+            if opts["dry_run"]:
+                self._report(items)
+                return
+
             self._save(items, opts, doc)
 
     # ------------------------------------------------------------------ 파싱
@@ -106,7 +105,7 @@ class Command(BaseCommand):
         names = {}
         index_pages = set()
 
-        for i, (_, text) in enumerate(pages, 1):
+        for i, (text, _blocks) in enumerate(pages, 1):
             rows = [INDEX_ROW_RE.match(ln) for ln in text.split("\n")]
             rows = [m for m in rows if m]
             # 번호 목록이 여러 줄 이어지는 페이지만 목차로 본다
@@ -129,33 +128,36 @@ class Command(BaseCommand):
         name = re.sub(r"\s*\(\s*[A-Za-z][^)]*\)\s*$", "", name)  # 라틴 학명 괄호 제거
         return name.strip(" .")
 
-    def _parse_details(self, pages, names, index_pages):
+    def _parse_details(self, doc, pages, names, index_pages):
         """목차를 뺀 나머지를 순서대로 종에 대응시킨다."""
         items = []
         expected = 1
         last = max(names) if names else 0
 
-        for i, (page, text) in enumerate(pages, 1):
+        for i, (text, blocks) in enumerate(pages, 1):
             if i in index_pages or INDEX_TAIL in text:
                 continue
             if expected > last:
                 break
-            # 표지·판권 등 사진이 거의 없는 앞 페이지는 건너뛴다
-            try:
-                photo_count = sum(
-                    1 for im in page.images
-                    if self._is_photo(im)
-                )
-            except Exception:
-                photo_count = 0
-            if photo_count < 2:
+            # 표지·판권은 배경 이미지 1~2장뿐이고, 종별 페이지는 사진 칸이
+            # 격자로 여러 개다. 칸 크기가 페이지의 일부인 것만 센다.
+            page_rect = doc[i - 1].rect
+            photo_count = 0
+            for info in doc[i - 1].get_image_info():
+                x0, y0, x1, y1 = info["bbox"]
+                w, h = x1 - x0, y1 - y0
+                if w * h <= MIN_BOX_AREA:
+                    continue
+                if w > page_rect.width * 0.6 or h > page_rect.height * 0.9:
+                    continue  # 페이지를 덮는 배경 이미지
+                photo_count += 1
+            if photo_count < MIN_PHOTOS_PER_PAGE:
                 continue
 
             items.append({
                 "no": expected,
                 "name": names.get(expected, ""),
-                "description": self._clean_description(text, expected),
-                "page": page,
+                "description": self._clean_description(blocks, expected),
                 "page_no": i,  # 페이지 렌더링에 쓴다 (1-based)
             })
             expected += 1
@@ -163,29 +165,30 @@ class Command(BaseCommand):
         return items
 
     @staticmethod
-    def _is_photo(embedded):
-        from PIL import Image
-        try:
-            img = Image.open(io.BytesIO(embedded.data))
-            return img.width * img.height >= MIN_PHOTO_AREA
-        except Exception:
-            return False
+    def _clean_description(blocks, no):
+        """PDF 텍스트 블록을 설명 문단으로 정리한다.
 
-    @staticmethod
-    def _clean_description(text, no):
-        """설명문에서 종 번호를 떼고 줄바꿈을 정리한다."""
-        lines = []
-        for raw in text.split("\n"):
-            line = raw.strip()
-            if not line:
+        PDF는 좁은 칸에 맞춰 줄을 끊어 놓아, 줄 단위로 나누면 한 문장이
+        여러 조각으로 쪼개진다. 블록(문단) 단위로 이어 붙여야 문장이 산다.
+        """
+        paragraphs = []
+        for raw in blocks:
+            # 줄바꿈은 공백 한 칸으로 잇는다. PDF가 좁은 칸에 맞춰 단어
+            # 중간에서 끊은 경우가 많아 완벽히 복원할 수는 없지만,
+            # 공백을 넣는 편이 붙여 쓰는 것보다 읽기 쉽다.
+            text = re.sub(r"\s*\n\s*", " ", raw)
+            text = re.sub(r"\s+", " ", text).strip()
+            if not text:
                 continue
-            # 줄에 붙은 종 번호 제거 ("61", "03 암수한그루" 등)
-            line = re.sub(rf"(?<!\d){no:02d}(?!\d)", " ", line)
-            line = re.sub(rf"(?<!\d){no}(?!\d)", " ", line, count=1) if no >= 10 else line
-            line = re.sub(r"\s+", " ", line).strip()
-            if line:
-                lines.append(line)
-        return "\n".join(lines)[:2000]
+            # 문단 앞뒤나 중간에 끼어든 종 번호 제거 (숫자로 홀로 선 것만)
+            text = re.sub(rf"(?<![\d~.-])0?{no}(?![\d~.-])", " ", text)
+            text = re.sub(r"\s+", " ", text).strip()
+            # 페이지 번호 등 숫자·기호만 남은 문단은 버린다
+            if not text or not re.search(r"[가-힣A-Za-z]", text):
+                continue
+            paragraphs.append(text)
+
+        return "\n".join(paragraphs)[:2000]
 
     # ------------------------------------------------------------------ 이미지
 
