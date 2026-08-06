@@ -1,0 +1,235 @@
+"""DVD 시험 — 수목·병해·해충 암기 데이터로 보는 시험.
+
+관리자가 시험을 등록하면 응시자가 풀고 제출한다.
+문제는 등록 시점에 암기 데이터에서 무작위로 뽑아 고정한다.
+"""
+
+import random
+
+from django.contrib.auth.models import User
+from django.db import models
+from django.utils import timezone
+
+
+class Exam(models.Model):
+    """관리자가 등록하는 시험."""
+
+    SUBJECT_CHOICES = [
+        ("tree", "수목"),
+        ("disease", "병해"),
+        ("pest", "해충"),
+    ]
+    KIND_CHOICES = [
+        ("always", "상시시험"),
+        ("live", "실시간 시험"),
+    ]
+    FORMAT_CHOICES = [
+        ("choice", "객관식형"),
+        ("typing", "주관식형"),
+    ]
+
+    title = models.CharField(max_length=120, verbose_name="시험명")
+    subject = models.CharField(
+        max_length=10, choices=SUBJECT_CHOICES, verbose_name="학습대상"
+    )
+    kind = models.CharField(
+        max_length=10, choices=KIND_CHOICES, default="always", verbose_name="시험유형"
+    )
+    answer_format = models.CharField(
+        max_length=10, choices=FORMAT_CHOICES, default="choice", verbose_name="선택유형"
+    )
+
+    question_count = models.IntegerField(default=20, verbose_name="문항 수")
+    time_limit_min = models.IntegerField(
+        default=0, verbose_name="제한 시간(분)", help_text="0이면 제한 없음"
+    )
+
+    # 실시간 시험 전용
+    start_at = models.DateTimeField(null=True, blank=True, verbose_name="시작 시각")
+    end_at = models.DateTimeField(null=True, blank=True, verbose_name="종료 시각")
+
+    is_active = models.BooleanField(default=True, verbose_name="공개")
+    created_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="created_dvd_exams", verbose_name="등록자",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "DVD 시험"
+        verbose_name_plural = "DVD 시험"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"[{self.get_subject_display()}] {self.title}"
+
+    # ---- 실시간 시험 상태 ----
+
+    @property
+    def is_live(self):
+        return self.kind == "live"
+
+    @property
+    def live_state(self):
+        """실시간 시험의 현재 상태: before / open / closed."""
+        if not self.is_live:
+            return "open"
+        now = timezone.now()
+        if self.start_at and now < self.start_at:
+            return "before"
+        if self.end_at and now > self.end_at:
+            return "closed"
+        return "open"
+
+    @property
+    def is_open(self):
+        """지금 응시할 수 있는지."""
+        return self.is_active and self.live_state == "open"
+
+    def deadline_for(self, attempt):
+        """이 응시가 끝나야 하는 시각. 없으면 None.
+
+        실시간 시험은 종료 시각과 개인 제한 시간 중 이른 쪽이다.
+        """
+        limits = []
+        if self.time_limit_min:
+            limits.append(attempt.started_at + timezone.timedelta(minutes=self.time_limit_min))
+        if self.is_live and self.end_at:
+            limits.append(self.end_at)
+        return min(limits) if limits else None
+
+
+class ExamQuestion(models.Model):
+    """시험에 담긴 문제 한 개.
+
+    암기 데이터의 종을 가리키되, 정답과 보기는 등록 시점에 확정해 둔다.
+    원본이 바뀌어도 이미 치른 시험의 채점이 흔들리지 않게 하기 위해서다.
+    """
+
+    exam = models.ForeignKey(
+        Exam, on_delete=models.CASCADE, related_name="questions", verbose_name="시험"
+    )
+    order = models.IntegerField(default=0, verbose_name="번호")
+
+    source_id = models.IntegerField(verbose_name="원본 문제 ID")
+    image_url = models.CharField(max_length=300, verbose_name="사진 경로")
+    answer = models.CharField(max_length=200, verbose_name="정답")
+    choices = models.JSONField(default=list, blank=True, verbose_name="보기 5개")
+
+    class Meta:
+        verbose_name = "DVD 시험 문제"
+        verbose_name_plural = "DVD 시험 문제"
+        ordering = ["exam", "order", "id"]
+
+    def __str__(self):
+        return f"{self.exam.title} #{self.order} - {self.answer}"
+
+    def is_correct(self, given):
+        """공백을 무시하고 정답과 비교한다."""
+        return (given or "").replace(" ", "") == self.answer.replace(" ", "")
+
+
+class ExamAttempt(models.Model):
+    """응시 기록. 사용자 한 명이 시험 하나를 한 번 본다."""
+
+    exam = models.ForeignKey(
+        Exam, on_delete=models.CASCADE, related_name="attempts", verbose_name="시험"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="dvd_exam_attempts", verbose_name="응시자"
+    )
+    started_at = models.DateTimeField(auto_now_add=True, verbose_name="시작 시각")
+    submitted_at = models.DateTimeField(null=True, blank=True, verbose_name="제출 시각")
+    score = models.IntegerField(default=0, verbose_name="맞은 개수")
+    total = models.IntegerField(default=0, verbose_name="문항 수")
+    auto_submitted = models.BooleanField(default=False, verbose_name="시간 종료 제출")
+
+    class Meta:
+        verbose_name = "DVD 시험 응시"
+        verbose_name_plural = "DVD 시험 응시"
+        unique_together = ("exam", "user")
+        ordering = ["-started_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.exam.title} ({self.score}/{self.total})"
+
+    @property
+    def is_submitted(self):
+        return self.submitted_at is not None
+
+    @property
+    def score_percent(self):
+        return round(self.score * 100 / self.total) if self.total else 0
+
+
+class ExamAnswer(models.Model):
+    """문항별 응답."""
+
+    attempt = models.ForeignKey(
+        ExamAttempt, on_delete=models.CASCADE, related_name="answers", verbose_name="응시"
+    )
+    question = models.ForeignKey(
+        ExamQuestion, on_delete=models.CASCADE, related_name="answers", verbose_name="문제"
+    )
+    given = models.CharField(max_length=200, blank=True, default="", verbose_name="응답")
+    is_correct = models.BooleanField(default=False, verbose_name="정답 여부")
+
+    class Meta:
+        verbose_name = "DVD 시험 응답"
+        verbose_name_plural = "DVD 시험 응답"
+        unique_together = ("attempt", "question")
+        ordering = ["question__order"]
+
+    def __str__(self):
+        return f"{self.attempt.user.username} Q{self.question.order}"
+
+
+# ---------------------------------------------------------------- 출제
+
+def source_pool(subject):
+    """학습대상별 (문제 목록, 이름 뽑는 함수) 반환."""
+    if subject == "tree":
+        from treeid.models import TreeQuestion
+        qs = TreeQuestion.objects.filter(course__is_active=True).exclude(name="")
+    elif subject == "disease":
+        from diseaseid.models import DiseaseQuestion
+        qs = DiseaseQuestion.objects.filter(course__is_active=True).exclude(name="")
+    else:
+        from pestid.models import PestQuestion
+        qs = PestQuestion.objects.filter(course__is_active=True).exclude(name="")
+    return list(qs)
+
+
+def build_questions(exam):
+    """암기 데이터에서 무작위로 뽑아 시험 문제를 만든다.
+
+    객관식은 같은 학습대상의 다른 이름 4개를 오답 보기로 붙인다.
+    """
+    pool = source_pool(exam.subject)
+    if not pool:
+        return 0
+
+    picked = random.sample(pool, min(exam.question_count, len(pool)))
+    names = sorted({q.name.split(",")[0].strip() for q in pool if q.name})
+
+    created = 0
+    for i, src in enumerate(picked, 1):
+        answer = src.name.split(",")[0].strip()
+        choices = []
+        if exam.answer_format == "choice":
+            others = [n for n in names if n != answer]
+            random.shuffle(others)
+            choices = others[:4] + [answer]
+            random.shuffle(choices)
+
+        ExamQuestion.objects.create(
+            exam=exam,
+            order=i,
+            source_id=src.id,
+            image_url=src.image.url,
+            answer=answer,
+            choices=choices,
+        )
+        created += 1
+
+    return created

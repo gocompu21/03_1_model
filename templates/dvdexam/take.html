@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 96px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 12px 18px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            position: sticky; top: 0; z-index: 20;
+        }
+        header strong { font-size: 0.95rem; min-width: 0; }
+        .timer {
+            background: rgba(255,255,255,0.18); padding: 5px 11px; border-radius: 12px;
+            font-size: 0.86rem; font-weight: 700; font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+        .timer.urgent { background: #d94f4f; }
+
+        .progress-bar { height: 4px; background: #dfe7e1; position: sticky; top: 47px; z-index: 19; }
+        .progress-fill { height: 100%; background: #2d6a4f; width: 0; transition: width 0.25s; }
+
+        .container { max-width: 760px; margin: 0 auto; padding: 16px 20px; }
+
+        .qhead {
+            display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px;
+        }
+        .qhead .no { font-size: 1.3rem; font-weight: 800; color: #1b4332; }
+        .qhead .of { font-size: 0.85rem; color: #9aa8a0; }
+
+        .photo-wrap {
+            background: #fff; border-radius: 14px; overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .photo-wrap img { width: 100%; display: block; cursor: zoom-in; }
+
+        .answers { margin-top: 16px; }
+        .choice {
+            display: flex; align-items: center; gap: 11px;
+            background: #fff; border: 2px solid #e6ece8; border-radius: 11px;
+            padding: 14px 16px; margin-bottom: 9px; cursor: pointer;
+            font-size: 0.98rem; transition: border-color 0.12s, background 0.12s;
+        }
+        .choice:active { background: #f4f7f5; }
+        .choice.on { border-color: #2d6a4f; background: #edf7f0; }
+        .choice .num {
+            width: 25px; height: 25px; border-radius: 50%; flex-shrink: 0;
+            background: #eef2ef; color: #55605a; font-size: 0.8rem; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .choice.on .num { background: #2d6a4f; color: #fff; }
+        .choice .txt { word-break: keep-all; }
+
+        .typing input {
+            width: 100%; padding: 15px 16px; border: 2px solid #e6ece8;
+            border-radius: 11px; font-size: 1.02rem; font-family: inherit;
+        }
+        .typing input:focus { outline: none; border-color: #2d6a4f; }
+
+        .nav-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+            gap: 6px; margin-top: 22px;
+        }
+        .nav-grid button {
+            aspect-ratio: 1; border: 1px solid #dde5e0; background: #fff;
+            border-radius: 7px; font-size: 0.8rem; font-family: inherit;
+            cursor: pointer; color: #7a8b80;
+        }
+        .nav-grid button.answered { background: #d8f3dc; color: #1b4332; border-color: #b7d9c4; font-weight: 700; }
+        .nav-grid button.current { outline: 2px solid #2d6a4f; color: #1b4332; font-weight: 700; }
+
+        .controls {
+            position: fixed; left: 0; right: 0; bottom: 0; background: #fff;
+            border-top: 1px solid #e6ece8;
+            padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+            display: flex; gap: 9px; justify-content: center;
+        }
+        .controls-inner { display: flex; gap: 9px; width: 100%; max-width: 620px; }
+        .btn {
+            flex: 1; padding: 15px; border: none; border-radius: 10px;
+            font-size: 0.98rem; font-weight: 600; font-family: inherit; cursor: pointer;
+        }
+        .btn-prev { flex: 0 0 54px; background: #eef2ef; color: #40684f; padding: 15px 0; }
+        .btn-next { background: #2d6a4f; color: #fff; }
+        .btn-submit { background: #b8860b; color: #fff; }
+        .btn:disabled { opacity: 0.35; cursor: default; }
+
+        .lightbox {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 100%; max-height: 100%; }
+        .lightbox-close {
+            position: absolute; top: 16px; right: 20px; color: #fff;
+            font-size: 1.7rem; background: none; border: none; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <strong>{{ exam.title }}</strong>
+        {% if deadline_ms %}
+        <span class="timer" id="timer">--:--</span>
+        {% else %}
+        <span class="timer">제한 없음</span>
+        {% endif %}
+    </header>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <div class="container">
+        <div class="qhead">
+            <span class="no" id="qno">1</span>
+            <span class="of">/ {{ total }}번</span>
+        </div>
+
+        <div class="photo-wrap">
+            <img id="photo" src="" alt="문제 사진">
+        </div>
+
+        <div class="answers" id="answers"></div>
+
+        <div class="nav-grid" id="navGrid"></div>
+    </div>
+
+    <div class="controls">
+        <div class="controls-inner">
+            <button class="btn btn-prev" id="prev" type="button" aria-label="이전">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="btn btn-next" id="next" type="button">다음</button>
+            <button class="btn btn-submit" id="submit" type="button">제출</button>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose" type="button">&times;</button>
+        <img id="lightboxImg" src="" alt="확대">
+    </div>
+
+<script>
+const QUESTIONS = {{ questions_json|safe }};
+const CSRF = '{{ csrf_token }}';
+const FORMAT = '{{ exam.answer_format }}';
+const SUBMIT_URL = '{% url "dvdexam:submit" exam.id %}';
+const DEADLINE = {{ deadline_ms }};
+
+const answers = {};   // {questionId: 답}
+let index = 0;
+let submitting = false;
+
+const photo = document.getElementById('photo');
+const answersEl = document.getElementById('answers');
+const navGrid = document.getElementById('navGrid');
+const qnoEl = document.getElementById('qno');
+const progress = document.getElementById('progress');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const submitBtn = document.getElementById('submit');
+
+/* ---- 문항 렌더 ---- */
+function render() {
+    const q = QUESTIONS[index];
+    photo.src = q.image;
+    qnoEl.textContent = q.no;
+
+    const done = Object.values(answers).filter(v => v && v.trim()).length;
+    progress.style.width = (done / QUESTIONS.length * 100) + '%';
+
+    if (FORMAT === 'choice') {
+        answersEl.className = 'answers';
+        answersEl.innerHTML = q.choices.map((c, i) => `
+            <div class="choice${answers[q.id] === c ? ' on' : ''}" data-value="${escapeAttr(c)}">
+                <span class="num">${i + 1}</span><span class="txt">${escapeHtml(c)}</span>
+            </div>`).join('');
+    } else {
+        answersEl.className = 'answers typing';
+        answersEl.innerHTML =
+            `<input type="text" id="typed" placeholder="이름을 입력하세요"
+                    autocomplete="off" value="${escapeAttr(answers[q.id] || '')}">`;
+        const input = document.getElementById('typed');
+        input.addEventListener('input', () => {
+            answers[q.id] = input.value;
+            syncNav();
+        });
+    }
+
+    prevBtn.disabled = index === 0;
+    nextBtn.disabled = index === QUESTIONS.length - 1;
+    syncNav();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+const escapeAttr = escapeHtml;
+
+/* 보기 선택 */
+answersEl.addEventListener('click', (e) => {
+    const el = e.target.closest('.choice');
+    if (!el) return;
+    answers[QUESTIONS[index].id] = el.dataset.value;
+    for (const c of answersEl.children) c.classList.toggle('on', c === el);
+    syncNav();
+    // 마지막 문항이 아니면 잠시 뒤 다음으로 넘어간다
+    if (index < QUESTIONS.length - 1) setTimeout(() => { index++; render(); }, 220);
+});
+
+/* ---- 문항 이동 격자 ---- */
+navGrid.innerHTML = QUESTIONS.map((q, i) =>
+    `<button type="button" data-i="${i}">${q.no}</button>`).join('');
+
+navGrid.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    index = Number(b.dataset.i);
+    render();
+});
+
+function syncNav() {
+    const done = Object.values(answers).filter(v => v && v.trim()).length;
+    progress.style.width = (done / QUESTIONS.length * 100) + '%';
+    [...navGrid.children].forEach((b, i) => {
+        const val = answers[QUESTIONS[i].id];
+        b.classList.toggle('answered', !!(val && val.trim()));
+        b.classList.toggle('current', i === index);
+    });
+}
+
+prevBtn.addEventListener('click', () => { if (index > 0) { index--; render(); } });
+nextBtn.addEventListener('click', () => { if (index < QUESTIONS.length - 1) { index++; render(); } });
+
+/* ---- 제출 ---- */
+function doSubmit(auto) {
+    if (submitting) return;
+    const done = Object.values(answers).filter(v => v && v.trim()).length;
+    if (!auto && done < QUESTIONS.length) {
+        if (!confirm(`${QUESTIONS.length - done}문항이 비어 있습니다. 제출할까요?`)) return;
+    }
+    submitting = true;
+    submitBtn.disabled = true;
+    submitBtn.textContent = '제출 중...';
+
+    fetch(SUBMIT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ answers, auto: !!auto }),
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (d.url) location.href = d.url;
+        else throw new Error('제출 실패');
+    })
+    .catch(() => {
+        submitting = false;
+        submitBtn.disabled = false;
+        submitBtn.textContent = '제출';
+        alert('제출에 실패했습니다. 다시 시도해 주세요.');
+    });
+}
+submitBtn.addEventListener('click', () => doSubmit(false));
+
+/* ---- 남은 시간 ---- */
+if (DEADLINE) {
+    const timer = document.getElementById('timer');
+    setInterval(() => {
+        const left = DEADLINE - Date.now();
+        if (left <= 0) {
+            timer.textContent = '00:00';
+            doSubmit(true);   // 시간이 다 되면 자동 제출
+            return;
+        }
+        const m = Math.floor(left / 60000);
+        const s = Math.floor((left % 60000) / 1000);
+        timer.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        timer.classList.toggle('urgent', left < 60000);
+    }, 1000);
+}
+
+/* ---- 사진 확대 ---- */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+photo.addEventListener('click', () => {
+    lightboxImg.src = photo.src;
+    lightbox.classList.add('open');
+});
+function closeLightbox() { lightbox.classList.remove('open'); }
+document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+});
+
+/* 실수로 나가는 것을 막는다 */
+window.addEventListener('beforeunload', (e) => {
+    if (!submitting) { e.preventDefault(); e.returnValue = ''; }
+});
+
+render();
+</script>
+</body>
+</html>

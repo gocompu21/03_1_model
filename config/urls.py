@@ -45,6 +45,7 @@ urlpatterns = [
     path("pestid/", include("pestid.urls")),
     path("diseaseid/", include("diseaseid.urls")),
     path("treeid/", include("treeid.urls")),
+    path("dvdexam/", include("dvdexam.urls")),
     path("dashboard/", include("dashboard.urls")),
 ]
 

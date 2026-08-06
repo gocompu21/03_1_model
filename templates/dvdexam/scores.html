@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} 응시 결과 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 50px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 760px; margin: 0 auto; padding: 20px; }
+
+        .card {
+            background: #fff; border-radius: 14px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 16px;
+        }
+        .title { font-size: 1.08rem; font-weight: 700; color: #1b4332; }
+        .tags { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag { font-size: 0.72rem; padding: 2px 9px; border-radius: 10px; background: #eef2ef; color: #55605a; }
+
+        .stats { display: flex; gap: 12px; margin-top: 16px; }
+        .stat { flex: 1; background: #f7faf8; border-radius: 10px; padding: 13px; text-align: center; }
+        .stat .n { font-size: 1.5rem; font-weight: 800; color: #2d6a4f; line-height: 1.1; }
+        .stat .k { font-size: 0.76rem; color: #7a8b80; margin-top: 3px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { padding: 11px 8px; text-align: left; border-bottom: 1px solid #eef2ef; }
+        th { color: #7a8b80; font-size: 0.78rem; font-weight: 600; }
+        .rank { color: #9aa8a0; font-variant-numeric: tabular-nums; width: 34px; }
+        .who { font-weight: 600; color: #1b4332; }
+        .sc { font-weight: 700; color: #2d6a4f; font-variant-numeric: tabular-nums; }
+        .pending { color: #b8860b; font-size: 0.83rem; }
+        .empty { text-align: center; color: #9aa8a0; padding: 32px; font-size: 0.9rem; }
+        .auto { color: #9aa8a0; font-size: 0.76rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'dvdexam:manage' %}"><i class="fas fa-arrow-left"></i> 시험 관리</a>
+        <strong>응시 결과</strong>
+        <span></span>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="title">{{ exam.title }}</div>
+            <div class="tags">
+                <span class="tag">{{ exam.get_subject_display }}</span>
+                <span class="tag">{{ exam.get_kind_display }}</span>
+                <span class="tag">{{ exam.get_answer_format_display }}</span>
+                <span class="tag">{{ exam.questions.count }}문항</span>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="n">{{ attempts|length }}</div>
+                    <div class="k">응시</div>
+                </div>
+                <div class="stat">
+                    <div class="n">{{ submitted_count }}</div>
+                    <div class="k">제출</div>
+                </div>
+                <div class="stat">
+                    <div class="n">{{ average }}</div>
+                    <div class="k">평균 점수</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            {% if attempts %}
+            <table>
+                <tr><th class="rank">#</th><th>응시자</th><th>점수</th><th>제출</th></tr>
+                {% for a in attempts %}
+                <tr>
+                    <td class="rank">{{ forloop.counter }}</td>
+                    <td class="who">
+                        {{ a.user.first_name|default:a.user.username }}
+                        {% if a.auto_submitted %}<span class="auto">· 자동제출</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if a.is_submitted %}
+                        <span class="sc">{{ a.score }}/{{ a.total }}</span>
+                        <span class="auto">({{ a.score_percent }}점)</span>
+                        {% else %}
+                        <span class="pending">응시 중</span>
+                        {% endif %}
+                    </td>
+                    <td class="auto">
+                        {% if a.is_submitted %}{{ a.submitted_at|date:"m/d H:i" }}{% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <div class="empty">아직 응시한 사람이 없습니다.</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

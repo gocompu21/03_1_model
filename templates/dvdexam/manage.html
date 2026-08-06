@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVD 시험 관리 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 50px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+        .card {
+            background: #fff; border-radius: 14px; padding: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 18px;
+        }
+        .card h2 {
+            font-size: 1.05rem; color: #1b4332; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+        .field label {
+            display: block; font-size: 0.82rem; color: #7a8b80;
+            margin-bottom: 5px; font-weight: 600;
+        }
+        .field input, .field select {
+            width: 100%; padding: 10px 12px; border: 1px solid #dde5e0;
+            border-radius: 8px; font-size: 0.92rem; font-family: inherit; background: #fff;
+        }
+        .field input:focus, .field select:focus { outline: 2px solid #b7d9c4; border-color: #2d6a4f; }
+        .hint { font-size: 0.78rem; color: #9aa8a0; margin-top: 4px; }
+
+        .live-only { display: none; }
+        .live-only.on { display: block; }
+
+        .submit {
+            margin-top: 18px; width: 100%; padding: 14px; border: none;
+            border-radius: 9px; background: #2d6a4f; color: #fff;
+            font-size: 0.98rem; font-weight: 700; font-family: inherit; cursor: pointer;
+        }
+        .submit:active { background: #245a41; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        th, td { padding: 11px 8px; text-align: left; border-bottom: 1px solid #eef2ef; }
+        th { color: #7a8b80; font-size: 0.78rem; font-weight: 600; }
+        td .title { font-weight: 700; color: #1b4332; }
+        .tag {
+            display: inline-block; font-size: 0.72rem; padding: 2px 8px;
+            border-radius: 10px; white-space: nowrap;
+        }
+        .tag.tree { background: #d8f3dc; color: #1b4332; }
+        .tag.disease { background: #fde8d8; color: #7a3e12; }
+        .tag.pest { background: #e5e2fb; color: #362b78; }
+        .tag.live { background: #ffd166; color: #5c4300; }
+        .tag.always { background: #eef2ef; color: #55605a; }
+        .tag.off { background: #f0f0f0; color: #999; }
+
+        .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+        .acts a, .acts button {
+            font-size: 0.78rem; padding: 6px 10px; border-radius: 7px;
+            border: 1px solid #dde5e0; background: #fff; color: #40684f;
+            text-decoration: none; cursor: pointer; font-family: inherit; white-space: nowrap;
+        }
+        .acts .danger { color: #a83232; border-color: #f0d8d8; }
+        .empty { text-align: center; color: #9aa8a0; padding: 30px; font-size: 0.9rem; }
+        @media (max-width: 620px) {
+            .hide-sm { display: none; }
+            th, td { padding: 9px 5px; font-size: 0.82rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'main:dvd' %}"><i class="fas fa-arrow-left"></i> DVD</a>
+        <strong>시험 관리</strong>
+        <a href="{% url 'dvdexam:index' %}" style="font-size:0.82rem;">응시 화면</a>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2><i class="fas fa-plus-circle"></i> 시험 등록</h2>
+            <form method="post">
+                {% csrf_token %}
+                <div class="grid">
+                    <div class="field" style="grid-column: 1 / -1;">
+                        <label>시험명</label>
+                        <input type="text" name="title" placeholder="비워두면 자동으로 붙습니다">
+                    </div>
+
+                    <div class="field">
+                        <label>학습대상</label>
+                        <select name="subject" id="subject">
+                            {% for s in subjects %}
+                            <option value="{{ s.key }}">{{ s.label }} ({{ s.count }}종)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>시험유형</label>
+                        <select name="kind" id="kind">
+                            {% for key, label in kind_choices %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>선택유형</label>
+                        <select name="answer_format">
+                            {% for key, label in format_choices %}
+                            <option value="{{ key }}">{{ label }}{% if key == 'choice' %} (5지선다){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label>문항 수</label>
+                        <input type="number" name="question_count" value="20" min="1" max="100">
+                    </div>
+
+                    <div class="field">
+                        <label>제한 시간(분)</label>
+                        <input type="number" name="time_limit_min" value="0" min="0" max="300">
+                        <div class="hint">0이면 제한 없음</div>
+                    </div>
+
+                    <div class="field live-only" id="liveStart">
+                        <label>시작 시각</label>
+                        <input type="datetime-local" name="start_at">
+                    </div>
+                    <div class="field live-only" id="liveEnd">
+                        <label>종료 시각</label>
+                        <input type="datetime-local" name="end_at">
+                        <div class="hint">시간이 지나면 자동 제출됩니다</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit">
+                    <i class="fas fa-check"></i> 시험 만들기
+                </button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-list"></i> 등록된 시험</h2>
+            {% if exams %}
+            <table>
+                <tr>
+                    <th>시험</th>
+                    <th class="hide-sm">유형</th>
+                    <th>문항</th>
+                    <th>응시</th>
+                    <th></th>
+                </tr>
+                {% for e in exams %}
+                <tr>
+                    <td>
+                        <div class="title">{{ e.title }}</div>
+                        <span class="tag {{ e.subject }}">{{ e.get_subject_display }}</span>
+                        <span class="tag {{ e.kind }}">{{ e.get_kind_display }}</span>
+                        {% if not e.is_active %}<span class="tag off">비공개</span>{% endif %}
+                        {% if e.kind == 'live' and e.start_at %}
+                        <div class="hint">{{ e.start_at|date:"m/d H:i" }} ~ {{ e.end_at|date:"m/d H:i" }}</div>
+                        {% endif %}
+                    </td>
+                    <td class="hide-sm">{{ e.get_answer_format_display }}</td>
+                    <td>{{ e.q_count }}</td>
+                    <td>{{ e.attempt_count }}</td>
+                    <td>
+                        <div class="acts">
+                            <a href="{% url 'dvdexam:scores' e.id %}">결과</a>
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="toggle">
+                                <input type="hidden" name="exam_id" value="{{ e.id }}">
+                                <button type="submit">{% if e.is_active %}숨기기{% else %}공개{% endif %}</button>
+                            </form>
+                            <form method="post" style="display:inline;"
+                                  onsubmit="return confirm('시험과 응시 기록이 모두 삭제됩니다. 계속할까요?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="exam_id" value="{{ e.id }}">
+                                <button type="submit" class="danger">삭제</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <div class="empty">아직 등록된 시험이 없습니다.</div>
+            {% endif %}
+        </div>
+    </div>
+
+<script>
+// 실시간 시험을 고를 때만 시작/종료 시각을 보여준다
+const kind = document.getElementById('kind');
+const liveFields = [document.getElementById('liveStart'), document.getElementById('liveEnd')];
+
+function syncKind() {
+    const on = kind.value === 'live';
+    liveFields.forEach(f => f.classList.toggle('on', on));
+    liveFields.forEach(f => f.querySelector('input').required = on);
+}
+kind.addEventListener('change', syncKind);
+syncKind();
+</script>
+</body>
+</html>

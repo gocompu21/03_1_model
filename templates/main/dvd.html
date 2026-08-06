@@ -133,6 +133,15 @@
                 <span class="count">{{ pest_course_count }}개 코스</span>
                 {% endif %}
             </a>
+
+            <a href="{% url 'dvdexam:index' %}" class="item">
+                <div class="emoji">📝</div>
+                <h3>시험 보기</h3>
+                <p>상시시험과 실시간 시험으로<br>실력을 확인하세요</p>
+                {% if exam_count %}
+                <span class="count">{{ exam_count }}개 시험</span>
+                {% endif %}
+            </a>
         </div>
     </div>
 </body>
