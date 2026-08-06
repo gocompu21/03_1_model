@@ -67,6 +67,11 @@
             border-radius: 12px;
         }
 
+        /* 관리자 전용 카드는 학습 카드와 구분되게 톤을 낮춘다 */
+        .item.admin { background: #f7faf8; border: 1px dashed #c6d5cc; box-shadow: none; }
+        .item.admin h3 { color: #40684f; }
+        .admin-tag { background: #e6ece8; color: #55605a; }
+
         .soon {
             background: #fff;
             border-radius: 14px;
@@ -142,6 +147,15 @@
                 <span class="count">{{ exam_count }}개 시험</span>
                 {% endif %}
             </a>
+
+            {% if user.is_staff %}
+            <a href="{% url 'dvdexam:manage' %}" class="item admin">
+                <div class="emoji">⚙️</div>
+                <h3>시험 관리</h3>
+                <p>시험을 등록하고<br>응시 결과를 확인합니다</p>
+                <span class="count admin-tag">관리자</span>
+            </a>
+            {% endif %}
         </div>
     </div>
 </body>
