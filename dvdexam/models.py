@@ -200,27 +200,70 @@ def source_pool(subject):
     return list(qs)
 
 
+# 해충 이름의 끝 어미. 오답 보기를 같은 무리에서 뽑기 위한 기준이다.
+# 긴 것부터 맞춰야 '밤나방'이 '나방'에 먼저 걸리지 않는다.
+PEST_GROUPS = [
+    "가루이", "거위벌레", "거품벌레", "굴파리", "깍지벌레", "나무이", "나무좀",
+    "노린재", "대벌레", "땅강아지", "매미충", "매미", "면충", "명나방", "무당벌레",
+    "바구미", "박각시", "방패벌레", "밤나방", "번데기", "불나방", "선녀벌레",
+    "솜벌레", "쐐기나방", "여치", "응애", "잎벌레", "잎벌", "자나방", "재주나방",
+    "잎말이나방", "진딧물", "총채벌레", "풍뎅이", "하늘소", "혹파리", "혹벌",
+    "알락나방", "독나방", "나방",
+]
+
+
+def group_key(subject, question):
+    """오답 보기를 같은 무리에서 뽑기 위한 묶음 키.
+
+    - 해충: 이름 끝 어미 (나방 / 잎벌레 / 깍지벌레 / 진딧물 …)
+    - 병해: 병명 끝 단어 (흰가루병 / 녹병 / 점무늬병 …)
+    - 수목: 코스 (분류 순서대로 10종씩 묶여 있다)
+    """
+    name = (question.name or "").split(",")[0].strip()
+
+    if subject == "pest":
+        for suffix in PEST_GROUPS:
+            if name.endswith(suffix):
+                return suffix
+        return None
+
+    if subject == "disease":
+        return name.split()[-1] if " " in name else name
+
+    return f"course:{question.course_id}"
+
+
 def build_questions(exam):
     """암기 데이터에서 무작위로 뽑아 시험 문제를 만든다.
 
-    객관식은 같은 학습대상의 다른 이름 4개를 오답 보기로 붙인다.
+    객관식 오답은 **같은 무리**에서 먼저 채운다. 나방 문제에는 나방을,
+    깍지벌레 문제에는 깍지벌레를 붙여야 실제 시험처럼 변별이 된다.
+    같은 무리가 모자라면 전체에서 채운다.
     """
     pool = source_pool(exam.subject)
     if not pool:
         return 0
 
     picked = random.sample(pool, min(exam.question_count, len(pool)))
-    names = sorted({q.name.split(",")[0].strip() for q in pool if q.name})
+
+    # 이름 목록과 무리별 이름 목록을 미리 만든다
+    all_names, by_group = set(), {}
+    for q in pool:
+        name = q.name.split(",")[0].strip()
+        if not name:
+            continue
+        all_names.add(name)
+        key = group_key(exam.subject, q)
+        if key:
+            by_group.setdefault(key, set()).add(name)
 
     created = 0
     for i, src in enumerate(picked, 1):
         answer = src.name.split(",")[0].strip()
         choices = []
+
         if exam.answer_format == "choice":
-            others = [n for n in names if n != answer]
-            random.shuffle(others)
-            choices = others[:4] + [answer]
-            random.shuffle(choices)
+            choices = _pick_choices(answer, group_key(exam.subject, src), by_group, all_names)
 
         ExamQuestion.objects.create(
             exam=exam,
@@ -233,3 +276,19 @@ def build_questions(exam):
         created += 1
 
     return created
+
+
+def _pick_choices(answer, key, by_group, all_names, count=4):
+    """오답 4개를 고른다. 같은 무리를 우선하고 모자라면 전체에서 채운다."""
+    same = [n for n in by_group.get(key, ()) if n != answer]
+    random.shuffle(same)
+    wrong = same[:count]
+
+    if len(wrong) < count:
+        rest = [n for n in all_names if n != answer and n not in wrong]
+        random.shuffle(rest)
+        wrong += rest[: count - len(wrong)]
+
+    options = wrong + [answer]
+    random.shuffle(options)
+    return options
