@@ -55,8 +55,9 @@
         th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid #eef2ef; }
         th { color: #7a8b80; font-size: 0.76rem; font-weight: 600; }
         .rank { color: #9aa8a0; font-variant-numeric: tabular-nums; width: 30px; }
-        .who { font-weight: 600; color: #1b4332; }
+        .who { font-weight: 600; color: #1b4332; word-break: keep-all; }
         .who .id { font-weight: 400; color: #9aa8a0; font-size: 0.78rem; }
+        .who .badge { margin-left: 4px; vertical-align: middle; }
         .sc { font-weight: 700; color: #2d6a4f; font-variant-numeric: tabular-nums; }
         /* 응시 중인 사람의 점수는 아직 확정 전이라 톤을 낮춘다 */
         .sc.temp { color: #b8860b; }
@@ -149,7 +150,7 @@
                         <th>응답률</th>
                         <th>점수</th>
                         <th>소요시간</th>
-                        <th class="hide-sm">제출</th>
+                        <th class="hide-sm">시각</th>
                     </tr>
                 </thead>
                 <tbody id="rows"></tbody>
@@ -192,7 +193,13 @@ function draw(data) {
         return `
         <tr class="${changed ? 'flash' : ''}">
             <td class="rank">${i + 1}</td>
-            <td class="who">${esc(r.name)}<br><span class="id">${esc(r.username)}</span></td>
+            <td class="who">
+                ${esc(r.name)}
+                ${r.submitted
+                    ? `<span class="badge done">제출</span>${r.auto ? '<span class="badge auto">자동</span>' : ''}`
+                    : `<span class="badge doing">응시 중</span>`}
+                <br><span class="id">${esc(r.username)}</span>
+            </td>
             <td>
                 <div class="bar ${r.submitted ? 'done' : ''}">
                     <span style="width:${r.answer_percent}%"></span>
@@ -210,10 +217,7 @@ function draw(data) {
                 <span class="elapsed ${r.submitted ? '' : 'running'}">${r.elapsed}</span>
             </td>
             <td class="hide-sm muted">
-                ${r.submitted
-                    ? `<span class="badge done">제출</span>${r.auto ? '<span class="badge auto">자동</span>' : ''}
-                       <div>${r.submitted_at}</div>`
-                    : `<div>${r.started_at} 시작</div>`}
+                ${r.submitted ? `${r.submitted_at} 제출` : `${r.started_at} 시작`}
             </td>
         </tr>`;
     }).join('');
