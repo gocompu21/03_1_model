@@ -164,6 +164,24 @@ class ExamAttempt(models.Model):
         return round(self.score * 100 / self.total) if self.total else 0
 
     @property
+    def elapsed_seconds(self):
+        """소요 시간(초). 제출 전이면 지금까지 걸린 시간."""
+        end = self.submitted_at or timezone.now()
+        return max(0, int((end - self.started_at).total_seconds()))
+
+    @property
+    def elapsed_display(self):
+        """소요 시간을 '12분 34초' 형태로."""
+        seconds = self.elapsed_seconds
+        hours, rest = divmod(seconds, 3600)
+        minutes, secs = divmod(rest, 60)
+        if hours:
+            return f"{hours}시간 {minutes}분"
+        if minutes:
+            return f"{minutes}분 {secs}초"
+        return f"{secs}초"
+
+    @property
     def answered_count(self):
         """응답을 채운 문항 수 (제출 전에도 센다)."""
         return self.answers.exclude(given="").count()

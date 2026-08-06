@@ -320,6 +320,8 @@ def _scores_data(exam):
             "answer_percent": round(answered * 100 / total_q) if total_q else 0,
             # 푼 문제 중 몇 %를 맞혔는지 (제출 후에는 전체 기준 = 최종 점수)
             "percent": round(a.hit * 100 / base) if base else 0,
+            "elapsed": a.elapsed_display,
+            "elapsed_sec": a.elapsed_seconds,
             "submitted_at": timezone.localtime(a.submitted_at).strftime("%m/%d %H:%M")
                             if a.submitted_at else "",
             "started_at": timezone.localtime(a.started_at).strftime("%m/%d %H:%M"),
@@ -333,7 +335,21 @@ def _scores_data(exam):
             "submitted": len(done),
             "in_progress": len(rows) - len(done),
             "average": round(sum(r["percent"] for r in done) / len(done)) if done else 0,
+            "avg_elapsed": _format_seconds(
+                round(sum(r["elapsed_sec"] for r in done) / len(done)) if done else 0
+            ),
             "total_q": total_q,
         },
         "updated": timezone.localtime().strftime("%H:%M:%S"),
     }
+
+
+def _format_seconds(seconds):
+    """초를 '12분 34초' 형태로."""
+    hours, rest = divmod(int(seconds), 3600)
+    minutes, secs = divmod(rest, 60)
+    if hours:
+        return f"{hours}시간 {minutes}분"
+    if minutes:
+        return f"{minutes}분 {secs}초"
+    return f"{secs}초"

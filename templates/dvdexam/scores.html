@@ -41,6 +41,15 @@
         }
         .stat .k { font-size: 0.74rem; color: #7a8b80; margin-top: 3px; }
         .stat.doing .n { color: #b8860b; }
+        /* 시간 문자열은 숫자보다 길어 작게 잡는다 */
+        .stat .n.sm { font-size: 0.98rem; padding: 6px 0 5px; }
+        @media (max-width: 560px) {
+            .stats { gap: 6px; }
+            .stat { padding: 11px 4px; }
+            .stat .n { font-size: 1.25rem; }
+            .stat .n.sm { font-size: 0.82rem; }
+            .stat .k { font-size: 0.68rem; }
+        }
 
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid #eef2ef; }
@@ -53,6 +62,9 @@
         .sc.temp { color: #b8860b; }
         .muted { color: #9aa8a0; font-size: 0.78rem; }
         .sub { margin-top: 3px; font-size: 0.72rem; }
+        .elapsed { font-size: 0.86rem; color: #55605a; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        /* 응시 중인 사람은 시간이 계속 흐르므로 구분한다 */
+        .elapsed.running { color: #b8860b; font-weight: 600; }
 
         /* 응답률 막대 */
         .bar {
@@ -121,6 +133,10 @@
                     <div class="n" id="sAvg">{{ stats.average }}</div>
                     <div class="k">평균 점수</div>
                 </div>
+                <div class="stat">
+                    <div class="n sm" id="sTime">{{ stats.avg_elapsed }}</div>
+                    <div class="k">평균 소요</div>
+                </div>
             </div>
         </div>
 
@@ -132,6 +148,7 @@
                         <th>응시자</th>
                         <th>응답률</th>
                         <th>점수</th>
+                        <th>소요시간</th>
                         <th class="hide-sm">제출</th>
                     </tr>
                 </thead>
@@ -162,6 +179,7 @@ function draw(data) {
     document.getElementById('sDoing').textContent = data.stats.in_progress;
     document.getElementById('sDone').textContent = data.stats.submitted;
     document.getElementById('sAvg').textContent = data.stats.average;
+    document.getElementById('sTime').textContent = data.stats.avg_elapsed;
     document.getElementById('updated').textContent = data.updated;
 
     emptyEl.style.display = data.rows.length ? 'none' : 'block';
@@ -187,6 +205,9 @@ function draw(data) {
                 <div class="muted sub">
                     ${r.correct}/${r.submitted ? r.total : r.answered}${r.submitted ? '' : ' 푼 것 중'}
                 </div>
+            </td>
+            <td>
+                <span class="elapsed ${r.submitted ? '' : 'running'}">${r.elapsed}</span>
             </td>
             <td class="hide-sm muted">
                 ${r.submitted
