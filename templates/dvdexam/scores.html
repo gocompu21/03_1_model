@@ -49,7 +49,10 @@
         .who { font-weight: 600; color: #1b4332; }
         .who .id { font-weight: 400; color: #9aa8a0; font-size: 0.78rem; }
         .sc { font-weight: 700; color: #2d6a4f; font-variant-numeric: tabular-nums; }
+        /* 응시 중인 사람의 점수는 아직 확정 전이라 톤을 낮춘다 */
+        .sc.temp { color: #b8860b; }
         .muted { color: #9aa8a0; font-size: 0.78rem; }
+        .sub { margin-top: 3px; font-size: 0.72rem; }
 
         /* 응답률 막대 */
         .bar {
@@ -175,14 +178,15 @@ function draw(data) {
             <td>
                 <div class="bar ${r.submitted ? 'done' : ''}">
                     <span style="width:${r.answer_percent}%"></span>
-                    <b>${r.answered}/${r.total}</b>
+                    <b>${r.answer_percent}%</b>
                 </div>
+                <div class="muted sub">${r.answered}/${r.total}문항</div>
             </td>
             <td>
-                ${r.submitted
-                    ? `<span class="sc">${r.score}/${r.total}</span>
-                       <span class="muted">${r.percent}점</span>`
-                    : `<span class="badge doing">응시 중</span>`}
+                <span class="sc ${r.submitted ? '' : 'temp'}">${r.percent}점</span>
+                <div class="muted sub">
+                    ${r.correct}/${r.submitted ? r.total : r.answered}${r.submitted ? '' : ' 푼 것 중'}
+                </div>
             </td>
             <td class="hide-sm muted">
                 ${r.submitted

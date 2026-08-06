@@ -108,9 +108,12 @@ def save(request, exam_id):
         q = questions.get(qid)
         if not q:
             continue
+        value = value.strip()
+        # 저장 시점에 정답 여부까지 판정해 둔다. 관리자 화면에서 푼 문항
+        # 기준 점수를 실시간으로 보여주기 위해서다 (응시자에게는 알리지 않는다)
         ExamAnswer.objects.update_or_create(
             attempt=attempt, question=q,
-            defaults={"given": value.strip()[:200], "is_correct": False},
+            defaults={"given": value[:200], "is_correct": q.is_correct(value) if value else False},
         )
 
     attempt.last_saved_at = timezone.now()
@@ -293,23 +296,30 @@ def _scores_data(exam):
     total_q = exam.questions.count()
     attempts = (
         exam.attempts.select_related("user")
-        .annotate(filled=Count("answers", filter=~Q(answers__given="")))
-        .order_by("-score", "submitted_at", "started_at")
+        .annotate(
+            filled=Count("answers", filter=~Q(answers__given="")),
+            hit=Count("answers", filter=Q(answers__is_correct=True)),
+        )
+        .order_by("-hit", "-filled", "started_at")
     )
 
     rows = []
     for a in attempts:
+        answered = a.filled
+        # 제출자는 전체 문항 기준, 응시 중인 사람은 푼 문항 기준으로 본다
+        base = (a.total or total_q) if a.is_submitted else answered
         rows.append({
             "id": a.id,
             "name": a.user.first_name or a.user.username,
             "username": a.user.username,
             "submitted": a.is_submitted,
             "auto": a.auto_submitted,
-            "score": a.score,
+            "correct": a.hit,
+            "answered": answered,
             "total": a.total or total_q,
-            "percent": a.score_percent,
-            "answered": a.filled,
-            "answer_percent": round(a.filled * 100 / total_q) if total_q else 0,
+            "answer_percent": round(answered * 100 / total_q) if total_q else 0,
+            # 푼 문제 중 몇 %를 맞혔는지 (제출 후에는 전체 기준 = 최종 점수)
+            "percent": round(a.hit * 100 / base) if base else 0,
             "submitted_at": timezone.localtime(a.submitted_at).strftime("%m/%d %H:%M")
                             if a.submitted_at else "",
             "started_at": timezone.localtime(a.started_at).strftime("%m/%d %H:%M"),
