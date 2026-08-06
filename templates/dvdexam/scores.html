@@ -138,7 +138,7 @@
         </div>
 
         <div class="foot">
-            5초마다 자동으로 새로 불러옵니다 · 마지막 갱신 <span id="updated">—</span>
+            2초마다 자동으로 새로 불러옵니다 · 마지막 갱신 <span id="updated">—</span>
         </div>
     </div>
 
@@ -196,16 +196,23 @@ function draw(data) {
     prev = Object.fromEntries(data.rows.map(r => [r.id, r]));
 }
 
+let loading = false;
+
 function load() {
+    // 앞선 요청이 아직 안 끝났으면 건너뛴다 (느린 회선에서 요청이 쌓이지 않게)
+    if (loading || document.hidden) return;
+    loading = true;
+
     fetch(API, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.json())
         .then(draw)
-        .catch(() => {});   // 잠깐 끊겨도 다음 주기에 다시 시도한다
+        .catch(() => {})    // 잠깐 끊겨도 다음 주기에 다시 시도한다
+        .finally(() => { loading = false; });
 }
 
 // 첫 화면은 서버가 렌더한 통계로 시작하고, 표는 곧바로 불러 채운다
 load();
-setInterval(load, 5000);
+setInterval(load, 2000);
 
 // 탭을 다시 보면 즉시 갱신한다
 document.addEventListener('visibilitychange', () => {
