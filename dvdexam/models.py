@@ -153,6 +153,8 @@ class ExamAttempt(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.exam.title} ({self.score}/{self.total})"
 
+    last_saved_at = models.DateTimeField(null=True, blank=True, verbose_name="마지막 저장")
+
     @property
     def is_submitted(self):
         return self.submitted_at is not None
@@ -160,6 +162,17 @@ class ExamAttempt(models.Model):
     @property
     def score_percent(self):
         return round(self.score * 100 / self.total) if self.total else 0
+
+    @property
+    def answered_count(self):
+        """응답을 채운 문항 수 (제출 전에도 센다)."""
+        return self.answers.exclude(given="").count()
+
+    @property
+    def answer_percent(self):
+        """응답률."""
+        total = self.total or self.exam.questions.count()
+        return round(self.answered_count * 100 / total) if total else 0
 
 
 class ExamAnswer(models.Model):

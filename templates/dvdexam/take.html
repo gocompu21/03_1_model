@@ -151,6 +151,7 @@ const QUESTIONS = {{ questions_json|safe }};
 const CSRF = '{{ csrf_token }}';
 const FORMAT = '{{ exam.answer_format }}';
 const SUBMIT_URL = '{% url "dvdexam:submit" exam.id %}';
+const SAVE_URL = '{% url "dvdexam:save" exam.id %}';
 const DEADLINE = {{ deadline_ms }};
 
 const answers = {};   // {questionId: 답}
@@ -190,6 +191,7 @@ function render() {
         input.addEventListener('input', () => {
             answers[q.id] = input.value;
             syncNav();
+            queueSave(q.id);
         });
     }
 
@@ -212,6 +214,7 @@ answersEl.addEventListener('click', (e) => {
     answers[QUESTIONS[index].id] = el.dataset.value;
     for (const c of answersEl.children) c.classList.toggle('on', c === el);
     syncNav();
+    queueSave(QUESTIONS[index].id);
     // 마지막 문항이 아니면 잠시 뒤 다음으로 넘어간다
     if (index < QUESTIONS.length - 1) setTimeout(() => { index++; render(); }, 220);
 });
@@ -239,6 +242,39 @@ function syncNav() {
 
 prevBtn.addEventListener('click', () => { if (index > 0) { index--; render(); } });
 nextBtn.addEventListener('click', () => { if (index < QUESTIONS.length - 1) { index++; render(); } });
+
+/* ---- 중간 저장 ----
+   답을 고칠 때마다 서버에 남긴다. 브라우저가 닫히거나 시간이 끝나도
+   여기까지 푼 내용이 살아 있고, 관리자 화면에도 바로 반영된다. */
+let saveTimer = null;
+let pending = {};      // 아직 서버에 못 보낸 응답
+let saving = false;
+
+function queueSave(qid) {
+    pending[qid] = answers[qid];
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 600);   // 연타를 묶어 한 번에 보낸다
+}
+
+function flushSave() {
+    if (saving || submitting) return;
+    const batch = pending;
+    if (!Object.keys(batch).length) return;
+    pending = {};
+    saving = true;
+
+    fetch(SAVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        body: JSON.stringify({ answers: batch }),
+    })
+    .then(r => r.json())
+    .catch(() => { Object.assign(pending, batch); })   // 실패하면 다음에 다시 시도
+    .finally(() => { saving = false; });
+}
+
+// 주기적으로도 한 번씩 밀어 넣는다 (놓친 응답 보완)
+setInterval(flushSave, 10000);
 
 /* ---- 제출 ---- */
 function doSubmit(auto) {

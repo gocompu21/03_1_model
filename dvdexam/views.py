@@ -1,7 +1,7 @@
 import json
 
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -82,6 +82,44 @@ def take(request, exam_id):
 
 
 @login_required
+def save(request, exam_id):
+    """응시 중 답안을 중간 저장한다.
+
+    채점은 하지 않고 응답만 남긴다. 브라우저가 닫히거나 시간이 끝나도
+    여기까지 푼 내용은 살아 있다.
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    exam = get_object_or_404(Exam, id=exam_id, is_active=True)
+    attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
+    if not attempt or attempt.is_submitted:
+        return JsonResponse({"ok": False, "submitted": True})
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "invalid json"}, status=400)
+
+    given = {int(k): (v or "") for k, v in (body.get("answers") or {}).items()}
+    questions = {q.id: q for q in exam.questions.all()}
+
+    for qid, value in given.items():
+        q = questions.get(qid)
+        if not q:
+            continue
+        ExamAnswer.objects.update_or_create(
+            attempt=attempt, question=q,
+            defaults={"given": value.strip()[:200], "is_correct": False},
+        )
+
+    attempt.last_saved_at = timezone.now()
+    attempt.save(update_fields=["last_saved_at"])
+
+    return JsonResponse({"ok": True, "answered": attempt.answered_count})
+
+
+@login_required
 def submit(request, exam_id):
     """제출. 채점은 서버에서만 한다."""
     if request.method != "POST":
@@ -111,12 +149,18 @@ def submit(request, exam_id):
 
 
 def _grade(attempt, given, auto=False):
-    """응답을 저장하고 점수를 매긴다."""
+    """응답을 저장하고 점수를 매긴다.
+
+    given에 없는 문항은 중간 저장해 둔 답을 쓴다. 시간이 끝나 자동
+    제출될 때 브라우저가 답을 못 보내도 저장분으로 채점하기 위해서다.
+    """
     questions = list(attempt.exam.questions.all())
+    saved = {a.question_id: a.given for a in attempt.answers.all()}
     score = 0
 
     for q in questions:
-        value = (given.get(q.id) or "").strip()
+        value = (given.get(q.id) if q.id in given else saved.get(q.id)) or ""
+        value = value.strip()
         correct = q.is_correct(value) if value else False
         if correct:
             score += 1
@@ -226,18 +270,60 @@ def _parse_dt(value):
 
 @user_passes_test(_is_admin)
 def scores(request, exam_id):
-    """응시 결과 모아 보기."""
+    """응시 결과 모아 보기. 화면은 아래 API로 실시간 갱신된다."""
     exam = get_object_or_404(Exam, id=exam_id)
-    attempts = (
-        exam.attempts.select_related("user")
-        .order_by("-score", "submitted_at")
-    )
-    submitted = [a for a in attempts if a.is_submitted]
-    average = round(sum(a.score_percent for a in submitted) / len(submitted)) if submitted else 0
+    data = _scores_data(exam)
 
     return render(request, "dvdexam/scores.html", {
         "exam": exam,
-        "attempts": attempts,
-        "submitted_count": len(submitted),
-        "average": average,
+        "rows": data["rows"],
+        "stats": data["stats"],
     })
+
+
+@user_passes_test(_is_admin)
+def scores_api(request, exam_id):
+    """응시 현황 JSON. 결과 화면이 주기적으로 불러 새로 그린다."""
+    exam = get_object_or_404(Exam, id=exam_id)
+    return JsonResponse(_scores_data(exam))
+
+
+def _scores_data(exam):
+    """응시자별 현황과 집계를 만든다."""
+    total_q = exam.questions.count()
+    attempts = (
+        exam.attempts.select_related("user")
+        .annotate(filled=Count("answers", filter=~Q(answers__given="")))
+        .order_by("-score", "submitted_at", "started_at")
+    )
+
+    rows = []
+    for a in attempts:
+        rows.append({
+            "id": a.id,
+            "name": a.user.first_name or a.user.username,
+            "username": a.user.username,
+            "submitted": a.is_submitted,
+            "auto": a.auto_submitted,
+            "score": a.score,
+            "total": a.total or total_q,
+            "percent": a.score_percent,
+            "answered": a.filled,
+            "answer_percent": round(a.filled * 100 / total_q) if total_q else 0,
+            "submitted_at": timezone.localtime(a.submitted_at).strftime("%m/%d %H:%M")
+                            if a.submitted_at else "",
+            "started_at": timezone.localtime(a.started_at).strftime("%m/%d %H:%M"),
+        })
+
+    done = [r for r in rows if r["submitted"]]
+    return {
+        "rows": rows,
+        "stats": {
+            "taking": len(rows),
+            "submitted": len(done),
+            "in_progress": len(rows) - len(done),
+            "average": round(sum(r["percent"] for r in done) / len(done)) if done else 0,
+            "total_q": total_q,
+        },
+        "updated": timezone.localtime().strftime("%H:%M:%S"),
+    }
