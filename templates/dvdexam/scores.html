@@ -51,6 +51,15 @@
             .stat .k { font-size: 0.68rem; }
         }
 
+        .overview-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 14px; margin-top: 16px;
+            background: #2d6a4f; color: #fff; border-radius: 10px;
+            text-decoration: none; font-weight: 700; font-size: 0.96rem;
+        }
+        .overview-btn:hover { background: #245a41; }
+        .overview-btn small { font-weight: 400; opacity: 0.85; font-size: 0.8rem; }
+
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid #eef2ef; }
         th { color: #7a8b80; font-size: 0.76rem; font-weight: 600; }
@@ -139,6 +148,11 @@
                     <div class="k">평균 소요</div>
                 </div>
             </div>
+
+            <a href="{% url 'dvdexam:overview' exam.id %}" class="overview-btn">
+                <i class="fas fa-chart-simple"></i> 전체 시험현황 보기
+                <small>문항별 정답과 정답률</small>
+            </a>
         </div>
 
         <div class="card">

@@ -271,6 +271,106 @@ def _parse_dt(value):
     return parsed
 
 
+@login_required
+def overview(request, exam_id):
+    """전체 시험현황. 문항별 정답과 정답률을 보여준다.
+
+    응시자도 볼 수 있다. 다만 아직 제출하지 않았다면 정답이 새므로 막는다.
+    """
+    exam = get_object_or_404(Exam, id=exam_id)
+
+    if not _is_admin(request.user):
+        mine = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
+        if not mine or not mine.is_submitted:
+            return render(request, "dvdexam/locked.html", {"exam": exam})
+
+    return render(request, "dvdexam/overview.html", _overview_data(exam, request.user))
+
+
+def _overview_data(exam, user):
+    """문항별 정답률과 전체 집계를 만든다."""
+    questions = list(exam.questions.all())
+    answers = list(
+        ExamAnswer.objects.filter(attempt__exam=exam)
+        .exclude(given="")
+        .values("question_id", "is_correct")
+    )
+
+    solved, correct = {}, {}
+    for a in answers:
+        qid = a["question_id"]
+        solved[qid] = solved.get(qid, 0) + 1
+        if a["is_correct"]:
+            correct[qid] = correct.get(qid, 0) + 1
+
+    # 내가 어떻게 답했는지 (관리자는 응시 기록이 없을 수 있다)
+    mine = {
+        a.question_id: a
+        for a in ExamAnswer.objects.filter(attempt__exam=exam, attempt__user=user)
+    }
+
+    rows = []
+    for q in questions:
+        n = solved.get(q.id, 0)
+        hit = correct.get(q.id, 0)
+        my = mine.get(q.id)
+        rows.append({
+            "id": q.id,
+            "no": q.order,
+            "image": q.image_url,
+            "answer": q.answer,
+            "solved": n,
+            "correct": hit,
+            "rate": round(hit * 100 / n) if n else None,   # 푼 사람 기준
+            "my_given": my.given if my else "",
+            "my_correct": my.is_correct if my else None,
+        })
+
+    graded = [r for r in rows if r["rate"] is not None]
+    attempts = exam.attempts.all()
+    submitted = [a for a in attempts if a.is_submitted]
+
+    return {
+        "exam": exam,
+        "rows": rows,
+        "hardest": sorted(graded, key=lambda r: r["rate"])[:5],
+        "stats": {
+            "total_q": len(questions),
+            "taking": attempts.count(),
+            "submitted": len(submitted),
+            "average": round(sum(a.score_percent for a in submitted) / len(submitted))
+                       if submitted else 0,
+            "avg_rate": round(sum(r["rate"] for r in graded) / len(graded)) if graded else 0,
+        },
+        "is_admin": _is_admin(user),
+    }
+
+
+@login_required
+def review(request, exam_id):
+    """복습하기. 반 전체가 많이 틀린 순으로 사진을 넘겨본다."""
+    exam = get_object_or_404(Exam, id=exam_id)
+
+    if not _is_admin(request.user):
+        mine = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
+        if not mine or not mine.is_submitted:
+            return render(request, "dvdexam/locked.html", {"exam": exam})
+
+    data = _overview_data(exam, request.user)
+
+    # 아무도 풀지 않은 문항은 뒤로 (rate가 None)
+    cards = sorted(
+        data["rows"],
+        key=lambda r: (r["rate"] if r["rate"] is not None else 101, r["no"]),
+    )
+
+    return render(request, "dvdexam/review.html", {
+        "exam": exam,
+        "cards_json": json.dumps(cards, ensure_ascii=False),
+        "total": len(cards),
+    })
+
+
 @user_passes_test(_is_admin)
 def scores(request, exam_id):
     """응시 결과 모아 보기. 화면은 아래 API로 실시간 갱신된다."""

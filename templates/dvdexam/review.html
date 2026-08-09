@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} 복습 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 96px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 12px 18px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        header strong { font-size: 0.95rem; }
+        .rank-tag {
+            background: rgba(255,255,255,0.18); padding: 5px 11px; border-radius: 12px;
+            font-size: 0.76rem; white-space: nowrap;
+        }
+
+        .progress-bar { height: 4px; background: #dfe7e1; }
+        .progress-fill { height: 100%; background: #b8860b; width: 0; transition: width 0.25s; }
+
+        .container { max-width: 960px; margin: 0 auto; padding: 16px 20px; }
+
+        .photo-wrap {
+            position: relative; background: #fff; border-radius: 14px;
+            overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .photo-wrap img { width: 100%; display: block; cursor: zoom-in; }
+        .photo-wrap.fit img {
+            max-height: calc(100vh - 210px); object-fit: contain;
+            object-position: top; background: #fafbfa;
+        }
+        .fit-toggle {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(27,67,50,0.78); color: #fff; border: none;
+            border-radius: 8px; padding: 7px 12px; font-size: 0.8rem;
+            font-family: inherit; cursor: pointer;
+        }
+
+        /* 정답은 사진 위에 겹쳐 보여준다 */
+        .info {
+            position: absolute; left: 0; right: 0; bottom: 0;
+            padding: 60px 22px 18px; color: #fff; pointer-events: none;
+            background: linear-gradient(to top,
+                rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.72) 45%,
+                rgba(0,0,0,0.34) 75%, rgba(0,0,0,0) 100%);
+            animation: fadeUp 0.22s ease-out;
+        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+        .info.hidden { display: none; }
+        .ans-name {
+            font-size: clamp(1.5rem, 4.2vw, 2.1rem); font-weight: 800;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.75); word-break: keep-all;
+        }
+        .ans-rate {
+            margin-top: 8px; font-size: 0.9rem; color: #ffe9a8;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+        }
+        .ans-mine { margin-top: 6px; font-size: 0.86rem; text-shadow: 0 1px 6px rgba(0,0,0,0.85); }
+        .ans-mine .no { color: #ffb4b4; }
+        .ans-mine .ok { color: #bff0c8; }
+
+        .controls {
+            position: fixed; left: 0; right: 0; bottom: 0; background: #fff;
+            border-top: 1px solid #e6ece8;
+            padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+            display: flex; justify-content: center;
+        }
+        .controls-inner { display: flex; align-items: center; gap: 8px; width: 100%; max-width: 620px; }
+        .btn {
+            flex: 1; padding: 15px; border: none; border-radius: 10px;
+            font-size: 0.98rem; font-weight: 600; font-family: inherit; cursor: pointer;
+        }
+        .btn-prev { flex: 0 0 54px; padding: 15px 0; background: #eef2ef; color: #40684f; }
+        .btn-next { background: #b8860b; color: #fff; }
+        .btn:disabled { opacity: 0.35; cursor: default; }
+        .counter { flex-shrink: 0; padding: 0 12px; font-variant-numeric: tabular-nums; }
+        .counter b { font-size: 1.2rem; color: #1b4332; }
+        .counter span { font-size: 0.82rem; color: #9aa8a0; }
+
+        .done {
+            background: #fff; border-radius: 14px; padding: 46px 24px;
+            text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .done h2 { color: #1b4332; margin: 14px 0 8px; }
+        .done p { color: #888; font-size: 0.9rem; margin-bottom: 20px; }
+        .done a {
+            display: inline-block; padding: 12px 22px; background: #d8f3dc;
+            color: #1b4332; border-radius: 9px; text-decoration: none;
+            font-weight: 600; margin: 0 4px;
+        }
+
+        .lightbox {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 100%; max-height: 100%; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'dvdexam:overview' exam.id %}"><i class="fas fa-arrow-left"></i> 현황</a>
+        <strong>복습하기</strong>
+        <span class="rank-tag">많이 틀린 순</span>
+    </header>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <div class="container">
+        <div id="card">
+            <div class="photo-wrap" id="photoWrap">
+                <img id="photo" src="" alt="문제 사진">
+                <button class="fit-toggle" id="fitToggle" type="button">
+                    <i class="fas fa-compress"></i> 한 화면
+                </button>
+                <div class="info hidden" id="info">
+                    <div class="ans-name" id="ansName"></div>
+                    <div class="ans-rate" id="ansRate"></div>
+                    <div class="ans-mine" id="ansMine"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="done" id="done" style="display:none;">
+            <div style="font-size: 3rem;">🎉</div>
+            <h2>{{ total }}문항을 모두 복습했습니다</h2>
+            <p>틀린 문항을 한 번 더 눈에 익혀두세요.</p>
+            <a href="{% url 'dvdexam:review' exam.id %}"><i class="fas fa-rotate-right"></i> 다시 보기</a>
+            <a href="{% url 'dvdexam:overview' exam.id %}"><i class="fas fa-list-ol"></i> 전체 현황</a>
+        </div>
+    </div>
+
+    <div class="controls" id="controls">
+        <div class="controls-inner">
+            <button class="btn btn-prev" id="prev" type="button" aria-label="이전">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="counter"><b id="pos">1</b><span>/ {{ total }}</span></div>
+            <button class="btn btn-next" id="next" type="button">정답 보기</button>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="확대"></div>
+
+<script>
+const CARDS = {{ cards_json|safe }};
+
+const photo = document.getElementById('photo');
+const info = document.getElementById('info');
+const ansName = document.getElementById('ansName');
+const ansRate = document.getElementById('ansRate');
+const ansMine = document.getElementById('ansMine');
+const posEl = document.getElementById('pos');
+const progress = document.getElementById('progress');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+
+let index = 0;
+let revealed = false;
+
+function esc(s) {
+    return String(s).replace(/[&<>"']/g, c =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function render() {
+    const c = CARDS[index];
+    photo.src = c.image;
+    posEl.textContent = index + 1;
+    progress.style.width = ((index + (revealed ? 1 : 0.5)) / CARDS.length * 100) + '%';
+
+    if (revealed) {
+        ansName.textContent = c.answer;
+        ansRate.innerHTML = (c.rate === null)
+            ? '아직 푼 사람이 없습니다'
+            : `<i class="fas fa-users"></i> 정답률 ${c.rate}% (${c.solved}명 중 ${c.correct}명)`;
+        ansMine.innerHTML = (c.my_correct === null)
+            ? ''
+            : (c.my_correct
+                ? '<span class="ok"><i class="fas fa-circle-check"></i> 내 답: 정답</span>'
+                : `<span class="no"><i class="fas fa-circle-xmark"></i> 내 답: ${esc(c.my_given || '(무응답)')}</span>`);
+        info.classList.remove('hidden');
+        nextBtn.innerHTML = (index === CARDS.length - 1)
+            ? '완료 <i class="fas fa-check"></i>'
+            : '다음 문항 <i class="fas fa-chevron-right"></i>';
+    } else {
+        info.classList.add('hidden');
+        nextBtn.textContent = '정답 보기';
+    }
+
+    prevBtn.disabled = (index === 0 && !revealed);
+
+    if (revealed) {
+        requestAnimationFrame(scrollInfoIntoView);
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// 정답이 하단 고정 바에 가리지 않게 내려준다
+function scrollInfoIntoView() {
+    const bar = document.getElementById('controls');
+    const barH = bar ? bar.getBoundingClientRect().height : 0;
+    const delta = info.getBoundingClientRect().bottom - (window.innerHeight - barH - 12);
+    if (delta > 0) window.scrollBy({ top: delta, behavior: 'smooth' });
+}
+photo.addEventListener('load', () => { if (revealed) scrollInfoIntoView(); });
+
+function goNext() {
+    if (!revealed) {
+        revealed = true;
+    } else if (index < CARDS.length - 1) {
+        index += 1;
+        revealed = false;
+    } else {
+        document.getElementById('card').style.display = 'none';
+        document.getElementById('controls').style.display = 'none';
+        document.getElementById('done').style.display = 'block';
+        progress.style.width = '100%';
+        return;
+    }
+    render();
+}
+
+function goPrev() {
+    if (revealed) revealed = false;
+    else if (index > 0) { index -= 1; revealed = true; }
+    render();
+}
+
+nextBtn.addEventListener('click', goNext);
+prevBtn.addEventListener('click', goPrev);
+document.addEventListener('keydown', (e) => {
+    if (lightbox.classList.contains('open')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') { e.preventDefault(); goNext(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+});
+
+/* 한 화면 토글 */
+const photoWrap = document.getElementById('photoWrap');
+const fitToggle = document.getElementById('fitToggle');
+function applyFit(on) {
+    photoWrap.classList.toggle('fit', on);
+    fitToggle.innerHTML = on
+        ? '<i class="fas fa-expand"></i> 크게'
+        : '<i class="fas fa-compress"></i> 한 화면';
+    try { localStorage.setItem('dvdexamFit', on ? '1' : '0'); } catch (e) {}
+}
+let fitMode = false;
+try { fitMode = localStorage.getItem('dvdexamFit') === '1'; } catch (e) {}
+applyFit(fitMode);
+fitToggle.addEventListener('click', () => { fitMode = !fitMode; applyFit(fitMode); });
+
+/* 사진 확대 */
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+photo.addEventListener('click', () => {
+    lightboxImg.src = photo.src;
+    lightbox.classList.add('open');
+});
+lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') lightbox.classList.remove('open');
+});
+
+render();
+</script>
+</body>
+</html>

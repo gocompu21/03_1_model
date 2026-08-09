@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ exam.title }} 전체 현황 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 50px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 820px; margin: 0 auto; padding: 20px; }
+
+        .card {
+            background: #fff; border-radius: 14px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 16px;
+        }
+        .title { font-size: 1.08rem; font-weight: 700; color: #1b4332; }
+        .tags { margin-top: 8px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .tag { font-size: 0.72rem; padding: 2px 9px; border-radius: 10px; background: #eef2ef; color: #55605a; }
+
+        .stats { display: flex; gap: 10px; margin-top: 16px; }
+        .stat { flex: 1; background: #f7faf8; border-radius: 10px; padding: 13px 6px; text-align: center; }
+        .stat .n { font-size: 1.4rem; font-weight: 800; color: #2d6a4f; line-height: 1.1; font-variant-numeric: tabular-nums; }
+        .stat .k { font-size: 0.73rem; color: #7a8b80; margin-top: 3px; }
+
+        .review-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 15px; margin-top: 16px;
+            background: #b8860b; color: #fff; border-radius: 10px;
+            text-decoration: none; font-weight: 700; font-size: 1rem;
+        }
+        .review-btn:hover { background: #a5790a; }
+        .review-btn small { font-weight: 400; opacity: 0.85; font-size: 0.82rem; }
+
+        h2 { font-size: 0.98rem; color: #1b4332; margin: 22px 0 10px; display: flex; align-items: center; gap: 7px; }
+
+        .q {
+            display: flex; gap: 13px; align-items: flex-start;
+            padding: 13px 0; border-bottom: 1px solid #eef2ef;
+        }
+        .q:last-child { border-bottom: none; }
+        .q img {
+            width: 74px; height: 74px; object-fit: cover; border-radius: 8px;
+            flex-shrink: 0; cursor: zoom-in; background: #f4f7f5;
+        }
+        .q .body { flex: 1; min-width: 0; }
+        .q .line1 { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+        .q .no { font-size: 0.78rem; color: #9aa8a0; font-variant-numeric: tabular-nums; }
+        .q .ans { font-weight: 700; color: #1b4332; font-size: 0.98rem; word-break: keep-all; }
+
+        .rate-wrap { display: flex; align-items: center; gap: 9px; margin-top: 7px; }
+        .rate-bar { flex: 1; height: 16px; background: #eef2ef; border-radius: 8px; overflow: hidden; min-width: 80px; }
+        .rate-bar span { display: block; height: 100%; background: #2d6a4f; }
+        .rate-bar.mid span { background: #d0a018; }
+        .rate-bar.low span { background: #c05252; }
+        .rate-num {
+            font-size: 0.88rem; font-weight: 700; color: #2d6a4f;
+            font-variant-numeric: tabular-nums; white-space: nowrap; min-width: 42px; text-align: right;
+        }
+        .rate-num.mid { color: #a37d0c; }
+        .rate-num.low { color: #a83232; }
+        .rate-sub { font-size: 0.74rem; color: #9aa8a0; margin-top: 3px; }
+
+        .mine { font-size: 0.78rem; margin-top: 5px; }
+        .mine .ok { color: #2d6a4f; font-weight: 600; }
+        .mine .no { color: #a83232; font-weight: 600; }
+        .mine .given { color: #9aa8a0; }
+
+        .lightbox {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+            display: none; align-items: center; justify-content: center; z-index: 100;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 100%; max-height: 100%; }
+        .empty { text-align: center; color: #9aa8a0; padding: 26px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% if is_admin %}{% url 'dvdexam:scores' exam.id %}{% else %}{% url 'dvdexam:result' exam.id %}{% endif %}">
+            <i class="fas fa-arrow-left"></i> 결과
+        </a>
+        <strong>전체 시험현황</strong>
+        <span></span>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="title">{{ exam.title }}</div>
+            <div class="tags">
+                <span class="tag">{{ exam.get_subject_display }}</span>
+                <span class="tag">{{ exam.get_kind_display }}</span>
+                <span class="tag">{{ exam.get_answer_format_display }}</span>
+                <span class="tag">{{ stats.total_q }}문항</span>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="n">{{ stats.taking }}</div>
+                    <div class="k">응시자</div>
+                </div>
+                <div class="stat">
+                    <div class="n">{{ stats.submitted }}</div>
+                    <div class="k">제출</div>
+                </div>
+                <div class="stat">
+                    <div class="n">{{ stats.average }}</div>
+                    <div class="k">평균 점수</div>
+                </div>
+                <div class="stat">
+                    <div class="n">{{ stats.avg_rate }}%</div>
+                    <div class="k">평균 정답률</div>
+                </div>
+            </div>
+
+            <a href="{% url 'dvdexam:review' exam.id %}" class="review-btn">
+                <i class="fas fa-rotate-left"></i>
+                복습하기
+                <small>많이 틀린 순으로 보기</small>
+            </a>
+        </div>
+
+        {% if hardest %}
+        <div class="card">
+            <h2><i class="fas fa-triangle-exclamation" style="color:#c05252;"></i> 많이 틀린 문항</h2>
+            {% for r in hardest %}
+            <div class="q">
+                <img src="{{ r.image }}" alt="{{ r.no }}번" loading="lazy">
+                <div class="body">
+                    <div class="line1">
+                        <span class="no">{{ r.no }}번</span>
+                        <span class="ans">{{ r.answer }}</span>
+                    </div>
+                    <div class="rate-wrap">
+                        <div class="rate-bar {% if r.rate < 40 %}low{% elif r.rate < 70 %}mid{% endif %}">
+                            <span style="width: {{ r.rate }}%"></span>
+                        </div>
+                        <span class="rate-num {% if r.rate < 40 %}low{% elif r.rate < 70 %}mid{% endif %}">{{ r.rate }}%</span>
+                    </div>
+                    <div class="rate-sub">{{ r.solved }}명 중 {{ r.correct }}명 정답</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <h2><i class="fas fa-list-ol"></i> 문항별 정답과 정답률</h2>
+            {% for r in rows %}
+            <div class="q">
+                <img src="{{ r.image }}" alt="{{ r.no }}번" loading="lazy">
+                <div class="body">
+                    <div class="line1">
+                        <span class="no">{{ r.no }}번</span>
+                        <span class="ans">{{ r.answer }}</span>
+                    </div>
+
+                    {% if r.rate is not None %}
+                    <div class="rate-wrap">
+                        <div class="rate-bar {% if r.rate < 40 %}low{% elif r.rate < 70 %}mid{% endif %}">
+                            <span style="width: {{ r.rate }}%"></span>
+                        </div>
+                        <span class="rate-num {% if r.rate < 40 %}low{% elif r.rate < 70 %}mid{% endif %}">{{ r.rate }}%</span>
+                    </div>
+                    <div class="rate-sub">{{ r.solved }}명 중 {{ r.correct }}명 정답</div>
+                    {% else %}
+                    <div class="rate-sub">아직 푼 사람이 없습니다</div>
+                    {% endif %}
+
+                    {% if r.my_correct is not None %}
+                    <div class="mine">
+                        {% if r.my_correct %}
+                        <span class="ok"><i class="fas fa-circle-check"></i> 내 답 정답</span>
+                        {% else %}
+                        <span class="no"><i class="fas fa-circle-xmark"></i> 내 답</span>
+                        <span class="given">{{ r.my_given|default:"(무응답)" }}</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty">문항이 없습니다.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="확대"></div>
+
+<script>
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+document.querySelectorAll('.q img').forEach(img => {
+    img.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add('open');
+    });
+});
+lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') lightbox.classList.remove('open');
+});
+</script>
+</body>
+</html>

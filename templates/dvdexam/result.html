@@ -31,6 +31,15 @@
             padding: 9px 14px; border-radius: 9px; margin-top: 14px;
         }
 
+        .overview-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: 100%; padding: 14px; margin-top: 18px;
+            background: #2d6a4f; color: #fff; border-radius: 10px;
+            text-decoration: none; font-weight: 700; font-size: 0.96rem;
+        }
+        .overview-btn:hover { background: #245a41; }
+        .overview-btn small { font-weight: 400; opacity: 0.85; font-size: 0.8rem; }
+
         h2 { font-size: 0.98rem; color: #1b4332; margin: 22px 0 10px; }
 
         .item {
@@ -90,6 +99,11 @@
             {% if attempt.auto_submitted %}
             <div class="auto-note"><i class="fas fa-clock"></i> 시간이 끝나 자동 제출되었습니다</div>
             {% endif %}
+
+            <a href="{% url 'dvdexam:overview' exam.id %}" class="overview-btn">
+                <i class="fas fa-chart-simple"></i> 전체 시험현황 보기
+                <small>문항별 정답률 · 복습하기</small>
+            </a>
         </div>
 
         <h2>문항별 결과</h2>
