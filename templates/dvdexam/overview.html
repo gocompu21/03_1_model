@@ -41,6 +41,15 @@
         .review-btn small { font-weight: 400; opacity: 0.85; font-size: 0.82rem; }
 
         h2 { font-size: 0.98rem; color: #1b4332; margin: 22px 0 10px; display: flex; align-items: center; gap: 7px; }
+        /* 정렬 버튼은 제목 오른쪽 끝에 붙인다 */
+        .sorts { margin-left: auto; display: flex; gap: 5px; }
+        .sort-btn {
+            border: 1px solid #dde5e0; background: #fff; color: #7a8b80;
+            border-radius: 13px; padding: 5px 12px; font-size: 0.78rem;
+            font-family: inherit; cursor: pointer; white-space: nowrap;
+        }
+        .sort-btn:hover { background: #f4f7f5; }
+        .sort-btn.on { background: #2d6a4f; border-color: #2d6a4f; color: #fff; font-weight: 600; }
 
         .q {
             display: flex; gap: 13px; align-items: flex-start;
@@ -152,9 +161,16 @@
         {% endif %}
 
         <div class="card">
-            <h2><i class="fas fa-list-ol"></i> 문항별 정답과 정답률</h2>
+            <h2>
+                <i class="fas fa-list-ol"></i> 문항별 정답과 정답률
+                <span class="sorts">
+                    <button type="button" class="sort-btn on" data-sort="no">문항순</button>
+                    <button type="button" class="sort-btn" data-sort="rate">정답률순</button>
+                </span>
+            </h2>
+            <div id="qlist">
             {% for r in rows %}
-            <div class="q">
+            <div class="q" data-no="{{ r.no }}" data-rate="{% if r.rate is None %}101{% else %}{{ r.rate }}{% endif %}">
                 <img src="{{ r.image }}" alt="{{ r.no }}번" loading="lazy">
                 <div class="body">
                     <div class="line1">
@@ -189,12 +205,38 @@
             {% empty %}
             <div class="empty">문항이 없습니다.</div>
             {% endfor %}
+            </div>
         </div>
     </div>
 
     <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt="확대"></div>
 
 <script>
+/* ---- 문항 정렬 ----
+   DOM 순서만 바꾼다. 정답률이 없는 문항(아무도 안 품)은 101로 두어 맨 뒤로 간다. */
+const qlist = document.getElementById('qlist');
+const sortBtns = document.querySelectorAll('.sort-btn');
+
+function sortBy(mode) {
+    const items = [...qlist.querySelectorAll('.q')];
+    items.sort((a, b) => {
+        if (mode === 'rate') {
+            const d = Number(a.dataset.rate) - Number(b.dataset.rate);
+            if (d) return d;                       // 정답률 낮은 순
+        }
+        return Number(a.dataset.no) - Number(b.dataset.no);
+    });
+    items.forEach(el => qlist.appendChild(el));
+    sortBtns.forEach(b => b.classList.toggle('on', b.dataset.sort === mode));
+    try { localStorage.setItem('dvdexamSort', mode); } catch (e) {}
+}
+
+sortBtns.forEach(b => b.addEventListener('click', () => sortBy(b.dataset.sort)));
+
+let saved = 'no';
+try { saved = localStorage.getItem('dvdexamSort') || 'no'; } catch (e) {}
+if (saved === 'rate') sortBy('rate');
+
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
 document.querySelectorAll('.q img').forEach(img => {
