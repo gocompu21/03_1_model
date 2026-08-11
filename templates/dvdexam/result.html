@@ -69,6 +69,8 @@
         }
         .a1 { background: #2d6a4f; color: #fff; }
         .a2 { background: #eef2ef; color: #40684f; }
+        .retry { background: #b8860b; }
+        .retry:hover { background: #a5790a; }
 
         .lightbox {
             position: fixed; inset: 0; background: rgba(0,0,0,0.92);
@@ -134,8 +136,11 @@
         {% endfor %}
 
         <div class="actions">
-            <a href="{% url 'dvdexam:index' %}" class="a1">시험 목록</a>
-            <a href="{% url 'main:dvd' %}" class="a2">DVD로</a>
+            <a href="{% url 'dvdexam:take' exam.id %}?retry=1" class="a1 retry"
+               onclick="return confirm('다시 풀면 지금 점수와 답안이 지워집니다. 계속할까요?');">
+                <i class="fas fa-rotate-right"></i> 다시 풀기
+            </a>
+            <a href="{% url 'dvdexam:index' %}" class="a2">시험 목록</a>
         </div>
     </div>
 

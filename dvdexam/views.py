@@ -41,16 +41,36 @@ def index(request):
 
 @login_required
 def take(request, exam_id):
-    """응시 화면. 이미 제출했으면 결과로 보낸다."""
+    """응시 화면.
+
+    이미 제출했으면 결과로 보낸다. ?retry=1 로 들어오면 다시 푼다
+    (이전 기록을 지우고 새로 시작한다).
+    """
     exam = get_object_or_404(Exam, id=exam_id, is_active=True)
 
     attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
-    if attempt and attempt.is_submitted:
+    retry = request.GET.get("retry") == "1"
+
+    if attempt and attempt.is_submitted and not retry:
         return redirect("dvdexam:result", exam_id=exam.id)
 
     state = exam.live_state
     if state != "open":
         return render(request, "dvdexam/closed.html", {"exam": exam, "state": state})
+
+    if attempt and retry:
+        # 같은 문제로 처음부터 다시 푼다. 이전 답과 점수는 지운다.
+        attempt.answers.all().delete()
+        attempt.score = 0
+        attempt.submitted_at = None
+        attempt.auto_submitted = False
+        attempt.last_saved_at = None
+        attempt.started_at = timezone.now()
+        attempt.total = exam.questions.count()
+        attempt.save(update_fields=[
+            "score", "submitted_at", "auto_submitted",
+            "last_saved_at", "started_at", "total",
+        ])
 
     if not attempt:
         attempt = ExamAttempt.objects.create(
