@@ -240,7 +240,7 @@ def manage(request):
             created_by=request.user,
         )
         try:
-            exam.question_count = max(1, min(100, int(request.POST.get("question_count", 20))))
+            exam.question_count = max(1, min(500, int(request.POST.get("question_count", 20))))
         except (TypeError, ValueError):
             exam.question_count = 20
         try:
@@ -259,6 +259,10 @@ def manage(request):
         made = build_questions(exam)
         if not made:
             exam.delete()
+        elif made != exam.question_count:
+            # 보유 종수가 모자라 덜 만들어졌으면 실제 수로 맞춘다
+            exam.question_count = made
+            exam.save(update_fields=["question_count"])
 
         return redirect("dvdexam:manage")
 
