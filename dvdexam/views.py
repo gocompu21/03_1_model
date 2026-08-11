@@ -5,6 +5,7 @@ from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
 
 from .models import Exam, ExamAnswer, ExamAttempt, ExamQuestion, build_questions, source_pool
 
@@ -16,6 +17,7 @@ def _is_admin(user):
 # ---------------------------------------------------------------- 응시자
 
 @login_required
+@never_cache
 def index(request):
     """응시할 수 있는 시험 목록."""
     exams = (
@@ -40,6 +42,7 @@ def index(request):
 
 
 @login_required
+@never_cache
 def take(request, exam_id):
     """응시 화면.
 
@@ -200,6 +203,7 @@ def _grade(attempt, given, auto=False):
 
 
 @login_required
+@never_cache
 def result(request, exam_id):
     """내 채점 결과."""
     exam = get_object_or_404(Exam, id=exam_id)
@@ -216,6 +220,7 @@ def result(request, exam_id):
 # ---------------------------------------------------------------- 관리자
 
 @user_passes_test(_is_admin)
+@never_cache
 def manage(request):
     """시험 관리: 등록 + 목록."""
     if request.method == "POST":
@@ -296,6 +301,7 @@ def _parse_dt(value):
 
 
 @login_required
+@never_cache
 def overview(request, exam_id):
     """전체 시험현황. 문항별 정답과 정답률을 보여준다.
 
@@ -396,6 +402,7 @@ def review(request, exam_id):
 
 
 @user_passes_test(_is_admin)
+@never_cache
 def scores(request, exam_id):
     """응시 결과 모아 보기. 화면은 아래 API로 실시간 갱신된다."""
     exam = get_object_or_404(Exam, id=exam_id)
@@ -409,6 +416,7 @@ def scores(request, exam_id):
 
 
 @user_passes_test(_is_admin)
+@never_cache
 def scores_api(request, exam_id):
     """응시 현황 JSON. 결과 화면이 주기적으로 불러 새로 그린다."""
     exam = get_object_or_404(Exam, id=exam_id)
