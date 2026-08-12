@@ -337,6 +337,18 @@
             border-bottom: 1px solid #eef2ef;
             padding-bottom: 9px;
         }
+        /* 헤더를 눌러 정렬한다. 현재 기준은 진하게, 방향은 화살표로 */
+        .list-cols .sort {
+            background: none; border: none; padding: 0;
+            font: inherit; color: inherit; cursor: pointer;
+            text-align: left; display: flex; align-items: center; gap: 3px;
+            white-space: nowrap; overflow: hidden;
+        }
+        .list-cols .sort:hover { color: #40684f; }
+        .list-cols .sort i::after { content: '↕'; opacity: 0.35; font-style: normal; }
+        .list-cols .sort.on { color: #2d6a4f; font-weight: 700; }
+        .list-cols .sort.on i::after { content: '↑'; opacity: 1; }
+        .list-cols .sort.on.desc i::after { content: '↓'; }
         .list-body { overflow-y: auto; flex: 1; padding-bottom: 20px; }
         .list-row {
             font-size: 0.88rem;
@@ -394,7 +406,8 @@
                 gap: 6px;
             }
             .list-row { font-size: 0.82rem; }
-            .list-cols .c-tax { display: none; }
+            /* 좁은 화면에서는 목/과 헤더를 감춘다 (버튼이므로 !important 로 확실히) */
+            .list-cols .c-tax { display: none !important; }
             .list-row .c-tax {
                 grid-column: 2;
                 grid-row: 2;
@@ -552,7 +565,11 @@
             </div>
             {% endif %}
             <div class="list-cols">
-                <span class="c-no">번호</span><span class="c-name">해충명</span><span class="c-tax">목 / 과</span><span class="c-occ">연발생횟수</span><span class="c-ow">월동태</span>
+                <button type="button" class="c-no sort on" data-key="no">번호<i></i></button>
+                <button type="button" class="c-name sort" data-key="name">해충명<i></i></button>
+                <button type="button" class="c-tax sort" data-key="taxon">목 / 과<i></i></button>
+                <button type="button" class="c-occ sort" data-key="occ">연발생횟수<i></i></button>
+                <button type="button" class="c-ow sort" data-key="ow">월동태<i></i></button>
             </div>
             <div class="list-body" id="listBody"></div>
         </div>
@@ -721,8 +738,17 @@ function fieldOf(card, label) {
     return f ? f.value : '-';
 }
 
+function escapeAttr(s) {
+    return String(s).replace(/[&<>"']/g, c =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 listBody.innerHTML = CARDS.map((card, i) => `
-    <div class="list-row${card.stars ? ' past' : ''}" data-i="${i}" data-past="${card.stars ? 1 : 0}">
+    <div class="list-row${card.stars ? ' past' : ''}" data-i="${i}" data-past="${card.stars ? 1 : 0}"
+         data-no="${i + 1}" data-name="${escapeAttr(card.name || '')}"
+         data-taxon="${escapeAttr(card.taxon || '')}"
+         data-occ="${escapeAttr(fieldOf(card, '연발생횟수'))}"
+         data-ow="${escapeAttr(fieldOf(card, '월동태'))}">
         <span class="c-no">${i + 1}</span>
         <span class="c-name"><span class="mark-badge${card.marked ? '' : ' off'}">관심</span>${card.name || '(이름 미상)'}${
             card.stars ? `<span class="stars" title="기출 ${card.exam}">${'★'.repeat(card.stars)}</span>` : ''
@@ -732,8 +758,13 @@ listBody.innerHTML = CARDS.map((card, i) => `
         <span class="c-ow">${fieldOf(card, '월동태')}</span>
     </div>`).join('');
 
+function rowOf(i) {
+    // 정렬하면 화면 순서와 카드 번호가 달라지므로 data-i로 찾는다
+    return listBody.querySelector(`.list-row[data-i="${i}"]`);
+}
+
 function syncListMark(i, on) {
-    const row = listBody.children[i];
+    const row = rowOf(i);
     if (!row) return;
     const badge = row.querySelector('.mark-badge');
     if (badge) badge.classList.toggle('off', !on);
@@ -761,12 +792,53 @@ if (filterAll && filterPast) {
 
 function openList() {
     listPanel.classList.add('open');
-    const rows = listBody.children;
-    for (const row of rows) row.classList.toggle('current', Number(row.dataset.i) === index);
-    if (rows[index] && !rows[index].classList.contains('filtered')) {
-        rows[index].scrollIntoView({ block: 'center' });
+    for (const row of listBody.children) {
+        row.classList.toggle('current', Number(row.dataset.i) === index);
+    }
+    const cur = rowOf(index);
+    if (cur && !cur.classList.contains('filtered')) {
+        cur.scrollIntoView({ block: 'center' });
     }
 }
+/* ---- 헤더 클릭 정렬 ----
+   같은 헤더를 다시 누르면 오름/내림이 뒤집힌다. DOM 순서만 바꾼다. */
+let sortKey = 'no';
+let sortAsc = true;
+
+function sortList(key) {
+    if (key === sortKey) sortAsc = !sortAsc;
+    else { sortKey = key; sortAsc = true; }
+
+    const rows = [...listBody.querySelectorAll('.list-row')];
+    const collator = new Intl.Collator('ko');   // 한글 가나다 정렬
+
+    rows.sort((a, b) => {
+        let d;
+        if (sortKey === 'no') {
+            d = Number(a.dataset.no) - Number(b.dataset.no);
+        } else {
+            const av = a.dataset[sortKey] || '';
+            const bv = b.dataset[sortKey] || '';
+            // 값이 비어 있으면 항상 뒤로 보낸다
+            if (!av !== !bv) return av ? -1 : 1;
+            d = collator.compare(av, bv);
+            if (!d) d = Number(a.dataset.no) - Number(b.dataset.no);  // 같으면 번호순
+        }
+        return sortAsc ? d : -d;
+    });
+    rows.forEach(r => listBody.appendChild(r));
+
+    document.querySelectorAll('.list-cols .sort').forEach(btn => {
+        const on = btn.dataset.key === sortKey;
+        btn.classList.toggle('on', on);
+        btn.classList.toggle('desc', on && !sortAsc);
+    });
+}
+
+document.querySelectorAll('.list-cols .sort').forEach(btn => {
+    btn.addEventListener('click', () => sortList(btn.dataset.key));
+});
+
 function closeList() { listPanel.classList.remove('open'); }
 
 document.getElementById('listBtn').addEventListener('click', openList);
