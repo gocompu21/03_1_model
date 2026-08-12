@@ -63,6 +63,17 @@
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
         th, td { padding: 10px 6px; text-align: left; border-bottom: 1px solid #eef2ef; }
         th { color: #7a8b80; font-size: 0.76rem; font-weight: 600; }
+        /* 헤더를 눌러 정렬한다. 현재 기준은 진하게, 방향은 화살표로 */
+        th .sort {
+            background: none; border: none; padding: 0;
+            font: inherit; color: inherit; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 3px; white-space: nowrap;
+        }
+        th .sort:hover { color: #40684f; }
+        th .sort i::after { content: '↕'; opacity: 0.35; font-style: normal; }
+        th .sort.on { color: #2d6a4f; font-weight: 700; }
+        th .sort.on i::after { content: '↑'; opacity: 1; }
+        th .sort.on.desc i::after { content: '↓'; }
         .rank { color: #9aa8a0; font-variant-numeric: tabular-nums; width: 30px; }
         .who { font-weight: 600; color: #1b4332; word-break: keep-all; }
         .who .id { font-weight: 400; color: #9aa8a0; font-size: 0.78rem; }
@@ -160,11 +171,11 @@
                 <thead>
                     <tr>
                         <th class="rank">#</th>
-                        <th>응시자</th>
-                        <th>응답률</th>
-                        <th>점수</th>
-                        <th>소요시간</th>
-                        <th class="hide-sm">시각</th>
+                        <th><button type="button" class="sort" data-key="name">응시자<i></i></button></th>
+                        <th><button type="button" class="sort" data-key="answer_percent">응답률<i></i></button></th>
+                        <th><button type="button" class="sort on desc" data-key="percent">점수<i></i></button></th>
+                        <th><button type="button" class="sort" data-key="elapsed_sec">소요시간<i></i></button></th>
+                        <th class="hide-sm"><button type="button" class="sort" data-key="time">시각<i></i></button></th>
                     </tr>
                 </thead>
                 <tbody id="rows"></tbody>
@@ -189,7 +200,55 @@ function esc(s) {
         ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+/* ---- 헤더 클릭 정렬 ----
+   2초마다 표를 다시 그리므로, 그릴 때마다 현재 기준으로 정렬한다. */
+let sortKey = 'percent';   // 기본은 점수
+let sortAsc = false;       // 높은 점수부터
+const collator = new Intl.Collator('ko');
+
+function sortRows(rows) {
+    return [...rows].sort((a, b) => {
+        let d;
+        if (sortKey === 'name') {
+            d = collator.compare(a.name || '', b.name || '');
+        } else if (sortKey === 'time') {
+            // 제출한 사람은 제출 시각, 아직이면 시작 시각 기준
+            d = collator.compare(a.submitted_at || a.started_at, b.submitted_at || b.started_at);
+        } else if (sortKey === 'percent') {
+            // 미제출자는 잠정 점수라 항상 뒤로 보낸다
+            if (a.submitted !== b.submitted) return a.submitted ? -1 : 1;
+            d = a.percent - b.percent;
+        } else {
+            d = (a[sortKey] || 0) - (b[sortKey] || 0);
+        }
+        if (!d) d = collator.compare(a.name || '', b.name || '');  // 같으면 이름순
+        return sortAsc ? d : -d;
+    });
+}
+
+function setSort(key) {
+    if (key === sortKey) sortAsc = !sortAsc;
+    else {
+        sortKey = key;
+        // 이름·시각은 오름차순이 자연스럽고, 숫자는 큰 값부터 보는 게 유용하다
+        sortAsc = (key === 'name' || key === 'time');
+    }
+    document.querySelectorAll('thead .sort').forEach(btn => {
+        const on = btn.dataset.key === sortKey;
+        btn.classList.toggle('on', on);
+        btn.classList.toggle('desc', on && !sortAsc);
+    });
+    if (lastData) draw(lastData);
+}
+
+document.querySelectorAll('thead .sort').forEach(btn => {
+    btn.addEventListener('click', () => setSort(btn.dataset.key));
+});
+
+let lastData = null;
+
 function draw(data) {
+    lastData = data;
     document.getElementById('sTaking').textContent = data.stats.taking;
     document.getElementById('sDoing').textContent = data.stats.in_progress;
     document.getElementById('sDone').textContent = data.stats.submitted;
@@ -199,7 +258,7 @@ function draw(data) {
 
     emptyEl.style.display = data.rows.length ? 'none' : 'block';
 
-    rowsEl.innerHTML = data.rows.map((r, i) => {
+    rowsEl.innerHTML = sortRows(data.rows).map((r, i) => {
         // 직전과 달라졌으면 잠깐 강조한다
         const before = prev[r.id];
         const changed = before && (before.answered !== r.answered || before.submitted !== r.submitted);
