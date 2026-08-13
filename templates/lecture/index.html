@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>녹화강의 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 50px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 860px; margin: 0 auto; padding: 20px; }
+
+        /* 과목 고르기 */
+        .subjects {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+        }
+        .subj {
+            background: #fff; border: 1.5px solid #dfe7e2; color: #40684f;
+            padding: 8px 15px; border-radius: 20px; text-decoration: none;
+            font-size: 0.88rem; font-weight: 600; white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .subj:hover { border-color: #2d6a4f; }
+        .subj.on { background: #2d6a4f; border-color: #2d6a4f; color: #fff; }
+        .subj .n {
+            background: #eef2ef; color: #7a8b80; font-size: 0.74rem;
+            padding: 1px 7px; border-radius: 9px;
+        }
+        .subj.on .n { background: rgba(255,255,255,0.24); color: #fff; }
+
+        h2 {
+            font-size: 1rem; color: #1b4332; margin: 0 0 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* 강의 카드 */
+        .lec {
+            background: #fff; border-radius: 14px; padding: 16px 18px;
+            margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; gap: 14px;
+            align-items: center; text-decoration: none; color: inherit;
+        }
+        .lec:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
+        .lec-body { min-width: 0; }
+        .lec-title {
+            font-size: 1.02rem; font-weight: 700; color: #1b4332;
+            word-break: keep-all; line-height: 1.35;
+        }
+        .tags { margin-top: 7px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+        .tag {
+            font-size: 0.74rem; padding: 2px 9px; border-radius: 10px; white-space: nowrap;
+            background: #eef2ef; color: #55605a;
+        }
+        .tag.s { background: #d8f3dc; color: #1b4332; }
+        .tag.p { background: #e5e2fb; color: #362b78; }
+        .note { font-size: 0.82rem; color: #7a8b80; margin-top: 7px; word-break: keep-all; }
+
+        .play {
+            background: #2d6a4f; color: #fff; font-size: 0.86rem; font-weight: 600;
+            padding: 10px 16px; border-radius: 9px; white-space: nowrap; flex-shrink: 0;
+            display: flex; align-items: center; gap: 6px;
+        }
+
+        .empty {
+            background: #fff; border-radius: 14px; padding: 46px 20px;
+            text-align: center; color: #9aa8a0; font-size: 0.92rem;
+        }
+        .empty i { font-size: 2.2rem; color: #d8e2db; display: block; margin-bottom: 12px; }
+
+        @media (max-width: 520px) {
+            .container { padding: 14px; }
+            .lec { padding: 14px; gap: 10px; }
+            .lec-title { font-size: 0.95rem; }
+            .play { padding: 9px 13px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'main:index' %}"><i class="fas fa-arrow-left"></i> 홈</a>
+        <strong>녹화강의</strong>
+        {% if user.is_staff %}
+        <a href="{% url 'lecture:manage' %}" style="font-size:0.82rem;">
+            <i class="fas fa-gear"></i> 관리
+        </a>
+        {% else %}<span></span>{% endif %}
+    </header>
+
+    <div class="container">
+        <div class="subjects">
+            <a href="{% url 'lecture:index' %}" class="subj {% if not current %}on{% endif %}">
+                전체 <span class="n">{{ total }}</span>
+            </a>
+            {% for s in subjects %}
+            <a href="?subject={{ s.code }}"
+               class="subj {% if current and current.code == s.code %}on{% endif %}">
+                {{ s.name }} <span class="n">{{ s.lecture_count }}</span>
+            </a>
+            {% endfor %}
+        </div>
+
+        <h2>
+            <i class="fas fa-video"></i>
+            {% if current %}{{ current.name }}{% else %}전체 강의{% endif %}
+            <span style="font-weight:500; color:#7a8b80; font-size:0.86rem;">
+                {{ lectures|length }}편
+            </span>
+        </h2>
+
+        {% for lec in lectures %}
+        <a href="{{ lec.video_url }}" target="_blank" rel="noopener noreferrer" class="lec">
+            <div class="lec-body">
+                <div class="lec-title">{{ lec.title }}</div>
+                <div class="tags">
+                    <span class="tag s">{{ lec.subject.name }}</span>
+                    <span class="tag">{{ lec.lecture_date|date:"Y.n.j" }}</span>
+                    <span class="tag p">{{ lec.period }}교시</span>
+                    {% if lec.duration_display %}
+                    <span class="tag"><i class="far fa-clock"></i> {{ lec.duration_display }}</span>
+                    {% endif %}
+                </div>
+                {% if lec.note %}<div class="note">{{ lec.note }}</div>{% endif %}
+            </div>
+            <span class="play"><i class="fas fa-play"></i> 보기</span>
+        </a>
+        {% empty %}
+        <div class="empty">
+            <i class="fas fa-video-slash"></i>
+            {% if current %}{{ current.name }} 녹화강의가 아직 없습니다.
+            {% else %}등록된 녹화강의가 없습니다.{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

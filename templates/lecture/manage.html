@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>녹화강의 관리 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 60px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 940px; margin: 0 auto; padding: 20px; }
+
+        .msg {
+            padding: 11px 15px; border-radius: 9px; margin-bottom: 14px; font-size: 0.9rem;
+        }
+        .msg.success { background: #d8f3dc; color: #1b4332; }
+        .msg.error { background: #fde2e2; color: #7a1b1b; }
+
+        .panel {
+            background: #fff; border-radius: 14px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 22px;
+        }
+        .panel h2 {
+            font-size: 1.02rem; color: #1b4332; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; }
+        .f { display: flex; flex-direction: column; gap: 5px; }
+        .f.subject { grid-column: span 4; }
+        .f.date    { grid-column: span 4; }
+        .f.period  { grid-column: span 2; }
+        .f.dur     { grid-column: span 2; }
+        .f.title   { grid-column: span 12; }
+        .f.url     { grid-column: span 12; }
+        .f.note    { grid-column: span 12; }
+
+        label { font-size: 0.82rem; color: #55605a; font-weight: 600; }
+        input[type=text], input[type=date], input[type=number], input[type=url], select, textarea {
+            border: 1.5px solid #dfe7e2; border-radius: 8px; padding: 9px 11px;
+            font-size: 0.92rem; font-family: inherit; background: #fff; width: 100%;
+        }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: #2d6a4f; }
+        textarea { resize: vertical; min-height: 60px; }
+        .hint { font-size: 0.76rem; color: #9aa8a0; }
+
+        .row-check { display: flex; align-items: center; gap: 7px; margin-top: 14px; }
+        .row-check label { font-weight: 500; font-size: 0.88rem; }
+
+        .actions { margin-top: 16px; display: flex; gap: 8px; }
+        button, .btn {
+            border: none; border-radius: 9px; padding: 11px 20px; font-size: 0.92rem;
+            font-weight: 600; cursor: pointer; font-family: inherit;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .b1 { background: #2d6a4f; color: #fff; }
+        .b2 { background: #eef2ef; color: #55605a; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { padding: 11px 9px; text-align: left; border-bottom: 1px solid #eef2ef; }
+        th { font-size: 0.8rem; color: #7a8b80; font-weight: 600; white-space: nowrap; }
+        td.t { font-weight: 600; color: #1b4332; word-break: keep-all; }
+        tr.off { opacity: 0.5; }
+
+        .badge {
+            font-size: 0.72rem; padding: 2px 8px; border-radius: 9px; white-space: nowrap;
+        }
+        .badge.s { background: #d8f3dc; color: #1b4332; }
+        .link {
+            color: #2d6a4f; font-size: 0.82rem; text-decoration: none;
+            word-break: break-all;
+        }
+        .ops { display: flex; gap: 5px; white-space: nowrap; }
+        .op {
+            border: none; background: #eef2ef; color: #55605a; cursor: pointer;
+            font-size: 0.78rem; padding: 5px 10px; border-radius: 7px;
+            text-decoration: none; font-family: inherit;
+        }
+        .op.del { background: #fde2e2; color: #7a1b1b; }
+        .empty { text-align: center; color: #9aa8a0; padding: 32px; font-size: 0.9rem; }
+
+        @media (max-width: 700px) {
+            .container { padding: 14px; }
+            .f.subject, .f.date { grid-column: span 12; }
+            .f.period, .f.dur { grid-column: span 6; }
+            .hide-sm { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'dashboard:index' %}"><i class="fas fa-arrow-left"></i> 관리메뉴</a>
+        <strong>녹화강의 관리</strong>
+        <a href="{% url 'lecture:index' %}" style="font-size:0.82rem;">
+            <i class="fas fa-eye"></i> 사용자 화면
+        </a>
+    </header>
+
+    <div class="container">
+        {% for m in messages %}
+        <div class="msg {{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+
+        <div class="panel">
+            <h2>
+                <i class="fas fa-{% if editing %}pen{% else %}plus{% endif %}"></i>
+                {% if editing %}강의 수정{% else %}강의 등록{% endif %}
+            </h2>
+            <form method="post">
+                {% csrf_token %}
+                {% if editing %}<input type="hidden" name="id" value="{{ editing.id }}">{% endif %}
+                <div class="grid">
+                    <div class="f subject">
+                        <label for="subject">과목</label>
+                        <select name="subject" id="subject" required>
+                            <option value="">선택하세요</option>
+                            {% for s in subjects %}
+                            <option value="{{ s.id }}"
+                                {% if editing and editing.subject_id == s.id %}selected{% endif %}>
+                                {{ s.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="f date">
+                        <label for="lecture_date">일시</label>
+                        <input type="date" name="lecture_date" id="lecture_date" required
+                               value="{{ editing.lecture_date|date:'Y-m-d' }}">
+                    </div>
+                    <div class="f period">
+                        <label for="period">교시</label>
+                        <input type="number" name="period" id="period" min="1" max="20"
+                               value="{{ editing.period|default:1 }}">
+                    </div>
+                    <div class="f dur">
+                        <label for="duration_min">시간(분)</label>
+                        <input type="number" name="duration_min" id="duration_min" min="0" max="600"
+                               value="{{ editing.duration_min|default:0 }}">
+                    </div>
+
+                    <div class="f title">
+                        <label for="title">내용</label>
+                        <input type="text" name="title" id="title" required maxlength="200"
+                               placeholder="예: 수목병의 개념과 병삼각형"
+                               value="{{ editing.title|default:'' }}">
+                    </div>
+
+                    <div class="f url">
+                        <label for="video_url">영상 링크</label>
+                        <input type="url" name="video_url" id="video_url" required maxlength="500"
+                               placeholder="https://naver.me/FvTbwUsX"
+                               value="{{ editing.video_url|default:'' }}">
+                        <span class="hint">
+                            영상은 올리지 않습니다. 네이버 등에 올린 주소를 넣으면 사용자가 그 주소로 이동합니다.
+                        </span>
+                    </div>
+
+                    <div class="f note">
+                        <label for="note">비고 <span class="hint">(선택)</span></label>
+                        <textarea name="note" id="note" placeholder="교재 범위, 준비물 등">{{ editing.note|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="row-check">
+                    <input type="checkbox" name="is_active" id="is_active"
+                           {% if not editing or editing.is_active %}checked{% endif %}>
+                    <label for="is_active">사용자에게 공개</label>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="b1">
+                        <i class="fas fa-{% if editing %}check{% else %}plus{% endif %}"></i>
+                        {% if editing %}수정 저장{% else %}등록{% endif %}
+                    </button>
+                    {% if editing %}
+                    <a href="{% url 'lecture:manage' %}" class="btn b2">취소</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h2><i class="fas fa-list"></i> 등록된 강의 <span style="font-weight:500;color:#7a8b80;">{{ lectures|length }}편</span></h2>
+            {% if lectures %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>일시</th>
+                        <th>과목</th>
+                        <th>교시</th>
+                        <th>내용</th>
+                        <th class="hide-sm">시간</th>
+                        <th class="hide-sm">링크</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lec in lectures %}
+                    <tr class="{% if not lec.is_active %}off{% endif %}">
+                        <td style="white-space:nowrap;">{{ lec.lecture_date|date:"Y.n.j" }}</td>
+                        <td><span class="badge s">{{ lec.subject.name }}</span></td>
+                        <td>{{ lec.period }}교시</td>
+                        <td class="t">
+                            {{ lec.title }}
+                            {% if not lec.is_active %}<span class="badge">비공개</span>{% endif %}
+                        </td>
+                        <td class="hide-sm">{{ lec.duration_display|default:"-" }}</td>
+                        <td class="hide-sm">
+                            <a href="{{ lec.video_url }}" target="_blank" rel="noopener noreferrer"
+                               class="link">{{ lec.video_url|truncatechars:34 }}</a>
+                        </td>
+                        <td>
+                            <div class="ops">
+                                <a href="?edit={{ lec.id }}" class="op">수정</a>
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="toggle">
+                                    <input type="hidden" name="id" value="{{ lec.id }}">
+                                    <button type="submit" class="op">
+                                        {% if lec.is_active %}숨김{% else %}공개{% endif %}
+                                    </button>
+                                </form>
+                                <form method="post" style="display:inline;"
+                                      onsubmit="return confirm('삭제하면 되돌릴 수 없습니다. 계속할까요?');">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="{{ lec.id }}">
+                                    <button type="submit" class="op del">삭제</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">등록된 강의가 없습니다. 위에서 첫 강의를 등록하세요.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if editing %}
+    <script>document.getElementById('subject').scrollIntoView({block: 'center'});</script>
+    {% endif %}
+</body>
+</html>
