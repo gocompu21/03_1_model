@@ -41,38 +41,70 @@
             display: flex; align-items: center; gap: 8px;
         }
 
-        /* 강의 카드 */
-        .lec {
-            background: #fff; border-radius: 14px; padding: 16px 18px;
-            margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: flex; justify-content: space-between; gap: 14px;
-            align-items: center; text-decoration: none; color: inherit;
+        /* 하루 묶음 */
+        .day {
+            background: #fff; border-radius: 14px; margin-bottom: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden;
         }
-        .lec:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); }
-        .lec-body { min-width: 0; }
+        .day-head {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 10px; padding: 13px 18px; background: #f0f6f2;
+            border-bottom: 1px solid #e3ece7;
+        }
+        .day-when { display: flex; align-items: baseline; gap: 8px; min-width: 0; flex-wrap: wrap; }
+        .day-note { font-size: 0.79rem; color: #7a8b80; word-break: keep-all; }
+        .day-date { font-size: 1rem; font-weight: 700; color: #1b4332; white-space: nowrap; }
+        .day-dow { font-size: 0.8rem; color: #7a8b80; }
+        .day-meta { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .day-n {
+            font-size: 0.76rem; color: #55605a; background: #fff;
+            border: 1px solid #dfe7e2; padding: 2px 9px; border-radius: 10px; white-space: nowrap;
+        }
+        .day-body { padding: 6px 8px 8px; }
+
+        /* 강의 한 줄 */
+        .lec {
+            border-radius: 10px; padding: 11px 12px;
+            display: flex; gap: 12px; align-items: center;
+            text-decoration: none; color: inherit;
+        }
+        .lec + .lec { border-top: 1px solid #f2f5f3; }
+        .lec:hover { background: #f7faf8; }
+        .lec-body { min-width: 0; flex: 1; }
+
+        /* 교시 번호 */
+        .pnum {
+            width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+            background: #eef2ef; color: #55605a;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.86rem; font-weight: 700;
+        }
+        .lec.seen .pnum { background: #2d6a4f; color: #fff; }
         .lec-title {
-            font-size: 1.02rem; font-weight: 700; color: #1b4332;
+            font-size: 0.96rem; font-weight: 600; color: #1b4332;
             word-break: keep-all; line-height: 1.35;
         }
-        .tags { margin-top: 7px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+        .tags { margin-top: 5px; display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+        .tags:empty { display: none; }
         .tag {
             font-size: 0.74rem; padding: 2px 9px; border-radius: 10px; white-space: nowrap;
             background: #eef2ef; color: #55605a;
         }
         .tag.s { background: #d8f3dc; color: #1b4332; }
         .tag.p { background: #e5e2fb; color: #362b78; }
-        /* 내가 이미 본 강의 */
+        /* 이미 본 것 */
         .tag.done {
-            background: #2d6a4f; color: #fff; margin-right: 5px;
-            vertical-align: middle; font-size: 0.7rem;
+            background: #2d6a4f; color: #fff; font-size: 0.7rem;
+            vertical-align: middle; margin-left: 5px;
         }
-        .lec.seen { border-left: 4px solid #2d6a4f; }
-        .lec.seen .play { background: #6b8f7c; }
-        .note { font-size: 0.82rem; color: #7a8b80; margin-top: 7px; word-break: keep-all; }
+        .tag.part { background: #fff3d4; color: #7a5a12; }
+        .note { font-size: 0.8rem; color: #7a8b80; margin-top: 5px; word-break: keep-all; }
+        .lec.seen .lec-title { color: #55605a; font-weight: 500; }
+        .lec.seen .play { background: #eef2ef; color: #6b8f7c; }
 
         .play {
-            background: #2d6a4f; color: #fff; font-size: 0.86rem; font-weight: 600;
-            padding: 10px 16px; border-radius: 9px; white-space: nowrap; flex-shrink: 0;
+            background: #2d6a4f; color: #fff; font-size: 0.84rem; font-weight: 600;
+            padding: 8px 14px; border-radius: 8px; white-space: nowrap; flex-shrink: 0;
             display: flex; align-items: center; gap: 6px;
         }
 
@@ -84,9 +116,14 @@
 
         @media (max-width: 520px) {
             .container { padding: 14px; }
-            .lec { padding: 14px; gap: 10px; }
-            .lec-title { font-size: 0.95rem; }
-            .play { padding: 9px 13px; font-size: 0.8rem; }
+            .day-head { padding: 11px 14px; }
+            .day-date { font-size: 0.94rem; }
+            .lec { padding: 10px 8px; gap: 9px; }
+            .lec-title { font-size: 0.9rem; }
+            .pnum { width: 27px; height: 27px; font-size: 0.8rem; }
+            /* 좁은 화면에서는 아이콘만 남긴다 */
+            .play { padding: 9px 11px; }
+            .play .ptext { display: none; }
         }
     </style>
 </head>
@@ -118,36 +155,65 @@
             <i class="fas fa-video"></i>
             {% if current %}{{ current.name }}{% else %}전체 강의{% endif %}
             <span style="font-weight:500; color:#7a8b80; font-size:0.86rem;">
-                {{ lectures|length }}편
+                {{ lecture_count }}편
                 {% if seen_count %}· 시청 {{ seen_count }}편{% endif %}
             </span>
         </h2>
 
-        {% for lec in lectures %}
-        <a href="{% url 'lecture:watch' lec.id %}" target="_blank" rel="noopener noreferrer"
-           class="lec {% if lec.my_view %}seen{% endif %}">
-            <div class="lec-body">
-                <div class="lec-title">
-                    {% if lec.my_view %}<span class="tag done">시청</span>{% endif %}
-                    {{ lec.title }}
+        {% for day in days %}
+        <section class="day">
+            <div class="day-head">
+                <div class="day-when">
+                    <span class="day-date">{{ day.date|date:"Y년 n월 j일" }}</span>
+                    <span class="day-dow">({{ day.date|date:"D"|slice:":1" }})</span>
+                    {% if day.note %}<span class="day-note">{{ day.note }}</span>{% endif %}
                 </div>
-                <div class="tags">
-                    <span class="tag s">{{ lec.subject.name }}</span>
-                    <span class="tag">{{ lec.lecture_date|date:"Y.n.j" }}</span>
-                    <span class="tag p">{{ lec.period }}교시</span>
-                    {% if lec.duration_display %}
-                    <span class="tag"><i class="far fa-clock"></i> {{ lec.duration_display }}</span>
+                <div class="day-meta">
+                    {% if day.subject and not current %}
+                    <span class="tag s">{{ day.subject.name }}</span>
                     {% endif %}
-                    {% if lec.my_view.count > 1 %}
-                    <span class="tag">{{ lec.my_view.count }}회 봄</span>
+                    <span class="day-n">{{ day.count }}편</span>
+                    {% if day.done %}
+                    <span class="tag done">모두 시청</span>
+                    {% elif day.seen %}
+                    <span class="tag part">{{ day.seen }}/{{ day.count }} 시청</span>
                     {% endif %}
                 </div>
-                {% if lec.note %}<div class="note">{{ lec.note }}</div>{% endif %}
             </div>
-            <span class="play">
-                <i class="fas fa-play"></i> {% if lec.my_view %}다시 보기{% else %}보기{% endif %}
-            </span>
-        </a>
+
+            <div class="day-body">
+                {% for lec in day.items %}
+                <a href="{% url 'lecture:watch' lec.id %}" target="_blank" rel="noopener noreferrer"
+                   class="lec {% if lec.my_view %}seen{% endif %}">
+                    <span class="pnum">{{ lec.period }}</span>
+                    <div class="lec-body">
+                        <div class="lec-title">
+                            {{ lec.title }}
+                            {% if lec.my_view %}<span class="tag done">시청</span>{% endif %}
+                        </div>
+                        <div class="tags">
+                            {% if not current %}
+                            <span class="tag s">{{ lec.subject.name }}</span>
+                            {% endif %}
+                            {% if lec.duration_display %}
+                            <span class="tag"><i class="far fa-clock"></i> {{ lec.duration_display }}</span>
+                            {% endif %}
+                            {% if lec.my_view.count > 1 %}
+                            <span class="tag">{{ lec.my_view.count }}회 봄</span>
+                            {% endif %}
+                        </div>
+                        {% if day.per_item_note and lec.note %}
+                        <div class="note">{{ lec.note }}</div>
+                        {% endif %}
+                    </div>
+                    <span class="play">
+                        <i class="fas fa-play"></i>
+                        <span class="ptext">{% if lec.my_view %}다시 보기{% else %}보기{% endif %}</span>
+                    </span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
         {% empty %}
         <div class="empty">
             <i class="fas fa-video-slash"></i>

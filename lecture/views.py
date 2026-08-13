@@ -51,11 +51,47 @@ def index(request):
 
     return render(request, "lecture/index.html", {
         "subjects": subjects,
-        "lectures": lectures,
+        "days": _group_by_day(lectures),
+        "lecture_count": len(lectures),
         "current": current,
         "total": Lecture.objects.filter(is_active=True).count(),
         "seen_count": len(seen),
     })
+
+
+def _group_by_day(lectures):
+    """같은 날 강의를 한 묶음으로 만든다.
+
+    Meta.ordering이 이미 '최근 날짜 → 교시' 순이라 순서대로 훑으면 된다.
+    """
+    days = []
+    for lec in lectures:
+        if not days or days[-1]["date"] != lec.lecture_date:
+            days.append({
+                "date": lec.lecture_date,
+                "subject": lec.subject,
+                "items": [],
+                "seen": 0,
+            })
+        days[-1]["items"].append(lec)
+        if lec.my_view:
+            days[-1]["seen"] += 1
+
+    for day in days:
+        day["count"] = len(day["items"])
+        # 그날 강의를 다 봤는지
+        day["done"] = day["seen"] == day["count"]
+        # 그날 전체가 같은 비고를 쓰면 묶음 머리에 한 번만 보인다.
+        # 다르면 강의마다 따로 보여야 하므로 묶음 비고는 비운다
+        notes = {i.note for i in day["items"] if i.note}
+        shared = len(notes) == 1
+        day["note"] = next(iter(notes)) if shared else ""
+        # 비고가 제각각이면 강의 줄마다 보여준다
+        day["per_item_note"] = len(notes) > 1
+        # 여러 과목이 섞인 날이면 과목을 묶음 제목에 쓰지 않는다
+        if any(i.subject_id != day["subject"].id for i in day["items"]):
+            day["subject"] = None
+    return days
 
 
 @login_required
