@@ -2,13 +2,14 @@
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Count, Q
+from django.db.models import Count, F, Max, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.cache import never_cache
 
 from exam.models import Subject
 
-from .models import Lecture
+from .models import Lecture, LectureView
 
 
 def _is_admin(user):
@@ -39,12 +40,43 @@ def index(request):
         if current:
             lectures = lectures.filter(subject=current)
 
+    # 내가 본 강의는 목록에 표시해 준다
+    seen = {
+        v.lecture_id: v
+        for v in LectureView.objects.filter(user=request.user, lecture__in=lectures)
+    }
+    lectures = list(lectures)
+    for lec in lectures:
+        lec.my_view = seen.get(lec.id)
+
     return render(request, "lecture/index.html", {
         "subjects": subjects,
         "lectures": lectures,
         "current": current,
         "total": Lecture.objects.filter(is_active=True).count(),
+        "seen_count": len(seen),
     })
+
+
+@login_required
+def watch(request, lecture_id):
+    """시청 기록을 남기고 영상 주소로 보낸다.
+
+    영상이 외부(네이버 등)에서 재생되므로 사이트가 알 수 있는 것은
+    여기까지다. 실제로 몇 분을 봤는지는 확인할 방법이 없다.
+    """
+    lecture = get_object_or_404(Lecture, id=lecture_id, is_active=True)
+
+    view, created = LectureView.objects.get_or_create(
+        lecture=lecture, user=request.user, defaults={"count": 1}
+    )
+    if not created:
+        # 경쟁 상태에서도 세기가 어긋나지 않도록 DB에서 직접 올린다
+        LectureView.objects.filter(id=view.id).update(
+            count=F("count") + 1, last_viewed_at=timezone.now()
+        )
+
+    return redirect(lecture.video_url)
 
 
 # ---------------------------------------------------------------- 관리자
@@ -76,10 +108,72 @@ def manage(request):
             messages.error(request, error)
         return redirect("lecture:manage")
 
+    lectures = (
+        Lecture.objects.select_related("subject")
+        .annotate(
+            viewer_count=Count("views", distinct=True),  # 본 사람 수
+            play_count=Sum("views__count"),              # 누른 횟수 합
+        )
+        # annotate()가 Meta.ordering을 무너뜨린다. 다시 명시한다
+        .order_by("-lecture_date", "period", "id")
+    )
+
     return render(request, "lecture/manage.html", {
         "subjects": Subject.objects.order_by("code"),
-        "lectures": Lecture.objects.select_related("subject").all(),
+        "lectures": lectures,
         "editing": _editing(request),
+    })
+
+
+@user_passes_test(_is_admin)
+@never_cache
+def stats(request):
+    """시청 현황.
+
+    영상이 외부에서 재생되므로 **시청 시간은 집계할 수 없다.**
+    누가 어떤 강의를 몇 번 열었는지와 마지막 시청 시각까지가 한계다.
+    """
+    lectures = (
+        Lecture.objects.select_related("subject")
+        .annotate(
+            viewer_count=Count("views", distinct=True),
+            play_count=Sum("views__count"),
+            last_at=Max("views__last_viewed_at"),
+        )
+        .order_by("-lecture_date", "period", "id")
+    )
+
+    # 사용자별 집계
+    people = (
+        LectureView.objects.values("user__id", "user__username", "user__first_name")
+        .annotate(
+            lecture_count=Count("lecture", distinct=True),
+            play_count=Sum("count"),
+            last_at=Max("last_viewed_at"),
+        )
+        .order_by("-lecture_count", "-play_count")
+    )
+
+    # 한 강의만 파고들 때
+    focus_id = request.GET.get("lecture")
+    focus, focus_rows = None, []
+    if focus_id and focus_id.isdigit():
+        focus = Lecture.objects.filter(id=focus_id).select_related("subject").first()
+        if focus:
+            focus_rows = (
+                focus.views.select_related("user").order_by("-count", "-last_viewed_at")
+            )
+
+    total_plays = LectureView.objects.aggregate(n=Sum("count"))["n"] or 0
+
+    return render(request, "lecture/stats.html", {
+        "lectures": lectures,
+        "people": people,
+        "focus": focus,
+        "focus_rows": focus_rows,
+        "total_plays": total_plays,
+        "total_viewers": LectureView.objects.values("user").distinct().count(),
+        "lecture_total": Lecture.objects.count(),
     })
 
 

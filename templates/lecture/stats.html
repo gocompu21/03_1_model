@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>녹화강의 시청 현황 - 나무의사 합격반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            background: #f4f7f5; color: #333; padding-bottom: 60px;
+        }
+        header {
+            background: #2d6a4f; color: #fff; padding: 14px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        header a { color: #fff; text-decoration: none; font-weight: 600; }
+        .container { max-width: 980px; margin: 0 auto; padding: 20px; }
+
+        /* 알 수 없는 것을 먼저 밝힌다 */
+        .caveat {
+            background: #fff6e5; border-left: 4px solid #e0a020; color: #6b4d10;
+            padding: 12px 16px; border-radius: 9px; margin-bottom: 20px;
+            font-size: 0.86rem; line-height: 1.55;
+        }
+        .caveat strong { color: #4a3508; }
+
+        .stats { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .stat {
+            background: #fff; border-radius: 12px; padding: 15px 18px; flex: 1;
+            min-width: 130px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .stat .n { font-size: 1.5rem; font-weight: 800; color: #2d6a4f; line-height: 1.1; }
+        .stat .l { font-size: 0.78rem; color: #7a8b80; margin-top: 4px; }
+
+        .panel {
+            background: #fff; border-radius: 14px; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+        .panel h2 {
+            font-size: 1.02rem; color: #1b4332; margin-bottom: 14px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .panel h2 .sub { font-weight: 500; color: #7a8b80; font-size: 0.82rem; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #eef2ef; }
+        th { font-size: 0.79rem; color: #7a8b80; font-weight: 600; white-space: nowrap; }
+        td.t { font-weight: 600; color: #1b4332; word-break: keep-all; }
+        td.num { text-align: right; white-space: nowrap; }
+        tr.zero td { color: #b3bfb8; }
+
+        .badge { font-size: 0.72rem; padding: 2px 8px; border-radius: 9px; white-space: nowrap; }
+        .badge.s { background: #d8f3dc; color: #1b4332; }
+        .badge.off { background: #eef2ef; color: #9aa8a0; }
+
+        .n1 { font-weight: 700; color: #2d6a4f; }
+        .muted { color: #9aa8a0; font-size: 0.82rem; }
+        .op {
+            background: #eef2ef; color: #55605a; font-size: 0.78rem;
+            padding: 5px 10px; border-radius: 7px; text-decoration: none; white-space: nowrap;
+        }
+        .op:hover { background: #d8f3dc; color: #1b4332; }
+        .op.on { background: #2d6a4f; color: #fff; }
+
+        .empty { text-align: center; color: #9aa8a0; padding: 30px; font-size: 0.9rem; }
+
+        @media (max-width: 700px) {
+            .container { padding: 14px; }
+            .hide-sm { display: none; }
+            .stat { min-width: 100px; padding: 12px; }
+            .stat .n { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{% url 'lecture:manage' %}"><i class="fas fa-arrow-left"></i> 강의 관리</a>
+        <strong>시청 현황</strong>
+        <a href="{% url 'dashboard:index' %}" style="font-size:0.82rem;">관리메뉴</a>
+    </header>
+
+    <div class="container">
+        <div class="caveat">
+            <strong>시청 시간은 집계되지 않습니다.</strong>
+            영상이 네이버 등 외부에서 재생되므로, 사이트가 알 수 있는 것은
+            <strong>'강의 보기'를 눌러 영상으로 넘어갔다는 사실</strong>까지입니다.
+            실제로 몇 분을 보았는지, 끝까지 보았는지는 확인할 방법이 없습니다.
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="n">{{ lecture_total }}</div>
+                <div class="l">등록 강의</div>
+            </div>
+            <div class="stat">
+                <div class="n">{{ total_viewers }}</div>
+                <div class="l">시청한 사람</div>
+            </div>
+            <div class="stat">
+                <div class="n">{{ total_plays }}</div>
+                <div class="l">전체 시청 횟수</div>
+            </div>
+        </div>
+
+        {% if focus %}
+        <div class="panel">
+            <h2>
+                <i class="fas fa-user-group"></i> {{ focus.title }}
+                <span class="sub">{{ focus.subject.name }} · {{ focus.lecture_date|date:"Y.n.j" }} {{ focus.period }}교시</span>
+            </h2>
+            {% if focus_rows %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>사용자</th>
+                        <th class="num">시청 횟수</th>
+                        <th class="hide-sm">처음 시청</th>
+                        <th>마지막 시청</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in focus_rows %}
+                    <tr>
+                        <td class="t">
+                            {{ v.user.first_name|default:v.user.username }}
+                            <span class="muted">{{ v.user.username }}</span>
+                        </td>
+                        <td class="num n1">{{ v.count }}회</td>
+                        <td class="hide-sm muted">{{ v.first_viewed_at|date:"n/j H:i" }}</td>
+                        <td class="muted">{{ v.last_viewed_at|date:"n/j H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">아직 이 강의를 본 사람이 없습니다.</div>
+            {% endif %}
+            <div style="margin-top:14px;">
+                <a href="{% url 'lecture:stats' %}" class="op">전체 현황으로</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="panel">
+            <h2><i class="fas fa-film"></i> 강의별 시청 현황</h2>
+            {% if lectures %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>일시</th>
+                        <th class="hide-sm">과목</th>
+                        <th>내용</th>
+                        <th class="num">본 사람</th>
+                        <th class="num">시청 횟수</th>
+                        <th class="hide-sm">마지막 시청</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lec in lectures %}
+                    <tr class="{% if not lec.viewer_count %}zero{% endif %}">
+                        <td style="white-space:nowrap;">{{ lec.lecture_date|date:"Y.n.j" }}</td>
+                        <td class="hide-sm"><span class="badge s">{{ lec.subject.name }}</span></td>
+                        <td class="t">
+                            {{ lec.title }}
+                            {% if not lec.is_active %}<span class="badge off">비공개</span>{% endif %}
+                        </td>
+                        <td class="num n1">{{ lec.viewer_count }}명</td>
+                        <td class="num">{{ lec.play_count|default:0 }}회</td>
+                        <td class="hide-sm muted">
+                            {% if lec.last_at %}{{ lec.last_at|date:"n/j H:i" }}{% else %}-{% endif %}
+                        </td>
+                        <td>
+                            {% if lec.viewer_count %}
+                            <a href="?lecture={{ lec.id }}"
+                               class="op {% if focus.id == lec.id %}on{% endif %}">명단</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">등록된 강의가 없습니다.</div>
+            {% endif %}
+        </div>
+
+        <div class="panel">
+            <h2>
+                <i class="fas fa-users"></i> 사용자별 시청 현황
+                <span class="sub">{{ people|length }}명</span>
+            </h2>
+            {% if people %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>사용자</th>
+                        <th class="hide-sm">아이디</th>
+                        <th class="num">본 강의</th>
+                        <th class="num">시청 횟수</th>
+                        <th>마지막 시청</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in people %}
+                    <tr>
+                        <td class="t">{{ p.user__first_name|default:p.user__username }}</td>
+                        <td class="hide-sm muted">{{ p.user__username }}</td>
+                        <td class="num n1">{{ p.lecture_count }}편</td>
+                        <td class="num">{{ p.play_count }}회</td>
+                        <td class="muted">{{ p.last_at|date:"n/j H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">아직 강의를 본 사람이 없습니다.</div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

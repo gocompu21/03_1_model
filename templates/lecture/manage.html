@@ -99,9 +99,10 @@
     <header>
         <a href="{% url 'dashboard:index' %}"><i class="fas fa-arrow-left"></i> 관리메뉴</a>
         <strong>녹화강의 관리</strong>
-        <a href="{% url 'lecture:index' %}" style="font-size:0.82rem;">
-            <i class="fas fa-eye"></i> 사용자 화면
-        </a>
+        <span style="display:flex; gap:14px; font-size:0.82rem;">
+            <a href="{% url 'lecture:stats' %}"><i class="fas fa-chart-simple"></i> 시청 현황</a>
+            <a href="{% url 'lecture:index' %}"><i class="fas fa-eye"></i> 사용자 화면</a>
+        </span>
     </header>
 
     <div class="container">
@@ -198,6 +199,7 @@
                         <th>교시</th>
                         <th>내용</th>
                         <th class="hide-sm">시간</th>
+                        <th style="text-align:right;">시청</th>
                         <th class="hide-sm">링크</th>
                         <th></th>
                     </tr>
@@ -213,6 +215,17 @@
                             {% if not lec.is_active %}<span class="badge">비공개</span>{% endif %}
                         </td>
                         <td class="hide-sm">{{ lec.duration_display|default:"-" }}</td>
+                        <td style="text-align:right; white-space:nowrap;">
+                            {% if lec.viewer_count %}
+                            <a href="{% url 'lecture:stats' %}?lecture={{ lec.id }}"
+                               style="color:#2d6a4f; text-decoration:none; font-weight:600;">
+                                {{ lec.viewer_count }}명
+                            </a>
+                            <span style="color:#9aa8a0; font-size:0.8rem;">/{{ lec.play_count }}회</span>
+                            {% else %}
+                            <span style="color:#c3ccc7;">-</span>
+                            {% endif %}
+                        </td>
                         <td class="hide-sm">
                             <a href="{{ lec.video_url }}" target="_blank" rel="noopener noreferrer"
                                class="link">{{ lec.video_url|truncatechars:34 }}</a>

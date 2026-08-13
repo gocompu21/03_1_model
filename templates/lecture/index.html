@@ -61,6 +61,13 @@
         }
         .tag.s { background: #d8f3dc; color: #1b4332; }
         .tag.p { background: #e5e2fb; color: #362b78; }
+        /* 내가 이미 본 강의 */
+        .tag.done {
+            background: #2d6a4f; color: #fff; margin-right: 5px;
+            vertical-align: middle; font-size: 0.7rem;
+        }
+        .lec.seen { border-left: 4px solid #2d6a4f; }
+        .lec.seen .play { background: #6b8f7c; }
         .note { font-size: 0.82rem; color: #7a8b80; margin-top: 7px; word-break: keep-all; }
 
         .play {
@@ -112,13 +119,18 @@
             {% if current %}{{ current.name }}{% else %}전체 강의{% endif %}
             <span style="font-weight:500; color:#7a8b80; font-size:0.86rem;">
                 {{ lectures|length }}편
+                {% if seen_count %}· 시청 {{ seen_count }}편{% endif %}
             </span>
         </h2>
 
         {% for lec in lectures %}
-        <a href="{{ lec.video_url }}" target="_blank" rel="noopener noreferrer" class="lec">
+        <a href="{% url 'lecture:watch' lec.id %}" target="_blank" rel="noopener noreferrer"
+           class="lec {% if lec.my_view %}seen{% endif %}">
             <div class="lec-body">
-                <div class="lec-title">{{ lec.title }}</div>
+                <div class="lec-title">
+                    {% if lec.my_view %}<span class="tag done">시청</span>{% endif %}
+                    {{ lec.title }}
+                </div>
                 <div class="tags">
                     <span class="tag s">{{ lec.subject.name }}</span>
                     <span class="tag">{{ lec.lecture_date|date:"Y.n.j" }}</span>
@@ -126,10 +138,15 @@
                     {% if lec.duration_display %}
                     <span class="tag"><i class="far fa-clock"></i> {{ lec.duration_display }}</span>
                     {% endif %}
+                    {% if lec.my_view.count > 1 %}
+                    <span class="tag">{{ lec.my_view.count }}회 봄</span>
+                    {% endif %}
                 </div>
                 {% if lec.note %}<div class="note">{{ lec.note }}</div>{% endif %}
             </div>
-            <span class="play"><i class="fas fa-play"></i> 보기</span>
+            <span class="play">
+                <i class="fas fa-play"></i> {% if lec.my_view %}다시 보기{% else %}보기{% endif %}
+            </span>
         </a>
         {% empty %}
         <div class="empty">

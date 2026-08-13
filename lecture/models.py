@@ -55,3 +55,32 @@ class Lecture(models.Model):
         if hours:
             return f"{hours}시간"
         return f"{minutes}분"
+
+
+class LectureView(models.Model):
+    """누가 어떤 강의를 몇 번 열었는지.
+
+    영상은 네이버 등 외부에서 재생되므로 **실제 시청 시간은 알 수 없다.**
+    사이트가 확인할 수 있는 것은 '강의 보기를 눌러 영상으로 나갔다'는
+    사실뿐이다. 그래서 시간이 아니라 횟수와 시각만 남긴다.
+    """
+
+    lecture = models.ForeignKey(
+        Lecture, on_delete=models.CASCADE, related_name="views", verbose_name="강의"
+    )
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="lecture_views", verbose_name="사용자"
+    )
+    count = models.IntegerField(default=0, verbose_name="시청 횟수")
+    first_viewed_at = models.DateTimeField(auto_now_add=True, verbose_name="처음 시청")
+    last_viewed_at = models.DateTimeField(auto_now=True, verbose_name="마지막 시청")
+
+    class Meta:
+        verbose_name = "녹화강의 시청"
+        verbose_name_plural = "녹화강의 시청"
+        # 사용자 한 명당 강의 하나에 한 행. 다시 보면 count만 올린다
+        unique_together = ("lecture", "user")
+        ordering = ["-last_viewed_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.lecture.title} ({self.count}회)"
