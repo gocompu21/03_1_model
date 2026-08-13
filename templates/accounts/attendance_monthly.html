@@ -83,6 +83,15 @@
         .present { color: #28a745; font-weight: 600; }
         .absent { color: #ddd; }
         .total-col { background: #f8fdf9; font-weight: 600; color: #1b4332; }
+
+        /* 맨 아래 일자별 합계 줄 */
+        tfoot td {
+            background: #eef6f1; font-weight: 700; color: #1b4332;
+            border-top: 2px solid #d3e5db; border-bottom: none;
+        }
+        /* 이름 칸은 가로 스크롤 시 고정되므로 배경을 따로 준다 */
+        tfoot .name-col { background: #eef6f1; z-index: 1; }
+        tfoot .grand { background: #d8f3dc; }
         .empty { text-align: center; color: #999; padding: 40px; }
         .legend { margin-top: 12px; color: #888; font-size: 0.82rem; text-align: center; }
     </style>
@@ -142,6 +151,15 @@
                     </tr>
                     {% endfor %}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <td class="name-col">계</td>
+                        {% for t in day_totals %}
+                        <td class="day-total">{{ t.count }}</td>
+                        {% endfor %}
+                        <td class="total-col grand">{{ grand_total }}</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
         <div class="legend">

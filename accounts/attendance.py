@@ -229,6 +229,17 @@ def attendance_monthly(request):
         if present_count:
             rows.append({"user": u, "cells": cells, "count": present_count})
 
+    # 일자별 출석 인원. 표에 실제로 그린 행을 세어야 열 합계와 눈으로 맞는다
+    # (탈퇴·비활성 사용자의 기록은 행이 없으니 합계에도 넣지 않는다)
+    day_totals = [
+        {
+            "date": d,
+            "count": sum(1 for r in rows if r["cells"][i]["present"]),
+        }
+        for i, d in enumerate(active_days)
+    ]
+    grand_total = sum(t["count"] for t in day_totals)
+
     prev_month = first_day - timedelta(days=1)
     next_month = last_day + timedelta(days=1)
 
@@ -240,6 +251,8 @@ def attendance_monthly(request):
             "month": month,
             "active_days": active_days,
             "rows": rows,
+            "day_totals": day_totals,
+            "grand_total": grand_total,
             "prev_year": prev_month.year,
             "prev_month": prev_month.month,
             "next_year": next_month.year,
