@@ -168,7 +168,9 @@ def attendance_stats(request):
         .order_by("-attend_count", "first_name", "username")
     )
 
-    total_days = Attendance.objects.values("date").distinct().count()
+    # order_by() 필수. Meta.ordering의 checked_at이 DISTINCT에 딸려 들어가면
+    # 날짜 수가 아니라 출석 기록 건수가 세어진다
+    total_days = Attendance.objects.order_by().values("date").distinct().count()
 
     return render(
         request,
@@ -198,8 +200,13 @@ def attendance_monthly(request):
     last_day = date(year, month, days_in_month)
 
     # 이 달에 출석 기록이 있는 날짜만 열로 표시 (빈 날 제외해 표를 좁게 유지)
+    #
+    # order_by()로 Meta.ordering을 반드시 걷어낸다. 기본 정렬에 checked_at이
+    # 들어 있어 그대로 두면 DISTINCT에 checked_at이 딸려 들어가고, 체크 시각은
+    # 사람마다 달라 같은 날이 출석 인원 수만큼 열로 반복된다
     active_days = sorted(
         Attendance.objects.filter(date__range=(first_day, last_day))
+        .order_by()
         .values_list("date", flat=True)
         .distinct()
     )
