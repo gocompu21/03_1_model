@@ -79,11 +79,14 @@ def index(request):
             'device_icon': last_session.device_icon if last_session else 'fas fa-globe',
         })
     
-    # Sort by: 1) online status, 2) today's usage time, 3) total usage time
+    # 최근 로그인 순. 접속 중인 사람을 맨 위에 두고, 그 다음은 최근에
+    # 로그인한 순서다. 한 번도 로그인하지 않은 사용자는 맨 뒤로 보낸다
+    # (last_login이 None이라 그냥 비교하면 TypeError가 난다)
     user_stats.sort(key=lambda x: (
-        not x['is_online'],           # Online users first
-        -x['today_minutes_raw'],      # Then by today's usage (descending)
-        -x['total_minutes_raw']       # Then by total usage (descending)
+        not x['is_online'],            # 접속 중이면 위로
+        x['last_login'] is None,       # 로그인 이력 없으면 맨 뒤
+        # 최근 로그인이 위로. None은 위 조건에서 이미 갈렸으므로 0을 쓴다
+        -(x['last_login'].timestamp() if x['last_login'] else 0),
     ))
     
     # Subject performance stats
