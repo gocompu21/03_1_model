@@ -82,8 +82,9 @@ def index(request):
     # 최근 로그인 순. 접속 중인 사람을 맨 위에 두고, 그 다음은 최근에
     # 로그인한 순서다. 한 번도 로그인하지 않은 사용자는 맨 뒤로 보낸다
     # (last_login이 None이라 그냥 비교하면 TypeError가 난다)
+    # 오로지 최근 로그인 순. 접속 중이어도 로그인이 오래됐으면 아래로 간다
+    # (접속 여부는 첫 열의 초록 점으로 구분한다)
     user_stats.sort(key=lambda x: (
-        not x['is_online'],            # 접속 중이면 위로
         x['last_login'] is None,       # 로그인 이력 없으면 맨 뒤
         # 최근 로그인이 위로. None은 위 조건에서 이미 갈렸으므로 0을 쓴다
         -(x['last_login'].timestamp() if x['last_login'] else 0),
