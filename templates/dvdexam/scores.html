@@ -109,6 +109,9 @@
         .badge.done { background: #d8f3dc; color: #1b4332; }
         .badge.doing { background: #fff3d4; color: #7a5a12; }
         .badge.auto { background: #eef2ef; color: #7a8b80; margin-left: 3px; }
+        /* 재응시 중 — 표에 보이는 점수는 아직 지난 기록이다 */
+        .badge.retry { background: #e5e2fb; color: #362b78; }
+        .badge.prev { background: #eef2ef; color: #7a8b80; margin-left: 3px; }
 
         tr.flash { animation: flash 1.2s ease-out; }
         @keyframes flash { from { background: #fff8e0; } to { background: transparent; } }
@@ -270,7 +273,9 @@ function draw(data) {
                 ${esc(r.name)}
                 ${r.submitted
                     ? `<span class="badge done">제출</span>${r.auto ? '<span class="badge auto">자동</span>' : ''}`
-                    : `<span class="badge doing">응시 중</span>`}
+                    : r.retrying
+                        ? `<span class="badge retry">재응시 중</span>${r.prev ? '<span class="badge prev">지난 점수</span>' : ''}`
+                        : `<span class="badge doing">응시 중</span>`}
                 <br><span class="id">${esc(r.username)}</span>
             </td>
             <td>

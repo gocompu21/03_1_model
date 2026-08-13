@@ -137,7 +137,7 @@
 
         <div class="actions">
             <a href="{% url 'dvdexam:take' exam.id %}?retry=1" class="a1 retry"
-               onclick="return confirm('다시 풀면 지금 점수와 답안이 지워집니다. 계속할까요?');">
+               onclick="return confirm('다시 풀어 제출하면 지금 점수가 새 점수로 바뀝니다.\n제출하지 않으면 지금 기록이 그대로 남습니다. 계속할까요?');">
                 <i class="fas fa-rotate-right"></i> 다시 풀기
             </a>
             <a href="{% url 'dvdexam:index' %}" class="a2">시험 목록</a>

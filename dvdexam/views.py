@@ -27,10 +27,10 @@ def index(request):
         .order_by("kind", "-created_at")
     )
 
-    mine = {
-        a.exam_id: a
-        for a in ExamAttempt.objects.filter(user=request.user, exam__in=exams)
-    }
+    mine = {}
+    for a in ExamAttempt.objects.filter(user=request.user, exam__in=exams):
+        a.drop_stale_retry()  # 2시간 방치된 재응시는 버리고 이전 기록을 살린다
+        mine[a.exam_id] = a
     for exam in exams:
         exam.my_attempt = mine.get(exam.id)
 
@@ -46,34 +46,32 @@ def index(request):
 def take(request, exam_id):
     """응시 화면.
 
-    이미 제출했으면 결과로 보낸다. ?retry=1 로 들어오면 다시 푼다
-    (이전 기록을 지우고 새로 시작한다).
+    이미 제출했으면 결과로 보낸다. ?retry=1 로 들어오면 다시 푼다.
+    재응시는 **제출해야 기록이 갱신된다.** 중간에 그만두면 지난 점수가 남는다.
     """
     exam = get_object_or_404(Exam, id=exam_id, is_active=True)
 
     attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
     retry = request.GET.get("retry") == "1"
 
-    if attempt and attempt.is_submitted and not retry:
+    if attempt:
+        attempt.drop_stale_retry()  # 2시간 방치된 재응시는 버린다
+
+    # 재응시를 시작해 둔 상태면 제출 전까지 계속 이어서 푼다
+    if attempt and attempt.is_submitted and not retry and not attempt.is_retrying:
         return redirect("dvdexam:result", exam_id=exam.id)
 
     state = exam.live_state
     if state != "open":
         return render(request, "dvdexam/closed.html", {"exam": exam, "state": state})
 
-    if attempt and retry:
-        # 같은 문제로 처음부터 다시 푼다. 이전 답과 점수는 지운다.
+    if attempt and retry and not attempt.is_retrying:
+        # 재응시 시작. 이전 점수·제출 기록은 그대로 두고 답안만 비운다.
+        # 제출해야 _grade()가 새 결과로 덮어쓴다.
         attempt.answers.all().delete()
-        attempt.score = 0
-        attempt.submitted_at = None
-        attempt.auto_submitted = False
+        attempt.retrying_since = timezone.now()
         attempt.last_saved_at = None
-        attempt.started_at = timezone.now()
-        attempt.total = exam.questions.count()
-        attempt.save(update_fields=[
-            "score", "submitted_at", "auto_submitted",
-            "last_saved_at", "started_at", "total",
-        ])
+        attempt.save(update_fields=["retrying_since", "last_saved_at"])
 
     if not attempt:
         attempt = ExamAttempt.objects.create(
@@ -116,7 +114,13 @@ def save(request, exam_id):
 
     exam = get_object_or_404(Exam, id=exam_id, is_active=True)
     attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
-    if not attempt or attempt.is_submitted:
+    if not attempt:
+        return JsonResponse({"ok": False, "submitted": True})
+    if attempt.drop_stale_retry():
+        # 2시간이 지나 폐기된 재응시. 저장을 받지 않는다
+        return JsonResponse({"ok": False, "expired": True})
+    # 재응시 중이면 지난 제출 기록이 남아 있어도 저장을 받는다
+    if attempt.is_submitted and not attempt.is_retrying:
         return JsonResponse({"ok": False, "submitted": True})
 
     try:
@@ -155,7 +159,10 @@ def submit(request, exam_id):
     attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
     if not attempt:
         return JsonResponse({"error": "no attempt"}, status=404)
-    if attempt.is_submitted:
+    if attempt.drop_stale_retry():
+        return JsonResponse({"ok": False, "expired": True, "url": f"/dvdexam/{exam.id}/result/"})
+    # 재응시 중이면 지난 기록이 있어도 다시 채점해 덮어쓴다
+    if attempt.is_submitted and not attempt.is_retrying:
         return JsonResponse({"ok": True, "already": True, "url": f"/dvdexam/{exam.id}/result/"})
 
     try:
@@ -199,7 +206,11 @@ def _grade(attempt, given, auto=False):
     attempt.total = len(questions)
     attempt.submitted_at = timezone.now()
     attempt.auto_submitted = auto
-    attempt.save(update_fields=["score", "total", "submitted_at", "auto_submitted"])
+    # 제출이 곧 갱신이다. 재응시였다면 여기서 이전 기록이 새 결과로 바뀐다.
+    attempt.retrying_since = None
+    attempt.save(update_fields=[
+        "score", "total", "submitted_at", "auto_submitted", "retrying_since",
+    ])
 
 
 @login_required
@@ -426,6 +437,12 @@ def scores_api(request, exam_id):
 def _scores_data(exam):
     """응시자별 현황과 집계를 만든다."""
     total_q = exam.questions.count()
+
+    # 2시간 넘게 방치된 재응시를 먼저 정리한다. 응시자가 화면을 닫고
+    # 돌아오지 않아도 관리자 화면에서 이전 기록이 되살아난다
+    stale = timezone.now() - timezone.timedelta(hours=ExamAttempt.RETRY_ABANDON_HOURS)
+    for a in exam.attempts.filter(retrying_since__lt=stale):
+        a.drop_stale_retry()
     attempts = (
         exam.attempts.select_related("user")
         .annotate(
@@ -438,24 +455,42 @@ def _scores_data(exam):
     rows = []
     for a in attempts:
         answered = a.filled
-        # 제출자는 전체 문항 기준, 응시 중인 사람은 푼 문항 기준으로 본다
-        base = (a.total or total_q) if a.is_submitted else answered
+        retrying = a.is_retrying
+
+        # 재응시 중이면 표의 모든 값이 '지난 확정 기록'이어야 한다.
+        # 새로 푼 답안 수를 섞어 보이면 점수와 응답률이 따로 놀아 혼란스럽다
+        if retrying and a.is_submitted:
+            answered = a.total or total_q
+
+        if a.is_submitted:
+            # 제출한 점수는 확정값이다. 응답 행에서 다시 세지 않는다.
+            # (재응시가 폐기되면 답안이 지워져 hit이 0이 되므로 반드시 score를 쓴다)
+            correct, shown_total = a.score, a.total or total_q
+            percent = a.score_percent
+        else:
+            correct, shown_total = a.hit, a.total or total_q
+            # 응시 중인 사람은 푼 문항 기준으로 본다
+            percent = round(a.hit * 100 / answered) if answered else 0
+
         rows.append({
             "id": a.id,
             "name": a.user.first_name or a.user.username,
             "username": a.user.username,
-            "submitted": a.is_submitted,
-            "auto": a.auto_submitted,
-            "correct": a.hit,
+            "submitted": a.is_submitted and not retrying,
+            "retrying": retrying,
+            # 재응시 중이면 표시되는 점수는 지난 기록이다
+            "prev": retrying and a.is_submitted,
+            "auto": a.auto_submitted and not retrying,
+            "correct": correct,
             "answered": answered,
-            "total": a.total or total_q,
+            "total": shown_total,
             "answer_percent": round(answered * 100 / total_q) if total_q else 0,
             # 푼 문제 중 몇 %를 맞혔는지 (제출 후에는 전체 기준 = 최종 점수)
-            "percent": round(a.hit * 100 / base) if base else 0,
+            "percent": percent,
             "elapsed": a.elapsed_display,
             "elapsed_sec": a.elapsed_seconds,
             "submitted_at": timezone.localtime(a.submitted_at).strftime("%m/%d %H:%M")
-                            if a.submitted_at else "",
+                            if a.submitted_at and not retrying else "",
             "started_at": timezone.localtime(a.started_at).strftime("%m/%d %H:%M"),
         })
 

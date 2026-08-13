@@ -77,7 +77,7 @@
     <div class="container">
         <h2><i class="fas fa-bolt"></i> 실시간 시험 <span class="cnt">{{ live|length }}</span></h2>
         {% for e in live %}
-        {% if e.my_attempt.is_submitted %}
+        {% if e.my_attempt.is_submitted and not e.my_attempt.is_retrying %}
         <a href="{% url 'dvdexam:result' e.id %}" class="exam done">
         {% elif e.live_state == 'open' %}
         <a href="{% url 'dvdexam:take' e.id %}" class="exam">
@@ -101,7 +101,12 @@
                     </div>
                 </div>
                 <div class="state">
+                    {% if e.my_attempt.is_retrying and e.live_state == 'open' %}
+                    <span class="go">재응시 이어서</span>
                     {% if e.my_attempt.is_submitted %}
+                    <div class="sub">지난 점수 {{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
+                    {% endif %}
+                    {% elif e.my_attempt.is_submitted %}
                     <div class="score">{{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
                     <div class="sub">결과 · 다시 풀기</div>
                     {% elif e.live_state == 'open' %}
@@ -111,14 +116,14 @@
                     {% endif %}
                 </div>
             </div>
-        {% if e.my_attempt.is_submitted or e.live_state == 'open' %}</a>{% else %}</div>{% endif %}
+        {% if e.my_attempt.is_submitted and not e.my_attempt.is_retrying or e.live_state == 'open' %}</a>{% else %}</div>{% endif %}
         {% empty %}
         <div class="empty">예정된 실시간 시험이 없습니다.</div>
         {% endfor %}
 
         <h2><i class="fas fa-clock"></i> 상시시험 <span class="cnt">{{ always|length }}</span></h2>
         {% for e in always %}
-        {% if e.my_attempt.is_submitted %}
+        {% if e.my_attempt.is_submitted and not e.my_attempt.is_retrying %}
         <a href="{% url 'dvdexam:result' e.id %}" class="exam done">
         {% else %}
         <a href="{% url 'dvdexam:take' e.id %}" class="exam">
@@ -134,7 +139,12 @@
                     </div>
                 </div>
                 <div class="state">
+                    {% if e.my_attempt.is_retrying %}
+                    <span class="go">재응시 이어서</span>
                     {% if e.my_attempt.is_submitted %}
+                    <div class="sub">지난 점수 {{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
+                    {% endif %}
+                    {% elif e.my_attempt.is_submitted %}
                     <div class="score">{{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
                     <div class="sub">결과 · 다시 풀기</div>
                     {% elif e.my_attempt %}

@@ -154,6 +154,38 @@ class ExamAttempt(models.Model):
         return f"{self.user.username} - {self.exam.title} ({self.score}/{self.total})"
 
     last_saved_at = models.DateTimeField(null=True, blank=True, verbose_name="마지막 저장")
+    # 재응시 중에는 이전 결과를 그대로 두고, 제출할 때만 갱신한다.
+    # 중간에 그만두면 지난 점수가 남는다.
+    retrying_since = models.DateTimeField(
+        null=True, blank=True, verbose_name="재응시 시작",
+        help_text="값이 있으면 재응시 진행 중",
+    )
+
+    # 재응시를 시작해 놓고 이 시간이 지나도록 제출하지 않으면 버린 것으로 본다
+    RETRY_ABANDON_HOURS = 2
+
+    @property
+    def is_retrying(self):
+        return self.retrying_since is not None
+
+    def drop_stale_retry(self):
+        """방치된 재응시를 폐기하고 이전 기록으로 되돌린다.
+
+        재응시를 시작한 지 2시간이 지나도록 제출하지 않았으면 그 답안을
+        지운다. 지난 점수·제출 시각은 손대지 않았으므로 그대로 살아난다.
+        폐기했으면 True.
+        """
+        if not self.retrying_since:
+            return False
+        limit = timezone.timedelta(hours=self.RETRY_ABANDON_HOURS)
+        if timezone.now() - self.retrying_since < limit:
+            return False
+
+        self.answers.all().delete()
+        self.retrying_since = None
+        self.last_saved_at = None
+        self.save(update_fields=["retrying_since", "last_saved_at"])
+        return True
 
     @property
     def is_submitted(self):
@@ -165,7 +197,12 @@ class ExamAttempt(models.Model):
 
     @property
     def elapsed_seconds(self):
-        """소요 시간(초). 제출 전이면 지금까지 걸린 시간."""
+        """소요 시간(초). 제출 전이면 지금까지 걸린 시간.
+
+        재응시 중이면 그 시작 시각부터 잰다(지난 기록의 시간이 아니라).
+        """
+        if self.retrying_since:
+            return max(0, int((timezone.now() - self.retrying_since).total_seconds()))
         end = self.submitted_at or timezone.now()
         return max(0, int((end - self.started_at).total_seconds()))
 
