@@ -161,23 +161,33 @@ class ExamAttempt(models.Model):
         help_text="값이 있으면 재응시 진행 중",
     )
 
-    # 재응시를 시작해 놓고 이 시간이 지나도록 제출하지 않으면 버린 것으로 본다
-    RETRY_ABANDON_HOURS = 2
+    # 응시를 시작해 놓고 이 시간이 지나도록 제출하지 않으면 버린 것으로 본다.
+    # 첫 응시는 기록을 지우고, 재응시는 이전 기록으로 되돌린다
+    ABANDON_HOURS = 1
+    RETRY_ABANDON_HOURS = ABANDON_HOURS  # 예전 이름 (같은 값)
 
     @property
     def is_retrying(self):
         return self.retrying_since is not None
 
+    @property
+    def is_stale(self):
+        """제출하지 않은 채 방치된 시간이 기준을 넘었는지."""
+        if self.is_submitted and not self.is_retrying:
+            return False  # 이미 제출을 마친 기록은 건드리지 않는다
+        started = self.retrying_since or self.started_at
+        return timezone.now() - started >= timezone.timedelta(hours=self.ABANDON_HOURS)
+
     def drop_stale_retry(self):
         """방치된 재응시를 폐기하고 이전 기록으로 되돌린다.
 
-        재응시를 시작한 지 2시간이 지나도록 제출하지 않았으면 그 답안을
+        재응시를 시작한 지 기준 시간이 지나도록 제출하지 않았으면 그 답안을
         지운다. 지난 점수·제출 시각은 손대지 않았으므로 그대로 살아난다.
         폐기했으면 True.
         """
         if not self.retrying_since:
             return False
-        limit = timezone.timedelta(hours=self.RETRY_ABANDON_HOURS)
+        limit = timezone.timedelta(hours=self.ABANDON_HOURS)
         if timezone.now() - self.retrying_since < limit:
             return False
 
@@ -186,6 +196,45 @@ class ExamAttempt(models.Model):
         self.last_saved_at = None
         self.save(update_fields=["retrying_since", "last_saved_at"])
         return True
+
+    def drop_if_stale(self):
+        """방치된 응시를 정리한다.
+
+        - 재응시 중이면 폐기하고 지난 기록을 되살린다
+        - 첫 응시(제출 이력 없음)면 되돌릴 것이 없으므로 응시를 지운다
+
+        정리했으면 True. 첫 응시를 지운 경우 이 객체는 DB에 없다.
+        """
+        if not self.is_stale:
+            return False
+        if self.is_retrying:
+            return self.drop_stale_retry()
+        if not self.is_submitted:
+            self.delete()  # 답안은 CASCADE로 함께 사라진다
+            return True
+        return False
+
+    @classmethod
+    def sweep_stale(cls, exam=None):
+        """방치된 응시를 한꺼번에 정리한다. 정리한 건수를 돌려준다."""
+        limit = timezone.now() - timezone.timedelta(hours=cls.ABANDON_HOURS)
+        qs = cls.objects.all()
+        if exam is not None:
+            qs = qs.filter(exam=exam)
+
+        n = 0
+        # 재응시: 답안만 지우고 지난 기록으로 되돌린다
+        for a in qs.filter(retrying_since__lt=limit):
+            n += bool(a.drop_stale_retry())
+        # 첫 응시: 제출하지 않은 채 방치됐으면 응시를 지운다
+        first = qs.filter(
+            retrying_since__isnull=True, submitted_at__isnull=True,
+            started_at__lt=limit,
+        )
+        # delete()가 돌려주는 수는 답안까지 합친 것이라 응시 수를 따로 센다
+        n += first.count()
+        first.delete()
+        return n
 
     @property
     def is_submitted(self):

@@ -113,6 +113,37 @@
         .badge.retry { background: #e5e2fb; color: #362b78; }
         .badge.prev { background: #eef2ef; color: #7a8b80; margin-left: 3px; }
 
+        /* 관리자 작업 */
+        .table-head {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 14px 0; font-size: 0.84rem;
+        }
+        .sweep {
+            border: 1px solid #dfe7e2; background: #fff; color: #55605a;
+            font-size: 0.79rem; padding: 6px 12px; border-radius: 8px;
+            cursor: pointer; font-family: inherit; white-space: nowrap;
+        }
+        .sweep:hover { background: #f0f6f2; border-color: #b9cdc2; }
+        .act-col { white-space: nowrap; text-align: right; }
+        .act {
+            border: none; border-radius: 7px; cursor: pointer; font-family: inherit;
+            font-size: 0.76rem; padding: 5px 10px; margin-left: 4px;
+        }
+        .act.sub { background: #d8f3dc; color: #1b4332; }
+        .act.sub:hover { background: #b7e4c7; }
+        .act.del { background: #fde2e2; color: #7a1b1b; }
+        .act.del:hover { background: #fbcfcf; }
+
+        /* 처리 결과 알림 */
+        .toast {
+            position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 14px);
+            background: #1b4332; color: #fff; padding: 11px 20px; border-radius: 10px;
+            font-size: 0.86rem; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s; z-index: 50;
+            max-width: 90vw; text-align: center;
+        }
+        .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
         tr.flash { animation: flash 1.2s ease-out; }
         @keyframes flash { from { background: #fff8e0; } to { background: transparent; } }
 
@@ -170,6 +201,12 @@
         </div>
 
         <div class="card">
+            <div class="table-head">
+                <span class="muted">응시자별 현황</span>
+                <button type="button" id="sweepBtn" class="sweep">
+                    <i class="fas fa-broom"></i> 방치 응시 정리
+                </button>
+            </div>
             <table>
                 <thead>
                     <tr>
@@ -179,6 +216,7 @@
                         <th><button type="button" class="sort on desc" data-key="percent">점수<i></i></button></th>
                         <th><button type="button" class="sort" data-key="elapsed_sec">소요시간<i></i></button></th>
                         <th class="hide-sm"><button type="button" class="sort" data-key="time">시각<i></i></button></th>
+                        <th class="act-col">작업</th>
                     </tr>
                 </thead>
                 <tbody id="rows"></tbody>
@@ -190,6 +228,8 @@
             2초마다 자동으로 새로 불러옵니다 · 마지막 갱신 <span id="updated">—</span>
         </div>
     </div>
+
+    <div class="toast" id="toast"></div>
 
 <script>
 const API = '{% url "dvdexam:scores_api" exam.id %}';
@@ -297,11 +337,69 @@ function draw(data) {
             <td class="hide-sm muted">
                 ${r.submitted ? `${r.submitted_at} 제출` : `${r.started_at} 시작`}
             </td>
+            <td class="act-col">
+                ${r.submitted ? '' : `
+                <button type="button" class="act sub" data-act="submit" data-id="${r.id}"
+                        data-who="${esc(r.name)}" data-n="${r.answered}">제출</button>`}
+                <button type="button" class="act del" data-act="delete" data-id="${r.id}"
+                        data-who="${esc(r.name)}">삭제</button>
+            </td>
         </tr>`;
     }).join('');
 
     prev = Object.fromEntries(data.rows.map(r => [r.id, r]));
 }
+
+// ── 관리자 작업 (제출 / 삭제 / 일괄 정리)
+const ACTION = API.replace('/api/', '/action/');
+
+function csrf() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+
+function act(payload, confirmText) {
+    if (confirmText && !confirm(confirmText)) return;
+    fetch(ACTION, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf() },
+        body: JSON.stringify(payload),
+    })
+        .then(r => r.json())
+        .then(d => {
+            if (d.message) notify(d.message);
+            load();   // 표를 곧바로 다시 그린다
+        })
+        .catch(() => notify('처리하지 못했습니다. 잠시 후 다시 시도하세요.'));
+}
+
+function notify(text) {
+    const el = document.getElementById('toast');
+    el.textContent = text;
+    el.classList.add('on');
+    clearTimeout(notify.t);
+    notify.t = setTimeout(() => el.classList.remove('on'), 2600);
+}
+
+// 표는 매번 새로 그려지므로 개별 버튼이 아니라 표에 한 번만 건다
+rowsEl.addEventListener('click', ev => {
+    const btn = ev.target.closest('.act');
+    if (!btn) return;
+    const who = btn.dataset.who;
+    if (btn.dataset.act === 'submit') {
+        const n = btn.dataset.n;
+        act({ action: 'submit', id: btn.dataset.id },
+            `${who} 님을 지금까지 푼 ${n}문항으로 제출 처리할까요?`);
+    } else {
+        act({ action: 'delete', id: btn.dataset.id },
+            `${who} 님의 응시 기록을 삭제할까요?\n되돌릴 수 없습니다.`);
+    }
+});
+
+document.getElementById('sweepBtn').addEventListener('click', () => {
+    act({ action: 'sweep' },
+        '1시간 넘게 방치된 응시를 정리할까요?\n제출한 기록은 그대로 둡니다.');
+});
 
 let loading = false;
 

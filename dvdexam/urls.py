@@ -15,4 +15,5 @@ urlpatterns = [
     path("<int:exam_id>/review/", views.review, name="review"),
     path("<int:exam_id>/scores/", views.scores, name="scores"),
     path("<int:exam_id>/scores/api/", views.scores_api, name="scores_api"),
+    path("<int:exam_id>/scores/action/", views.scores_action, name="scores_action"),
 ]

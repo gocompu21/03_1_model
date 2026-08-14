@@ -29,7 +29,11 @@ def index(request):
 
     mine = {}
     for a in ExamAttempt.objects.filter(user=request.user, exam__in=exams):
-        a.drop_stale_retry()  # 2시간 방치된 재응시는 버리고 이전 기록을 살린다
+        # 1시간 방치된 응시는 정리한다.
+        # 재응시는 이전 기록으로 되돌리고, 첫 응시는 지운다
+        if a.drop_if_stale():
+            if not a.is_retrying and not a.is_submitted:
+                continue  # 지워진 첫 응시는 목록에 두지 않는다
         mine[a.exam_id] = a
     for exam in exams:
         exam.my_attempt = mine.get(exam.id)
@@ -54,8 +58,11 @@ def take(request, exam_id):
     attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
     retry = request.GET.get("retry") == "1"
 
-    if attempt:
-        attempt.drop_stale_retry()  # 2시간 방치된 재응시는 버린다
+    if attempt and attempt.drop_if_stale():
+        # 1시간 방치된 응시를 정리했다. 첫 응시였다면 기록이 사라졌으므로
+        # 아래에서 새 응시를 만들어 처음부터 풀게 한다
+        if not attempt.is_retrying and not attempt.is_submitted:
+            attempt = None
 
     # 재응시를 시작해 둔 상태면 제출 전까지 계속 이어서 푼다
     if attempt and attempt.is_submitted and not retry and not attempt.is_retrying:
@@ -116,8 +123,8 @@ def save(request, exam_id):
     attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
     if not attempt:
         return JsonResponse({"ok": False, "submitted": True})
-    if attempt.drop_stale_retry():
-        # 2시간이 지나 폐기된 재응시. 저장을 받지 않는다
+    if attempt.drop_if_stale():
+        # 1시간이 지나 정리된 응시. 저장을 받지 않는다
         return JsonResponse({"ok": False, "expired": True})
     # 재응시 중이면 지난 제출 기록이 남아 있어도 저장을 받는다
     if attempt.is_submitted and not attempt.is_retrying:
@@ -159,8 +166,9 @@ def submit(request, exam_id):
     attempt = ExamAttempt.objects.filter(exam=exam, user=request.user).first()
     if not attempt:
         return JsonResponse({"error": "no attempt"}, status=404)
-    if attempt.drop_stale_retry():
-        return JsonResponse({"ok": False, "expired": True, "url": f"/dvdexam/{exam.id}/result/"})
+    # 제출은 방치로 지우지 않는다. 응시자가 지금 제출 버튼을 누른 것이므로
+    # 1시간이 지났더라도 푼 답안을 채점해 준다 (정리는 안 푼 응시를 위한 것)
+    #
     # 재응시 중이면 지난 기록이 있어도 다시 채점해 덮어쓴다
     if attempt.is_submitted and not attempt.is_retrying:
         return JsonResponse({"ok": True, "already": True, "url": f"/dvdexam/{exam.id}/result/"})
@@ -434,15 +442,66 @@ def scores_api(request, exam_id):
     return JsonResponse(_scores_data(exam))
 
 
+@user_passes_test(_is_admin)
+def scores_action(request, exam_id):
+    """결과 화면에서 관리자가 응시를 직접 처리한다.
+
+    - submit: 저장된 답안으로 대신 채점해 제출 처리한다
+    - delete: 응시 기록을 지운다 (되돌릴 수 없다)
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    exam = get_object_or_404(Exam, id=exam_id)
+
+    try:
+        body = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "invalid json"}, status=400)
+
+    action = body.get("action")
+
+    # 일괄 정리는 특정 응시를 지목하지 않는다
+    if action == "sweep":
+        n = ExamAttempt.sweep_stale(exam)
+        return JsonResponse({
+            "ok": True,
+            "message": f"방치된 응시 {n}건을 정리했습니다." if n else "정리할 응시가 없습니다.",
+        })
+
+    attempt = ExamAttempt.objects.filter(
+        id=body.get("id"), exam=exam
+    ).select_related("user").first()
+    if not attempt:
+        return JsonResponse({"error": "not found"}, status=404)
+
+    who = attempt.user.first_name or attempt.user.username
+
+    if action == "submit":
+        if attempt.is_submitted and not attempt.is_retrying:
+            return JsonResponse({"ok": False, "message": f"{who} 님은 이미 제출했습니다."})
+        # 저장된 답안만으로 채점한다. 관리자가 대신 눌렀으므로 자동 제출로 남긴다
+        _grade(attempt, {}, auto=True)
+        return JsonResponse({
+            "ok": True,
+            "message": f"{who} 님을 제출 처리했습니다. ({attempt.score}/{attempt.total})",
+        })
+
+    if action == "delete":
+        attempt.delete()  # 답안은 CASCADE로 함께 사라진다
+        return JsonResponse({"ok": True, "message": f"{who} 님의 응시를 삭제했습니다."})
+
+    return JsonResponse({"error": "unknown action"}, status=400)
+
+
 def _scores_data(exam):
     """응시자별 현황과 집계를 만든다."""
     total_q = exam.questions.count()
 
-    # 2시간 넘게 방치된 재응시를 먼저 정리한다. 응시자가 화면을 닫고
-    # 돌아오지 않아도 관리자 화면에서 이전 기록이 되살아난다
-    stale = timezone.now() - timezone.timedelta(hours=ExamAttempt.RETRY_ABANDON_HOURS)
-    for a in exam.attempts.filter(retrying_since__lt=stale):
-        a.drop_stale_retry()
+    # 1시간 넘게 방치된 응시를 먼저 정리한다. 응시자가 화면을 닫고
+    # 돌아오지 않아도 관리자 화면이 스스로 깨끗해진다
+    #   재응시 → 지난 기록으로 되돌림 / 첫 응시 → 삭제
+    ExamAttempt.sweep_stale(exam)
     attempts = (
         exam.attempts.select_related("user")
         .annotate(
