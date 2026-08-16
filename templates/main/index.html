@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>나무의사 자격시험 대비반</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             margin: 0;
@@ -51,32 +52,181 @@
             background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1953&q=80');
             background-size: cover;
             background-position: center;
-            height: 400px;
+            /* 대시보드에 자리를 내주고 인사말만 남긴다 */
+            height: 190px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
             color: white;
+            padding: 0 20px;
         }
 
         .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 20px;
+            font-size: 1.9rem;
+            margin: 0 0 8px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .hero p {
-            font-size: 1.2rem;
+            font-size: 0.98rem;
             max-width: 600px;
-            line-height: 1.6;
-            margin-bottom: 30px;
+            line-height: 1.5;
+            margin: 0;
+            word-break: keep-all;
+        }
+
+        /* ── 대시보드 ── */
+        .dash {
+            max-width: 1200px;
+            margin: -34px auto 0;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 18px;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 14px;
+            padding: 18px 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        .panel.wide { grid-column: 1 / -1; }
+
+        .panel h2 {
+            font-size: 0.95rem;
+            color: #1b4332;
+            margin: 0 0 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel h2 .more {
+            margin-left: auto;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #7a8b80;
+            text-decoration: none;
+        }
+        .panel h2 .more:hover { color: #2d6a4f; }
+
+        /* 자료 등록 현황 */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+            gap: 10px;
+        }
+        .stat {
+            background: #f4f9f6;
+            border-radius: 11px;
+            padding: 13px 8px;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .stat:hover { background: #d8f3dc; transform: translateY(-2px); }
+        .s-icon { font-size: 1.15rem; }
+        .s-n {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #2d6a4f;
+            line-height: 1.1;
+        }
+        .s-n small { font-size: 0.68rem; font-weight: 600; margin-left: 2px; color: #6b8f7c; }
+        .s-name { font-size: 0.76rem; color: #55605a; }
+
+        /* 질문 공유방 */
+        .posts { list-style: none; margin: 0; padding: 0; }
+        .posts li + li { border-top: 1px solid #f2f5f3; }
+        .posts a {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: baseline;
+            padding: 8px 0;
+            text-decoration: none;
+            color: inherit;
+        }
+        .posts a:hover .p-title { color: #2d6a4f; }
+        .p-title {
+            font-size: 0.88rem;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .p-meta { font-size: 0.75rem; color: #9aa8a0; white-space: nowrap; flex-shrink: 0; }
+        .p-meta .cmt {
+            background: #2d6a4f;
+            color: #fff;
+            border-radius: 9px;
+            padding: 1px 6px;
+            margin-left: 4px;
+            font-size: 0.68rem;
+        }
+        .posts .none { color: #9aa8a0; font-size: 0.86rem; padding: 16px 0; text-align: center; }
+
+        /* 학습 현황 */
+        .mine {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .m-cell {
+            background: #f4f9f6;
+            border-radius: 10px;
+            padding: 10px 6px;
+            text-align: center;
+        }
+        .m-cell b { display: block; font-size: 1.25rem; color: #2d6a4f; line-height: 1.15; }
+        .m-cell span { font-size: 0.72rem; color: #7a8b80; }
+
+        .who-line { font-size: 0.84rem; color: #55605a; margin-bottom: 10px; }
+        .who-line b { color: #2d6a4f; }
+        .who-line .muted { color: #9aa8a0; }
+
+        .people { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+        .people li {
+            font-size: 0.78rem;
+            background: #f4f9f6;
+            color: #40684f;
+            border-radius: 20px;
+            padding: 4px 11px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .people li.me { background: #2d6a4f; color: #fff; }
+        .people .dot {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: #6b8f7c; display: inline-block;
+        }
+        .people li.me .dot { background: #b7e4c7; }
+        .people .ago { font-size: 0.68rem; opacity: 0.7; }
+        .join { text-align: center; padding: 6px 0 2px; }
+
+        /* 메뉴 제목 */
+        .menu-head {
+            max-width: 1200px;
+            margin: 34px auto 0;
+            padding: 0 20px;
+            font-size: 1rem;
+            color: #1b4332;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* Dashboard Cards */
         .container {
             max-width: 1200px;
-            margin: -50px auto 50px;
+            margin: 16px auto 50px;
             padding: 0 20px;
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -230,24 +380,38 @@
 
             /* Hero Section */
             .hero {
-                height: 280px;
+                height: 160px;
                 padding: 20px;
             }
 
             .hero h1 {
-                font-size: 1.8rem;
-                margin-bottom: 15px;
+                font-size: 1.45rem;
+                margin-bottom: 6px;
             }
 
             .hero p {
-                font-size: 1rem;
-                margin-bottom: 20px;
-                padding: 0 10px;
+                font-size: 0.9rem;
+                margin: 0;
+                padding: 0 6px;
             }
+
+            /* 대시보드는 한 줄에 하나씩 */
+            .dash {
+                grid-template-columns: 1fr;
+                gap: 14px;
+                padding: 0 15px;
+                margin-top: -26px;
+            }
+
+            .panel { padding: 15px 16px; }
+            .stat-grid { grid-template-columns: repeat(3, 1fr); }
+            .s-n { font-size: 1.2rem; }
+
+            .menu-head { margin-top: 26px; padding: 0 15px; }
 
             /* Container & Cards */
             .container {
-                margin: -30px auto 30px;
+                margin: 14px auto 30px;
                 padding: 0 15px;
                 grid-template-columns: 1fr;
                 gap: 15px;
@@ -369,6 +533,91 @@
         <h1>나무의 미래를 지키는 전문가</h1>
         <p>나무의사 자격 시험, 체계적인 학습 관리와 실전 모의고사를 통해 합격의 꿈을 이루세요.</p>
     </div>
+
+    <!-- ── 지금 사이트에서 일어나는 일 ── -->
+    <div class="dash">
+        <!-- 자료 등록 현황 -->
+        <section class="panel wide">
+            <h2><i class="fas fa-database"></i> 자료 등록 현황</h2>
+            <div class="stat-grid">
+                {% for s in content_stats %}
+                <a href="{% url s.url %}" class="stat">
+                    <span class="s-icon">{{ s.icon }}</span>
+                    <span class="s-n">{{ s.n }}<small>{{ s.unit }}</small></span>
+                    <span class="s-name">{{ s.name }}</span>
+                </a>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 질문 공유방 최근 글 -->
+        <section class="panel">
+            <h2>
+                <i class="fas fa-comments"></i> 질문 공유방
+                <a href="{% url 'bbs:post_list' %}" class="more">더보기 ›</a>
+            </h2>
+            <ul class="posts">
+                {% for p in recent_posts %}
+                <li>
+                    <a href="{% url 'bbs:post_detail' p.id %}">
+                        <span class="p-title">{{ p.title|striptags|truncatechars:38 }}</span>
+                        <span class="p-meta">
+                            {{ p.author.first_name|default:p.author.username }}
+                            · {{ p.created_at|date:"n/j" }}
+                            {% if p.comment_count %}
+                            <b class="cmt">{{ p.comment_count }}</b>
+                            {% endif %}
+                        </span>
+                    </a>
+                </li>
+                {% empty %}
+                <li class="none">아직 올라온 질문이 없습니다.</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <!-- 학습 현황 -->
+        <section class="panel">
+            <h2><i class="fas fa-users"></i> 학습 현황</h2>
+
+            {% if activity.me %}
+            <div class="mine">
+                <div class="m-cell">
+                    <b>{{ activity.me.studied }}</b><span>기출 학습</span>
+                </div>
+                <div class="m-cell">
+                    <b>{{ activity.me.lectures }}</b><span>들은 강의</span>
+                </div>
+                <div class="m-cell">
+                    <b>{{ activity.me.exams }}</b><span>본 시험</span>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="who-line">
+                이번 주 <b>{{ activity.week_users }}</b>명 학습 중
+                <span class="muted">· 전체 {{ activity.total_users }}명</span>
+            </div>
+
+            {% if activity.recent %}
+            <ul class="people">
+                {% for r in activity.recent %}
+                <li class="{% if r.is_me %}me{% endif %}">
+                    <span class="dot"></span>
+                    {{ r.name }}
+                    <span class="ago">{{ r.last_login|timesince|truncatewords:1 }} 전</span>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="join">
+                <a href="{% url 'accounts:user_login' %}" class="btn">로그인하고 시작하기</a>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <h2 class="menu-head"><i class="fas fa-th-large"></i> 학습 메뉴</h2>
 
     <div class="container">
         <!-- Card: 기본서 학습 -->
