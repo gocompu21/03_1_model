@@ -90,10 +90,16 @@ class Exam(models.Model):
         """이 응시가 끝나야 하는 시각. 없으면 None.
 
         실시간 시험은 종료 시각과 개인 제한 시간 중 이른 쪽이다.
+
+        제한 시간은 **이번에 풀기 시작한 시각**부터 잰다. 재응시라면
+        retrying_since가 그 기준이다. 첫 응시의 started_at을 쓰면
+        오래전에 시험을 본 사람은 재응시하는 순간 이미 마감이 지나
+        곧바로 자동 제출되어 버린다.
         """
         limits = []
         if self.time_limit_min:
-            limits.append(attempt.started_at + timezone.timedelta(minutes=self.time_limit_min))
+            begun = attempt.retrying_since or attempt.started_at
+            limits.append(begun + timezone.timedelta(minutes=self.time_limit_min))
         if self.is_live and self.end_at:
             limits.append(self.end_at)
         return min(limits) if limits else None

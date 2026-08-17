@@ -59,10 +59,13 @@ def take(request, exam_id):
     retry = request.GET.get("retry") == "1"
 
     if attempt and attempt.drop_if_stale():
-        # 1시간 방치된 응시를 정리했다. 첫 응시였다면 기록이 사라졌으므로
-        # 아래에서 새 응시를 만들어 처음부터 풀게 한다
         if not attempt.is_retrying and not attempt.is_submitted:
+            # 첫 응시였다면 기록이 사라졌으므로 아래에서 새로 만든다
             attempt = None
+        else:
+            # 방치되어 폐기된 재응시다. 응시자가 다시 들어온 것이니
+            # 결과로 돌려보내지 말고 그 자리에서 다시 풀게 해 준다
+            retry = True
 
     # 재응시를 시작해 둔 상태면 제출 전까지 계속 이어서 푼다
     if attempt and attempt.is_submitted and not retry and not attempt.is_retrying:
