@@ -33,7 +33,11 @@
         }
         /* 마친 시험은 왼쪽에 표시를 남긴다 (흐리게 하면 점수가 안 보인다) */
         .exam.done { border-left: 4px solid #2d6a4f; }
-        .exam-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+        /* 제목·태그 | 점수 | 버튼 — 한 줄에 나란히 */
+        .exam-top {
+            display: flex; gap: 14px; align-items: center;
+        }
+        .exam-body { flex: 1; min-width: 0; }
         .exam-title { font-size: 1.05rem; font-weight: 700; color: #1b4332; word-break: keep-all; }
         .tags { margin-top: 7px; display: flex; gap: 5px; flex-wrap: wrap; }
         .tag {
@@ -53,14 +57,13 @@
         .mark .pct small { font-size: 0.8rem; font-weight: 600; margin-left: 1px; }
         .mark .raw { font-size: 0.76rem; color: #9aa8a0; margin-top: 3px; }
 
-        /* 아래쪽 버튼 줄 */
+        /* 오른쪽 버튼 (점수 옆) */
         .acts {
-            display: flex; gap: 8px; margin-top: 13px;
-            padding-top: 12px; border-top: 1px solid #eef2ef;
+            display: flex; gap: 7px; flex-shrink: 0; align-items: center;
         }
         .acts a, .acts span {
-            flex: 1; text-align: center; text-decoration: none;
-            font-size: 0.86rem; font-weight: 600; padding: 10px 12px;
+            text-align: center; text-decoration: none;
+            font-size: 0.84rem; font-weight: 600; padding: 9px 15px;
             border-radius: 9px; white-space: nowrap;
             display: inline-flex; align-items: center; justify-content: center; gap: 6px;
         }
@@ -76,6 +79,24 @@
         .empty {
             background: #fff; border-radius: 14px; padding: 40px 20px;
             text-align: center; color: #9aa8a0; font-size: 0.92rem;
+        }
+
+        /* 좁은 화면에서는 버튼을 아래 줄로 내린다 */
+        @media (max-width: 620px) {
+            .exam-top { flex-wrap: wrap; }
+            .exam-body { flex: 1 1 100%; }
+            .mark { order: 1; }
+            .acts {
+                order: 2; flex: 1; justify-content: flex-end;
+                margin-top: 12px; padding-top: 11px;
+                border-top: 1px solid #eef2ef;
+            }
+            /* 점수도 같은 줄에 두어 위쪽 여백을 맞춘다 */
+            .mark {
+                margin-top: 12px; padding-top: 11px;
+                border-top: 1px solid #eef2ef; flex: 0 0 auto;
+            }
+            .acts a, .acts span { flex: 1; }
         }
 
         @media (max-width: 480px) {
@@ -104,7 +125,7 @@
         {% with a=e.my_attempt open=e.live_state %}
         <div class="exam {% if a.is_submitted and not a.is_retrying or open != 'open' %}done{% endif %}">
             <div class="exam-top">
-                <div>
+                <div class="exam-body">
                     <div class="exam-title">{{ e.title }}</div>
                     <div class="tags">
                         <span class="tag {{ e.subject }}">{{ e.get_subject_display }}</span>
@@ -126,39 +147,39 @@
                     <div class="raw">{{ a.score }}/{{ a.total }}</div>
                 </div>
                 {% endif %}
-            </div>
 
-            <div class="acts">
-                {% if a.is_retrying and open == 'open' %}
-                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
-                    <i class="fas fa-pen"></i> 재응시 이어서
-                </a>
-                {% if a.is_submitted %}
-                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
-                    지난 점수 {{ a.score }}/{{ a.total }}
-                </a>
-                {% endif %}
+                <div class="acts">
+                    {% if a.is_retrying and open == 'open' %}
+                    {% if a.is_submitted %}
+                    <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                        지난 점수 {{ a.score }}/{{ a.total }}
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                        <i class="fas fa-pen"></i> 이어서
+                    </a>
 
-                {% elif a.is_submitted %}
-                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
-                    <i class="fas fa-list-check"></i> 결과 보기
-                </a>
-                {% if open == 'open' %}
-                <a href="{% url 'dvdexam:take' e.id %}?retry=1" class="b1"
-                   onclick="return confirm('다시 풀어 제출하면 지금 점수가 새 점수로 바뀝니다.\n제출하지 않으면 지금 기록이 그대로 남습니다. 계속할까요?');">
-                    <i class="fas fa-rotate-right"></i> 재응시
-                </a>
-                {% endif %}
+                    {% elif a.is_submitted %}
+                    <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                        <i class="fas fa-list-check"></i> 결과
+                    </a>
+                    {% if open == 'open' %}
+                    <a href="{% url 'dvdexam:take' e.id %}?retry=1" class="b1"
+                       onclick="return confirm('다시 풀어 제출하면 지금 점수가 새 점수로 바뀝니다.\n제출하지 않으면 지금 기록이 그대로 남습니다. 계속할까요?');">
+                        <i class="fas fa-rotate-right"></i> 재응시
+                    </a>
+                    {% endif %}
 
-                {% elif open == 'open' %}
-                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
-                    <i class="fas fa-play"></i> {% if a %}이어서 풀기{% else %}응시하기{% endif %}
-                </a>
-                {% else %}
-                <span class="b-off">
-                    {% if open == 'before' %}시작 전{% else %}마감됨{% endif %}
-                </span>
-                {% endif %}
+                    {% elif open == 'open' %}
+                    <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                        <i class="fas fa-play"></i> {% if a %}이어서 풀기{% else %}응시하기{% endif %}
+                    </a>
+                    {% else %}
+                    <span class="b-off">
+                        {% if open == 'before' %}시작 전{% else %}마감됨{% endif %}
+                    </span>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endwith %}
@@ -171,7 +192,7 @@
         {% with a=e.my_attempt %}
         <div class="exam {% if a.is_submitted and not a.is_retrying %}done{% endif %}">
             <div class="exam-top">
-                <div>
+                <div class="exam-body">
                     <div class="exam-title">{{ e.title }}</div>
                     <div class="tags">
                         <span class="tag {{ e.subject }}">{{ e.get_subject_display }}</span>
@@ -188,37 +209,37 @@
                     <div class="raw">{{ a.score }}/{{ a.total }}</div>
                 </div>
                 {% endif %}
-            </div>
 
-            <div class="acts">
-                {% if a.is_retrying %}
-                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
-                    <i class="fas fa-pen"></i> 재응시 이어서
-                </a>
-                {% if a.is_submitted %}
-                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
-                    지난 점수 {{ a.score }}/{{ a.total }}
-                </a>
-                {% endif %}
+                <div class="acts">
+                    {% if a.is_retrying %}
+                    {% if a.is_submitted %}
+                    <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                        지난 점수 {{ a.score }}/{{ a.total }}
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                        <i class="fas fa-pen"></i> 이어서
+                    </a>
 
-                {% elif a.is_submitted %}
-                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
-                    <i class="fas fa-list-check"></i> 결과 보기
-                </a>
-                <a href="{% url 'dvdexam:take' e.id %}?retry=1" class="b1"
-                   onclick="return confirm('다시 풀어 제출하면 지금 점수가 새 점수로 바뀝니다.\n제출하지 않으면 지금 기록이 그대로 남습니다. 계속할까요?');">
-                    <i class="fas fa-rotate-right"></i> 재응시
-                </a>
+                    {% elif a.is_submitted %}
+                    <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                        <i class="fas fa-list-check"></i> 결과
+                    </a>
+                    <a href="{% url 'dvdexam:take' e.id %}?retry=1" class="b1"
+                       onclick="return confirm('다시 풀어 제출하면 지금 점수가 새 점수로 바뀝니다.\n제출하지 않으면 지금 기록이 그대로 남습니다. 계속할까요?');">
+                        <i class="fas fa-rotate-right"></i> 재응시
+                    </a>
 
-                {% elif a %}
-                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
-                    <i class="fas fa-pen"></i> 이어서 풀기
-                </a>
-                {% else %}
-                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
-                    <i class="fas fa-play"></i> 응시하기
-                </a>
-                {% endif %}
+                    {% elif a %}
+                    <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                        <i class="fas fa-pen"></i> 이어서 풀기
+                    </a>
+                    {% else %}
+                    <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                        <i class="fas fa-play"></i> 응시하기
+                    </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endwith %}
