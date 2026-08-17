@@ -30,9 +30,9 @@
         .exam {
             background: #fff; border-radius: 14px; padding: 18px 20px;
             margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: block; text-decoration: none; color: inherit;
         }
-        .exam.done { opacity: 0.72; }
+        /* 마친 시험은 왼쪽에 표시를 남긴다 (흐리게 하면 점수가 안 보인다) */
+        .exam.done { border-left: 4px solid #2d6a4f; }
         .exam-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
         .exam-title { font-size: 1.05rem; font-weight: 700; color: #1b4332; word-break: keep-all; }
         .tags { margin-top: 7px; display: flex; gap: 5px; flex-wrap: wrap; }
@@ -45,14 +45,30 @@
         .tag.fmt { background: #eef2ef; color: #55605a; }
         .tag.time { background: #eef2ef; color: #55605a; }
 
-        .state { text-align: right; flex-shrink: 0; }
-        .state .score { font-size: 1.3rem; font-weight: 800; color: #2d6a4f; line-height: 1.1; }
-        .state .sub { font-size: 0.76rem; color: #9aa8a0; margin-top: 2px; }
-        .state .go {
-            background: #2d6a4f; color: #fff; font-size: 0.82rem; font-weight: 600;
-            padding: 8px 15px; border-radius: 8px; white-space: nowrap;
+        /* 받은 점수 */
+        .mark { text-align: right; flex-shrink: 0; }
+        .mark .pct {
+            font-size: 1.7rem; font-weight: 800; color: #2d6a4f; line-height: 1;
         }
-        .state .wait { background: #eef2ef; color: #7a8b80; }
+        .mark .pct small { font-size: 0.8rem; font-weight: 600; margin-left: 1px; }
+        .mark .raw { font-size: 0.76rem; color: #9aa8a0; margin-top: 3px; }
+
+        /* 아래쪽 버튼 줄 */
+        .acts {
+            display: flex; gap: 8px; margin-top: 13px;
+            padding-top: 12px; border-top: 1px solid #eef2ef;
+        }
+        .acts a, .acts span {
+            flex: 1; text-align: center; text-decoration: none;
+            font-size: 0.86rem; font-weight: 600; padding: 10px 12px;
+            border-radius: 9px; white-space: nowrap;
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        }
+        .acts .b1 { background: #2d6a4f; color: #fff; }
+        .acts .b1:hover { background: #245a41; }
+        .acts .b2 { background: #eef2ef; color: #40684f; }
+        .acts .b2:hover { background: #dce9e2; }
+        .acts .b-off { background: #f4f7f5; color: #b3bfb8; }
 
         .when { font-size: 0.82rem; color: #7a8b80; margin-top: 8px; }
         .when strong { color: #40684f; }
@@ -60,6 +76,14 @@
         .empty {
             background: #fff; border-radius: 14px; padding: 40px 20px;
             text-align: center; color: #9aa8a0; font-size: 0.92rem;
+        }
+
+        @media (max-width: 480px) {
+            .container { padding: 14px; }
+            .exam { padding: 15px 16px; }
+            .exam-title { font-size: 0.98rem; }
+            .mark .pct { font-size: 1.45rem; }
+            .acts a, .acts span { font-size: 0.8rem; padding: 10px 8px; }
         }
     </style>
 </head>
@@ -77,13 +101,8 @@
     <div class="container">
         <h2><i class="fas fa-bolt"></i> 실시간 시험 <span class="cnt">{{ live|length }}</span></h2>
         {% for e in live %}
-        {% if e.my_attempt.is_submitted and not e.my_attempt.is_retrying %}
-        <a href="{% url 'dvdexam:result' e.id %}" class="exam done">
-        {% elif e.live_state == 'open' %}
-        <a href="{% url 'dvdexam:take' e.id %}" class="exam">
-        {% else %}
-        <div class="exam done">
-        {% endif %}
+        {% with a=e.my_attempt open=e.live_state %}
+        <div class="exam {% if a.is_submitted and not a.is_retrying or open != 'open' %}done{% endif %}">
             <div class="exam-top">
                 <div>
                     <div class="exam-title">{{ e.title }}</div>
@@ -95,39 +114,62 @@
                     </div>
                     <div class="when">
                         {{ e.start_at|date:"n월 j일 H:i" }} ~ {{ e.end_at|date:"H:i" }}
-                        {% if e.live_state == 'before' %}<strong>· 시작 전</strong>
-                        {% elif e.live_state == 'closed' %}<strong>· 종료됨</strong>
+                        {% if open == 'before' %}<strong>· 시작 전</strong>
+                        {% elif open == 'closed' %}<strong>· 종료됨</strong>
                         {% else %}<strong>· 진행 중</strong>{% endif %}
                     </div>
                 </div>
-                <div class="state">
-                    {% if e.my_attempt.is_retrying and e.live_state == 'open' %}
-                    <span class="go">재응시 이어서</span>
-                    {% if e.my_attempt.is_submitted %}
-                    <div class="sub">지난 점수 {{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
-                    {% endif %}
-                    {% elif e.my_attempt.is_submitted %}
-                    <div class="score">{{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
-                    <div class="sub">결과 · 다시 풀기</div>
-                    {% elif e.live_state == 'open' %}
-                    <span class="go">응시</span>
-                    {% else %}
-                    <span class="go wait">{% if e.live_state == 'before' %}대기{% else %}마감{% endif %}</span>
-                    {% endif %}
+
+                {% if a.is_submitted and not a.is_retrying %}
+                <div class="mark">
+                    <div class="pct">{{ a.score_percent }}<small>점</small></div>
+                    <div class="raw">{{ a.score }}/{{ a.total }}</div>
                 </div>
+                {% endif %}
             </div>
-        {% if e.my_attempt.is_submitted and not e.my_attempt.is_retrying or e.live_state == 'open' %}</a>{% else %}</div>{% endif %}
+
+            <div class="acts">
+                {% if a.is_retrying and open == 'open' %}
+                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                    <i class="fas fa-pen"></i> 재응시 이어서
+                </a>
+                {% if a.is_submitted %}
+                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                    지난 점수 {{ a.score }}/{{ a.total }}
+                </a>
+                {% endif %}
+
+                {% elif a.is_submitted %}
+                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                    <i class="fas fa-list-check"></i> 결과 보기
+                </a>
+                {% if open == 'open' %}
+                <a href="{% url 'dvdexam:take' e.id %}?retry=1" class="b1"
+                   onclick="return confirm('다시 풀어 제출하면 지금 점수가 새 점수로 바뀝니다.\n제출하지 않으면 지금 기록이 그대로 남습니다. 계속할까요?');">
+                    <i class="fas fa-rotate-right"></i> 재응시
+                </a>
+                {% endif %}
+
+                {% elif open == 'open' %}
+                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                    <i class="fas fa-play"></i> {% if a %}이어서 풀기{% else %}응시하기{% endif %}
+                </a>
+                {% else %}
+                <span class="b-off">
+                    {% if open == 'before' %}시작 전{% else %}마감됨{% endif %}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
         {% empty %}
         <div class="empty">예정된 실시간 시험이 없습니다.</div>
         {% endfor %}
 
         <h2><i class="fas fa-clock"></i> 상시시험 <span class="cnt">{{ always|length }}</span></h2>
         {% for e in always %}
-        {% if e.my_attempt.is_submitted and not e.my_attempt.is_retrying %}
-        <a href="{% url 'dvdexam:result' e.id %}" class="exam done">
-        {% else %}
-        <a href="{% url 'dvdexam:take' e.id %}" class="exam">
-        {% endif %}
+        {% with a=e.my_attempt %}
+        <div class="exam {% if a.is_submitted and not a.is_retrying %}done{% endif %}">
             <div class="exam-top">
                 <div>
                     <div class="exam-title">{{ e.title }}</div>
@@ -138,23 +180,48 @@
                         {% if e.time_limit_min %}<span class="tag time">{{ e.time_limit_min }}분</span>{% endif %}
                     </div>
                 </div>
-                <div class="state">
-                    {% if e.my_attempt.is_retrying %}
-                    <span class="go">재응시 이어서</span>
-                    {% if e.my_attempt.is_submitted %}
-                    <div class="sub">지난 점수 {{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
-                    {% endif %}
-                    {% elif e.my_attempt.is_submitted %}
-                    <div class="score">{{ e.my_attempt.score }}/{{ e.my_attempt.total }}</div>
-                    <div class="sub">결과 · 다시 풀기</div>
-                    {% elif e.my_attempt %}
-                    <span class="go">이어서</span>
-                    {% else %}
-                    <span class="go">응시</span>
-                    {% endif %}
+
+                {% if a.is_submitted and not a.is_retrying %}
+                <!-- 응시를 마쳤으면 점수를 크게 보여준다 -->
+                <div class="mark">
+                    <div class="pct">{{ a.score_percent }}<small>점</small></div>
+                    <div class="raw">{{ a.score }}/{{ a.total }}</div>
                 </div>
+                {% endif %}
             </div>
-        </a>
+
+            <div class="acts">
+                {% if a.is_retrying %}
+                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                    <i class="fas fa-pen"></i> 재응시 이어서
+                </a>
+                {% if a.is_submitted %}
+                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                    지난 점수 {{ a.score }}/{{ a.total }}
+                </a>
+                {% endif %}
+
+                {% elif a.is_submitted %}
+                <a href="{% url 'dvdexam:result' e.id %}" class="b2">
+                    <i class="fas fa-list-check"></i> 결과 보기
+                </a>
+                <a href="{% url 'dvdexam:take' e.id %}?retry=1" class="b1"
+                   onclick="return confirm('다시 풀어 제출하면 지금 점수가 새 점수로 바뀝니다.\n제출하지 않으면 지금 기록이 그대로 남습니다. 계속할까요?');">
+                    <i class="fas fa-rotate-right"></i> 재응시
+                </a>
+
+                {% elif a %}
+                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                    <i class="fas fa-pen"></i> 이어서 풀기
+                </a>
+                {% else %}
+                <a href="{% url 'dvdexam:take' e.id %}" class="b1">
+                    <i class="fas fa-play"></i> 응시하기
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
         {% empty %}
         <div class="empty">등록된 상시시험이 없습니다.</div>
         {% endfor %}
