@@ -187,9 +187,9 @@ class ExamAttempt(models.Model):
     def drop_stale_retry(self):
         """방치된 재응시를 폐기하고 이전 기록으로 되돌린다.
 
-        재응시를 시작한 지 기준 시간이 지나도록 제출하지 않았으면 그 답안을
-        지운다. 지난 점수·제출 시각은 손대지 않았으므로 그대로 살아난다.
-        폐기했으면 True.
+        재응시를 시작한 지 기준 시간이 지나도록 제출하지 않았으면
+        **재응시분만** 지운다. 확정 답안과 점수는 손대지 않으므로
+        지난 기록이 온전히 살아난다. 폐기했으면 True.
         """
         if not self.retrying_since:
             return False
@@ -197,7 +197,7 @@ class ExamAttempt(models.Model):
         if timezone.now() - self.retrying_since < limit:
             return False
 
-        self.answers.all().delete()
+        self.answers.filter(is_retry=True).delete()
         self.retrying_since = None
         self.last_saved_at = None
         self.save(update_fields=["retrying_since", "last_saved_at"])
@@ -273,10 +273,26 @@ class ExamAttempt(models.Model):
             return f"{minutes}분 {secs}초"
         return f"{secs}초"
 
+    def current_answers(self):
+        """지금 화면에 해당하는 답안.
+
+        재응시 중이면 재응시분, 아니면 확정분이다.
+        """
+        return self.answers.filter(is_retry=self.is_retrying)
+
     @property
     def answered_count(self):
-        """응답을 채운 문항 수 (제출 전에도 센다)."""
-        return self.answers.exclude(given="").count()
+        """응답을 채운 문항 수 (제출 전에도 센다).
+
+        재응시 중에는 **확정분**을 센다. 관리자 화면이 '지난 기록'을
+        보여주는 것과 맞추기 위해서다. 새로 푼 개수는 retry_answered_count.
+        """
+        return self.answers.filter(is_retry=False).exclude(given="").count()
+
+    @property
+    def retry_answered_count(self):
+        """재응시 중 지금까지 푼 문항 수."""
+        return self.answers.filter(is_retry=True).exclude(given="").count()
 
     @property
     def answer_percent(self):
@@ -284,9 +300,23 @@ class ExamAttempt(models.Model):
         total = self.total or self.exam.questions.count()
         return round(self.answered_count * 100 / total) if total else 0
 
+    @property
+    def has_answer_rows(self):
+        """확정 답안이 남아 있는지.
+
+        옛 재응시 처리로 답안이 지워진 기록이 있다. 그런 경우 응답률을
+        0%로 보이면 점수와 어긋나 보이므로 화면에서 '—'로 구분한다.
+        """
+        return self.answers.filter(is_retry=False).exists()
+
 
 class ExamAnswer(models.Model):
-    """문항별 응답."""
+    """문항별 응답.
+
+    재응시 중에 푼 답은 is_retry=True로 따로 담는다. 확정분(False)을
+    지우지 않기 때문에, 재응시를 그만두어도 지난 답안이 그대로 남는다.
+    제출할 때 확정분을 지우고 재응시분을 승격시킨다.
+    """
 
     attempt = models.ForeignKey(
         ExamAttempt, on_delete=models.CASCADE, related_name="answers", verbose_name="응시"
@@ -296,11 +326,16 @@ class ExamAnswer(models.Model):
     )
     given = models.CharField(max_length=200, blank=True, default="", verbose_name="응답")
     is_correct = models.BooleanField(default=False, verbose_name="정답 여부")
+    is_retry = models.BooleanField(
+        default=False, verbose_name="재응시분",
+        help_text="재응시 중에 푼 답. 제출하면 확정분이 된다",
+    )
 
     class Meta:
         verbose_name = "DVD 시험 응답"
         verbose_name_plural = "DVD 시험 응답"
-        unique_together = ("attempt", "question")
+        # 확정분과 재응시분이 같은 문항에 공존할 수 있어야 한다
+        unique_together = ("attempt", "question", "is_retry")
         ordering = ["question__order"]
 
     def __str__(self):

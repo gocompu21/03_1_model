@@ -109,6 +109,14 @@
         .badge.done { background: #d8f3dc; color: #1b4332; }
         .badge.doing { background: #fff3d4; color: #7a5a12; }
         .badge.auto { background: #eef2ef; color: #7a8b80; margin-left: 3px; }
+        /* 답안이 남지 않은 기록 (옛 재응시 처리의 흔적) */
+        .lost {
+            color: #b3bfb8; font-size: 1.1rem; font-weight: 700;
+            text-align: center; cursor: help;
+        }
+        /* 재응시 중 새로 푼 개수 */
+        .now { color: #362b78; font-weight: 600; }
+
         /* 재응시 중 — 표에 보이는 점수는 아직 지난 기록이다 */
         .badge.retry { background: #e5e2fb; color: #362b78; }
         .badge.prev { background: #eef2ef; color: #7a8b80; margin-left: 3px; }
@@ -319,11 +327,19 @@ function draw(data) {
                 <br><span class="id">${esc(r.username)}</span>
             </td>
             <td>
+                ${r.lost ? `
+                <div class="lost" title="옛 재응시 처리로 답안이 남지 않았습니다. 점수는 제출 당시 확정값입니다.">—</div>
+                <div class="muted sub">답안 없음</div>
+                ` : `
                 <div class="bar ${r.submitted ? 'done' : ''}">
                     <span style="width:${r.answer_percent}%"></span>
                     <b>${r.answer_percent}%</b>
                 </div>
-                <div class="muted sub">${r.answered}/${r.total}문항</div>
+                <div class="muted sub">${r.answered}/${r.total}문항${
+                    r.retrying && r.retry_answered
+                        ? ` <span class="now">새로 ${r.retry_answered}</span>` : ''
+                }</div>
+                `}
             </td>
             <td>
                 <span class="sc ${r.submitted ? '' : 'temp'}">${r.percent}점</span>

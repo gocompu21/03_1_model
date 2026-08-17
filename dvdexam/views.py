@@ -76,9 +76,11 @@ def take(request, exam_id):
         return render(request, "dvdexam/closed.html", {"exam": exam, "state": state})
 
     if attempt and retry and not attempt.is_retrying:
-        # 재응시 시작. 이전 점수·제출 기록은 그대로 두고 답안만 비운다.
-        # 제출해야 _grade()가 새 결과로 덮어쓴다.
-        attempt.answers.all().delete()
+        # 재응시 시작. 점수·제출 기록·확정 답안을 모두 그대로 둔다.
+        # 새로 푸는 답은 is_retry=True로 따로 담기므로 지난 답안이 살아남는다.
+        # (예전에는 여기서 답안을 지워, 재응시를 그만두면 무엇을 틀렸는지
+        #  알 수 없게 됐다. 제출해야 _grade()가 확정분을 교체한다)
+        attempt.answers.filter(is_retry=True).delete()  # 옛 재응시 잔여물 정리
         attempt.retrying_since = timezone.now()
         attempt.last_saved_at = None
         attempt.save(update_fields=["retrying_since", "last_saved_at"])
@@ -141,6 +143,9 @@ def save(request, exam_id):
     given = {int(k): (v or "") for k, v in (body.get("answers") or {}).items()}
     questions = {q.id: q for q in exam.questions.all()}
 
+    # 재응시 중이면 재응시분 칸에 담는다. 확정 답안은 건드리지 않는다
+    bucket = attempt.is_retrying
+
     for qid, value in given.items():
         q = questions.get(qid)
         if not q:
@@ -149,14 +154,15 @@ def save(request, exam_id):
         # 저장 시점에 정답 여부까지 판정해 둔다. 관리자 화면에서 푼 문항
         # 기준 점수를 실시간으로 보여주기 위해서다 (응시자에게는 알리지 않는다)
         ExamAnswer.objects.update_or_create(
-            attempt=attempt, question=q,
+            attempt=attempt, question=q, is_retry=bucket,
             defaults={"given": value[:200], "is_correct": q.is_correct(value) if value else False},
         )
 
     attempt.last_saved_at = timezone.now()
     attempt.save(update_fields=["last_saved_at"])
 
-    return JsonResponse({"ok": True, "answered": attempt.answered_count})
+    answered = attempt.retry_answered_count if bucket else attempt.answered_count
+    return JsonResponse({"ok": True, "answered": answered})
 
 
 @login_required
@@ -197,10 +203,23 @@ def _grade(attempt, given, auto=False):
 
     given에 없는 문항은 중간 저장해 둔 답을 쓴다. 시간이 끝나 자동
     제출될 때 브라우저가 답을 못 보내도 저장분으로 채점하기 위해서다.
+
+    재응시였다면 이 시점에 확정분을 지우고 재응시분을 확정분으로 올린다.
+    제출이 곧 갱신이라는 규칙이 여기서 지켜진다.
     """
     questions = list(attempt.exam.questions.all())
-    saved = {a.question_id: a.given for a in attempt.answers.all()}
+    retrying = attempt.is_retrying
+
+    # 이번에 푼 답 (재응시면 재응시분, 아니면 확정분)
+    saved = {
+        a.question_id: a.given
+        for a in attempt.answers.filter(is_retry=retrying)
+    }
     score = 0
+
+    if retrying:
+        # 지난 확정 답안을 비우고 그 자리에 이번 답을 넣는다
+        attempt.answers.filter(is_retry=False).delete()
 
     for q in questions:
         value = (given.get(q.id) if q.id in given else saved.get(q.id)) or ""
@@ -209,9 +228,13 @@ def _grade(attempt, given, auto=False):
         if correct:
             score += 1
         ExamAnswer.objects.update_or_create(
-            attempt=attempt, question=q,
+            attempt=attempt, question=q, is_retry=False,
             defaults={"given": value[:200], "is_correct": correct},
         )
+
+    if retrying:
+        # 승격을 마쳤으므로 재응시분은 치운다
+        attempt.answers.filter(is_retry=True).delete()
 
     attempt.score = score
     attempt.total = len(questions)
@@ -230,7 +253,11 @@ def result(request, exam_id):
     """내 채점 결과."""
     exam = get_object_or_404(Exam, id=exam_id)
     attempt = get_object_or_404(ExamAttempt, exam=exam, user=request.user)
-    answers = attempt.answers.select_related("question").order_by("question__order")
+    # 결과는 확정분만 보여준다. 재응시 중이라도 지난 결과가 보여야 한다
+    answers = (
+        attempt.answers.filter(is_retry=False)
+        .select_related("question").order_by("question__order")
+    )
 
     return render(request, "dvdexam/result.html", {
         "exam": exam,
@@ -342,8 +369,9 @@ def overview(request, exam_id):
 def _overview_data(exam, user):
     """문항별 정답률과 전체 집계를 만든다."""
     questions = list(exam.questions.all())
+    # 확정분만 센다. 재응시분까지 세면 같은 사람이 두 번 반영된다
     answers = list(
-        ExamAnswer.objects.filter(attempt__exam=exam)
+        ExamAnswer.objects.filter(attempt__exam=exam, is_retry=False)
         .exclude(given="")
         .values("question_id", "is_correct")
     )
@@ -358,7 +386,9 @@ def _overview_data(exam, user):
     # 내가 어떻게 답했는지 (관리자는 응시 기록이 없을 수 있다)
     mine = {
         a.question_id: a
-        for a in ExamAnswer.objects.filter(attempt__exam=exam, attempt__user=user)
+        for a in ExamAnswer.objects.filter(
+            attempt__exam=exam, attempt__user=user, is_retry=False
+        )
     }
 
     rows = []
@@ -505,11 +535,17 @@ def _scores_data(exam):
     # 돌아오지 않아도 관리자 화면이 스스로 깨끗해진다
     #   재응시 → 지난 기록으로 되돌림 / 첫 응시 → 삭제
     ExamAttempt.sweep_stale(exam)
+    # 확정분만 센다. 재응시분(is_retry=True)까지 세면 두 번 반영된다
+    done_only = Q(answers__is_retry=False)
     attempts = (
         exam.attempts.select_related("user")
         .annotate(
-            filled=Count("answers", filter=~Q(answers__given="")),
-            hit=Count("answers", filter=Q(answers__is_correct=True)),
+            filled=Count("answers", filter=done_only & ~Q(answers__given="")),
+            hit=Count("answers", filter=done_only & Q(answers__is_correct=True)),
+            rows_kept=Count("answers", filter=done_only),
+            retry_filled=Count(
+                "answers", filter=Q(answers__is_retry=True) & ~Q(answers__given="")
+            ),
         )
         .order_by("-hit", "-filled", "started_at")
     )
@@ -522,11 +558,10 @@ def _scores_data(exam):
         # 재응시 중이면 표의 모든 값이 '지난 확정 기록'이어야 한다.
         # 새로 푼 답안 수를 섞어 보이면 점수와 응답률이 따로 놀아 혼란스럽다
         if retrying and a.is_submitted:
-            answered = a.total or total_q
+            answered = a.filled
 
         if a.is_submitted:
-            # 제출한 점수는 확정값이다. 응답 행에서 다시 세지 않는다.
-            # (재응시가 폐기되면 답안이 지워져 hit이 0이 되므로 반드시 score를 쓴다)
+            # 제출한 점수는 확정값이다. 응답 행에서 다시 세지 않는다
             correct, shown_total = a.score, a.total or total_q
             percent = a.score_percent
         else:
@@ -547,6 +582,11 @@ def _scores_data(exam):
             "answered": answered,
             "total": shown_total,
             "answer_percent": round(answered * 100 / total_q) if total_q else 0,
+            # 옛 재응시 처리로 답안이 지워진 기록. 응답률을 0%로 보이면
+            # 점수와 어긋나 보이므로 화면에서 '—'로 구분한다
+            "lost": a.is_submitted and a.score > 0 and a.rows_kept == 0,
+            # 재응시 중 지금까지 새로 푼 개수 (참고용)
+            "retry_answered": a.retry_filled if retrying else 0,
             # 푼 문제 중 몇 %를 맞혔는지 (제출 후에는 전체 기준 = 최종 점수)
             "percent": percent,
             "elapsed": a.elapsed_display,
