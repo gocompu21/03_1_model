@@ -290,6 +290,11 @@
         text-underline-offset: 2px;
     }
     .q-choices.revealed .choice-note { display: block; }
+
+    /* 정답 선지의 설명은 조금 진하게.
+       번호에 correct가 붙으므로 :has()로 그 칸의 설명을 골라낸다 */
+    .choice-item:has(.choice-num.correct) .choice-note,
+    .choice-item.is-answer .choice-note { color: #1a1a1a; }
     @media (max-width: 768px) {
         .choice-note { margin-left: 2px; font-size: 0.88rem; line-height: 1.6; }
     }
@@ -1255,8 +1260,11 @@
                 qChoices.querySelectorAll('.choice-num').forEach(cn => {
                     cn.classList.remove('correct');
                     const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                    cn.closest('.choice-item').classList.remove('is-answer');
                     if (correctAnswers.includes(choiceNum)) {
                         cn.classList.add('correct');
+                        // :has()를 모르는 브라우저를 위해 칸에도 표시를 남긴다
+                        cn.closest('.choice-item').classList.add('is-answer');
                     }
                 });
                 // 정답이 드러나는 시점이 같으므로 선지별 설명도 함께 펼친다
@@ -1330,10 +1338,13 @@
             const correctAnswers = JSON.parse(correctAnswerStr);
             qChoices.querySelectorAll('.choice-num').forEach(cn => {
                 const choiceNum = parseInt(cn.getAttribute('data-choice'));
+                const item = cn.closest('.choice-item');
                 if (allExpanded && correctAnswers.includes(choiceNum)) {
                     cn.classList.add('correct');
+                    item.classList.add('is-answer');
                 } else {
                     cn.classList.remove('correct');
+                    item.classList.remove('is-answer');
                 }
             });
         });
