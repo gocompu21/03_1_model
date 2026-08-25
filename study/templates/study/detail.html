@@ -241,10 +241,15 @@
     }
 
     /* Correct answer circle (shown when explanation is visible) */
+    /* 번호 오른쪽 칸. 보기 글과 설명이 세로로 쌓인다
+       (.choice-item이 flex라 이 칸이 없으면 설명이 옆으로 밀린다) */
+    .choice-body { flex: 1; min-width: 0; }
+    .choice-text { }
+
     /* 선지별 설명 — 답을 고르거나 해설을 열면 각 보기 아래에 붙는다 */
     .choice-note {
         display: none;              /* 열기 전에는 감춘다 (정답 노출 방지) */
-        margin: 7px 0 4px 34px;
+        margin: 7px 0 4px 4px;
         padding-left: 18px;
         position: relative;
         font-size: 0.93rem;
@@ -284,7 +289,7 @@
     }
     .q-choices.revealed .choice-note { display: block; }
     @media (max-width: 768px) {
-        .choice-note { margin-left: 8px; font-size: 0.88rem; line-height: 1.6; }
+        .choice-note { margin-left: 2px; font-size: 0.88rem; line-height: 1.6; }
     }
 
     .choice-num.correct::before {
@@ -831,34 +836,49 @@
 
             <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                 <div class="choice-item" onclick="selectChoice(this, 1)">
-                    <span class="choice-num" data-choice="1">①</span> {{ q.choice1|safe }}
-                    {% if q.choice_notes.1 %}
-                    <div class="choice-note">{{ q.choice_notes.1|choice_note }}</div>
-                    {% endif %}
+                    <span class="choice-num" data-choice="1">①</span>
+                    <div class="choice-body">
+                        <div class="choice-text">{{ q.choice1|safe }}</div>
+                        {% if q.choice_notes.1 %}
+                        <div class="choice-note">{{ q.choice_notes.1|choice_note }}</div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 2)">
-                    <span class="choice-num" data-choice="2">②</span> {{ q.choice2|safe }}
-                    {% if q.choice_notes.2 %}
-                    <div class="choice-note">{{ q.choice_notes.2|choice_note }}</div>
-                    {% endif %}
+                    <span class="choice-num" data-choice="2">②</span>
+                    <div class="choice-body">
+                        <div class="choice-text">{{ q.choice2|safe }}</div>
+                        {% if q.choice_notes.2 %}
+                        <div class="choice-note">{{ q.choice_notes.2|choice_note }}</div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 3)">
-                    <span class="choice-num" data-choice="3">③</span> {{ q.choice3|safe }}
-                    {% if q.choice_notes.3 %}
-                    <div class="choice-note">{{ q.choice_notes.3|choice_note }}</div>
-                    {% endif %}
+                    <span class="choice-num" data-choice="3">③</span>
+                    <div class="choice-body">
+                        <div class="choice-text">{{ q.choice3|safe }}</div>
+                        {% if q.choice_notes.3 %}
+                        <div class="choice-note">{{ q.choice_notes.3|choice_note }}</div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 4)">
-                    <span class="choice-num" data-choice="4">④</span> {{ q.choice4|safe }}
-                    {% if q.choice_notes.4 %}
-                    <div class="choice-note">{{ q.choice_notes.4|choice_note }}</div>
-                    {% endif %}
+                    <span class="choice-num" data-choice="4">④</span>
+                    <div class="choice-body">
+                        <div class="choice-text">{{ q.choice4|safe }}</div>
+                        {% if q.choice_notes.4 %}
+                        <div class="choice-note">{{ q.choice_notes.4|choice_note }}</div>
+                        {% endif %}
+                    </div>
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 5)">
-                    <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5|safe }}
-                    {% if q.choice_notes.5 %}
-                    <div class="choice-note">{{ q.choice_notes.5|choice_note }}</div>
-                    {% endif %}
+                    <span class="choice-num" data-choice="5">⑤</span>
+                    <div class="choice-body">
+                        <div class="choice-text">{{ q.choice5|safe }}</div>
+                        {% if q.choice_notes.5 %}
+                        <div class="choice-note">{{ q.choice_notes.5|choice_note }}</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 

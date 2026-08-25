@@ -189,6 +189,12 @@ def format_question(text):
 # 선지별 설명에서 허용하는 태그는 강조(<em>) 하나뿐이다.
 # 관리자가 넣는 값이지만 그대로 |safe로 흘리면 실수나 붙여넣기로
 # 스크립트가 섞여 들어갈 수 있어, 나머지는 모두 글자로 만든다.
+# 학명을 *Xanthomonas citri* 처럼 마크다운 기울임으로 적은 것을 찾는다.
+# 겹별표(**굵게**)와 헷갈리지 않도록 앞뒤에 별표가 더 없는 것만 잡는다.
+_ITALIC_RE = re.compile(r"(?<!\*)\*(?!\s)([^*
+]+?)(?<!\s)\*(?!\*)")
+
+
 @register.filter
 def choice_note(value):
     if not value:
@@ -196,4 +202,6 @@ def choice_note(value):
     out = escape(value)                       # 우선 전부 무해하게 만들고
     out = out.replace("&lt;em&gt;", "<em>")   # 강조만 되살린다
     out = out.replace("&lt;/em&gt;", "</em>")
+    # 학명은 기울임이 관례다. 별표가 글자로 남지 않도록 <i>로 바꾼다
+    out = _ITALIC_RE.sub(r"<i></i>", out)
     return mark_safe(out)
