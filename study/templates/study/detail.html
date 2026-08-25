@@ -286,10 +286,6 @@
 
     /* 정답 선지의 설명은 조금 진하게.
        번호에 correct가 붙으므로 :has()로 그 칸의 설명을 골라낸다 */
-    .choice-item:has(.choice-num.correct) .choice-note,
-    .choice-item.is-answer .choice-note {
-        color: #1a1a1a;
-    }
     /* 형광펜으로 그은 듯 글자 아래쪽에 밝은 노란 띠를 깐다.
        블록에 걸면 첫 줄에만 그려지므로, 글자 흐름을 따라가도록
        안쪽 인라인 요소에 배경을 건다 */
