@@ -793,6 +793,9 @@
                 });
             }
         }
+        // 답을 고른 순간 선지별 설명도 함께 펼친다.
+        // 해설이 이미 열려 있던 경우에도 빠짐없이 보이게 밖에서 한 번 더 건다
+        parent.classList.add('revealed');
     }
 
     // Toggle Explanation
@@ -824,7 +827,11 @@
                 qChoices.querySelectorAll('.choice-num').forEach(cn => {
                     cn.classList.remove('correct');
                 });
-                qChoices.classList.remove('revealed');
+                // 답을 이미 고른 문제는 설명을 남겨 둔다.
+                // 고르지 않았다면 정답이 드러나므로 함께 감춘다
+                if (!qChoices.querySelector('.choice-item.selected')) {
+                    qChoices.classList.remove('revealed');
+                }
             }
         }
     }
