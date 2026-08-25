@@ -197,7 +197,9 @@ def choice_note(value):
     out = out.replace("&lt;em&gt;", "<em>")   # 강조만 되살린다
     out = out.replace("&lt;/em&gt;", "</em>")
     out = _italicize(out)                     # *학명* -> 기울임
-    return mark_safe(_latin_to_italic(out))
+    # 형광줄이 줄마다 이어지려면 인라인 요소여야 한다.
+    # 블록(div)에 배경을 걸면 첫 줄에만 칠해진다
+    return mark_safe('<span class="hl">' + _latin_to_italic(out) + '</span>')
 
 
 # 학명은 형광펜이 아니라 기울임으로 쓰는 것이 관례다.

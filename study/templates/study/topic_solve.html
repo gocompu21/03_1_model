@@ -223,14 +223,13 @@
     /* 선 끝의 작은 화살촉 */
     /* 형광펜 느낌: 글자 뒤로만 깔리도록 배경을 아래쪽에 둔다 */
     .choice-note em {
-        /* 핵심어는 형광 밑줄로 짚는다. 글자를 덮지 않아 읽기 편하다 */
+        /* 핵심어는 글자색 밑줄로 조용히 짚는다 */
         font-style: normal;
         font-weight: inherit;
         text-decoration: underline;
-        text-decoration-color: #ffd83d;
-        text-decoration-thickness: 4px;
-        text-underline-offset: -1px;
-        text-decoration-skip-ink: none;
+        text-decoration-color: currentColor;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
     }
     .q-choices.revealed .choice-note { display: block; }
 
@@ -239,18 +238,19 @@
     .choice-item:has(.choice-num.correct) .choice-note,
     .choice-item.is-answer .choice-note {
         color: #1a1a1a;
-        /* 정답 설명은 문장 전체에 형광줄 */
-        text-decoration: underline;
-        text-decoration-color: #ffd83d;
-        text-decoration-thickness: 4px;
-        text-underline-offset: -1px;
-        text-decoration-skip-ink: none;
     }
-    /* 문장 전체에 형광줄이 그어지면 핵심어의 밑줄이 묻힌다.
-       정답 선지 안에서는 핵심어를 조금 더 진한 색으로 구분한다 */
-    .choice-item:has(.choice-num.correct) .choice-note em,
-    .choice-item.is-answer .choice-note em {
-        text-decoration-color: #f0a500;
+    /* 형광펜으로 그은 듯 글자 아래쪽에 밝은 노란 띠를 깐다.
+       블록에 걸면 첫 줄에만 그려지므로, 글자 흐름을 따라가도록
+       안쪽 인라인 요소에 배경을 건다 */
+    .choice-item:has(.choice-num.correct) .choice-note .hl,
+    .choice-item.is-answer .choice-note .hl {
+        background-image: linear-gradient(#fff35c, #fff35c);
+        background-size: 100% 0.42em;
+        background-position: 0 88%;
+        background-repeat: no-repeat;
+        /* 줄이 바뀌어도 띠가 이어지게 한다 */
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
     }
 
     @media (max-width: 768px) {
