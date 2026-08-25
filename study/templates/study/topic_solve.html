@@ -210,12 +210,30 @@
         word-break: keep-all;
     }
     .choice-note::before {
-        content: "↳";           /* 꺾인 화살표 */
+        content: "";
         position: absolute;
-        left: 0;
-        top: 0;
-        color: #d35400;
-        font-weight: bold;
+        left: 2px;
+        top: 2px;
+        width: 9px;
+        height: 9px;
+        /* 왼쪽에서 내려와 오른쪽으로 굽는 선 */
+        border-left: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        border-bottom-left-radius: 6px;
+        opacity: 0.4;
+    }
+    /* 선 끝의 작은 화살촉 */
+    .choice-note::after {
+        content: "";
+        position: absolute;
+        left: 9px;
+        top: 8px;
+        width: 4px;
+        height: 4px;
+        border-top: 1.5px solid currentColor;
+        border-right: 1.5px solid currentColor;
+        transform: rotate(45deg);
+        opacity: 0.4;
     }
     /* 형광펜 느낌: 글자 뒤로만 깔리도록 배경을 아래쪽에 둔다 */
     .choice-note em {
