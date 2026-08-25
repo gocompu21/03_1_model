@@ -257,37 +257,24 @@
         cursor: default;
     }
     .choice-note::before {
-        content: "";
+        /* 굽어서 오른쪽을 가리키는 화살표 */
+        content: "↪";
         position: absolute;
-        left: 2px;
-        top: 2px;
-        width: 9px;
-        height: 9px;
-        border-left: 1.5px solid currentColor;
-        border-bottom: 1.5px solid currentColor;
-        border-bottom-left-radius: 6px;
-        opacity: 0.4;
-    }
-    .choice-note::after {
-        content: "";
-        position: absolute;
-        left: 9px;
-        top: 8px;
-        width: 4px;
-        height: 4px;
-        border-top: 1.5px solid currentColor;
-        border-right: 1.5px solid currentColor;
-        transform: rotate(45deg);
-        opacity: 0.4;
+        left: 0;
+        top: -1px;
+        color: #d94a3d;
+        font-size: 1.05em;
+        line-height: 1.55;
     }
     .choice-note em {
-        /* 핵심어는 밑줄로만 짚는다. 글자색을 따르고 굵기는 본문 그대로 */
+        /* 핵심어는 형광 밑줄로 짚는다. 글자를 덮지 않아 읽기 편하다 */
         font-style: normal;
         font-weight: inherit;
         text-decoration: underline;
-        text-decoration-color: currentColor;
-        text-decoration-thickness: 1px;
-        text-underline-offset: 2px;
+        text-decoration-color: #ffd83d;
+        text-decoration-thickness: 4px;
+        text-underline-offset: -1px;
+        text-decoration-skip-ink: none;
     }
     .q-choices.revealed .choice-note { display: block; }
 
