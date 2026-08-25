@@ -238,10 +238,13 @@
     }
     /* 형광펜 느낌: 글자 뒤로만 깔리도록 배경을 아래쪽에 둔다 */
     .choice-note em {
-        /* 강조 표시를 두지 않는다. 밑줄도 굵기도 없이 본문과 같게 읽힌다 */
+        /* 핵심어는 밑줄로만 짚는다. 글자색을 따르고 굵기는 본문 그대로 */
         font-style: normal;
         font-weight: inherit;
-        text-decoration: none;
+        text-decoration: underline;
+        text-decoration-color: currentColor;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
     }
     .q-choices.revealed .choice-note { display: block; }
 
