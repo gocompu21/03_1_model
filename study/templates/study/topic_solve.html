@@ -198,6 +198,41 @@
         pointer-events: none;
     }
 
+    /* 선지별 설명 — 해설을 열었을 때 각 보기 아래에 붙는다 */
+    .choice-note {
+        display: none;              /* 해설을 열기 전에는 감춘다 (정답 노출 방지) */
+        margin: 7px 0 4px 34px;
+        padding-left: 18px;
+        position: relative;
+        font-size: 0.93rem;
+        line-height: 1.65;
+        color: #4a4a4a;
+        word-break: keep-all;
+    }
+    .choice-note::before {
+        content: "B3";           /* ↳ */
+        position: absolute;
+        left: 0;
+        top: 0;
+        color: #d35400;
+        font-weight: bold;
+    }
+    /* 형광펜 느낌: 글자 뒤로만 깔리도록 배경을 아래쪽에 둔다 */
+    .choice-note em {
+        font-style: normal;
+        background: linear-gradient(transparent 55%, #fff3a3 55%);
+        padding: 0 1px;
+    }
+    .q-choices.revealed .choice-note { display: block; }
+
+    @media (max-width: 768px) {
+        .choice-note {
+            margin-left: 8px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+    }
+
     /* Explanation Section */
     .explanation-section {
         margin-top: 30px;
@@ -555,18 +590,33 @@
             <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                 <div class="choice-item">
                     <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span> {{ q.choice1|safe }}
+                    {% if q.choice_notes.1 %}
+                    <div class="choice-note" data-note="1">{{ q.choice_notes.1 }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span> {{ q.choice2|safe }}
+                    {% if q.choice_notes.2 %}
+                    <div class="choice-note" data-note="2">{{ q.choice_notes.2 }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span> {{ q.choice3|safe }}
+                    {% if q.choice_notes.3 %}
+                    <div class="choice-note" data-note="3">{{ q.choice_notes.3 }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span> {{ q.choice4|safe }}
+                    {% if q.choice_notes.4 %}
+                    <div class="choice-note" data-note="4">{{ q.choice_notes.4 }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span> {{ q.choice5|safe }}
+                    {% if q.choice_notes.5 %}
+                    <div class="choice-note" data-note="5">{{ q.choice_notes.5 }}</div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -766,12 +816,15 @@
                         cn.classList.add('correct');
                     }
                 });
+                // 선지별 설명도 함께 펼친다 (정답이 드러나는 시점이 같다)
+                qChoices.classList.add('revealed');
             } else if (card && !isHidden) {
                 // Hide correct answer circle when closing
                 const qChoices = card.querySelector('.q-choices');
                 qChoices.querySelectorAll('.choice-num').forEach(cn => {
                     cn.classList.remove('correct');
                 });
+                qChoices.classList.remove('revealed');
             }
         }
     }

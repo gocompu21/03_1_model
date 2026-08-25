@@ -35,13 +35,19 @@ class Question(models.Model):
     choice5 = models.CharField(max_length=200, verbose_name="보기 5")
 
     answer = models.JSONField(default=list, verbose_name="정답 (1-5, 복수 가능)")
-    general_chat = models.TextField(verbose_name="해설")
+    general_chat = models.TextField(verbose_name="해설", blank=True, default="")
     textbook_chat = models.TextField(verbose_name="기본서 해설", blank=True, null=True)
     infographic_image = models.ImageField(
         upload_to="questions/explanations/",
         blank=True,
         null=True,
         verbose_name="인포그래픽 이미지",
+    )
+    # 선지별 짧은 설명. {"1": "…", "2": "…"} 형태로 담는다.
+    # 화면에서 각 보기 바로 아래에 붙여 왜 맞고 틀렸는지 그 자리에서 보여준다
+    choice_notes = models.JSONField(
+        default=dict, blank=True, verbose_name="선지별 설명",
+        help_text='보기 번호를 키로 쓴다. 예: {"1": "…", "2": "…"}',
     )
     narration = models.TextField(verbose_name="나레이션", blank=True, null=True)
     summary = models.CharField(max_length=50, verbose_name="문제 요약", blank=True, null=True)
