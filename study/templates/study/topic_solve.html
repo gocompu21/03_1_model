@@ -237,7 +237,21 @@
     /* 정답 선지의 설명은 조금 진하게.
        번호에 correct가 붙으므로 :has()로 그 칸의 설명을 골라낸다 */
     .choice-item:has(.choice-num.correct) .choice-note,
-    .choice-item.is-answer .choice-note { color: #1a1a1a; }
+    .choice-item.is-answer .choice-note {
+        color: #1a1a1a;
+        /* 정답 설명은 문장 전체에 형광줄 */
+        text-decoration: underline;
+        text-decoration-color: #ffd83d;
+        text-decoration-thickness: 4px;
+        text-underline-offset: -1px;
+        text-decoration-skip-ink: none;
+    }
+    /* 문장 전체에 형광줄이 그어지면 핵심어의 밑줄이 묻힌다.
+       정답 선지 안에서는 핵심어를 조금 더 진한 색으로 구분한다 */
+    .choice-item:has(.choice-num.correct) .choice-note em,
+    .choice-item.is-answer .choice-note em {
+        text-decoration-color: #f0a500;
+    }
 
     @media (max-width: 768px) {
         .choice-note {
