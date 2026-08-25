@@ -148,8 +148,9 @@
         transform: scale(1.2);
     }
 
+    /* 고른 선지는 번호의 체크 표시로 알 수 있다. 배경은 칠하지 않는다 */
     .choice-item.selected {
-        background-color: #e8f5e9;
+        background-color: transparent;
     }
 
     .choice-num {
@@ -238,8 +239,9 @@
     /* 형광펜 느낌: 글자 뒤로만 깔리도록 배경을 아래쪽에 둔다 */
     .choice-note em {
         font-style: normal;
-        background: linear-gradient(transparent 55%, #fff3a3 55%);
-        padding: 0 1px;
+        /* 형광펜은 글자를 덮어 읽기 불편하다. 밑줄로 조용히 짚는다 */
+        border-bottom: 2px solid #f0c419;
+        padding-bottom: 1px;
     }
     .q-choices.revealed .choice-note { display: block; }
 
