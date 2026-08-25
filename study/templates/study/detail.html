@@ -281,14 +281,10 @@
         opacity: 0.4;
     }
     .choice-note em {
+        /* 강조 표시를 두지 않는다. 밑줄도 굵기도 없이 본문과 같게 읽힌다 */
         font-style: normal;
-        /* 형광펜은 글자를 덮어 읽기 불편하다. 밑줄로 조용히 짚는다.
-           테두리로 그으면 글자에서 떨어지므로 text-decoration을 쓴다 */
-        text-decoration: underline;
-        text-decoration-color: currentColor;
-        text-decoration-thickness: 1.5px;
-        text-underline-offset: 2px;
-        font-weight: 600;
+        font-weight: inherit;
+        text-decoration: none;
     }
     .q-choices.revealed .choice-note { display: block; }
     @media (max-width: 768px) {
