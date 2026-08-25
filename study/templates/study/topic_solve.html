@@ -591,31 +591,31 @@
                 <div class="choice-item">
                     <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span> {{ q.choice1|safe }}
                     {% if q.choice_notes.1 %}
-                    <div class="choice-note" data-note="1">{{ q.choice_notes.1 }}</div>
+                    <div class="choice-note" data-note="1">{{ q.choice_notes.1|choice_note }}</div>
                     {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span> {{ q.choice2|safe }}
                     {% if q.choice_notes.2 %}
-                    <div class="choice-note" data-note="2">{{ q.choice_notes.2 }}</div>
+                    <div class="choice-note" data-note="2">{{ q.choice_notes.2|choice_note }}</div>
                     {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span> {{ q.choice3|safe }}
                     {% if q.choice_notes.3 %}
-                    <div class="choice-note" data-note="3">{{ q.choice_notes.3 }}</div>
+                    <div class="choice-note" data-note="3">{{ q.choice_notes.3|choice_note }}</div>
                     {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span> {{ q.choice4|safe }}
                     {% if q.choice_notes.4 %}
-                    <div class="choice-note" data-note="4">{{ q.choice_notes.4 }}</div>
+                    <div class="choice-note" data-note="4">{{ q.choice_notes.4|choice_note }}</div>
                     {% endif %}
                 </div>
                 <div class="choice-item">
                     <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span> {{ q.choice5|safe }}
                     {% if q.choice_notes.5 %}
-                    <div class="choice-note" data-note="5">{{ q.choice_notes.5 }}</div>
+                    <div class="choice-note" data-note="5">{{ q.choice_notes.5|choice_note }}</div>
                     {% endif %}
                 </div>
             </div>
