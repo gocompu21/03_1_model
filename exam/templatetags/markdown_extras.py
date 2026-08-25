@@ -196,7 +196,49 @@ def choice_note(value):
     out = escape(value)                       # 우선 전부 무해하게 만들고
     out = out.replace("&lt;em&gt;", "<em>")   # 강조만 되살린다
     out = out.replace("&lt;/em&gt;", "</em>")
-    return mark_safe(_italicize(out))
+    out = _italicize(out)                     # *학명* -> 기울임
+    return mark_safe(_latin_to_italic(out))
+
+
+# 학명은 형광펜이 아니라 기울임으로 쓰는 것이 관례다.
+# 모델이 <em>Exobasidium</em> 처럼 감싸 보낸 것을 바로잡는다.
+def _latin_to_italic(text):
+    out = []
+    for i, chunk in enumerate(text.split("<em>")):
+        if i == 0:
+            out.append(chunk)
+            continue
+        inner, sep, rest = chunk.partition("</em>")
+        if sep and _looks_latin(inner, rest):
+            out.append("<i>" + inner + "</i>" + rest)
+        else:
+            out.append("<em>" + chunk)
+    return "".join(out)
+
+
+def _looks_latin(s, after=""):
+    """라틴 학명처럼 보이는지 가린다.
+
+    Bioventing 같은 기술 용어까지 기울이지 않도록, 학명의 두 가지
+    전형만 인정한다.
+      · 속명 + 종소명   (Taphrina wiesneri)
+      · 속명 + spp./sp. (Exobasidium spp.)
+    """
+    s = s.strip()
+    if not s or not s[0].isupper():
+        return False
+    for ch in s:
+        # 한글이 섞이면 학명이 아니다
+        if not (ch.isascii() and (ch.isalpha() or ch in " .-")):
+            return False
+
+    words = s.split()
+    if len(words) >= 2 and words[1][:1].islower():
+        return True                        # 속명 + 종소명
+    if len(words) == 1:
+        # 뒤에 spp. 이나 sp. 가 붙는 속명 표기
+        return after.lstrip()[:4].rstrip(".").lower() in ("spp", "sp")
+    return False
 
 
 def _italicize(text):
