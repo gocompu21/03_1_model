@@ -804,28 +804,24 @@
         parent.querySelectorAll('.choice-item').forEach(c => c.classList.remove('selected'));
         choiceItem.classList.add('selected');
 
-        // 선지 선택 시 해설 자동 표시
-        const card = choiceItem.closest('.question-card');
-        if (card) {
-            const expEl = card.querySelector('.explanation-section');
-            if (expEl && expEl.style.display === 'none') {
-                expEl.style.display = 'block';
-                // 정답 표시
-                const correctAnswerStr = parent.getAttribute('data-answer');
-                const correctAnswers = JSON.parse(correctAnswerStr);
-                parent.querySelectorAll('.choice-num').forEach(cn => {
-                    cn.classList.remove('correct');
-                    cn.closest('.choice-item').classList.remove('is-answer');
-                    if (correctAnswers.includes(parseInt(cn.getAttribute('data-choice')))) {
-                        cn.classList.add('correct');
-                        cn.closest('.choice-item').classList.add('is-answer');
-                    }
-                });
-            }
-        }
-        // 답을 고른 순간 선지별 설명도 함께 펼친다.
-        // 해설이 이미 열려 있던 경우에도 빠짐없이 보이게 밖에서 한 번 더 건다
+        // 답을 고르면 정답 표시와 선지별 설명만 보여준다.
+        // 아래 해설은 '해설 보기'를 눌렀을 때만 펼친다
+        markCorrect(parent);
         parent.classList.add('revealed');
+    }
+
+    // 정답 선지에 표시를 남긴다 (여러 곳에서 쓴다)
+    function markCorrect(qChoices) {
+        const correctAnswers = JSON.parse(qChoices.getAttribute('data-answer'));
+        qChoices.querySelectorAll('.choice-num').forEach(cn => {
+            const item = cn.closest('.choice-item');
+            cn.classList.remove('correct');
+            item.classList.remove('is-answer');
+            if (correctAnswers.includes(parseInt(cn.getAttribute('data-choice')))) {
+                cn.classList.add('correct');
+                item.classList.add('is-answer');
+            }
+        });
     }
 
     // Toggle Explanation
@@ -857,12 +853,13 @@
             } else if (card && !isHidden) {
                 // Hide correct answer circle when closing
                 const qChoices = card.querySelector('.q-choices');
-                qChoices.querySelectorAll('.choice-num').forEach(cn => {
-                    cn.classList.remove('correct');
-                });
-                // 답을 이미 고른 문제는 설명을 남겨 둔다.
+                // 답을 이미 고른 문제는 정답 표시와 설명을 남긴다.
                 // 고르지 않았다면 정답이 드러나므로 함께 감춘다
                 if (!qChoices.querySelector('.choice-item.selected')) {
+                    qChoices.querySelectorAll('.choice-num').forEach(cn => {
+                        cn.classList.remove('correct');
+                        cn.closest('.choice-item').classList.remove('is-answer');
+                    });
                     qChoices.classList.remove('revealed');
                 }
             }
