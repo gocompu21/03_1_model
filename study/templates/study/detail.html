@@ -128,6 +128,27 @@
         animation: fadeIn 0.5s ease;
     }
 
+    /* 인라인 편집 */
+    .edit-btn { background: none; border: none; cursor: pointer; font-size: 1.1em; color: #888; padding: 2px 6px; }
+    .edit-btn:hover { color: #333; }
+    .edit-form { display: none; padding-left: 0; }
+    .question-card.editing .q-header,
+    .question-card.editing .q-choices,
+    .question-card.editing .explanation-section,
+    .question-card.editing > div:last-of-type:not(.edit-form) { display: none !important; }
+    .question-card.editing .edit-form { display: block; }
+    .edit-form label { display: block; font-size: 0.8em; color: #666; margin-top: 8px; }
+    .edit-form textarea, .edit-form input[type="text"] { width: 100%; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; }
+    .edit-form textarea.ef-content { min-height: 80px; }
+    .edit-form textarea.ef-chat { min-height: 60px; }
+    .edit-form select { padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; }
+    .edit-actions { margin-top: 12px; display: flex; gap: 8px; }
+    .edit-actions button { padding: 6px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
+    .edit-save { background: #2e7d32; color: #fff; }
+    .edit-save:hover { background: #1b5e20; }
+    .edit-cancel { background: #eee; color: #555; }
+    .edit-cancel:hover { background: #ddd; }
+
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -160,8 +181,10 @@
     .q-content {
         font-size: 1.2em;
         line-height: 1.6;
-        margin-bottom: 20px;
+        margin-bottom: 6px;
         font-weight: bold;
+        padding-left: 1.8em;
+        text-indent: -1.8em;
     }
 
     .q-choices {
@@ -170,6 +193,8 @@
     }
 
     .choice-item {
+        display: flex;
+        align-items: flex-start;
         margin-bottom: 8px;
         font-size: 1.05em;
         padding: 5px;
@@ -186,9 +211,7 @@
     }
 
     .choice-num {
-        display: inline-block;
-        width: auto;
-        height: auto;
+        flex-shrink: 0;
         border: none;
         border-radius: 0;
         text-align: center;
@@ -218,6 +241,52 @@
     }
 
     /* Correct answer circle (shown when explanation is visible) */
+    /* 선지별 설명 — 답을 고르거나 해설을 열면 각 보기 아래에 붙는다 */
+    .choice-note {
+        display: none;              /* 열기 전에는 감춘다 (정답 노출 방지) */
+        margin: 7px 0 4px 34px;
+        padding-left: 18px;
+        position: relative;
+        font-size: 0.93rem;
+        line-height: 1.65;
+        color: #4a4a4a;
+        word-break: keep-all;
+        cursor: default;
+    }
+    .choice-note::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 2px;
+        width: 9px;
+        height: 9px;
+        border-left: 1.5px solid currentColor;
+        border-bottom: 1.5px solid currentColor;
+        border-bottom-left-radius: 6px;
+        opacity: 0.4;
+    }
+    .choice-note::after {
+        content: "";
+        position: absolute;
+        left: 9px;
+        top: 8px;
+        width: 4px;
+        height: 4px;
+        border-top: 1.5px solid currentColor;
+        border-right: 1.5px solid currentColor;
+        transform: rotate(45deg);
+        opacity: 0.4;
+    }
+    .choice-note em {
+        font-style: normal;
+        background: linear-gradient(transparent 55%, #fff3a3 55%);
+        padding: 0 1px;
+    }
+    .q-choices.revealed .choice-note { display: block; }
+    @media (max-width: 768px) {
+        .choice-note { margin-left: 8px; font-size: 0.88rem; line-height: 1.6; }
+    }
+
     .choice-num.correct::before {
         content: "";
         position: absolute;
@@ -714,7 +783,7 @@
 
     <div class="content-area" id="question-list">
         {% for q in questions %}
-        <div class="question-card" data-subject="{{ q.subject.name }}">
+        <div class="question-card" data-subject="{{ q.subject.name }}" data-qid="{{ q.id }}">
             <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
                 <div style="margin-bottom: 10px;">
                     <span class="q-badge" style="float: right;">{{ q.subject.name }}</span>
@@ -723,33 +792,79 @@
                     {{ q.number }}. {{ q.content|safe|linebreaksbr }}
                 </div>
             </div>
+            {% if request.user.is_staff %}
+            <div class="edit-form">
+                <label>문제 지문</label>
+                <textarea class="ef-content">{{ q.content }}</textarea>
+                <label>① 보기1</label>
+                <input type="text" class="ef-c1" value="{{ q.choice1 }}">
+                <label>② 보기2</label>
+                <input type="text" class="ef-c2" value="{{ q.choice2 }}">
+                <label>③ 보기3</label>
+                <input type="text" class="ef-c3" value="{{ q.choice3 }}">
+                <label>④ 보기4</label>
+                <input type="text" class="ef-c4" value="{{ q.choice4 }}">
+                <label>⑤ 보기5</label>
+                <input type="text" class="ef-c5" value="{{ q.choice5 }}">
+                <label>정답</label>
+                <select class="ef-answer">
+                    <option value="1"{% if 1 in q.answer %} selected{% endif %}>①</option>
+                    <option value="2"{% if 2 in q.answer %} selected{% endif %}>②</option>
+                    <option value="3"{% if 3 in q.answer %} selected{% endif %}>③</option>
+                    <option value="4"{% if 4 in q.answer %} selected{% endif %}>④</option>
+                    <option value="5"{% if 5 in q.answer %} selected{% endif %}>⑤</option>
+                </select>
+                <label>해설</label>
+                <textarea class="ef-chat">{{ q.general_chat }}</textarea>
+                <div class="edit-actions">
+                    <button type="button" class="edit-save" onclick="saveEdit(this)">저장</button>
+                    <button type="button" class="edit-cancel" onclick="cancelEdit(this)">취소</button>
+                </div>
+            </div>
+            {% endif %}
 
             {% if q.image %}
-            <div style="text-align: center; margin-bottom: 20px;">
-                <img src="{{ q.image.url }}" style="max-width: 100%; max-height: 400px; border: 1px solid #ccc; cursor: pointer;" onclick="openModal(this.src)">
+            <div style="text-align: left; margin-bottom: 15px; padding-left: 1.8em;">
+                <img src="{{ q.image.url }}" style="max-width: 90%; max-height: 400px; border: 1px solid #ccc; cursor: pointer;" onclick="openModal(this.src)">
             </div>
             {% endif %}
 
             <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                 <div class="choice-item" onclick="selectChoice(this, 1)">
                     <span class="choice-num" data-choice="1">①</span> {{ q.choice1|safe }}
+                    {% if q.choice_notes.1 %}
+                    <div class="choice-note">{{ q.choice_notes.1|choice_note }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 2)">
                     <span class="choice-num" data-choice="2">②</span> {{ q.choice2|safe }}
+                    {% if q.choice_notes.2 %}
+                    <div class="choice-note">{{ q.choice_notes.2|choice_note }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 3)">
                     <span class="choice-num" data-choice="3">③</span> {{ q.choice3|safe }}
+                    {% if q.choice_notes.3 %}
+                    <div class="choice-note">{{ q.choice_notes.3|choice_note }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 4)">
                     <span class="choice-num" data-choice="4">④</span> {{ q.choice4|safe }}
+                    {% if q.choice_notes.4 %}
+                    <div class="choice-note">{{ q.choice_notes.4|choice_note }}</div>
+                    {% endif %}
                 </div>
                 <div class="choice-item" onclick="selectChoice(this, 5)">
                     <span class="choice-num" data-choice="5">⑤</span> {{ q.choice5|safe }}
+                    {% if q.choice_notes.5 %}
+                    <div class="choice-note">{{ q.choice_notes.5|choice_note }}</div>
+                    {% endif %}
                 </div>
             </div>
 
             <!-- Toggle Button for Explanation -->
             <div style="margin-top: 10px; text-align: right; display: flex; justify-content: flex-end; gap: 15px; align-items: center;">
+                {% if request.user.is_staff %}<button type="button" class="edit-btn" onclick="startEdit(this)" title="수정">&#9998;</button>{% endif %}
                 <!-- Listen to Explanation Button -->
                 <button type="button" class="tts-btn" data-question-id="{{ q.id }}" onclick="toggleTTS(this, '{{ q.id }}')"
                     style="background:none; border:none; cursor:pointer; color:#2196F3; display:inline-flex; align-items:center; gap:5px; font-size:0.9em; font-weight: bold;">
@@ -1024,6 +1139,61 @@
         menu.classList.toggle('active');
     }
 
+    // 인라인 편집
+    function startEdit(btn) {
+        var card = btn.closest('.question-card');
+        card.classList.add('editing');
+    }
+
+    function saveEdit(btn) {
+        var card = btn.closest('.question-card');
+        var qid = card.getAttribute('data-qid');
+        var form = card.querySelector('.edit-form');
+        var payload = {
+            content: form.querySelector('.ef-content').value,
+            choice1: form.querySelector('.ef-c1').value,
+            choice2: form.querySelector('.ef-c2').value,
+            choice3: form.querySelector('.ef-c3').value,
+            choice4: form.querySelector('.ef-c4').value,
+            choice5: form.querySelector('.ef-c5').value,
+            answer: [parseInt(form.querySelector('.ef-answer').value)],
+            general_chat: form.querySelector('.ef-chat').value,
+        };
+        btn.disabled = true;
+        btn.textContent = '저장 중...';
+        fetch('/study/api/question/' + qid + '/update/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            body: JSON.stringify(payload)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.ok) { alert(data.error || '저장 실패'); btn.disabled = false; btn.textContent = '저장'; return; }
+            // DOM 갱신
+            var content = card.querySelector('.q-content');
+            var num = content.textContent.trim().split('.')[0];
+            content.innerHTML = num + '. ' + payload.content.replace(/\n/g, '<br>');
+            var choices = card.querySelectorAll('.choice-item');
+            var circles = ['①','②','③','④','⑤'];
+            for (var i = 0; i < 5; i++) {
+                var span = choices[i].querySelector('.choice-num');
+                choices[i].innerHTML = '';
+                choices[i].appendChild(span);
+                choices[i].append(' ' + payload['choice' + (i+1)]);
+            }
+            card.querySelector('.q-choices').setAttribute('data-answer', JSON.stringify(payload.answer));
+            card.classList.remove('editing');
+            btn.disabled = false;
+            btn.textContent = '저장';
+        })
+        .catch(function() { alert('오류 발생'); btn.disabled = false; btn.textContent = '저장'; });
+    }
+
+    function cancelEdit(btn) {
+        var card = btn.closest('.question-card');
+        card.classList.remove('editing');
+    }
+
     // Select Choice
     function selectChoice(choiceItem, choiceNum) {
         const parent = choiceItem.closest('.q-choices');
@@ -1040,6 +1210,9 @@
             const expId = expSection.id;
             toggleExplanation(expId);
         }
+        // 답을 고른 순간 선지별 설명도 펼친다.
+        // 해설이 이미 열려 있던 경우까지 덮도록 밖에서 건다
+        parent.classList.add('revealed');
     }
 
     // Toggle Explanation
@@ -1064,6 +1237,8 @@
                         cn.classList.add('correct');
                     }
                 });
+                // 정답이 드러나는 시점이 같으므로 선지별 설명도 함께 펼친다
+                qChoices.classList.add('revealed');
 
                 // Lazy load related terms via AJAX
                 const termsContainer = card.querySelector('.terms-container');
@@ -1104,6 +1279,11 @@
                 qChoices.querySelectorAll('.choice-num').forEach(cn => {
                     cn.classList.remove('correct');
                 });
+                // 답을 이미 고른 문제는 설명을 남긴다.
+                // 고르지 않았다면 정답이 드러나므로 함께 감춘다
+                if (!qChoices.querySelector('.choice-item.selected')) {
+                    qChoices.classList.remove('revealed');
+                }
             }
         }
     }
