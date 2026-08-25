@@ -196,4 +196,24 @@ def choice_note(value):
     out = escape(value)                       # 우선 전부 무해하게 만들고
     out = out.replace("&lt;em&gt;", "<em>")   # 강조만 되살린다
     out = out.replace("&lt;/em&gt;", "</em>")
-    return mark_safe(out)
+    return mark_safe(_italicize(out))
+
+
+def _italicize(text):
+    """*Xanthomonas citri* 처럼 별표로 감싼 학명을 기울임으로 바꾼다.
+
+    별표가 짝을 이루지 않거나 안쪽이 비면 원문 그대로 둔다.
+    (곱셈 기호 2 * 3 이나 **굵게** 를 건드리지 않기 위해서다)
+    """
+    parts = text.split("*")
+    if len(parts) < 3 or len(parts) % 2 == 0:
+        return text                       # 짝이 안 맞으면 손대지 않는다
+    out = [parts[0]]
+    for i in range(1, len(parts), 2):
+        inner = parts[i]
+        # 빈 칸이거나 공백으로 시작·끝나면 강조가 아니라고 본다
+        if not inner.strip() or inner != inner.strip():
+            return text
+        out.append("<i>" + inner + "</i>")
+        out.append(parts[i + 1])
+    return "".join(out)
