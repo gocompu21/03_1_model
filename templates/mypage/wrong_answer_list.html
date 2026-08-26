@@ -635,10 +635,10 @@
         <!-- Sidebar -->
         <div class="sidebar">
             <a href="{% url 'mypage:review_index' %}" class="menu-item">
-                <i class="fas fa-brain"></i> 오늘의 복습
+                <i class="fas fa-brain"></i> 오늘의 복습{% if sidebar_review_count %} <span style="background-color: #e63946; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem; margin-left: 5px; font-weight: 600;">{{ sidebar_review_count }}</span>{% endif %}
             </a>
             <a href="{% url 'mypage:wrong_answer_list' %}" class="menu-item active">
-                <i class="fas fa-times-circle"></i> 전체 오답 노트
+                <i class="fas fa-times-circle"></i> 전체 오답 노트{% if sidebar_wrong_count %} <span style="background-color: #e63946; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem; margin-left: 5px; font-weight: 600;">{{ sidebar_wrong_count }}</span>{% endif %}
             </a>
             <a href="{% url 'mypage:my_questions_list' %}" class="menu-item">
                 <i class="fas fa-question-circle"></i> 나의 질의응답

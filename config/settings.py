@@ -91,6 +91,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                # 마이페이지 사이드바 배지 (어느 화면에 있든 보여야 한다)
+                "mypage.context_processors.sidebar_counts",
             ],
         },
     },
