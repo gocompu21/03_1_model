@@ -217,6 +217,35 @@
     .hi-num { padding-left: 1.8em; text-indent: -1.8em; }
     .indent-cont { padding-left: 2em; }
 
+    /* 정답 선지 바로 밑에 붙는 해설.
+       선지가 flex 로 늘어서므로 줄 전체를 차지하게 해야 아래로 내려간다 */
+    .choice-item { flex-wrap: wrap; }
+    .inline-exp {
+        display: none;
+        flex-basis: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 9px 0 4px 1.9em;
+        padding: 11px 14px;
+        background: #f6faf7;
+        border-left: 3px solid #2d6a4f;
+        border-radius: 0 6px 6px 0;
+        font-size: 0.95rem;
+        line-height: 1.75;
+        color: #333;
+    }
+    .q-choices.revealed .inline-exp { display: block; }
+
+    .inline-exp-head {
+        font-weight: 700;
+        color: #1b6b3a;
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+    }
+    .inline-exp-body p:first-child { margin-top: 0; }
+    .inline-exp-body p:last-child { margin-bottom: 0; }
+    .inline-exp-body strong { color: #14452f; }
+
     /* Explanation Section */
     .explanation-section {
         margin-top: 20px;
@@ -481,18 +510,48 @@
                 <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                     <div class="choice-item">
                         <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span><span class="choice-text">{{ q.choice1|safe }}</span>
+                        {% if q.answer == 1 %}
+                        <div class="inline-exp">
+                            <div class="inline-exp-head">정답 및 해설</div>
+                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span><span class="choice-text">{{ q.choice2|safe }}</span>
+                        {% if q.answer == 2 %}
+                        <div class="inline-exp">
+                            <div class="inline-exp-head">정답 및 해설</div>
+                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span><span class="choice-text">{{ q.choice3|safe }}</span>
+                        {% if q.answer == 3 %}
+                        <div class="inline-exp">
+                            <div class="inline-exp-head">정답 및 해설</div>
+                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span><span class="choice-text">{{ q.choice4|safe }}</span>
+                        {% if q.answer == 4 %}
+                        <div class="inline-exp">
+                            <div class="inline-exp-head">정답 및 해설</div>
+                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span><span class="choice-text">{{ q.choice5|safe }}</span>
+                        {% if q.answer == 5 %}
+                        <div class="inline-exp">
+                            <div class="inline-exp-head">정답 및 해설</div>
+                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -512,17 +571,13 @@
                 </div>
 
                 <div id="exp-{{ q.id }}" class="explanation-section">
-                    <div class="exp-title">
-                        <span>💡 정답 및 해설</span>
-                    </div>
-                    <div class="exp-text markdown-content">
-                        {{ q.explanation|default:"해설이 없습니다."|markdown|safe }}
-                    </div>
+                    <!-- 해설은 정답 선지 바로 밑에 나오므로 여기서는 뺐다.
+                         관련 용어만 남긴다 -->
 
                     <!-- Related Terms in Explanation -->
                     {% get_relevant_terms q chapter.book.subject as related_terms %}
                     {% if related_terms %}
-                    <div style="margin-top: 20px; border-top: 1px dashed #ddd; padding-top: 15px;">
+                    <div>
                         <h4 style="font-size: 0.95rem; color: #2d6a4f; margin: 0 0 10px 0;">🔑 관련 용어</h4>
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                             {% for term in related_terms %}
@@ -598,6 +653,8 @@
                         cn.classList.add('correct');
                     }
                 });
+                // 정답 선지 밑의 해설도 함께 편다
+                parent.classList.add('revealed');
             }
         }
     }
@@ -620,11 +677,13 @@
                         cn.classList.add('correct');
                     }
                 });
+                qChoices.classList.add('revealed');
             } else if (card && !isHidden) {
                 const qChoices = card.querySelector('.q-choices');
                 qChoices.querySelectorAll('.choice-num').forEach(cn => {
                     cn.classList.remove('correct');
                 });
+                qChoices.classList.remove('revealed');
             }
         }
     }
@@ -653,6 +712,8 @@
                     cn.classList.remove('correct');
                 }
             });
+            // 선지 밑 해설도 함께
+            qChoices.classList.toggle('revealed', allExpanded);
         });
         
         if (allExpanded) {
