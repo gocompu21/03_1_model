@@ -673,22 +673,43 @@ def member_info(request):
 
 @login_required
 def wrong_answer_list(request):
-    """전체 오답 노트 별도 페이지"""
-    wrong_qs = (
+    """전체 오답 노트. 과목을 골라 볼 수 있다."""
+    from exam.models import Subject
+
+    base = (
         UserQuestionResult.objects.filter(attempt__user=request.user, is_correct=False)
         .select_related("question", "question__exam", "question__subject", "attempt")
-        .order_by("-attempt__start_time", "question__number")
     )
 
-    wrong_paginator = Paginator(wrong_qs, 15)
-    wrong_page = request.GET.get("page", 1)
-    wrong_answers = wrong_paginator.get_page(wrong_page)
+    # 과목별 오답 수 (필터 단추에 함께 보여준다)
+    counts = dict(
+        base.values_list("question__subject__name")
+        .annotate(n=Count("id"))
+        .values_list("question__subject__name", "n")
+    )
+    subjects = [
+        {"name": s.name, "count": counts.get(s.name, 0)}
+        for s in Subject.objects.order_by("code")
+    ]
 
-    total_count = wrong_qs.count()
+    current = request.GET.get("subject", "")
+    wrong_qs = base
+    if current and current in counts:
+        wrong_qs = wrong_qs.filter(question__subject__name=current)
+    else:
+        current = ""
+
+    wrong_qs = wrong_qs.order_by("-attempt__start_time", "question__number")
+
+    paginator = Paginator(wrong_qs, 20)
+    wrong_answers = paginator.get_page(request.GET.get("page", 1))
 
     context = {
         "wrong_answers": wrong_answers,
-        "total_count": total_count,
+        "total_count": base.count(),
+        "shown_count": wrong_qs.count(),
+        "subjects": subjects,
+        "current_subject": current,
     }
     return render(request, "mypage/wrong_answer_list.html", context)
 

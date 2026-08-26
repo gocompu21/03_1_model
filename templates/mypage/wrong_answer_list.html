@@ -1,4 +1,5 @@
 {% load static %}
+{% load markdown_extras %}
 <!DOCTYPE html>
 <html lang="ko">
 
@@ -108,6 +109,126 @@
             padding: 20px 40px;
             overflow-y: auto;
         }
+
+        /* 과목 고르기 */
+        .subject-tabs {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px;
+        }
+        .subject-tabs .subj {
+            background: #fff; border: 1.5px solid #dfe7e2; color: #40684f;
+            padding: 7px 14px; border-radius: 20px; text-decoration: none;
+            font-size: 0.86rem; font-weight: 600; white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .subject-tabs .subj:hover { border-color: #2d6a4f; }
+        .subject-tabs .subj.on { background: #2d6a4f; border-color: #2d6a4f; color: #fff; }
+        .subject-tabs .n {
+            background: #eef2ef; color: #7a8b80; font-size: 0.74rem;
+            padding: 1px 7px; border-radius: 9px;
+        }
+        .subject-tabs .subj.on .n { background: rgba(255,255,255,0.24); color: #fff; }
+
+        /* 문제 한 장 */
+        .wa-card {
+            background: #fff; padding: 20px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #e8e8e8;
+            margin-bottom: 16px;
+        }
+        .q-tags {
+            display: flex; align-items: center; justify-content: flex-end;
+            gap: 8px; margin-bottom: 10px;
+        }
+        .q-badge {
+            background: #2d6a4f; color: #fff; padding: 3px 10px;
+            border-radius: 11px; font-size: 0.78rem; line-height: 1.5;
+            white-space: nowrap;
+        }
+        .q-summary {
+            color: #40684f; font-weight: 600; font-size: 0.86rem;
+            line-height: 1.5; word-break: keep-all;
+        }
+        .q-content {
+            font-size: 1.1em; font-weight: bold; line-height: 1.6;
+            color: #333; margin-bottom: 16px;
+        }
+        .q-image { text-align: center; margin-bottom: 14px; }
+        .q-image img { max-width: 100%; border-radius: 8px; cursor: pointer; }
+
+        /* 선지 */
+        .choice-item {
+            display: flex; align-items: flex-start; flex-wrap: wrap;
+            margin-bottom: 8px; font-size: 1.05em;
+            padding: 5px 12px 5px 5px; border-radius: 5px; line-height: 1.5;
+        }
+        .choice-num {
+            flex-shrink: 0; width: 22px; margin-right: 6px;
+            font-size: 1em; line-height: 1.5; text-align: center;
+            position: relative; display: inline-block;
+        }
+        .choice-text { flex: 1; min-width: 0; line-height: 1.5; }
+        /* 정답 - 손으로 그린 듯한 빨간 동그라미 */
+        .choice-item.correct .choice-num::before {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            width: 26px; height: 26px; border: 3px solid #d93025;
+            border-radius: 50% 45% 55% 40% / 50% 55% 45% 50%;
+            transform: translate(-50%, -50%) rotate(-5deg); pointer-events: none;
+        }
+        /* 내가 고른 답 - 체크 표시 */
+        .choice-item.mine .choice-num::after {
+            content: ""; position: absolute; top: 50%; left: 50%;
+            transform: translate(-35%, -115%) scale(2.5);
+            width: 100%; height: 100%;
+            background-image: url("{% static 'exam/images/check_mark_black.png' %}");
+            background-size: contain; background-repeat: no-repeat;
+            background-position: center; mix-blend-mode: multiply;
+            filter: contrast(1.5) brightness(1.1); pointer-events: none;
+        }
+
+        /* 선지별 설명 */
+        .choice-item .choice-note {
+            flex: 1 1 100%; margin-left: 28px; margin-right: 12px;
+        }
+        .choice-note {
+            margin: 8px 0 2px 4px; padding-left: 18px; position: relative;
+            font-size: 0.93rem; line-height: 1.65; color: #4a4a4a;
+            font-weight: normal; text-decoration: none; display: block;
+            word-break: keep-all;
+        }
+        .choice-note::before {
+            content: "↪"; position: absolute; left: 0; top: -1px;
+            color: #d94a3d; font-size: 1.05em; line-height: 1.55;
+        }
+        .choice-note i { font-style: italic; padding-right: 0.12em; }
+        .choice-note em {
+            font-style: normal; font-weight: inherit;
+            text-decoration: underline; text-decoration-color: currentColor;
+            text-decoration-thickness: 1px; text-underline-offset: 2px;
+        }
+        /* 정답 설명에는 형광줄 */
+        .choice-item.correct .choice-note .hl {
+            background-image: linear-gradient(#fff35c, #fff35c);
+            background-size: 100% 0.42em; background-position: 0 88%;
+            background-repeat: no-repeat;
+            box-decoration-break: clone; -webkit-box-decoration-break: clone;
+        }
+
+        .infographic-container { text-align: center; margin-top: 16px; }
+        .infographic-container img {
+            max-width: 100%; border-radius: 8px; cursor: pointer;
+        }
+
+        /* 쪽 넘기기 */
+        .pager {
+            display: flex; align-items: center; justify-content: center;
+            gap: 12px; margin: 24px 0 8px;
+        }
+        .pager a {
+            background: #fff; border: 1px solid #dfe7e2; color: #40684f;
+            padding: 8px 16px; border-radius: 8px; text-decoration: none;
+            font-size: 0.88rem; font-weight: 600;
+        }
+        .pager a:hover { background: #f0f6f2; }
+        .pager .now { color: #7a8b80; font-size: 0.86rem; }
 
         .page-header {
             display: flex;
@@ -490,50 +611,98 @@
         <div class="main-content" id="main-content">
             <div class="page-header">
                 <h1><i class="fas fa-times-circle"></i> 전체 오답 노트</h1>
-                <span class="total-count">총 {{ total_count }}개</span>
+                <span class="total-count">
+                    {% if current_subject %}{{ current_subject }} {{ shown_count }}개 / {% endif %}총 {{ total_count }}개
+                </span>
             </div>
 
-            <!-- Scroll Data for Infinite Scroll -->
-            <div id="scroll-data"
-                 data-page="{{ wrong_answers.number }}"
-                 data-has-next="{{ wrong_answers.has_next|yesno:'true,false' }}"
-                 data-next-page="{{ wrong_answers.next_page_number|default:'' }}"
-                 style="display: none;"></div>
+            <div class="subject-tabs">
+                <a href="?" class="subj {% if not current_subject %}on{% endif %}">
+                    전체 <span class="n">{{ total_count }}</span>
+                </a>
+                {% for s in subjects %}
+                <a href="?subject={{ s.name|urlencode }}"
+                   class="subj {% if current_subject == s.name %}on{% endif %}">
+                    {{ s.name }} <span class="n">{{ s.count }}</span>
+                </a>
+                {% endfor %}
+            </div>
 
-            <table class="history-table" id="wrong-answer-container">
-                <thead>
-                    <tr>
-                        <th>시험 일시</th>
-                        <th>과목</th>
-                        <th>문제</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in wrong_answers %}
-                    <tr>
-                        <td style="white-space: nowrap;">{{ result.attempt.start_time|date:"y/m/d H:i" }}</td>
-                        <td style="white-space: nowrap;">{{ result.question.subject.name }}</td>
-                        <td>
-                            <div>
-                                <strong style="color: #2d6a4f;">{{ result.question.exam.round_number }}-{{ result.question.number }}.</strong> {{ result.question.content|safe }}
-                            </div>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3">
-                            <div class="empty-state">
-                                <i class="fas fa-medal"></i>
-                                <p>틀린 문제가 없습니다. 훌륭합니다!</p>
-                                <a href="{% url 'exam:index' %}" class="start-btn">
-                                    <i class="fas fa-play"></i> 시험 보러 가기
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% for result in wrong_answers %}
+            {% with q=result.question ans=result.question.answer selected=result.selected_choice %}
+            <div class="wa-card">
+                <div class="q-tags">
+                    <span class="q-badge">{{ q.subject.name }}</span>
+                    {% if q.summary %}<span class="q-summary">{{ q.summary }}</span>{% endif %}
+                </div>
+                <div class="q-content">
+                    {{ q.exam.round_number }}-{{ q.number }}. {{ q.content|safe|linebreaksbr }}
+                </div>
+
+                {% if q.image %}
+                <div class="q-image"><img src="{{ q.image.url }}" onclick="openImageModal(this.src)"></div>
+                {% endif %}
+
+                <div class="q-choices">
+                    <div class="choice-item {% if 1 in ans %}correct{% endif %}{% if selected == 1 %} mine{% endif %}">
+                        <span class="choice-num">①</span>
+                        <span class="choice-text">{{ q.choice1|safe }}</span>
+                        {% if q.choice_notes.1 %}<div class="choice-note">{{ q.choice_notes.1|choice_note }}</div>{% endif %}
+                    </div>
+                    <div class="choice-item {% if 2 in ans %}correct{% endif %}{% if selected == 2 %} mine{% endif %}">
+                        <span class="choice-num">②</span>
+                        <span class="choice-text">{{ q.choice2|safe }}</span>
+                        {% if q.choice_notes.2 %}<div class="choice-note">{{ q.choice_notes.2|choice_note }}</div>{% endif %}
+                    </div>
+                    <div class="choice-item {% if 3 in ans %}correct{% endif %}{% if selected == 3 %} mine{% endif %}">
+                        <span class="choice-num">③</span>
+                        <span class="choice-text">{{ q.choice3|safe }}</span>
+                        {% if q.choice_notes.3 %}<div class="choice-note">{{ q.choice_notes.3|choice_note }}</div>{% endif %}
+                    </div>
+                    <div class="choice-item {% if 4 in ans %}correct{% endif %}{% if selected == 4 %} mine{% endif %}">
+                        <span class="choice-num">④</span>
+                        <span class="choice-text">{{ q.choice4|safe }}</span>
+                        {% if q.choice_notes.4 %}<div class="choice-note">{{ q.choice_notes.4|choice_note }}</div>{% endif %}
+                    </div>
+                    <div class="choice-item {% if 5 in ans %}correct{% endif %}{% if selected == 5 %} mine{% endif %}">
+                        <span class="choice-num">⑤</span>
+                        <span class="choice-text">{{ q.choice5|safe }}</span>
+                        {% if q.choice_notes.5 %}<div class="choice-note">{{ q.choice_notes.5|choice_note }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="terms-container" data-question-id="{{ q.id }}"
+                     data-skip="{{ q.subject.name }}|{{ q.summary|default:'' }}"
+                     data-loaded="false"></div>
+
+                {% if q.infographic_image %}
+                <div class="infographic-container">
+                    <img src="{{ q.infographic_image.url }}" onclick="openImageModal(this.src)">
+                </div>
+                {% endif %}
+            </div>
+            {% endwith %}
+            {% empty %}
+            <div class="empty-state">
+                <i class="fas fa-medal"></i>
+                <p>{% if current_subject %}{{ current_subject }}에 틀린 문제가 없습니다.{% else %}틀린 문제가 없습니다. 훌륭합니다!{% endif %}</p>
+                <a href="{% url 'exam:index' %}" class="start-btn">
+                    <i class="fas fa-play"></i> 시험 보러 가기
+                </a>
+            </div>
+            {% endfor %}
+
+            {% if wrong_answers.has_other_pages %}
+            <div class="pager">
+                {% if wrong_answers.has_previous %}
+                <a href="?{% if current_subject %}subject={{ current_subject|urlencode }}&{% endif %}page={{ wrong_answers.previous_page_number }}">이전</a>
+                {% endif %}
+                <span class="now">{{ wrong_answers.number }} / {{ wrong_answers.paginator.num_pages }}</span>
+                {% if wrong_answers.has_next %}
+                <a href="?{% if current_subject %}subject={{ current_subject|urlencode }}&{% endif %}page={{ wrong_answers.next_page_number }}">다음</a>
+                {% endif %}
+            </div>
+            {% endif %}
 
             <!-- Loading Indicator -->
             <div id="loading" class="loading" style="display: none;">
@@ -546,6 +715,59 @@
     <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <script>
+    // 관련 용어 - 화면을 열 때 문항마다 한 번씩 불러온다
+    (function () {
+        document.querySelectorAll('.terms-container').forEach(function (box) {
+            if (box.dataset.loaded === 'true') return;
+            box.dataset.loaded = 'true';
+            fetch('/study/api/question/' + box.dataset.questionId + '/terms/')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.terms || !data.terms.length) {
+                        box.style.display = 'none';
+                        return;
+                    }
+                    // 과목 배지와 요약에 이미 나온 말은 뺀다
+                    var skip = (box.dataset.skip || '').split('|')
+                        .map(function (x) { return x.trim(); })
+                        .filter(function (x) { return x.length > 0; });
+                    var parts = [];
+                    data.terms.forEach(function (t) {
+                        if (skip.indexOf(t.word) !== -1) return;
+                        var col = null;
+                        if (t.reference_count >= 10) col = '#d32f2f';
+                        else if (t.reference_count >= 5) col = '#f57c00';
+                        else if (t.reference_count > 0) col = '#1976d2';
+                        var style = 'border: 1px solid #2d6a4f; color: #2d6a4f;'
+                                  + ' padding: 3px 10px; border-radius: 12px;'
+                                  + ' font-size: 0.85rem; text-decoration: none;'
+                                  + ' background: #fff;';
+                        if (col) {
+                            style += ' border-right-width: 5px;'
+                                   + ' border-right-color: ' + col + ';';
+                        }
+                        var a = document.createElement('a');
+                        a.href = '/glossary/term/' + t.id + '/';
+                        a.target = 'glossary_popup';
+                        a.setAttribute('style', style);
+                        a.textContent = t.word;
+                        parts.push(a.outerHTML);
+                    });
+                    if (!parts.length) { box.style.display = 'none'; return; }
+                    box.innerHTML =
+                        '<div style="margin-top: 16px; padding-top: 12px;'
+                        + ' border-top: 1px dashed #ddd;">'
+                        + '<h4 style="font-size: 0.95rem; color: #2d6a4f;'
+                        + ' margin: 0 0 8px;">🔑 관련 용어</h4>'
+                        + '<div style="display: flex; flex-wrap: wrap; gap: 4px;">'
+                        + parts.join('') + '</div></div>';
+                })
+                .catch(function () { box.style.display = 'none'; });
+        });
+    })();
+    </script>
 
     <script>
         let isLoading = false;
