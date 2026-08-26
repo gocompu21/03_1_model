@@ -326,12 +326,12 @@
             border-radius: 5px;
             line-height: 1.5;
         }
-        .choice-text { flex: 1; min-width: 0; }
+        .choice-text { flex: 1; min-width: 0; line-height: 1.5; }
         /* 설명은 번호 아래가 아니라 보기 글 아래로 내려간다 */
         /* 형광줄이 오른쪽 끝에 닿지 않도록 여백을 둔다 */
         .choice-item .choice-note {
             flex: 1 1 100%;
-            margin-left: 26px;
+            margin-left: 28px;
             margin-right: 12px;
         }
 
@@ -386,10 +386,14 @@
             color: inherit;
             font-weight: normal;
         }
+        /* 번호와 보기 글의 첫 줄이 나란히 놓이도록 크기·줄간격을 맞춘다 */
         .choice-num {
             flex-shrink: 0;
-            margin-right: 5px;
-            font-size: 1.1em;
+            width: 22px;
+            margin-right: 6px;
+            font-size: 1em;
+            line-height: 1.5;
+            text-align: center;
             position: relative;
             display: inline-block;
         }
