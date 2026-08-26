@@ -4,19 +4,23 @@ from django.db import models
 class SiteSettings(models.Model):
     """사이트 전역 설정 (싱글톤 패턴)"""
 
-    # Gemini 모델 선택지
+    # Gemini 모델 선택지.
+    # 2026-08-26 정리: gemini-3-pro-preview 와 gemini-2.0-flash-exp 는
+    # 구글이 내려 404가 나므로 뺐다. 실제 호출해 되는 것만 남긴다
     GEMINI_MODEL_CHOICES = [
-        ('gemini-3-pro-preview', 'Gemini 3 Pro Preview ($2/$12 per 1M)'),
-        ('gemini-3-flash-preview', 'Gemini 3 Flash Preview ($0.5/$3 per 1M)'),
+        ('gemini-3.7-flash', 'Gemini 3.7 Flash (권장)'),
+        ('gemini-3.1-pro-preview', 'Gemini 3.1 Pro Preview (고품질·느림)'),
+        ('gemini-3-flash-preview', 'Gemini 3 Flash Preview'),
+        ('gemini-2.5-pro', 'Gemini 2.5 Pro'),
         ('gemini-2.5-flash', 'Gemini 2.5 Flash ($0.15/$0.60 per 1M)'),
-        ('gemini-2.0-flash-exp', 'Gemini 2.0 Flash Exp (Legacy)'),
+        ('gemini-2.5-flash-lite', 'Gemini 2.5 Flash Lite (가장 저렴)'),
     ]
 
     # 나무주치의 (Chat) API 모델
     chat_model = models.CharField(
         max_length=50,
         choices=GEMINI_MODEL_CHOICES,
-        default='gemini-3-pro-preview',
+        default='gemini-3.7-flash',
         verbose_name='나무주치의 모델'
     )
 
@@ -24,7 +28,7 @@ class SiteSettings(models.Model):
     textbook_model = models.CharField(
         max_length=50,
         choices=GEMINI_MODEL_CHOICES,
-        default='gemini-3-flash-preview',
+        default='gemini-3.7-flash',
         verbose_name='기본서 모델'
     )
 
