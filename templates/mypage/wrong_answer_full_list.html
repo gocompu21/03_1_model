@@ -846,11 +846,9 @@
                         {% endwith %}
                     </div>
 
-                    <div class="explanation-section">
-                        <!-- 관련 용어 (화면을 열 때 한 번만 불러온다) -->
-                        <div class="terms-container" data-question-id="{{ result.question.id }}"
-                             data-loaded="false"></div>
-                    </div>
+                    <!-- 관련 용어 (화면을 열 때 한 번만 불러온다) -->
+                    <div class="terms-container" data-question-id="{{ result.question.id }}"
+                         data-loaded="false"></div>
                 </div>
                 {% empty %}
                 <div class="empty-state">
@@ -871,7 +869,10 @@
             fetch('/study/api/question/' + box.dataset.questionId + '/terms/')
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    if (!data.terms || !data.terms.length) return;
+                    if (!data.terms || !data.terms.length) {
+                        box.style.display = 'none';   // 용어가 없으면 자리를 접는다
+                        return;
+                    }
                     var html = '<div style="margin-top: 20px; padding-top: 15px; '
                              + 'border-top: 1px dashed #ddd;">'
                              + '<h4 style="font-size: 0.95rem; color: #2d6a4f; '
@@ -896,7 +897,7 @@
                     });
                     box.innerHTML = html + '</div></div>';
                 })
-                .catch(function () {});   // 못 불러와도 화면은 그대로 둔다
+                .catch(function () { box.style.display = 'none'; });
         });
     })();
     </script>
