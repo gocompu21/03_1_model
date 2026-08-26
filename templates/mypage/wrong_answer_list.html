@@ -643,7 +643,7 @@
                 <i class="fas fa-brain"></i> 오늘의 복습{% if sidebar_review_count %} <span style="background-color: #e63946; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem; margin-left: 5px; font-weight: 600;">{{ sidebar_review_count }}</span>{% endif %}
             </a>
             <a href="{% url 'mypage:wrong_answer_list' %}" class="menu-item active">
-                <i class="fas fa-times-circle"></i> 오답 노트{% if sidebar_wrong_count %} <span style="background-color: #e63946; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem; margin-left: 5px; font-weight: 600;">{{ sidebar_wrong_count }}</span>{% endif %}
+                <i class="fas fa-times-circle"></i> 오답 노트{% if sidebar_wrong_count %} <span id="sideWrongBadge" style="background-color: #e63946; color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 0.72rem; margin-left: 5px; font-weight: 600;">{{ sidebar_wrong_count }}</span>{% endif %}
             </a>
             <a href="{% url 'mypage:my_questions_list' %}" class="menu-item">
                 <i class="fas fa-question-circle"></i> 나의 질의응답
@@ -676,12 +676,12 @@
 
             <div class="subject-tabs">
                 <a href="?" class="subj {% if not current_subject %}on{% endif %}">
-                    전체 <span class="n">{{ total_count }}</span>
+                    전체 <span class="n" id="tabAll">{{ total_count }}</span>
                 </a>
                 {% for s in subjects %}
                 <a href="?subject={{ s.name|urlencode }}"
                    class="subj {% if current_subject == s.name %}on{% endif %}">
-                    {{ s.name }} <span class="n">{{ s.count }}</span>
+                    {{ s.name }} <span class="n" data-subject="{{ s.name }}">{{ s.count }}</span>
                 </a>
                 {% endfor %}
             </div>
@@ -856,6 +856,24 @@
                         // 잠깐 흐려진 뒤 자리를 접는다
                         card.classList.add('leaving');
                         setTimeout(function () { card.remove(); }, 250);
+
+                        // 화면에 남은 숫자도 함께 고친다.
+                        // 안 고치면 목록에서는 빠졌는데 숫자만 그대로여서
+                        // 제외가 안 된 것처럼 보인다
+                        var badge = document.getElementById('sideWrongBadge');
+                        if (badge && typeof d.total === 'number') {
+                            badge.textContent = d.total;
+                            badge.style.display = d.total ? '' : 'none';
+                        }
+                        var all = document.getElementById('tabAll');
+                        if (all && typeof d.total === 'number') {
+                            all.textContent = d.total;
+                        }
+                        if (d.subject && typeof d.subject_count === 'number') {
+                            var one = document.querySelector(
+                                '.subject-tabs .n[data-subject="' + d.subject + '"]');
+                            if (one) one.textContent = d.subject_count;
+                        }
                     })
                     .catch(function () { btn.disabled = false; });
             });

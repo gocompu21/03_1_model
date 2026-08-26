@@ -2883,5 +2883,36 @@ def wrong_answer_exclude(request, question_id):
         excluded = True
 
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return JsonResponse({"ok": True, "excluded": excluded})
+        # 화면의 숫자(사이드바 배지, 전체·과목 탭)를 함께 고쳐야 하므로
+        # 남은 개수를 다시 세어 돌려준다
+        excluded_ids = WrongAnswerExclusion.objects.filter(
+            user=request.user
+        ).values_list("question_id", flat=True)
+        left = (
+            UserQuestionResult.objects.filter(
+                attempt__user=request.user, is_correct=False
+            )
+            .exclude(question_id__in=excluded_ids)
+            .values("question_id")
+            .distinct()
+        )
+        subject_left = (
+            UserQuestionResult.objects.filter(
+                attempt__user=request.user, is_correct=False
+            )
+            .exclude(question_id__in=excluded_ids)
+            .filter(question__subject=question.subject)
+            .values("question_id")
+            .distinct()
+            .count()
+        )
+        return JsonResponse(
+            {
+                "ok": True,
+                "excluded": excluded,
+                "total": left.count(),
+                "subject": question.subject.name if question.subject else "",
+                "subject_count": subject_left,
+            }
+        )
     return redirect(request.META.get("HTTP_REFERER", "mypage:wrong_answer_list"))
