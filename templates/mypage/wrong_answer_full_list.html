@@ -257,9 +257,11 @@
         .q-badge {
             background: #2d6a4f;
             color: white;
-            padding: 5px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
+            padding: 3px 10px;
+            border-radius: 11px;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            white-space: nowrap;
         }
 
         .q-info {
@@ -267,10 +269,24 @@
             font-size: 0.9em;
         }
 
+        /* 배지 옆에 나란히 놓이는 한 줄 요약.
+           배지보다 조금 크되 굵기를 낮춰 무게를 맞춘다 */
         .q-summary {
-            color: #2d6a4f;
-            font-weight: bold;
-            margin-left: 8px;
+            color: #40684f;
+            font-weight: 600;
+            font-size: 0.86rem;
+            line-height: 1.5;
+            word-break: keep-all;
+        }
+
+        /* 과목 배지와 요약을 오른쪽에 나란히 놓는다.
+           float 로 띄우면 세로 기준선이 어긋나 flex 로 맞춘다 */
+        .q-tags {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
         .q-content {
@@ -787,11 +803,11 @@
                 {% for result in wrong_answers %}
                 <div class="wa-detail-container">
                     <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
-                        <div style="margin-bottom: 10px; overflow: hidden;">
+                        <div class="q-tags">
+                            <span class="q-badge">{{ result.question.subject.name }}</span>
                             {% if result.question.summary %}
-                            <span class="q-summary" style="float: right;">{{ result.question.summary }}</span>
+                            <span class="q-summary">{{ result.question.summary }}</span>
                             {% endif %}
-                            <span class="q-badge" style="float: right; margin-right: 8px;">{{ result.question.subject.name }}</span>
                         </div>
                         <div class="q-content">
                             {{ result.question.exam.round_number }}-{{ result.question.number }}. {{ result.question.content|safe|linebreaksbr }}
