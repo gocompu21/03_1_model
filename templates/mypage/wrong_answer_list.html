@@ -143,6 +143,11 @@
             border-radius: 11px; font-size: 0.78rem; line-height: 1.5;
             white-space: nowrap;
         }
+        .q-times {
+            background: #f4d7d4; color: #a33b2c; padding: 3px 9px;
+            border-radius: 11px; font-size: 0.76rem; line-height: 1.5;
+            font-weight: 600; white-space: nowrap;
+        }
         .q-summary {
             color: #40684f; font-weight: 600; font-size: 0.86rem;
             line-height: 1.5; word-break: keep-all;
@@ -686,6 +691,7 @@
             <div class="wa-card">
                 <div class="q-tags">
                     <span class="q-badge">{{ q.subject.name }}</span>
+                    {% if result.wrong_times > 1 %}<span class="q-times">{{ result.wrong_times }}번 틀림</span>{% endif %}
                     {% if q.summary %}<span class="q-summary">{{ q.summary }}</span>{% endif %}
                 </div>
                 <div class="q-content">

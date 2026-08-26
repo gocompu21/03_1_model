@@ -690,7 +690,7 @@ def wrong_answer_list(request):
     # 과목별 오답 수 (필터 단추에 함께 보여준다)
     counts = dict(
         base.values_list("question__subject__name")
-        .annotate(n=Count("id"))
+        .annotate(n=Count("question_id", distinct=True))
         .values_list("question__subject__name", "n")
     )
     subjects = [
@@ -705,15 +705,33 @@ def wrong_answer_list(request):
     else:
         current = ""
 
-    wrong_qs = wrong_qs.order_by("-attempt__start_time", "question__number")
+    # 같은 문제를 여러 번 틀렸어도 한 줄로 모은다.
+    # 가장 최근에 틀린 기록을 대표로 삼고 틀린 횟수를 함께 센다
+    latest = {}
+    for r in wrong_qs.order_by("attempt__start_time"):
+        row = latest.get(r.question_id)
+        if row is None:
+            r.wrong_times = 1
+            latest[r.question_id] = r
+        else:
+            row.wrong_times += 1
+            # 뒤에 온 것이 더 최근이므로 대표를 바꾸되 횟수는 이어받는다
+            r.wrong_times = row.wrong_times
+            latest[r.question_id] = r
 
-    paginator = Paginator(wrong_qs, 20)
+    rows = sorted(
+        latest.values(),
+        key=lambda x: (x.attempt.start_time, x.question.number),
+        reverse=True,
+    )
+
+    paginator = Paginator(rows, 20)
     wrong_answers = paginator.get_page(request.GET.get("page", 1))
 
     context = {
         "wrong_answers": wrong_answers,
-        "total_count": base.count(),
-        "shown_count": wrong_qs.count(),
+        "total_count": base.values("question_id").distinct().count(),
+        "shown_count": len(rows),
         "subjects": subjects,
         "current_subject": current,
     }
