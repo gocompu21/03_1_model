@@ -184,6 +184,24 @@
             filter: contrast(1.5) brightness(1.1); pointer-events: none;
         }
 
+        /* 답을 드러내기 전에는 감춘다. 다시 풀어 볼 수 있게 한다 */
+        .choice-item { cursor: pointer; }
+        .choice-item:hover { background: #f7faf8; }
+        .q-choices.revealed .choice-item { cursor: default; }
+        .q-choices:not(.revealed) .choice-note { display: none; }
+        /* 내가 지금 고른 것 — 답을 보기 전까지의 표시 */
+        .choice-item.picked { background: #eef6f1; border-radius: 6px; }
+
+        .head-btns { display: flex; align-items: center; gap: 6px; }
+        .reveal-btn {
+            background: #2d6a4f; border: 1px solid #2d6a4f; color: #fff;
+            padding: 5px 12px; border-radius: 20px; cursor: pointer;
+            font-size: 0.8rem; font-family: inherit;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .reveal-btn:hover { background: #245a41; }
+        .q-choices.revealed ~ .terms-container .reveal-btn { display: none; }
+
         /* 선지별 설명 */
         .choice-item .choice-note {
             flex: 1 1 100%; margin-left: 28px; margin-right: 12px;
@@ -640,9 +658,6 @@
         <div class="main-content" id="main-content">
             <div class="page-header">
                 <h1><i class="fas fa-times-circle"></i> 전체 오답 노트</h1>
-                <span class="total-count">
-                    {% if current_subject %}{{ current_subject }} {{ shown_count }}개 / {% endif %}총 {{ total_count }}개
-                </span>
             </div>
 
             <div class="subject-tabs">
@@ -672,28 +687,28 @@
                 <div class="q-image"><img src="{{ q.image.url }}" onclick="openImageModal(this.src)"></div>
                 {% endif %}
 
-                <div class="q-choices">
-                    <div class="choice-item {% if 1 in ans %}correct{% endif %}{% if selected == 1 %} mine{% endif %}">
+                <div class="q-choices" data-answer="{{ ans }}" data-mine="{{ selected }}">
+                    <div class="choice-item" data-choice="1">
                         <span class="choice-num">①</span>
                         <span class="choice-text">{{ q.choice1|safe }}</span>
                         {% if q.choice_notes.1 %}<div class="choice-note">{{ q.choice_notes.1|choice_note }}</div>{% endif %}
                     </div>
-                    <div class="choice-item {% if 2 in ans %}correct{% endif %}{% if selected == 2 %} mine{% endif %}">
+                    <div class="choice-item" data-choice="2">
                         <span class="choice-num">②</span>
                         <span class="choice-text">{{ q.choice2|safe }}</span>
                         {% if q.choice_notes.2 %}<div class="choice-note">{{ q.choice_notes.2|choice_note }}</div>{% endif %}
                     </div>
-                    <div class="choice-item {% if 3 in ans %}correct{% endif %}{% if selected == 3 %} mine{% endif %}">
+                    <div class="choice-item" data-choice="3">
                         <span class="choice-num">③</span>
                         <span class="choice-text">{{ q.choice3|safe }}</span>
                         {% if q.choice_notes.3 %}<div class="choice-note">{{ q.choice_notes.3|choice_note }}</div>{% endif %}
                     </div>
-                    <div class="choice-item {% if 4 in ans %}correct{% endif %}{% if selected == 4 %} mine{% endif %}">
+                    <div class="choice-item" data-choice="4">
                         <span class="choice-num">④</span>
                         <span class="choice-text">{{ q.choice4|safe }}</span>
                         {% if q.choice_notes.4 %}<div class="choice-note">{{ q.choice_notes.4|choice_note }}</div>{% endif %}
                     </div>
-                    <div class="choice-item {% if 5 in ans %}correct{% endif %}{% if selected == 5 %} mine{% endif %}">
+                    <div class="choice-item" data-choice="5">
                         <span class="choice-num">⑤</span>
                         <span class="choice-text">{{ q.choice5|safe }}</span>
                         {% if q.choice_notes.5 %}<div class="choice-note">{{ q.choice_notes.5|choice_note }}</div>{% endif %}
@@ -705,9 +720,14 @@
                      data-loaded="false">
                     <div class="terms-head">
                         <h4 class="terms-title">관련 용어</h4>
-                        <button type="button" class="exclude-btn" data-qid="{{ q.id }}">
-                            <i class="fas fa-eye-slash"></i> 노트 제외
-                        </button>
+                        <div class="head-btns">
+                            <button type="button" class="reveal-btn">
+                                <i class="fas fa-lightbulb"></i> 정답 보기
+                            </button>
+                            <button type="button" class="exclude-btn" data-qid="{{ q.id }}">
+                                <i class="fas fa-eye-slash"></i> 노트 제외
+                            </button>
+                        </div>
                     </div>
                     <div class="terms-list"></div>
                 </div>
@@ -753,6 +773,48 @@
     <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <script>
+    // 오답노트는 다시 풀어 보는 자리다. 답은 눌러야 드러난다
+    (function () {
+        function reveal(box) {
+            if (box.classList.contains('revealed')) return;
+            box.classList.add('revealed');
+            var answers = JSON.parse(box.dataset.answer || '[]');
+            var mine = parseInt(box.dataset.mine, 10);
+            box.querySelectorAll('.choice-item').forEach(function (item) {
+                var n = parseInt(item.dataset.choice, 10);
+                item.classList.remove('picked');
+                if (answers.indexOf(n) !== -1) item.classList.add('correct');
+                if (n === mine) item.classList.add('mine');
+            });
+            // 지난 답이 무엇이었는지 알려 준다
+            var card = box.closest('.wa-card');
+            var btn = card ? card.querySelector('.reveal-btn') : null;
+            if (btn) btn.style.display = 'none';
+        }
+
+        document.querySelectorAll('.q-choices').forEach(function (box) {
+            box.querySelectorAll('.choice-item').forEach(function (item) {
+                item.addEventListener('click', function () {
+                    if (box.classList.contains('revealed')) return;
+                    box.querySelectorAll('.choice-item')
+                        .forEach(function (x) { x.classList.remove('picked'); });
+                    item.classList.add('picked');
+                    reveal(box);
+                });
+            });
+        });
+
+        document.querySelectorAll('.reveal-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var card = btn.closest('.wa-card');
+                var box = card ? card.querySelector('.q-choices') : null;
+                if (box) reveal(box);
+            });
+        });
+    })();
+    </script>
 
     <script>
     // 노트 제외 — 누르면 그 문항이 목록에서 사라진다
