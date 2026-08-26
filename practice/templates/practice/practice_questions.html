@@ -217,7 +217,7 @@
     .hi-num { padding-left: 1.8em; text-indent: -1.8em; }
     .indent-cont { padding-left: 2em; }
 
-    /* 정답 선지 바로 밑에 붙는 해설.
+    /* 정답 선지 바로 밑에 붙는 해설. 주제별 문제 화면과 같은 모양으로 한다.
        선지가 flex 로 늘어서므로 줄 전체를 차지하게 해야 아래로 내려간다 */
     .choice-item { flex-wrap: wrap; }
     .inline-exp {
@@ -225,26 +225,50 @@
         flex-basis: 100%;
         width: 100%;
         box-sizing: border-box;
-        margin: 9px 0 4px 1.9em;
-        padding: 11px 14px;
-        background: #f6faf7;
-        border-left: 3px solid #2d6a4f;
-        border-radius: 0 6px 6px 0;
-        font-size: 0.95rem;
-        line-height: 1.75;
-        color: #333;
+        margin: 7px 0 4px 34px;
+        padding-left: 18px;
+        position: relative;
+        font-size: 0.93rem;
+        line-height: 1.65;
+        color: #4a4a4a;
+        word-break: keep-all;
+    }
+    .inline-exp::before {
+        /* 굽어서 오른쪽을 가리키는 화살표 */
+        content: "↪";
+        position: absolute;
+        left: 0;
+        top: -1px;
+        color: #d94a3d;
+        font-size: 1.05em;
+        line-height: 1.55;
     }
     .q-choices.revealed .inline-exp { display: block; }
 
-    .inline-exp-head {
-        font-weight: 700;
-        color: #1b6b3a;
-        font-size: 0.85rem;
-        margin-bottom: 6px;
+    /* 마크다운이 <p>로 감싸 오므로 위아래 여백을 없앤다 */
+    .inline-exp p { margin: 0 0 6px; }
+    .inline-exp p:last-child { margin-bottom: 0; }
+    .inline-exp ul, .inline-exp ol { margin: 4px 0 6px; padding-left: 20px; }
+    .inline-exp li { margin-bottom: 3px; }
+
+    /* 형광펜으로 그은 듯 글자 아래쪽에 밝은 노란 띠를 깐다.
+       블록에 걸면 첫 줄에만 그려지므로 안쪽 인라인 요소에 배경을 건다 */
+    .inline-exp .hl {
+        background-image: linear-gradient(#fff35c, #fff35c);
+        background-size: 100% 0.42em;
+        background-position: 0 88%;
+        background-repeat: no-repeat;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
     }
-    .inline-exp-body p:first-child { margin-top: 0; }
-    .inline-exp-body p:last-child { margin-bottom: 0; }
-    .inline-exp-body strong { color: #14452f; }
+
+    @media (max-width: 768px) {
+        .inline-exp {
+            margin-left: 8px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+    }
 
     /* Explanation Section */
     .explanation-section {
@@ -511,46 +535,31 @@
                     <div class="choice-item">
                         <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span><span class="choice-text">{{ q.choice1|safe }}</span>
                         {% if q.answer == 1 %}
-                        <div class="inline-exp">
-                            <div class="inline-exp-head">정답 및 해설</div>
-                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
-                        </div>
+                        <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span><span class="choice-text">{{ q.choice2|safe }}</span>
                         {% if q.answer == 2 %}
-                        <div class="inline-exp">
-                            <div class="inline-exp-head">정답 및 해설</div>
-                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
-                        </div>
+                        <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span><span class="choice-text">{{ q.choice3|safe }}</span>
                         {% if q.answer == 3 %}
-                        <div class="inline-exp">
-                            <div class="inline-exp-head">정답 및 해설</div>
-                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
-                        </div>
+                        <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span><span class="choice-text">{{ q.choice4|safe }}</span>
                         {% if q.answer == 4 %}
-                        <div class="inline-exp">
-                            <div class="inline-exp-head">정답 및 해설</div>
-                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
-                        </div>
+                        <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span><span class="choice-text">{{ q.choice5|safe }}</span>
                         {% if q.answer == 5 %}
-                        <div class="inline-exp">
-                            <div class="inline-exp-head">정답 및 해설</div>
-                            <div class="inline-exp-body markdown-content">{{ q.explanation|default:"해설이 없습니다."|markdown|safe }}</div>
-                        </div>
+                        <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                 </div>
