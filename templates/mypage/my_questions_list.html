@@ -157,17 +157,68 @@
         .question-title {
             font-size: 1rem;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             line-height: 1.5;
+            font-weight: 600;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
+        /* 접혔을 때 보이는 앞부분 */
+        .question-preview {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            word-break: break-word;
+        }
+
+        /* 펼쳤을 때 나오는 본문. 처음에는 감춘다 */
+        .question-body {
+            display: none;
+            font-size: 0.93rem;
+            color: #333;
+            line-height: 1.75;
+            margin: 4px 0 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+            word-break: break-word;
+        }
+
+        .question-card.open .question-preview { display: none; }
+        .question-card.open .question-body { display: block; }
+
+        /* 펼친 본문 안의 글 모양 (해설이 h3/ol/strong 으로 온다) */
+        .question-body h3 {
+            font-size: 0.97rem; color: #2d6a4f; font-weight: 700;
+            margin: 16px 0 7px;
+        }
+        .question-body h3:first-child { margin-top: 0; }
+        .question-body p { margin: 0 0 9px; }
+        .question-body ol,
+        .question-body ul { margin: 0 0 10px; padding-left: 22px; }
+        .question-body li { margin-bottom: 6px; }
+        .question-body strong { color: #1b4332; }
+        .question-body img { max-width: 100%; height: auto; border-radius: 6px; }
+        .question-body table {
+            border-collapse: collapse; width: 100%; margin: 8px 0;
+            display: block; overflow-x: auto;
+        }
+        .question-body th,
+        .question-body td { border: 1px solid #ddd; padding: 6px 9px; }
+
+        /* 본문 전체를 보러 가는 길 */
+        .go-detail {
+            color: #2d6a4f; text-decoration: none; font-weight: 600;
+            margin-left: auto;
+        }
+        .go-detail:hover { text-decoration: underline; }
+
         .question-meta {
             display: flex;
-            justify-content: flex-end;
+            align-items: center;
             gap: 15px;
             font-size: 0.85rem;
             color: #888;
@@ -461,14 +512,19 @@
 
             <div class="questions-container" id="questions-container">
                 {% for post in my_questions %}
-                <a href="{% url 'mypage:detail_answer' post.pk %}" class="question-card">
+                <div class="question-card">
                     <div class="question-title">{{ post.title|highlight_prefix }}</div>
+                    <div class="question-preview">{{ post.preview }}</div>
+                    <div class="question-body">{{ post.content|safe }}</div>
                     <div class="question-meta">
                         <span class="type-badge">{{ post.type.name }}</span>
                         <span><i class="fas fa-calendar"></i> {{ post.created_at|compact_date }}</span>
                         <span><i class="fas fa-eye"></i> {{ post.hits }}</span>
+                        <a href="{% url 'mypage:detail_answer' post.pk %}" class="go-detail">
+                            자세히 <i class="fas fa-angle-right"></i>
+                        </a>
                     </div>
-                </a>
+                </div>
                 {% empty %}
                 <div class="empty-state">
                     <i class="fas fa-inbox"></i>
@@ -490,6 +546,19 @@
     </button>
 
     <script>
+        // 카드를 누르면 그 자리에서 본문을 펼친다.
+        // 무한 스크롤로 나중에 붙는 카드도 있으므로 목록 전체에서 한 번만 받는다
+        document.getElementById('questions-container')
+            .addEventListener('click', function (e) {
+                // '자세히'는 본래대로 본문 화면으로 간다
+                if (e.target.closest('.go-detail')) return;
+                // 본문 안의 링크를 누른 것이라면 접지 않는다
+                if (e.target.closest('.question-body a')) return;
+                var card = e.target.closest('.question-card');
+                if (!card) return;
+                card.classList.toggle('open');
+            });
+
         let isLoading = false;
 
         // Get main content for scroll handling
@@ -532,17 +601,41 @@
                     const container = document.getElementById('questions-container');
 
                     data.items.forEach(item => {
-                        const card = document.createElement('a');
-                        card.href = item.url;
+                        const card = document.createElement('div');
                         card.className = 'question-card';
-                        card.innerHTML = `
-                            <div class="question-title">${item.title}</div>
-                            <div class="question-meta">
-                                <span class="type-badge">${item.type}</span>
-                                <span><i class="fas fa-calendar"></i> ${item.created_at}</span>
-                                <span><i class="fas fa-eye"></i> ${item.hits}</span>
-                            </div>
+
+                        const title = document.createElement('div');
+                        title.className = 'question-title';
+                        title.textContent = item.title;
+
+                        const preview = document.createElement('div');
+                        preview.className = 'question-preview';
+                        preview.textContent = item.preview || '';
+
+                        // 본문은 서버가 만든 HTML이므로 그대로 넣는다
+                        const body = document.createElement('div');
+                        body.className = 'question-body';
+                        body.innerHTML = item.content || '';
+
+                        const meta = document.createElement('div');
+                        meta.className = 'question-meta';
+                        meta.innerHTML = `
+                            <span class="type-badge"></span>
+                            <span><i class="fas fa-calendar"></i> ${item.created_at}</span>
+                            <span><i class="fas fa-eye"></i> ${item.hits}</span>
                         `;
+                        meta.querySelector('.type-badge').textContent = item.type;
+
+                        const go = document.createElement('a');
+                        go.className = 'go-detail';
+                        go.href = item.url;
+                        go.innerHTML = '자세히 <i class="fas fa-angle-right"></i>';
+                        meta.appendChild(go);
+
+                        card.appendChild(title);
+                        card.appendChild(preview);
+                        card.appendChild(body);
+                        card.appendChild(meta);
                         container.appendChild(card);
                     });
 

@@ -520,6 +520,22 @@ def next_wrong_answers_api(request, pk):
     return JsonResponse({"items": items, "has_more": has_more, "offset": offset + limit})
 
 
+def _plain_preview(html, limit=180):
+    """목록에 보여 줄 앞부분.
+
+    본문이 모두 HTML이라 그냥 자르면 태그 한가운데가 잘려 화면이 깨진다.
+    글자만 남기고 자른다.
+    """
+    from django.utils.html import strip_tags
+    import html as _html
+
+    text = _html.unescape(strip_tags(html or ""))
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    return text[:limit].rstrip() + "…"
+
+
 @ajax_login_required
 def my_questions_api(request):
     """API for infinite scroll of my questions (BBS Posts)"""
@@ -543,6 +559,9 @@ def my_questions_api(request):
             "created_at": post.created_at.strftime("%y/%m/%d"),
             "hits": post.hits,
             "url": f"/mypage/detail_answer/{post.pk}/",
+            # 목록에서 바로 펼쳐 보므로 본문도 함께 내려보낸다
+            "content": post.content or "",
+            "preview": _plain_preview(post.content),
         })
 
     return JsonResponse({
@@ -564,6 +583,10 @@ def my_questions_list(request):
     paginator = Paginator(posts_qs, 15)
     page = request.GET.get("page", 1)
     my_questions = paginator.get_page(page)
+
+    # 목록에서 앞부분을 보여 주고 눌러서 펼친다
+    for post in my_questions:
+        post.preview = _plain_preview(post.content)
 
     return render(request, "mypage/my_questions_list.html", {
         "my_questions": my_questions,
