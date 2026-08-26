@@ -260,7 +260,6 @@
             padding: 5px 12px;
             border-radius: 12px;
             font-size: 0.85em;
-            margin-right: 10px;
         }
 
         .q-info {
@@ -787,16 +786,13 @@
 
                 {% for result in wrong_answers %}
                 <div class="wa-detail-container">
-                    <div class="q-header">
-                        <div>
-                            <span class="q-badge">{{ result.question.subject.name }}</span>
-                            <span class="q-info">
-                                {{ result.question.exam.round_number }}회 {{ result.question.number }}번
-                                {% if result.question.summary %}<span class="q-summary">{{ result.question.summary }}</span>{% endif %}
-                            </span>
+                    <div class="q-header" style="display: block; border-bottom: none; margin-bottom: 5px;">
+                        <div style="margin-bottom: 10px;">
+                            <span class="q-badge" style="float: right;">{{ result.question.subject.name }}</span>
+                            {% if result.question.summary %}<span class="q-summary">{{ result.question.summary }}</span>{% endif %}
                         </div>
                         <div class="q-content">
-                            {{ result.question.content|safe|linebreaksbr }}
+                            {{ result.question.exam.round_number }}-{{ result.question.number }}. {{ result.question.content|safe|linebreaksbr }}
                         </div>
                     </div>
 
