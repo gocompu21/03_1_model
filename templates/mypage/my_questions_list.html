@@ -175,6 +175,28 @@
             word-break: break-word;
         }
 
+        /* 본문 첫머리의 소제목. 뒤 문장과 섞이지 않게 앞에 세운다 */
+        .question-preview .pv-head {
+            display: inline-block;
+            background: #eaf5ee;
+            color: #1b4332;
+            font-weight: 700;
+            font-size: 0.8rem;
+            padding: 1px 8px;
+            border-radius: 4px;
+            margin-right: 7px;
+            vertical-align: baseline;
+        }
+
+        /* 핵심어는 접힌 채로도 눈에 걸려야 고를 수 있다 */
+        .question-preview strong,
+        .question-preview b {
+            color: #2d4a3a;
+            font-weight: 700;
+        }
+        .question-preview em,
+        .question-preview i { color: #40684f; }
+
         /* 펼쳤을 때 나오는 본문. 처음에는 감춘다 */
         .question-body {
             display: none;
@@ -576,7 +598,7 @@
                 {% for post in my_questions %}
                 <div class="question-card">
                     <div class="question-title">{{ post.title|highlight_prefix }}</div>
-                    <div class="question-preview">{{ post.preview }}</div>
+                    <div class="question-preview">{{ post.preview|safe }}</div>
                     <div class="question-body">{{ post.content|safe }}</div>
                     <div class="question-meta">
                         <span class="type-badge">{{ post.type.name }}</span>
@@ -685,7 +707,8 @@
 
                         const preview = document.createElement('div');
                         preview.className = 'question-preview';
-                        preview.textContent = item.preview || '';
+                        // 서버가 <strong> 만 남기고 나머지는 걷어낸 글이다
+                        preview.innerHTML = item.preview || '';
 
                         // 본문은 서버가 만든 HTML이므로 그대로 넣는다
                         const body = document.createElement('div');

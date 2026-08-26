@@ -520,20 +520,87 @@ def next_wrong_answers_api(request, pk):
     return JsonResponse({"items": items, "has_more": has_more, "offset": offset + limit})
 
 
-def _plain_preview(html, limit=180):
+# 미리보기에 남길 꾸밈. 이것 말고는 모두 걷어낸다
+_PREVIEW_KEEP = ("strong", "b", "em", "i")
+
+
+def _plain_preview(source, limit=180):
     """목록에 보여 줄 앞부분.
 
-    본문이 모두 HTML이라 그냥 자르면 태그 한가운데가 잘려 화면이 깨진다.
-    글자만 남기고 자른다.
-    """
-    from django.utils.html import strip_tags
-    import html as _html
+    본문이 모두 HTML이다. 그냥 자르면 태그 한가운데가 잘려 화면이 깨지므로
+    글자만 남기되, 핵심어의 <strong>과 <em>은 살려 둔다.
 
-    text = _html.unescape(strip_tags(html or ""))
-    text = " ".join(text.split())
-    if len(text) <= limit:
-        return text
-    return text[:limit].rstrip() + "…"
+    본문 첫머리는 늘 <h3> 소제목이라 그대로 이으면 뒤 문장에 붙어 버린다.
+    소제목은 따로 떼어 앞에 세운다.
+    """
+    import html as _html
+    import re
+
+    from django.utils.html import escape
+    from django.utils.safestring import mark_safe
+
+    raw = source or ""
+
+    # 소제목을 떼어 앞에 세운다 (뒤 문장과 붙지 않게)
+    head = ""
+    m = re.match(r"\s*<(h[1-6])[^>]*>(.*?)</\1>", raw, re.S | re.I)
+    if m:
+        head = " ".join(re.sub(r"<[^>]+>", "", m.group(2)).split())
+        head = _html.unescape(head)
+        raw = raw[m.end() :]
+
+    # 블록이 끝나는 자리는 띄어쓰기로 바꿔 낱말끼리 붙지 않게 한다
+    raw = re.sub(r"(?i)</(p|div|li|ol|ul|h[1-6]|tr|table)\s*>", " ", raw)
+    raw = re.sub(r"(?i)<br\s*/?>", " ", raw)
+
+    # 남길 태그는 표시로 바꿔 두고 나머지는 지운다.
+    # 표시를 먼저 escape 한 뒤 되돌려야 본문 속 <> 가 살아나지 않는다
+    kept = []
+
+    def _mark(match):
+        tag = match.group(2).lower()
+        if tag not in _PREVIEW_KEEP:
+            return ""
+        kept.append("</%s>" % tag if match.group(1) else "<%s>" % tag)
+        return "%d" % (len(kept) - 1)
+
+    raw = re.sub(r"<(/?)(\w+)[^>]*>", _mark, raw)
+
+    text = " ".join(_html.unescape(raw).split())
+    cut = len(text) > limit
+    if cut:
+        text = text[:limit].rstrip()
+
+    out = escape(text)
+
+    # 자르다 보면 짝이 맞지 않는 표시가 남는다. 짝이 맞는 것만 태그로 되돌린다
+    open_names = []
+    pieces = []
+    pos = 0
+    for m2 in re.finditer("(\\d+)", out):
+        pieces.append(out[pos : m2.start()])
+        pos = m2.end()
+        tag = kept[int(m2.group(1))]
+        if tag.startswith("</"):
+            name = tag[2:-1]
+            if name in open_names:
+                open_names.remove(name)
+                pieces.append(tag)
+        else:
+            open_names.append(tag[1:-1])
+            pieces.append(tag)
+    pieces.append(out[pos:])
+    out = "".join(pieces)
+
+    # 닫히지 않은 채 잘린 것은 여기서 닫는다
+    for name in reversed(open_names):
+        out += "</%s>" % name
+
+    if cut:
+        out += "…"
+    if head:
+        out = '<span class="pv-head">%s</span>%s' % (escape(head), out)
+    return mark_safe(out)
 
 
 @ajax_login_required
