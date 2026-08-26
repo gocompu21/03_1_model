@@ -217,12 +217,20 @@
             max-width: 100%; border-radius: 8px; cursor: pointer;
         }
 
-        /* 문항 맨 아래 — 노트에서 빼는 단추 */
-        .card-foot {
-            display: flex; justify-content: flex-end;
-            margin-top: 14px; padding-top: 12px;
-            border-top: 1px solid #f0f2f1;
+        /* 관련 용어 제목과 '노트 제외' 단추를 한 줄에 놓는다 */
+        .terms-container {
+            margin-top: 16px; padding-top: 12px;
+            border-top: 1px dashed #ddd;
         }
+        .terms-head {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px; margin-bottom: 8px;
+        }
+        .terms-title {
+            font-size: 0.95rem; color: #2d6a4f; margin: 0;
+        }
+        .terms-title::before { content: "🔑 "; }
+        .terms-list { display: flex; flex-wrap: wrap; gap: 4px; }
         .exclude-btn {
             background: #fff; border: 1px solid #dfe7e2; color: #7a8b80;
             padding: 5px 12px; border-radius: 20px; cursor: pointer;
@@ -694,7 +702,15 @@
 
                 <div class="terms-container" data-question-id="{{ q.id }}"
                      data-skip="{{ q.subject.name }}|{{ q.summary|default:'' }}"
-                     data-loaded="false"></div>
+                     data-loaded="false">
+                    <div class="terms-head">
+                        <h4 class="terms-title">관련 용어</h4>
+                        <button type="button" class="exclude-btn" data-qid="{{ q.id }}">
+                            <i class="fas fa-eye-slash"></i> 노트 제외
+                        </button>
+                    </div>
+                    <div class="terms-list"></div>
+                </div>
 
                 {% if q.infographic_image %}
                 <div class="infographic-container">
@@ -702,11 +718,6 @@
                 </div>
                 {% endif %}
 
-                <div class="card-foot">
-                    <button type="button" class="exclude-btn" data-qid="{{ q.id }}">
-                        <i class="fas fa-eye-slash"></i> 노트 제외
-                    </button>
-                </div>
             </div>
             {% endwith %}
             {% empty %}
@@ -775,24 +786,23 @@
     </script>
 
     <script>
-    // 관련 용어 - 화면을 열 때 문항마다 한 번씩 불러온다
+    // 관련 용어 — 화면을 열 때 문항마다 한 번씩 불러온다.
+    // 제목 줄은 이미 있으므로 낱말만 채운다
     (function () {
         document.querySelectorAll('.terms-container').forEach(function (box) {
             if (box.dataset.loaded === 'true') return;
             box.dataset.loaded = 'true';
+            var list = box.querySelector('.terms-list');
+            var title = box.querySelector('.terms-title');
             fetch('/study/api/question/' + box.dataset.questionId + '/terms/')
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
-                    if (!data.terms || !data.terms.length) {
-                        box.style.display = 'none';
-                        return;
-                    }
                     // 과목 배지와 요약에 이미 나온 말은 뺀다
                     var skip = (box.dataset.skip || '').split('|')
                         .map(function (x) { return x.trim(); })
                         .filter(function (x) { return x.length > 0; });
                     var parts = [];
-                    data.terms.forEach(function (t) {
+                    (data.terms || []).forEach(function (t) {
                         if (skip.indexOf(t.word) !== -1) return;
                         var col = null;
                         if (t.reference_count >= 10) col = '#d32f2f';
@@ -813,16 +823,16 @@
                         a.textContent = t.word;
                         parts.push(a.outerHTML);
                     });
-                    if (!parts.length) { box.style.display = 'none'; return; }
-                    box.innerHTML =
-                        '<div style="margin-top: 16px; padding-top: 12px;'
-                        + ' border-top: 1px dashed #ddd;">'
-                        + '<h4 style="font-size: 0.95rem; color: #2d6a4f;'
-                        + ' margin: 0 0 8px;">🔑 관련 용어</h4>'
-                        + '<div style="display: flex; flex-wrap: wrap; gap: 4px;">'
-                        + parts.join('') + '</div></div>';
+                    if (!parts.length) {
+                        // 용어가 없으면 제목을 감춘다. 단추는 남긴다
+                        if (title) title.style.visibility = 'hidden';
+                        return;
+                    }
+                    list.innerHTML = parts.join('');
                 })
-                .catch(function () { box.style.display = 'none'; });
+                .catch(function () {
+                    if (title) title.style.visibility = 'hidden';
+                });
         });
     })();
     </script>
