@@ -263,6 +263,10 @@
             border: 1px solid #ffc9c9;
             color: #c92a2a;
             font-weight: bold;
+        }
+        /* 취소선은 부모에 걸면 자식(설명)이 없앨 수 없다.
+           선지 글자만 감싼 칸에 긋는다 */
+        .choice-item.wrong .choice-text {
             text-decoration: line-through;
         }
 
@@ -770,35 +774,35 @@
                 <div class="q-choices">
                     {% with ans=result.question.answer selected=result.selected_choice %}
                     <div class="choice-item {% if 1 in ans %}correct{% elif selected == 1 %}wrong{% endif %}">
-                        ① {{ result.question.choice1|safe }}
+                        <span class="choice-text">① {{ result.question.choice1|safe }}</span>
                         {% if selected == 1 %}(내 답){% endif %}
                         {% if result.question.choice_notes.1 %}
                         <div class="choice-note">{{ result.question.choice_notes.1|choice_note }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item {% if 2 in ans %}correct{% elif selected == 2 %}wrong{% endif %}">
-                        ② {{ result.question.choice2|safe }}
+                        <span class="choice-text">② {{ result.question.choice2|safe }}</span>
                         {% if selected == 2 %}(내 답){% endif %}
                         {% if result.question.choice_notes.2 %}
                         <div class="choice-note">{{ result.question.choice_notes.2|choice_note }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item {% if 3 in ans %}correct{% elif selected == 3 %}wrong{% endif %}">
-                        ③ {{ result.question.choice3|safe }}
+                        <span class="choice-text">③ {{ result.question.choice3|safe }}</span>
                         {% if selected == 3 %}(내 답){% endif %}
                         {% if result.question.choice_notes.3 %}
                         <div class="choice-note">{{ result.question.choice_notes.3|choice_note }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item {% if 4 in ans %}correct{% elif selected == 4 %}wrong{% endif %}">
-                        ④ {{ result.question.choice4|safe }}
+                        <span class="choice-text">④ {{ result.question.choice4|safe }}</span>
                         {% if selected == 4 %}(내 답){% endif %}
                         {% if result.question.choice_notes.4 %}
                         <div class="choice-note">{{ result.question.choice_notes.4|choice_note }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item {% if 5 in ans %}correct{% elif selected == 5 %}wrong{% endif %}">
-                        ⑤ {{ result.question.choice5|safe }}
+                        <span class="choice-text">⑤ {{ result.question.choice5|safe }}</span>
                         {% if selected == 5 %}(내 답){% endif %}
                         {% if result.question.choice_notes.5 %}
                         <div class="choice-note">{{ result.question.choice_notes.5|choice_note }}</div>
