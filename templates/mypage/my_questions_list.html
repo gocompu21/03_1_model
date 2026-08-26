@@ -178,36 +178,98 @@
         /* 펼쳤을 때 나오는 본문. 처음에는 감춘다 */
         .question-body {
             display: none;
-            font-size: 0.93rem;
+            font-size: 0.94rem;
             color: #333;
-            line-height: 1.75;
-            margin: 4px 0 12px;
-            padding-top: 12px;
-            border-top: 1px solid #eee;
+            line-height: 1.8;
+            margin: 6px 0 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e8e8e8;
             word-break: break-word;
         }
 
         .question-card.open .question-preview { display: none; }
         .question-card.open .question-body { display: block; }
 
-        /* 펼친 본문 안의 글 모양 (해설이 h3/ol/strong 으로 온다) */
+        /* 펼친 본문 안의 글 모양.
+           해설이 h3(소제목) + ol/li(항목) + strong(핵심어)로 온다.
+           소제목이 눈에 들어와야 긴 글에서 원하는 대목을 찾을 수 있다 */
         .question-body h3 {
-            font-size: 0.97rem; color: #2d6a4f; font-weight: 700;
-            margin: 16px 0 7px;
+            font-size: 1rem;
+            color: #1b4332;
+            font-weight: 700;
+            margin: 20px 0 10px;
+            padding-left: 11px;
+            border-left: 4px solid #2d6a4f;
+            line-height: 1.4;
         }
         .question-body h3:first-child { margin-top: 0; }
-        .question-body p { margin: 0 0 9px; }
+
+        .question-body h4 {
+            font-size: 0.94rem; color: #2d6a4f; font-weight: 700;
+            margin: 15px 0 7px;
+        }
+
+        .question-body p { margin: 0 0 11px; }
+
         .question-body ol,
-        .question-body ul { margin: 0 0 10px; padding-left: 22px; }
-        .question-body li { margin-bottom: 6px; }
-        .question-body strong { color: #1b4332; }
+        .question-body ul {
+            margin: 0 0 12px;
+            padding-left: 20px;
+        }
+        .question-body li {
+            margin-bottom: 9px;
+            padding-left: 3px;
+        }
+        .question-body li::marker { color: #2d6a4f; font-weight: 700; }
+        .question-body li:last-child { margin-bottom: 0; }
+        .question-body li > p { margin: 0 0 6px; }
+
+        /* 핵심어. 형광펜처럼 옅게 깔아 눈에 걸리게 한다 */
+        .question-body strong {
+            color: #14452f;
+            font-weight: 700;
+            background: linear-gradient(#eaf5ee, #eaf5ee);
+            background-size: 100% 0.45em;
+            background-position: 0 88%;
+            background-repeat: no-repeat;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+        .question-body em { color: #40684f; }
+
+        .question-body blockquote {
+            margin: 10px 0; padding: 9px 14px;
+            background: #f6faf7; border-left: 3px solid #b7d6c3;
+            color: #40684f;
+        }
+
+        .question-body code {
+            background: #f2f5f3; padding: 1px 5px; border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .question-body hr {
+            border: 0; border-top: 1px solid #eee; margin: 16px 0;
+        }
+
+        .question-body a { color: #2d6a4f; }
+
         .question-body img { max-width: 100%; height: auto; border-radius: 6px; }
+
+        /* 표는 좁은 화면에서 옆으로 밀려 나가지 않게 가둔다 */
+        .question-body .table-wrap { overflow-x: auto; margin: 10px 0; }
         .question-body table {
-            border-collapse: collapse; width: 100%; margin: 8px 0;
-            display: block; overflow-x: auto;
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.9rem;
         }
         .question-body th,
-        .question-body td { border: 1px solid #ddd; padding: 6px 9px; }
+        .question-body td {
+            border: 1px solid #dde5e0; padding: 7px 10px; text-align: left;
+        }
+        .question-body th { background: #eaf5ee; color: #1b4332; font-weight: 700; }
+        .question-body tbody tr:nth-child(even) { background: #fafcfb; }
 
         /* 본문 전체를 보러 가는 길 */
         .go-detail {
@@ -548,6 +610,19 @@
     <script>
         // 카드를 누르면 그 자리에서 본문을 펼친다.
         // 무한 스크롤로 나중에 붙는 카드도 있으므로 목록 전체에서 한 번만 받는다
+        // 표는 좁은 화면에서 옆으로 밀려 나가므로 감싸서 가둔다
+        function wrapTables(root) {
+            (root || document).querySelectorAll('.question-body table')
+                .forEach(function (t) {
+                    if (t.parentNode.classList.contains('table-wrap')) return;
+                    var w = document.createElement('div');
+                    w.className = 'table-wrap';
+                    t.parentNode.insertBefore(w, t);
+                    w.appendChild(t);
+                });
+        }
+        wrapTables();
+
         document.getElementById('questions-container')
             .addEventListener('click', function (e) {
                 // '자세히'는 본래대로 본문 화면으로 간다
@@ -637,6 +712,7 @@
                         card.appendChild(body);
                         card.appendChild(meta);
                         container.appendChild(card);
+                        wrapTables(card);
                     });
 
                     // Update scroll data
