@@ -17,7 +17,7 @@ from exam.models import UserQuestionResult, UserExamAttempt
 from notebook.models import NotebookHistory
 from chat.models import ChatHistory
 from bbs.models import Post
-from .models import ReviewSchedule
+from .models import ReviewSchedule, WrongAnswerExclusion
 from dashboard.models import SiteSettings
 
 
@@ -676,8 +676,14 @@ def wrong_answer_list(request):
     """전체 오답 노트. 과목을 골라 볼 수 있다."""
     from exam.models import Subject
 
+    # 사용자가 빼 둔 문제는 목록에서 감춘다
+    excluded = WrongAnswerExclusion.objects.filter(
+        user=request.user
+    ).values_list("question_id", flat=True)
+
     base = (
         UserQuestionResult.objects.filter(attempt__user=request.user, is_correct=False)
+        .exclude(question_id__in=excluded)
         .select_related("question", "question__exam", "question__subject", "attempt")
     )
 
@@ -2774,3 +2780,26 @@ def batch_job_process(request):
             "error": f"{task_type} 처리 중 오류: {error_msg}",
             "task": task_type
         })
+
+
+@login_required
+@require_POST
+def wrong_answer_exclude(request, question_id):
+    """오답노트에서 문제를 빼거나 되돌린다."""
+    from exam.models import Question
+
+    question = get_object_or_404(Question, id=question_id)
+    row = WrongAnswerExclusion.objects.filter(
+        user=request.user, question=question
+    ).first()
+
+    if row:
+        row.delete()
+        excluded = False
+    else:
+        WrongAnswerExclusion.objects.create(user=request.user, question=question)
+        excluded = True
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"ok": True, "excluded": excluded})
+    return redirect(request.META.get("HTTP_REFERER", "mypage:wrong_answer_list"))

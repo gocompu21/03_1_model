@@ -217,6 +217,27 @@
             max-width: 100%; border-radius: 8px; cursor: pointer;
         }
 
+        /* 문항 맨 아래 — 노트에서 빼는 단추 */
+        .card-foot {
+            display: flex; justify-content: flex-end;
+            margin-top: 14px; padding-top: 12px;
+            border-top: 1px solid #f0f2f1;
+        }
+        .exclude-btn {
+            background: #fff; border: 1px solid #dfe7e2; color: #7a8b80;
+            padding: 5px 12px; border-radius: 20px; cursor: pointer;
+            font-size: 0.8rem; font-family: inherit;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .exclude-btn:hover {
+            background: #fdf0ef; border-color: #f0c9c5; color: #c0392b;
+        }
+        /* 뺀 직후 - 사라지기 전 잠깐 */
+        .wa-card.leaving {
+            opacity: 0; transform: translateX(20px);
+            transition: opacity 0.25s, transform 0.25s;
+        }
+
         /* 쪽 넘기기 */
         .pager {
             display: flex; align-items: center; justify-content: center;
@@ -680,6 +701,12 @@
                     <img src="{{ q.infographic_image.url }}" onclick="openImageModal(this.src)">
                 </div>
                 {% endif %}
+
+                <div class="card-foot">
+                    <button type="button" class="exclude-btn" data-qid="{{ q.id }}">
+                        <i class="fas fa-eye-slash"></i> 노트 제외
+                    </button>
+                </div>
             </div>
             {% endwith %}
             {% empty %}
@@ -715,6 +742,37 @@
     <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <script>
+    // 노트 제외 — 누르면 그 문항이 목록에서 사라진다
+    (function () {
+        function csrf() {
+            var m = document.cookie.match(/csrftoken=([^;]+)/);
+            return m ? m[1] : '';
+        }
+        document.querySelectorAll('.exclude-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var card = btn.closest('.wa-card');
+                btn.disabled = true;
+                fetch('/mypage/wrong-answers/exclude/' + btn.dataset.qid + '/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrf(),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        if (!d.ok) { btn.disabled = false; return; }
+                        // 잠깐 흐려진 뒤 자리를 접는다
+                        card.classList.add('leaving');
+                        setTimeout(function () { card.remove(); }, 250);
+                    })
+                    .catch(function () { btn.disabled = false; });
+            });
+        });
+    })();
+    </script>
 
     <script>
     // 관련 용어 - 화면을 열 때 문항마다 한 번씩 불러온다

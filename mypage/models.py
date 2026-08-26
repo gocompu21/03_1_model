@@ -65,3 +65,31 @@ class ReviewSchedule(models.Model):
             self.next_review_date = today + timedelta(days=self.REVIEW_INTERVALS[0])
 
         self.save()
+
+
+class WrongAnswerExclusion(models.Model):
+    """오답노트에서 빼 둔 문제.
+
+    이미 익힌 문제가 목록에 계속 남아 방해되므로 사용자가 직접 뺀다.
+    기록을 지우지 않고 표시만 남기므로 언제든 되돌릴 수 있다.
+    """
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="wrong_exclusions",
+        verbose_name="사용자",
+    )
+    question = models.ForeignKey(
+        Question, on_delete=models.CASCADE, related_name="wrong_exclusions",
+        verbose_name="문제",
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="제외한 날")
+
+    class Meta:
+        verbose_name = "오답노트 제외"
+        verbose_name_plural = "오답노트 제외"
+        # 같은 문제를 두 번 뺄 일은 없다
+        unique_together = ("user", "question")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question} 제외"

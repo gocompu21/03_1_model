@@ -34,6 +34,11 @@ urlpatterns = [
     path("history/", views.exam_history_list, name="exam_history_list"),
     path("api/exam_history/", views.exam_history_api, name="exam_history_api"),
     path("wrong-answers/", views.wrong_answer_list, name="wrong_answer_list"),
+    path(
+        "wrong-answers/exclude/<int:question_id>/",
+        views.wrong_answer_exclude,
+        name="wrong_answer_exclude",
+    ),
     path("member-info/", views.member_info, name="member_info"),
     path("ai-analysis/", views.ai_analysis_page, name="ai_analysis_page"),
     path("analysis/", views.analysis_page, name="analysis_page"),
