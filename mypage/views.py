@@ -592,6 +592,9 @@ def _plain_preview(source, limit=180):
     pieces.append(out[pos:])
     out = "".join(pieces)
 
+    # 자르는 자리가 표시 한가운데였으면 반쪽만 남는다. 그것도 지운다
+    out = re.sub("[][0-9]*", "", out)
+
     # 닫히지 않은 채 잘린 것은 여기서 닫는다
     for name in reversed(open_names):
         out += "</%s>" % name
