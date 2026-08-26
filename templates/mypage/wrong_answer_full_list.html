@@ -860,15 +860,15 @@
                         {% endwith %}
                     </div>
 
+                    <!-- 관련 용어 (화면을 열 때 한 번만 불러온다) -->
+                    <div class="terms-container" data-question-id="{{ result.question.id }}"
+                         data-loaded="false"></div>
+
                     {% if result.question.infographic_image %}
                     <div class="infographic-container">
                         <img src="{{ result.question.infographic_image.url }}" onclick="openImageModal(this.src)">
                     </div>
                     {% endif %}
-
-                    <!-- 관련 용어 (화면을 열 때 한 번만 불러온다) -->
-                    <div class="terms-container" data-question-id="{{ result.question.id }}"
-                         data-loaded="false"></div>
                 </div>
                 {% empty %}
                 <div class="empty-state">
