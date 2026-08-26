@@ -846,6 +846,12 @@
                         {% endwith %}
                     </div>
 
+                    {% if result.question.infographic_image %}
+                    <div class="infographic-container">
+                        <img src="{{ result.question.infographic_image.url }}" onclick="openImageModal(this.src)">
+                    </div>
+                    {% endif %}
+
                     <!-- 관련 용어 (화면을 열 때 한 번만 불러온다) -->
                     <div class="terms-container" data-question-id="{{ result.question.id }}"
                          data-loaded="false"></div>
@@ -873,29 +879,35 @@
                         box.style.display = 'none';   // 용어가 없으면 자리를 접는다
                         return;
                     }
-                    var html = '<div style="margin-top: 20px; padding-top: 15px; '
-                             + 'border-top: 1px dashed #ddd;">'
-                             + '<h4 style="font-size: 0.95rem; color: #2d6a4f; '
-                             + 'margin-bottom: 10px;">🔑 관련 용어</h4>'
-                             + '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+                    var parts = [];
                     data.terms.forEach(function (t) {
                         // 많이 쓰인 용어일수록 오른쪽 테두리를 진하게
-                        var border = 'border: 1px solid #2d6a4f;';
-                        if (t.reference_count > 0) {
-                            var col = '#1976d2';
-                            if (t.reference_count >= 10) col = '#d32f2f';
-                            else if (t.reference_count >= 5) col = '#f57c00';
-                            border = 'border: 1px solid #2d6a4f; border-right-width: 5px; '
-                                   + 'border-right-color: ' + col + ';';
+                        var col = null;
+                        if (t.reference_count >= 10) col = '#d32f2f';
+                        else if (t.reference_count >= 5) col = '#f57c00';
+                        else if (t.reference_count > 0) col = '#1976d2';
+                        var style = 'border: 1px solid #2d6a4f; color: #2d6a4f;'
+                                  + ' padding: 3px 10px; border-radius: 12px;'
+                                  + ' font-size: 0.85rem; text-decoration: none;'
+                                  + ' background: #fff;';
+                        if (col) {
+                            style += ' border-right-width: 5px; border-right-color: ' + col + ';';
                         }
-                        html += '<a href="/glossary/term/' + t.id + '/" target="glossary_popup"'
-                             + ' onclick="window.open(this.href, 'glossary_popup','
-                             + ' 'width=600,height=700'); return false;"'
-                             + ' style="' + border + ' color: #2d6a4f; padding: 3px 10px;'
-                             + ' border-radius: 12px; font-size: 0.85rem; text-decoration: none;'
-                             + ' background: #fff;">' + t.word + '</a>';
+                        // 따옴표가 섞이지 않도록 DOM으로 만든다
+                        var a = document.createElement('a');
+                        a.href = '/glossary/term/' + t.id + '/';
+                        a.target = 'glossary_popup';
+                        a.setAttribute('style', style);
+                        a.textContent = t.word;
+                        parts.push(a.outerHTML);
                     });
-                    box.innerHTML = html + '</div></div>';
+                    box.innerHTML =
+                        '<div style="margin-top: 20px; padding-top: 15px;'
+                        + ' border-top: 1px dashed #ddd;">'
+                        + '<h4 style="font-size: 0.95rem; color: #2d6a4f;'
+                        + ' margin-bottom: 10px;">🔑 관련 용어</h4>'
+                        + '<div style="display: flex; flex-wrap: wrap; gap: 4px;">'
+                        + parts.join('') + '</div></div>';
                 })
                 .catch(function () { box.style.display = 'none'; });
         });
