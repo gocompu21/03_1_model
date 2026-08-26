@@ -847,41 +847,16 @@
                     </div>
 
                     <div class="explanation-section">
-                        <div class="exp-title">💡 정답 및 해설</div>
-
-                        <div class="exp-tabs">
-                            <button class="exp-tab-btn active" onclick="switchExpTab(this, 'textbook')">기본서 해설</button>
-                            <button class="exp-tab-btn" onclick="switchExpTab(this, 'general')">일반 해설</button>
-                        </div>
-
-                        <div class="exp-content-area">
-                            <div class="exp-content textbook-content" style="display: block;">
-                                {% if result.question.textbook_chat %}
-                                <div class="markdown-content">
-                                    {{ result.question.textbook_chat|markdown|safe }}
-                                </div>
-                                {% else %}
-                                <p style="color: #999; font-style: italic;">기본서 해설이 없습니다.</p>
-                                {% endif %}
-                            </div>
-
-                            <div class="exp-content general-content" style="display: none;">
-                                {% if result.question.general_chat %}
-                                <div class="markdown-content">
-                                    {{ result.question.general_chat|markdown|safe }}
-                                </div>
-                                {% else %}
-                                <p style="color: #999; font-style: italic;">일반 해설이 없습니다.</p>
-                                {% endif %}
-                            </div>
-                        </div>
-
                         {% if result.question.infographic_image %}
                         <div class="infographic-container">
                             <p style="font-weight: bold; color: #555; margin-bottom: 8px;">[비주얼 암기 카드]</p>
                             <img src="{{ result.question.infographic_image.url }}" onclick="openImageModal(this.src)">
                         </div>
                         {% endif %}
+
+                        <!-- 관련 용어 (화면을 열 때 한 번만 불러온다) -->
+                        <div class="terms-container" data-question-id="{{ result.question.id }}"
+                             data-loaded="false"></div>
                     </div>
                 </div>
                 {% empty %}
@@ -893,6 +868,45 @@
             </div>
         </div>
     </div>
+
+    <script>
+    // 관련 용어 — 화면을 열 때 문항마다 한 번씩 불러온다
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.terms-container').forEach(function (box) {
+            if (box.dataset.loaded === 'true') return;
+            box.dataset.loaded = 'true';
+            fetch('/study/api/question/' + box.dataset.questionId + '/terms/')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data.terms || !data.terms.length) return;
+                    var html = '<div style="margin-top: 20px; padding-top: 15px; '
+                             + 'border-top: 1px dashed #ddd;">'
+                             + '<h4 style="font-size: 0.95rem; color: #2d6a4f; '
+                             + 'margin-bottom: 10px;">🔑 관련 용어</h4>'
+                             + '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+                    data.terms.forEach(function (t) {
+                        // 많이 쓰인 용어일수록 오른쪽 테두리를 진하게
+                        var border = 'border: 1px solid #2d6a4f;';
+                        if (t.reference_count > 0) {
+                            var col = '#1976d2';
+                            if (t.reference_count >= 10) col = '#d32f2f';
+                            else if (t.reference_count >= 5) col = '#f57c00';
+                            border = 'border: 1px solid #2d6a4f; border-right-width: 5px; '
+                                   + 'border-right-color: ' + col + ';';
+                        }
+                        html += '<a href="/glossary/term/' + t.id + '/" target="glossary_popup"'
+                             + ' onclick="window.open(this.href, 'glossary_popup','
+                             + ' 'width=600,height=700'); return false;"'
+                             + ' style="' + border + ' color: #2d6a4f; padding: 3px 10px;'
+                             + ' border-radius: 12px; font-size: 0.85rem; text-decoration: none;'
+                             + ' background: #fff;">' + t.name + '</a>';
+                    });
+                    box.innerHTML = html + '</div></div>';
+                })
+                .catch(function () {});   // 못 불러와도 화면은 그대로 둔다
+        });
+    });
+    </script>
 
     <!-- Scroll to Top Button -->
     <button class="scroll-top-btn" id="scrollTopBtn" onclick="scrollToTop()">
