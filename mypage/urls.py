@@ -67,6 +67,7 @@ urlpatterns = [
     path("review/", views.review_index, name="review_index"),
     path("review/start/", views.review_start, name="review_start"),
     path("review/submit/", views.review_submit, name="review_submit"),
+    path("review/answer/<int:schedule_id>/", views.review_answer, name="review_answer"),
     # Admin Prompt Generator
     path("admin/prompt-generator/", views.prompt_generator, name="prompt_generator"),
     path("admin/query-ai/", views.query_ai_api, name="query_ai_api"),

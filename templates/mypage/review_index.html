@@ -149,33 +149,38 @@
             padding-left: 15px;
         }
 
+        /* 남은 문제 수는 알려 주되 자리를 많이 차지하지 않게 한 줄로 */
         .review-summary {
-            background: linear-gradient(135deg, #2d6a4f 0%, #40916c 100%);
-            color: white;
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            text-align: center;
+            display: flex;
+            align-items: baseline;
+            gap: 7px;
+            background: #e8f3ec;
+            color: #1b4332;
+            padding: 9px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
         }
 
         .review-summary .count {
-            font-size: 3rem;
+            font-size: 1.25rem;
             font-weight: bold;
-            display: block;
         }
 
         .review-summary .label {
-            font-size: 1rem;
-            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        /* 다 풀면 알려 준다 */
+        .review-summary.done {
+            background: #d8ecdd;
         }
 
         .review-description {
-            color: #666;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            line-height: 1.6;
+            color: #777;
+            margin-bottom: 18px;
+            padding: 0 2px;
+            font-size: 0.87rem;
+            line-height: 1.55;
         }
 
         /* Card Layout (PC & Mobile) */
@@ -379,6 +384,15 @@
             border-radius: 4px;
             margin-left: 10px;
         }
+
+        /* 푼 뒤에만 나타난다 */
+        .rv-result {
+            font-size: 0.76rem; font-weight: 600; line-height: 1.5;
+            padding: 3px 9px; border-radius: 11px; white-space: nowrap;
+        }
+        .rv-result:empty { display: none; }
+        .rv-result.o { background: #d8ecdd; color: #1b6b3a; }
+        .rv-result.x { background: #f4d7d4; color: #a33b2c; }
 
         .review-count-badge {
             font-size: 0.8rem;
@@ -629,10 +643,6 @@
                 font-size: 1.2rem;
             }
 
-            .review-summary .count {
-                font-size: 2.5rem;
-            }
-
             /* Mobile Card Adjustments */
             .history-table tbody tr {
                 padding: 14px;
@@ -749,9 +759,9 @@
                 </div>
 
                 {% if review_recommendations %}
-                <div class="review-summary">
-                    <span class="count">{{ review_count }}</span>
-                    <span class="label">개의 문제가 복습을 기다리고 있습니다</span>
+                <div class="review-summary" id="reviewSummary">
+                    <span class="count" id="reviewLeft">{{ review_count }}</span>
+                    <span class="label">개 남았습니다</span>
                 </div>
 
                 <div class="review-description">
@@ -762,13 +772,14 @@
 
                 {% for schedule in review_recommendations %}
                 {% with q=schedule.question %}
-                <div class="rv-card">
+                <div class="rv-card" data-schedule="{{ schedule.id }}">
                     <div class="q-tags">
                         <span class="rv-when">
                             {{ schedule.last_wrong_date|date:"y/m/d" }}
                             <span class="review-count-badge">{{ schedule.review_count }}회차</span>
                         </span>
                         <span class="q-badge">{{ q.subject.name }}</span>
+                        <span class="rv-result"></span>
                         {% if q.summary %}<span class="q-summary">{{ q.summary }}</span>{% endif %}
                     </div>
 
@@ -829,10 +840,6 @@
                 {% endwith %}
                 {% endfor %}
 
-                <a href="{% url 'mypage:review_start' %}" class="review-start-btn">
-                    <i class="fas fa-play-circle"></i> 시 작
-                </a>
-
                 {% else %}
                 <div class="empty-state">
                     <i class="fas fa-check-circle"></i>
@@ -862,6 +869,57 @@
             if (btn) btn.style.display = 'none';
         }
 
+        // 고른 그 자리에서 복습 일정을 갱신한다.
+        // '정답 보기'로 펼친 것은 푼 것이 아니므로 여기서만 보낸다
+        function getCookie(name) {
+            // 오답노트 화면과 같은 방식. 문자열 안에서 \s가 풀려 버리는 일을 피한다
+            var m = document.cookie.match(/csrftoken=([^;]+)/);
+            return m ? m[1] : '';
+        }
+
+        function setLeft(n) {
+            var el = document.getElementById('reviewLeft');
+            var box = document.getElementById('reviewSummary');
+            if (!el) return;
+            var label = box ? box.querySelector('.label') : null;
+            if (n === 0) {
+                el.textContent = '오늘 몫을 다 풀었습니다';
+                el.style.fontSize = '0.95rem';
+                if (box) box.classList.add('done');
+                if (label) label.textContent = '';
+            } else {
+                el.textContent = n;
+                if (label) label.textContent = '개 남았습니다';
+            }
+        }
+
+        function record(card, choice) {
+            if (!card || card.dataset.sent === '1') return;
+            var id = card.dataset.schedule;
+            if (!id) return;
+            card.dataset.sent = '1';
+
+            var body = new FormData();
+            body.append('choice', choice);
+            fetch('/mypage/review/answer/' + id + '/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCookie('csrftoken'),
+                           'X-Requested-With': 'XMLHttpRequest' },
+                body: body
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (!d.ok) { card.dataset.sent = ''; return; }
+                    var mark = card.querySelector('.rv-result');
+                    if (mark) {
+                        mark.textContent = d.is_correct ? '맞음' : '틀림';
+                        mark.className = 'rv-result ' + (d.is_correct ? 'o' : 'x');
+                    }
+                    if (typeof d.remaining === 'number') setLeft(d.remaining);
+                })
+                .catch(function () { card.dataset.sent = ''; });
+        }
+
         document.querySelectorAll('.q-choices').forEach(function (box) {
             box.querySelectorAll('.choice-item').forEach(function (item) {
                 item.addEventListener('click', function () {
@@ -870,6 +928,8 @@
                         .forEach(function (x) { x.classList.remove('picked'); });
                     item.classList.add('picked');
                     reveal(box);
+                    record(box.closest('.rv-card'),
+                           parseInt(item.dataset.choice, 10));
                 });
             });
         });

@@ -1057,6 +1057,47 @@ def review_start(request):
 
 
 @login_required
+@require_POST
+def review_answer(request, schedule_id):
+    """복습 문제 하나를 푼 즉시 기록한다.
+
+    예전에는 맨 아래 '시작'을 눌러 따로 푸는 화면으로 갔지만,
+    지금은 목록에서 바로 풀므로 고른 그 자리에서 처리한다.
+    같은 문제를 두 번 눌러도 처음 것만 센다(되돌리기로 일정이 흔들리면 안 된다).
+    """
+    schedule = get_object_or_404(
+        ReviewSchedule, id=schedule_id, user=request.user
+    )
+    try:
+        choice = int(request.POST.get("choice", ""))
+    except (TypeError, ValueError):
+        return JsonResponse({"ok": False, "error": "고른 답이 없습니다"}, status=400)
+
+    today = timezone.localdate()
+    # 오늘 이미 처리한 문제면 일정을 다시 건드리지 않는다
+    if schedule.next_review_date > today or schedule.is_mastered:
+        return JsonResponse(
+            {"ok": True, "already": True, "is_correct": choice in schedule.question.answer}
+        )
+
+    is_correct = choice in schedule.question.answer
+    schedule.mark_reviewed(is_correct)
+
+    remaining = ReviewSchedule.objects.filter(
+        user=request.user, next_review_date__lte=today, is_mastered=False
+    ).count()
+    return JsonResponse(
+        {
+            "ok": True,
+            "is_correct": is_correct,
+            "review_count": schedule.review_count,
+            "mastered": schedule.is_mastered,
+            "remaining": remaining,
+        }
+    )
+
+
+@login_required
 def review_submit(request):
     """
     Submit review answers and update review schedules.
