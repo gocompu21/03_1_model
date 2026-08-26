@@ -189,6 +189,15 @@
         .choice-item:hover { background: #f7faf8; }
         .q-choices.revealed .choice-item { cursor: default; }
         .q-choices:not(.revealed) .choice-note { display: none; }
+        /* 답을 보기 전에는 용어와 이미지도 감춘다. 둘 다 실마리가 된다 */
+        .wa-card:not(.revealed) .terms-title,
+        .wa-card:not(.revealed) .terms-list,
+        .wa-card:not(.revealed) .infographic-container { display: none; }
+        /* 용어가 감춰져도 단추 줄은 남아야 한다 */
+        .wa-card:not(.revealed) .terms-container {
+            border-top: none; margin-top: 14px; padding-top: 12px;
+        }
+        .wa-card:not(.revealed) .terms-head { justify-content: flex-end; }
         /* 내가 지금 고른 것 — 답을 보기 전까지의 표시 */
         .choice-item.picked { background: #eef6f1; border-radius: 6px; }
 
@@ -790,6 +799,7 @@
             });
             // 지난 답이 무엇이었는지 알려 준다
             var card = box.closest('.wa-card');
+            if (card) card.classList.add('revealed');   // 용어·이미지도 함께 드러난다
             var btn = card ? card.querySelector('.reveal-btn') : null;
             if (btn) btn.style.display = 'none';
         }
