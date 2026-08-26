@@ -862,6 +862,7 @@
 
                     <!-- 관련 용어 (화면을 열 때 한 번만 불러온다) -->
                     <div class="terms-container" data-question-id="{{ result.question.id }}"
+                         data-skip="{{ result.question.subject.name }}|{{ result.question.summary|default:'' }}"
                          data-loaded="false"></div>
 
                     {% if result.question.infographic_image %}
@@ -893,8 +894,13 @@
                         box.style.display = 'none';   // 용어가 없으면 자리를 접는다
                         return;
                     }
+                    // 과목 배지와 문제 요약에 이미 나온 말은 빼서 겹치지 않게 한다
+                    var skip = (box.dataset.skip || '').split('|')
+                        .map(function (x) { return x.trim(); })
+                        .filter(function (x) { return x.length > 0; });
                     var parts = [];
                     data.terms.forEach(function (t) {
+                        if (skip.indexOf(t.word) !== -1) return;
                         // 많이 쓰인 용어일수록 오른쪽 테두리를 진하게
                         var col = null;
                         if (t.reference_count >= 10) col = '#d32f2f';
@@ -915,6 +921,10 @@
                         a.textContent = t.word;
                         parts.push(a.outerHTML);
                     });
+                    if (!parts.length) {
+                        box.style.display = 'none';
+                        return;
+                    }
                     box.innerHTML =
                         '<div style="margin-top: 16px; padding-top: 12px;'
                         + ' border-top: 1px dashed #ddd;">'
