@@ -324,8 +324,6 @@ def _chapter_exam_sets(chapter):
     화면에는 '5회 3문제' 처럼 배지로 보여 주고,
     '문제 풀기'를 누르면 그 문제집 전체를 푼다.
     """
-    from collections import Counter
-
     from exam.models import TopicQuestionSet
 
     sets = (TopicQuestionSet.objects
@@ -335,21 +333,23 @@ def _chapter_exam_sets(chapter):
 
     rows = []
     for ts in sets:
-        counter = Counter()
-        total = 0
-        for item in ts.items.all():
-            exam = getattr(item.question, 'exam', None)
+        questions = []
+        for item in ts.items.all().order_by('order'):
+            q = item.question
+            exam = getattr(q, 'exam', None)
             if exam is None:
                 continue
-            counter[exam.round_number] += 1
-            total += 1
-        if not total:
+            questions.append({
+                # 배지는 '5-1' 처럼 회차-문제번호
+                'badge': '%s-%s' % (exam.round_number, q.number),
+                'content': q.content,
+            })
+        if not questions:
             continue
         rows.append({
             'set': ts,
-            'total': total,
-            'rounds': [{'round': r, 'count': n}
-                       for r, n in sorted(counter.items())],
+            'total': len(questions),
+            'questions': questions,
         })
     return rows
 
