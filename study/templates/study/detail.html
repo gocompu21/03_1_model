@@ -1276,8 +1276,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.terms && data.terms.length > 0) {
-                    let html = '<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed #ddd;">';
-                    html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>';
+                    // 수평바(점선) 바로 아래 붙이고, 시작 위치는 선지 번호와 얼라인
+                    // (.q-choices padding-left 20px + .choice-item padding 5px = 25px)
+                    let html = '<div style="margin-top: 6px; padding: 8px 0 0 25px; border-top: 1px dashed #ddd;">';
+                    html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin: 0 0 8px;">🔑 관련 용어</h4>';
                     html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
                     data.terms.forEach(term => {
                         let borderStyle = 'border: 1px solid #2d6a4f;';
