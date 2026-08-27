@@ -386,6 +386,27 @@
     }
     .term-panel-body .bullet-level2 .bullet { font-weight: 400; }
     .term-panel-body .bullet-indent { margin-left: 2.8em; }
+    /* '1) 정의: ...' 처럼 라벨 뒤에 콜론이 오는 항목은
+       넘어가는 줄을 라벨 다음 글자 자리에 맞춘다.
+       라벨 길이가 항목마다 달라 고정값으로는 못 맞추므로 grid 로 재서 맞춘다 */
+    .term-panel-body .bullet-item.has-label {
+        display: grid;
+        grid-template-columns: auto auto 1fr;
+        column-gap: 0.32em;
+        align-items: baseline;
+        padding-left: 0;
+    }
+    .term-panel-body .bullet-item.has-label > .bullet { position: static; grid-column: 1; }
+    .term-panel-body .bullet-item.has-label > .lbl { grid-column: 2; font-weight: 700; }
+    .term-panel-body .bullet-item.has-label > .rest { grid-column: 3; }
+    @media (max-width: 768px) {
+        .term-panel-body .bullet-item.has-label {
+            display: block;
+            padding-left: 1.75em;
+        }
+        .term-panel-body .bullet-item.has-label > .bullet { position: absolute; }
+    }
+
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
     .term-panel-body th, .term-panel-body td {
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
@@ -1273,6 +1294,39 @@
 
         // 용어 설명에 $	ext{SO}_2$ 같은 수식이 들어 있다.
         // 나중에 붙는 글이라 MathJax 에게 다시 그려 달라고 해야 한다
+        // '1) 정의: ...' 처럼 라벨 뒤에 콜론이 오는 항목을 찾아 표시한다.
+        // 넘어가는 줄을 라벨 다음 글자 자리에 맞추기 위해서다
+        function markLabels(root) {
+            if (!root) return;
+            root.querySelectorAll('.bullet-item').forEach(function (item) {
+                if (item.classList.contains('has-label')) return;
+                var bullet = item.querySelector(':scope > .bullet');
+                if (!bullet) return;
+                var strong = null;
+                for (var n = bullet.nextSibling; n; n = n.nextSibling) {
+                    if (n.nodeType === 3 && !n.textContent.trim()) continue;
+                    if (n.nodeType === 1 && n.tagName === 'STRONG') strong = n;
+                    break;
+                }
+                if (!strong) return;
+                var txt = strong.textContent.trim();
+                if (txt.slice(-1) !== ':') return;
+                if (txt.length > 14) return;      // 너무 길면 오히려 읽기 나쁘다
+
+                strong.classList.add('lbl');
+                var rest = document.createElement('span');
+                rest.className = 'rest';
+                var n2 = strong.nextSibling;
+                while (n2) {
+                    var next = n2.nextSibling;
+                    rest.appendChild(n2);
+                    n2 = next;
+                }
+                item.appendChild(rest);
+                item.classList.add('has-label');
+            });
+        }
+
         function typeset(el) {
             if (window.MathJax && MathJax.typesetPromise) {
                 MathJax.typesetPromise([el]).catch(function () {});
@@ -1332,6 +1386,7 @@
             if (cache[id]) {
                 word.textContent = cache[id].word;
                 body.innerHTML = cache[id].html;
+                markLabels(body);
                 typeset(body);
                 return;
             }
@@ -1344,6 +1399,7 @@
                     if (panel.dataset.term !== id) return;
                     word.textContent = d.word;
                     body.innerHTML = d.html || '';
+                    markLabels(body);
                     typeset(body);
                 })
                 .catch(function () {

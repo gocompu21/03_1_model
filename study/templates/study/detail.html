@@ -440,6 +440,57 @@
     .term-inline-detail .bullet-level2 .bullet { font-weight: 400; }
     .term-inline-detail .bullet-indent { margin-left: 2.8em; }
 
+    /* '1) 정의: ...' 처럼 라벨 뒤에 콜론이 오는 항목은
+       넘어가는 줄을 라벨 다음 글자 자리에 맞춘다.
+       라벨 길이가 항목마다 달라(정의: / 공생성 곰팡이:) 고정값으로는
+       못 맞추므로, 글자 폭을 재서 그만큼 잡아 주는 grid 를 쓴다.
+       콜론이 없는 항목은 has-label 이 붙지 않아 지금처럼 그대로다 */
+    .term-inline-detail .bullet-item.has-label {
+        display: grid;
+        grid-template-columns: auto auto 1fr;
+        column-gap: 0.32em;
+        align-items: baseline;
+        padding-left: 0;
+    }
+    .term-inline-detail .bullet-item.has-label > .bullet {
+        position: static;
+        grid-column: 1;
+    }
+    .term-inline-detail .bullet-item.has-label > .lbl {
+        grid-column: 2;
+        font-weight: 700;
+    }
+    .term-inline-detail .bullet-item.has-label > .rest {
+        grid-column: 3;
+    }
+    /* 라벨이 지나치게 길면 오히려 읽기 나쁘다. 좁은 화면에선 접는다 */
+    @media (max-width: 768px) {
+        .term-inline-detail .bullet-item.has-label {
+            display: block;
+            padding-left: 1.75em;
+        }
+        .term-inline-detail .bullet-item.has-label > .bullet { position: absolute; }
+    }
+
+    /* 점선 낱말을 눌러 열리는 상자에도 같은 라벨 정렬을 준다 */
+    .term-panel-body .bullet-item.has-label {
+        display: grid;
+        grid-template-columns: auto auto 1fr;
+        column-gap: 0.32em;
+        align-items: baseline;
+        padding-left: 0;
+    }
+    .term-panel-body .bullet-item.has-label > .bullet { position: static; grid-column: 1; }
+    .term-panel-body .bullet-item.has-label > .lbl { grid-column: 2; font-weight: 700; }
+    .term-panel-body .bullet-item.has-label > .rest { grid-column: 3; }
+    @media (max-width: 768px) {
+        .term-panel-body .bullet-item.has-label {
+            display: block;
+            padding-left: 1.75em;
+        }
+        .term-panel-body .bullet-item.has-label > .bullet { position: absolute; }
+    }
+
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
     .term-panel-body th, .term-panel-body td {
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
@@ -1418,6 +1469,44 @@
     // 용어 칩 클릭: 새 창 대신 칩 아래 인라인 패널에 상세를 펼친다
     function showTermInline(el, termId) {
         const wrap = el.closest('.terms-container');
+        // '1) 정의: ...' 처럼 라벨 뒤에 콜론이 오는 항목을 찾아 표시한다.
+        // 넘어가는 줄을 라벨 다음 글자 자리에 맞추기 위해서다.
+        // 콜론이 없으면 건드리지 않는다
+        function markLabels(root) {
+            if (!root) return;
+            // 다른 상자(term-panel)에서도 쓴다
+            root.querySelectorAll('.bullet-item').forEach(function (item) {
+                if (item.classList.contains('has-label')) return;
+                var bullet = item.querySelector(':scope > .bullet');
+                if (!bullet) return;
+                // 번호 바로 다음이 <strong>...:</strong> 인 것만
+                var strong = null;
+                for (var n = bullet.nextSibling; n; n = n.nextSibling) {
+                    if (n.nodeType === 3 && !n.textContent.trim()) continue;
+                    if (n.nodeType === 1 && n.tagName === 'STRONG') strong = n;
+                    break;
+                }
+                if (!strong) return;
+                var txt = strong.textContent.trim();
+                if (txt.slice(-1) !== ':') return;
+                // 라벨이 너무 길면 오히려 읽기 나쁘다
+                if (txt.length > 14) return;
+
+                strong.classList.add('lbl');
+                var rest = document.createElement('span');
+                rest.className = 'rest';
+                var n2 = strong.nextSibling;
+                while (n2) {
+                    var next = n2.nextSibling;
+                    rest.appendChild(n2);
+                    n2 = next;
+                }
+                item.appendChild(rest);
+                item.classList.add('has-label');
+            });
+        }
+        window.markTermLabels = markLabels;
+
         const panel = wrap ? wrap.querySelector('.term-inline-detail') : null;
         if (!panel) return true;   // 패널이 없으면 기존 링크 동작으로 폴백
 
@@ -1442,6 +1531,7 @@
                               style="cursor:pointer; color:#aaa; padding:0 4px;">✕</span>
                     </div>
                     <div class="markdown-content" style="font-size:0.88rem; line-height:1.55; color:#444;">${data.html}</div>`;
+                markLabels(panel);
                 if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([panel]);
             })
             .catch(() => {
@@ -2174,6 +2264,7 @@
             if (cache[id]) {
                 word.textContent = cache[id].word;
                 body.innerHTML = cache[id].html;
+                if (window.markTermLabels) window.markTermLabels(body);
                 typeset(body);
                 return;
             }
@@ -2186,6 +2277,7 @@
                     if (panel.dataset.term !== id) return;
                     word.textContent = d.word;
                     body.innerHTML = d.html || '';
+                    if (window.markTermLabels) window.markTermLabels(body);
                     typeset(body);
                 })
                 .catch(function () {
