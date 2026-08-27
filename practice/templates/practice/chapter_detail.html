@@ -209,6 +209,62 @@
     }
     
     /* Content Body */
+    /* 본문 용어를 눌렀을 때 그 자리에 펼치는 뜻 상자 (기출 화면과 같은 모양) */
+    .term-panel {
+        display: none;
+        margin: 10px 0 12px;
+        padding: 14px 16px;
+        background: #f6faf7;
+        border: 1px solid #d8e8de;
+        border-left: 3px solid #2d6a4f;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.93rem;
+        line-height: 1.55;
+        color: #333;
+    }
+    .term-panel.open { display: block; }
+    .term-panel-head {
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 10px; margin-bottom: 8px;
+    }
+    .term-panel-word { font-weight: 700; color: #1b4332; font-size: 1rem; }
+    .term-panel-close {
+        border: 0; background: transparent; color: #777;
+        font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 2px 6px;
+    }
+    .term-panel-body p { margin: 0 0 5px; }
+    .term-panel-body p:first-child { margin-top: 0; }
+    .term-panel-body p:last-child { margin-bottom: 0; }
+    .term-panel-body h3, .term-panel-body h4 {
+        font-size: 0.95rem; color: #2d6a4f; margin: 11px 0 4px;
+    }
+    .term-panel-body h3:first-child, .term-panel-body h4:first-child { margin-top: 0; }
+    .term-panel-body ul, .term-panel-body ol { padding-left: 19px; margin: 4px 0 6px; }
+    .term-panel-body li { margin-bottom: 2px; }
+    .term-panel-body i, .term-panel-body em {
+        font-style: italic; font-family: inherit; padding-right: 0.1em;
+    }
+    .term-panel-body .bullet-item {
+        position: relative; padding-left: 1.35em; margin: 3px 0 3px 0.9em;
+    }
+    .term-panel-body .bullet-item .bullet {
+        position: absolute; left: 0; font-weight: 700;
+    }
+    .term-panel-body .bullet-level1 { margin: 3px 0 3px 0.9em; }
+    .term-panel-body .bullet-level2 { margin: 2px 0 2px 2.25em; padding-left: 1.1em; }
+    .term-panel-body .bullet-level2 .bullet { font-weight: 400; }
+    .term-panel-body li .bullet-item { margin-left: 0; }
+    .term-panel-body li .bullet-level2 { margin: 2px 0 2px 0.2em; padding-left: 1.1em; }
+    .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+    .term-panel-body th, .term-panel-body td {
+        border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
+    }
+    .term-panel-body th { background: #eaf5ee; }
+    .glossary-link.on {
+        color: #1b4332;
+        background-image: linear-gradient(#2d6a4f, #2d6a4f);
+        background-size: 100% 1.5px;
+    }
     .content-body {
         min-height: 200px;
         line-height: 1.9;
@@ -1553,5 +1609,109 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 })();
 {% endif %}
+
+    // 본문의 용어 점선을 누르면 새 창 대신 그 자리 아래에 뜻을 펼친다
+    // (기출 학습 화면과 같은 방식)
+    (function () {
+        var cache = {};
+
+        function scroller(el) {
+            for (var n = el; n && n !== document.body; n = n.parentElement) {
+                var ov = getComputedStyle(n).overflowY;
+                if ((ov === 'auto' || ov === 'scroll') && n.scrollHeight > n.clientHeight) {
+                    return n;
+                }
+            }
+            return document.scrollingElement || document.documentElement;
+        }
+
+        // 상자가 열리면 아래 내용이 밀린다. 누른 낱말은 제자리에 있어야 한다
+        function keepInPlace(link, act) {
+            var sc = scroller(link);
+            var before = link.getBoundingClientRect().top;
+            act();
+            var after = link.getBoundingClientRect().top;
+            var diff = after - before;
+            if (Math.abs(diff) > 1) sc.scrollTop += diff;
+        }
+
+        function panelFor(link) {
+            // 그 낱말이 든 문단 바로 다음에 상자를 놓는다
+            var block = link.closest('p, li, div.content-body') || link.parentElement;
+            var next = block.nextElementSibling;
+            if (next && next.classList.contains('term-panel')) return next;
+
+            var panel = document.createElement('div');
+            panel.className = 'term-panel';
+            panel.innerHTML =
+                '<div class="term-panel-head">'
+                + '<span class="term-panel-word"></span>'
+                + '<button type="button" class="term-panel-close" title="닫기">&times;</button>'
+                + '</div><div class="term-panel-body"></div>';
+            block.parentNode.insertBefore(panel, block.nextSibling);
+            panel.querySelector('.term-panel-close')
+                 .addEventListener('click', function () {
+                     panel.classList.remove('open');
+                     document.querySelectorAll('.glossary-link.on')
+                         .forEach(function (x) { x.classList.remove('on'); });
+                 });
+            return panel;
+        }
+
+        function show(link, id) {
+            var panel;
+            keepInPlace(link, function () { panel = panelFor(link); });
+
+            document.querySelectorAll('.glossary-link.on')
+                .forEach(function (x) { x.classList.remove('on'); });
+
+            // 같은 낱말을 다시 누르면 접는다
+            if (panel.classList.contains('open') && panel.dataset.term === id) {
+                keepInPlace(link, function () { panel.classList.remove('open'); });
+                return;
+            }
+            link.classList.add('on');
+            panel.dataset.term = id;
+            keepInPlace(link, function () { panel.classList.add('open'); });
+
+            var word = panel.querySelector('.term-panel-word');
+            var body = panel.querySelector('.term-panel-body');
+
+            function draw(w, html) {
+                keepInPlace(link, function () {
+                    word.textContent = w;
+                    body.innerHTML = html;
+                });
+                if (window.MathJax && MathJax.typesetPromise) {
+                    MathJax.typesetPromise([body]).catch(function () {});
+                }
+            }
+
+            if (cache[id]) { draw(cache[id].word, cache[id].html); return; }
+
+            word.textContent = link.textContent;
+            body.textContent = '불러오는 중…';
+            fetch('/glossary/api/term/' + id + '/')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    cache[id] = { word: d.word, html: d.html || '' };
+                    if (panel.dataset.term !== id) return;
+                    draw(d.word, d.html || '');
+                })
+                .catch(function () {
+                    if (panel.dataset.term === id) {
+                        body.textContent = '용어를 불러오지 못했습니다.';
+                    }
+                });
+        }
+
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('.glossary-link[data-term]');
+            if (!link) return;
+            e.preventDefault();
+            show(link, link.dataset.term);
+        });
+    })();
+
 </script>
 {% endblock %}

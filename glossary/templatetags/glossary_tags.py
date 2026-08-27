@@ -110,7 +110,11 @@ def autolink_terms(content, subject_name=None):
         term = term_map.get(word)
         if term:
             # target="glossary_popup"으로 설정하여 하나의 창만 재사용
-            return f'<a href="/glossary/term/{term.id}/" class="glossary-link" target="glossary_popup" title="용어: {word}">{word}</a>'
+            # data-term 이 있으면 화면에서 가로채 그 자리에 뜻을 펼친다.
+            # 그 처리가 없는 화면에서는 href 로 새 창이 열린다
+            return (f'<a href="/glossary/term/{term.id}/" class="glossary-link" '
+                    f'data-term="{term.id}" target="glossary_popup" '
+                    f'title="용어: {word}">{word}</a>')
         return word
         
     # 이미 링크된 태그 내부나 HTML 속성 등을 제외하고 텍스트만 치환하도록 복잡하게 짜는 대신,
