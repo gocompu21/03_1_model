@@ -255,25 +255,25 @@
     /* 용어 사전에 있는 말만 점선으로 잇는다. 누르면 아래에서 뜻을 보여 준다.
        사전에 없는 핵심어는 표시하지 않는다 */
     .choice-note em { font-style: normal; font-weight: inherit; }
-    .choice-note .term-link {
+    /* 점선은 촘촘하면 실선처럼 뭉개져 잘 안 보인다.
+       아래쪽에 점을 띄엄띄엄 깔아 눈에 걸리게 한다.
+       선지 본문과 설명 두 군데 모두에 쓴다 */
+    .term-link {
         color: inherit;
         font-weight: 600;
-        text-decoration: underline;
-        text-decoration-style: dotted;
-        text-decoration-color: #8a8a8a;
-        text-decoration-thickness: 1px;
-        text-underline-offset: 3px;
+        text-decoration: none;
         cursor: pointer;
+        background-image: radial-gradient(circle, #2d6a4f 1.1px, transparent 1.2px);
+        background-size: 5px 2.5px;
+        background-position: 0 100%;
+        background-repeat: repeat-x;
+        padding-bottom: 3px;
     }
-    .choice-note .term-link:hover {
-        text-decoration-style: solid;
-        text-decoration-color: #2d6a4f;
+    .term-link:hover,
+    .term-link.on {
         color: #1b4332;
-    }
-    .choice-note .term-link.on {
-        text-decoration-style: solid;
-        text-decoration-color: #2d6a4f;
-        color: #1b4332;
+        background-image: linear-gradient(#2d6a4f, #2d6a4f);
+        background-size: 100% 1.5px;
     }
 
     /* 누른 용어의 뜻. 문항 아래에 펼친다 */
@@ -859,27 +859,27 @@
                     <div class="q-choices" data-answer="{{ q.answer }}">
                         <div class="choice-item" data-choice="1">
                             <span class="choice-num">①</span>
-                            <span class="choice-text">{{ q.choice1|safe }}</span>
+                            <span class="choice-text">{{ q.choice1|choice_terms:q.subject.name }}</span>
                             {% if q.choice_notes.1 %}<div class="choice-note">{{ q.choice_notes.1|choice_note:q.subject.name }}</div>{% endif %}
                         </div>
                         <div class="choice-item" data-choice="2">
                             <span class="choice-num">②</span>
-                            <span class="choice-text">{{ q.choice2|safe }}</span>
+                            <span class="choice-text">{{ q.choice2|choice_terms:q.subject.name }}</span>
                             {% if q.choice_notes.2 %}<div class="choice-note">{{ q.choice_notes.2|choice_note:q.subject.name }}</div>{% endif %}
                         </div>
                         <div class="choice-item" data-choice="3">
                             <span class="choice-num">③</span>
-                            <span class="choice-text">{{ q.choice3|safe }}</span>
+                            <span class="choice-text">{{ q.choice3|choice_terms:q.subject.name }}</span>
                             {% if q.choice_notes.3 %}<div class="choice-note">{{ q.choice_notes.3|choice_note:q.subject.name }}</div>{% endif %}
                         </div>
                         <div class="choice-item" data-choice="4">
                             <span class="choice-num">④</span>
-                            <span class="choice-text">{{ q.choice4|safe }}</span>
+                            <span class="choice-text">{{ q.choice4|choice_terms:q.subject.name }}</span>
                             {% if q.choice_notes.4 %}<div class="choice-note">{{ q.choice_notes.4|choice_note:q.subject.name }}</div>{% endif %}
                         </div>
                         <div class="choice-item" data-choice="5">
                             <span class="choice-num">⑤</span>
-                            <span class="choice-text">{{ q.choice5|safe }}</span>
+                            <span class="choice-text">{{ q.choice5|choice_terms:q.subject.name }}</span>
                             {% if q.choice_notes.5 %}<div class="choice-note">{{ q.choice_notes.5|choice_note:q.subject.name }}</div>{% endif %}
                         </div>
                     </div>

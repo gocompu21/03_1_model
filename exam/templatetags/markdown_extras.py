@@ -266,6 +266,72 @@ def _link_terms(text, subject_name):
     return re.sub(r"<em>(.*?)</em>", repl, text, flags=re.S)
 
 
+# 선지 본문에도 용어 사전에 있는 말을 점선으로 잇는다.
+# 설명(choice_note)과 달리 <em> 표시가 없으므로 글에서 직접 찾는다.
+@register.filter
+def choice_terms(value, subject=None):
+    """선지 본문. 사전에 있는 낱말에 점선을 긋는다.
+
+    선지에는 <i>(학명)나 <sup> 같은 태그가 드물게 섞여 있다.
+    태그 안쪽은 건드리지 않고 글자 부분만 바꾼다.
+    """
+    import re
+
+    from django.utils.safestring import mark_safe
+
+    if not value:
+        return ""
+
+    text = str(value)
+    lookup = _term_lookup(subject)
+    if not lookup:
+        return mark_safe(text)
+
+    pattern = _term_pattern(subject)
+    if pattern is None:
+        return mark_safe(text)
+
+    def link(seg):
+        def repl(m):
+            w = m.group(0)
+            return '<a class="term-link" data-term="%d">%s</a>' % (lookup[w], w)
+
+        return pattern.sub(repl, seg)
+
+    # 태그(<i> 등)는 그대로 두고 그 사이의 글자만 바꾼다
+    out = []
+    pos = 0
+    for m in re.finditer(r"<[^>]+>", text):
+        out.append(link(text[pos:m.start()]))
+        out.append(m.group(0))
+        pos = m.end()
+    out.append(link(text[pos:]))
+    return mark_safe("".join(out))
+
+
+def _term_pattern(subject_name):
+    """과목별 용어를 한 번에 찾는 정규식. 긴 낱말이 먼저 걸리게 한다."""
+    import re
+
+    from django.core.cache import cache
+
+    key = "choice_terms_re_%s" % (subject_name or "_all")
+    got = cache.get(key)
+    if got is not None:
+        return re.compile(got) if got else None
+
+    lookup = _term_lookup(subject_name)
+    # 한 글자짜리는 아무 데나 걸려 방해가 된다
+    words = sorted((w for w in lookup if len(w) >= 2), key=len, reverse=True)
+    if not words:
+        cache.set(key, "", 60 * 30)
+        return None
+
+    src = "|".join(re.escape(w) for w in words)
+    cache.set(key, src, 60 * 30)
+    return re.compile(src)
+
+
 # 학명은 형광펜이 아니라 기울임으로 쓰는 것이 관례다.
 # 모델이 <em>Exobasidium</em> 처럼 감싸 보낸 것을 바로잡는다.
 def _latin_to_italic(text):
