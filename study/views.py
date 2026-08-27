@@ -894,7 +894,7 @@ def api_exam_questions(request):
     if not exam_id:
         return JsonResponse({'questions': []})
     
-    questions = Question.objects.filter(exam_id=exam_id).order_by('number')
+    questions = Question.objects.filter(exam_id=exam_id).select_related('exam').order_by('number')
     data = []
     for q in questions:
         clean_content = strip_html(q.content)
@@ -905,6 +905,8 @@ def api_exam_questions(request):
         data.append({
             'id': q.id,
             'number': q.number,
+            # 화면이 회차를 함께 적으므로 여기서도 실어 보낸다
+            'round': q.exam.round_number if q.exam else '',
             'full_text': full_text
         })
     

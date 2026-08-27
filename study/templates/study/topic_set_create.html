@@ -284,7 +284,7 @@
                         <label class="form-label">용어집에서 선택</label>
                         <div style="display: flex; gap: 6px;">
                             <input type="text" class="form-control" id="termInput"
-                                   placeholder="용어 입력 (쉼표로 여러 개: 탄저병, 흰가루병)"
+                                   placeholder="용어 입력 (쉼표로 여러 개). 적용하면 바로 담깁니다"
                                    style="flex: 1;">
                             <button type="button" class="btn-add" id="termApplyBtn"
                                     style="white-space: nowrap;">적용</button>
@@ -392,23 +392,47 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(r => r.json())
                 .then(data => {
                     applyBtn.disabled = false;
-                    currentQuestions = data.questions || [];
-                    currentRound = '';        // 회차가 섞이므로 비워 둔다
-                    renderQuestions();
+                    const found = data.questions || [];
+
+                    // 목록을 거치지 않고 곧바로 담는다
+                    let added = 0, already = 0;
+                    found.forEach(q => {
+                        const id = String(q.id);
+                        if (cart.has(id)) { already++; return; }
+                        cart.set(id, {
+                            id: id,
+                            // 회차가 섞이므로 서버가 붙여 준 '6회 3번' 앞머리를 뗀다
+                            text: q.full_text
+                                    .replace(/^\d+회\s*/, '')
+                                    .replace(/^\d+번\s*/, ''),
+                            round: q.round || '',
+                            number: q.number
+                        });
+                        added++;
+                    });
+                    renderCart();
+
+                    // 목록은 회차 선택 전용이므로 비워 둔다
+                    currentQuestions = [];
+                    currentRound = '';
+                    questionList.innerHTML =
+                        '<div style="text-align: center; color: #888; padding: 40px;">회차를 먼저 선택하세요</div>';
+                    selectAll.checked = false;
+                    updateAddBtn();
+                    const es = document.getElementById('examSelect');
+                    if (es) es.value = '';
 
                     const parts = [];
                     if (data.terms && data.terms.length) {
                         parts.push('찾은 용어: ' + data.terms.join(', '));
                     }
-                    parts.push('문제 ' + currentQuestions.length + '개');
+                    parts.push('담은 문제 ' + added + '개');
+                    if (already) parts.push('이미 담긴 것 ' + already + '개');
+                    if (!found.length) parts.push('해당 기출문제가 없습니다');
                     if (data.missing && data.missing.length) {
                         parts.push('사전에 없음: ' + data.missing.join(', '));
                     }
                     msg.textContent = parts.join(' · ');
-
-                    // 회차 선택은 비워 둔다 (지금 목록은 용어로 찾은 것)
-                    const es = document.getElementById('examSelect');
-                    if (es) es.value = '';
                 })
                 .catch(() => {
                     applyBtn.disabled = false;
