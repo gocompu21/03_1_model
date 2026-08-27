@@ -766,7 +766,9 @@
     /* ===== Linked BBS Posts Section ===== */
     /* 관련 Q&A — 제목 밑에 앞부분을 보여 주고 누르면 펼친다
        (나의 질의응답 화면과 같은 방식) */
-    .linked-post-item { flex-wrap: wrap; cursor: pointer; }
+    .linked-post-item { flex-wrap: wrap; }
+    /* 누를 수 있는 곳은 제목 줄뿐이다 */
+    .linked-post-info { cursor: pointer; }
     /* 제목이 시작되는 자리(배지 폭 + 여백)에 맞춰 들여쓴다.
        왼쪽 세로선으로 제목과 내용을 눈으로 가른다 */
     .lp-preview {
@@ -875,13 +877,16 @@
     .linked-post-info a { flex: 1; }
     .linked-post-info a {
         color: #333;
-        text-decoration: none;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 1px;
+        text-decoration-color: #b9cfc2;
         font-weight: 600;
         font-size: 0.95rem;
     }
     .linked-post-info a:hover {
         color: #2d6a4f;
-        /* 새 창으로 가지 않고 그 자리에서 펼치므로 밑줄은 넣지 않는다 */
+        text-decoration-color: #2d6a4f;
     }
     /* 펼친 항목의 제목은 진하게 남겨 어디를 폈는지 알 수 있게 */
     .linked-post-item.open .linked-post-info a { color: #1b4332; }
@@ -1823,13 +1828,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         list.addEventListener('click', function (e) {
             if (e.target.closest('.unlink-btn')) return;
-            var item = e.target.closest('.linked-post-item');
+            // 제목 줄에서만 열고 닫는다.
+            // 펼친 내용을 누를 때 접히면 글을 읽다가 사라져 불편하다
+            var head = e.target.closest('.linked-post-info');
+            if (!head) return;
+            var item = head.closest('.linked-post-item');
             if (!item) return;
-            // 제목을 눌러도 새 창으로 가지 않고 그 자리에서 펼친다.
-            // 본문 안의 링크는 본래대로 따라간다
-            var a = e.target.closest('a');
-            if (a && !a.closest('.lp-body')) e.preventDefault();
-            else if (a) return;
+            e.preventDefault();          // 새 창으로 가지 않는다
             item.classList.toggle('open');
             if (item.classList.contains('open') &&
                 window.MathJax && MathJax.typesetPromise) {
