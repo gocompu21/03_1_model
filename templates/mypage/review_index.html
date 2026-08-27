@@ -402,7 +402,7 @@
     @media (max-width: 768px) {
         .term-panel-body .bullet-item.has-label {
             display: block;
-            padding-left: 1.75em;
+            padding-left: 1.35em;
         }
         .term-panel-body .bullet-item.has-label > .bullet { position: absolute; }
     }
@@ -414,6 +414,43 @@
         font-style: italic;
         font-family: inherit;
         padding-right: 0.1em;
+    }
+
+
+    /* 번호와 글자 사이가 넓어 보였다. 번호 폭을 글자에 맞게 줄인다.
+       '1. 정의 및 특징'(소제목) 아래 오는 '1)' 항목은 한 단 들여쓴다 */
+    .term-panel-body .bullet-item {
+        padding-left: 1.35em;
+        margin-left: 0.9em;
+    }
+    .term-panel-body .bullet-item .bullet {
+        left: 0;
+    }
+    .term-panel-body .bullet-level1 { margin: 3px 0 3px 0.9em; }
+    .term-panel-body .bullet-level2 { margin: 2px 0 2px 1.9em; padding-left: 1.15em; }
+
+    /* 라벨 정렬(has-label)도 같은 자리에서 시작하도록 */
+    .term-panel-body .bullet-item.has-label {
+        column-gap: 0.28em;
+        padding-left: 0;
+    }
+
+    /* 번호와 글자 사이가 넓어 보였다. 번호 폭을 글자에 맞게 줄인다.
+       '1. 정의 및 특징'(소제목) 아래 오는 '1)' 항목은 한 단 들여쓴다 */
+    .term-inline-detail .bullet-item {
+        padding-left: 1.35em;
+        margin-left: 0.9em;
+    }
+    .term-inline-detail .bullet-item .bullet {
+        left: 0;
+    }
+    .term-inline-detail .bullet-level1 { margin: 3px 0 3px 0.9em; }
+    .term-inline-detail .bullet-level2 { margin: 2px 0 2px 1.9em; padding-left: 1.15em; }
+
+    /* 라벨 정렬(has-label)도 같은 자리에서 시작하도록 */
+    .term-inline-detail .bullet-item.has-label {
+        column-gap: 0.28em;
+        padding-left: 0;
     }
 
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
