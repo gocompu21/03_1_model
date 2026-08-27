@@ -269,6 +269,9 @@ def _qa_body(html):
     # $15^\circ\text{C}$ -> 15°C
     def _tex(m):
         inner = m.group(1)
+        # ^\circ 는 '도' 표기다. ^ 와 중괄호까지 함께 없애야
+        # 아래 '진짜 수식' 검사(_ ^ 백슬래시)에 걸리지 않는다
+        inner = re.sub(r'\^\s*\{?\s*\\+circ\s*\}?', '°', inner)
         inner = re.sub(r'\\+circ', '°', inner)
         inner = re.sub(r'\\+sim|\\+thicksim', '~', inner)
         inner = re.sub(r'\\+times', '×', inner)
