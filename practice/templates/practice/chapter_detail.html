@@ -1866,6 +1866,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!item) return;
             e.preventDefault();          // 새 창으로 가지 않는다
             item.classList.toggle('open');
+
+            // 펼칠 때 조회수를 올린다.
+            // 게시글 화면으로 가지 않으므로 여기서 대신 센다
+            if (item.classList.contains('open') && item.dataset.hit !== '1') {
+                item.dataset.hit = '1';
+                var pid = item.dataset.postId;
+                if (pid) {
+                    fetch('/practice/api/post/' + pid + '/hit/', {
+                        method: 'POST',
+                        headers: {'X-CSRFToken': csrfToken}
+                    }).catch(function () { item.dataset.hit = ''; });
+                }
+            }
             if (item.classList.contains('open') &&
                 window.MathJax && MathJax.typesetPromise) {
                 MathJax.typesetPromise([item]).catch(function () {});

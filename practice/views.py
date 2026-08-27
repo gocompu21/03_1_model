@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import Q
 import openpyxl
@@ -295,6 +296,33 @@ def _qa_preview(html, limit=180):
     from mypage.views import _plain_preview
 
     return _plain_preview(_qa_body(html), limit)
+
+
+@login_required
+@require_POST
+def api_post_hit(request, post_id):
+    """관련 Q&A 를 펼쳤을 때 조회수를 올린다.
+
+    본래 제목을 눌러 게시글 화면으로 가면 그곳에서 올랐는데,
+    그 자리에서 펼치도록 바꾸면서 조회가 잡히지 않았다.
+    한 사람이 접었다 펴기를 되풀이해도 한 번만 센다.
+    """
+    from bbs.models import Post
+    from django.db.models import F
+
+    seen = request.session.get('qa_seen_posts') or []
+    if post_id in seen:
+        post = Post.objects.filter(id=post_id).values_list('hits', flat=True).first()
+        return JsonResponse({'ok': True, 'counted': False, 'hits': post or 0})
+
+    updated = Post.objects.filter(id=post_id).update(hits=F('hits') + 1)
+    if not updated:
+        return JsonResponse({'ok': False}, status=404)
+
+    seen.append(post_id)
+    request.session['qa_seen_posts'] = seen[-200:]   # 너무 커지지 않게
+    hits = Post.objects.filter(id=post_id).values_list('hits', flat=True).first()
+    return JsonResponse({'ok': True, 'counted': True, 'hits': hits})
 
 
 @login_required
