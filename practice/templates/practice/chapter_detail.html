@@ -1103,7 +1103,7 @@
                     {% endif %}
                     {# 제목 밑에 앞부분을 보여 주고, 누르면 본문이 펼쳐진다 #}
                     <div class="lp-preview">{{ lp.preview|safe }}</div>
-                    <div class="lp-body">{{ lp.post.content|safe }}</div>
+                    <div class="lp-body">{{ lp.body|safe }}</div>
                 </div>
                 {% empty %}
                 <div id="no-linked-posts" style="text-align: center; color: #999; padding: 15px; font-size: 0.9rem;">
@@ -1652,7 +1652,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 본문에 백틱이 들어 있으면 문자열이 깨지므로 따로 넣는다
                 item.querySelector('.lp-preview').innerHTML = lk.preview || '';
                 item.querySelector('.lp-body').innerHTML = lk.content || '';
-                document.getElementById('linked-posts-list').appendChild(item);
+                // 최신이 위로 오도록 맨 앞에 넣는다 (목록 정렬이 -linked_at)
+                var listEl = document.getElementById('linked-posts-list');
+                listEl.insertBefore(item, listEl.firstElementChild);
                 // 표는 좁은 화면에서 밀려 나가므로 감싸 둔다
                 item.querySelectorAll('.lp-body table').forEach(function (t) {
                     if (t.parentNode.classList.contains('table-wrap')) return;

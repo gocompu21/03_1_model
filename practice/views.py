@@ -246,6 +246,55 @@ def upload_chapters(request):
 
 
 @login_required
+def _qa_body(html):
+    """관련 Q&A 본문을 화면에 맞게 다듬는다.
+
+    게시글은 HTML 로 저장되는데 그 안에 마크다운 글머리표(*)와
+    LaTeX 수식($...$)이 섞여 들어온 것이 있다. 그대로 두면
+    '* 보통 1년에' '$15^\\circ\\text{C}$' 처럼 원문이 노출된다.
+    """
+    import re
+
+    if not html:
+        return ''
+
+    text = str(html)
+
+    # 수식일 이유가 없는 것은 글자로 되돌린다 (용어 화면과 같은 처리)
+    try:
+        from glossary.views import _unwrap_plain_math
+        text = _unwrap_plain_math(text)
+    except Exception:
+        pass
+
+    # $15^\circ\text{C}$ -> 15°C
+    def _tex(m):
+        inner = m.group(1)
+        inner = re.sub(r'\\+circ', '°', inner)
+        inner = re.sub(r'\\+sim|\\+thicksim', '~', inner)
+        inner = re.sub(r'\\+times', '×', inner)
+        inner = re.sub(r'\\+text\{([^{}]*)\}', lambda x: x.group(1), inner)
+        inner = re.sub(r'\\+%', '%', inner)
+        inner = inner.replace('\\ ', ' ').replace('{', '').replace('}', '')
+        if re.search(r'[\\_^]', inner):
+            return m.group(0)          # 진짜 수식은 그대로 둔다
+        return inner
+
+    text = re.sub(r'\$([^$\n]{1,40})\$', _tex, text)
+
+    # 줄 앞의 '* ' 를 글머리표로 (HTML 안이라 마크다운이 돌지 않았다)
+    text = re.sub(r'(?m)(^|<br\s*/?>\s*\n?)\s*\*\s+', r'\1• ', text)
+
+    return text
+
+
+def _qa_preview(html, limit=180):
+    """관련 Q&A 미리보기. 다듬은 뒤 앞부분만 남긴다."""
+    from mypage.views import _plain_preview
+
+    return _plain_preview(_qa_body(html), limit)
+
+
 def chapter_detail(request, chapter_id):
     """목차 컨텐츠 상세 보기"""
     chapter = get_object_or_404(Chapter, id=chapter_id)
@@ -297,9 +346,9 @@ def chapter_detail(request, chapter_id):
     ).select_related('post', 'post__author', 'post__type')
 
     # 제목 밑에 본문 앞부분을 보여 준다 (나의 질의응답과 같은 방식)
-    from mypage.views import _plain_preview
     for lp in linked_posts:
-        lp.preview = _plain_preview(lp.post.content)
+        lp.preview = _qa_preview(lp.post.content)
+        lp.body = _qa_body(lp.post.content)
 
     return render(request, 'practice/chapter_detail.html', {
         'chapter': chapter,
@@ -520,7 +569,6 @@ def api_link_post(request, chapter_id):
         return JsonResponse({'success': False, 'error': '게시글 ID가 없습니다.'})
 
     from bbs.models import Post
-    from mypage.views import _plain_preview
     post = get_object_or_404(Post, id=post_id)
 
     if ChapterPost.objects.filter(chapter=chapter, post=post).exists():
@@ -542,8 +590,8 @@ def api_link_post(request, chapter_id):
             'created_at': post.created_at.strftime('%Y-%m-%d'),
             'hits': post.hits,
             # 목록에 바로 붙일 수 있게 앞부분과 본문도 함께 보낸다
-            'preview': str(_plain_preview(post.content)),
-            'content': post.content or '',
+            'preview': str(_qa_preview(post.content)),
+            'content': _qa_body(post.content),
         }
     })
 
