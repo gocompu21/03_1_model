@@ -1279,18 +1279,19 @@
                     // 수평바(점선) 바로 아래 붙이고, 시작 위치는 선지 번호와 얼라인
                     // (.q-choices padding-left 20px + .choice-item padding 5px = 25px)
                     let html = '<div style="margin-top: 6px; padding: 8px 0 0 25px; border-top: 1px dashed #ddd;">';
-                    html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin: 0 0 8px;">🔑 관련 용어</h4>';
+                    html += '<h4 style="font-size: 0.85rem; color: #8a948d; font-weight: 600; margin: 0 0 6px;">관련 용어</h4>';
                     html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+                    // 차분한 학술 톤: 옅은 회색 칩, 출제 빈도는 저채도 얇은 띠로만 구분
                     data.terms.forEach(term => {
-                        let borderStyle = 'border: 1px solid #2d6a4f;';
+                        let borderStyle = 'border: 1px solid #e2e5e2;';
                         if (term.reference_count > 0) {
-                            let borderColor = '#1976d2';
-                            if (term.reference_count >= 10) borderColor = '#d32f2f';
-                            else if (term.reference_count >= 5) borderColor = '#f57c00';
-                            borderStyle = `border: 1px solid #2d6a4f; border-right-width: 3px; border-right-color: ${borderColor};`;
+                            let borderColor = '#a9bccd';                    // 저채도 청회색
+                            if (term.reference_count >= 10) borderColor = '#c49a9a';   // 저채도 적갈색
+                            else if (term.reference_count >= 5) borderColor = '#c8b48e'; // 저채도 황갈색
+                            borderStyle = `border: 1px solid #e2e5e2; border-right-width: 3px; border-right-color: ${borderColor};`;
                         }
                         html += `<a href="/glossary/term/${term.id}/" target="glossary_popup"
-                            style="display: inline-block; padding: 1px 5px; line-height: 1.35; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
+                            style="display: inline-block; padding: 1px 5px; line-height: 1.35; background: #f7f8f7; color: #5a6b60; text-decoration: none; border-radius: 3px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
                             ${term.word}</a>`;
                     });
                     html += '</div></div>';
