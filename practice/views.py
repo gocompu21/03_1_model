@@ -591,6 +591,17 @@ def api_search_bbs_posts(request, chapter_id):
         ChapterPost.objects.filter(chapter=chapter).values_list('post_id', flat=True)
     )
 
+    # 한 글은 목차 하나에만 붙인다. 다른 목차에 이미 붙어 있으면
+    # 어느 목차인지 함께 알려 주어 연결을 막는다
+    elsewhere = {}
+    for cp in (ChapterPost.objects
+               .exclude(chapter=chapter)
+               .select_related('chapter')):
+        if cp.post_id in elsewhere:
+            continue
+        ch = cp.chapter
+        elsewhere[cp.post_id] = ('%s %s' % (ch.code or '', ch.title or '')).strip()
+
     if query:
         posts_qs = Post.objects.filter(
             Q(title__icontains=query) | Q(content__icontains=query)
@@ -614,6 +625,7 @@ def api_search_bbs_posts(request, chapter_id):
             'created_at': post.created_at.strftime('%Y-%m-%d'),
             'hits': post.hits,
             'already_linked': post.pk in linked_ids,
+            'linked_elsewhere': elsewhere.get(post.pk),
         })
 
     return JsonResponse({'posts': posts_data, 'has_more': has_more})
@@ -637,6 +649,19 @@ def api_link_post(request, chapter_id):
 
     if ChapterPost.objects.filter(chapter=chapter, post=post).exists():
         return JsonResponse({'success': False, 'error': '이미 연결된 게시글입니다.'})
+
+    other = (ChapterPost.objects
+             .exclude(chapter=chapter)
+             .filter(post=post)
+             .select_related('chapter')
+             .first())
+    if other:
+        ch = other.chapter
+        return JsonResponse({
+            'success': False,
+            'error': '이미 다른 목차에 연결된 글입니다 (%s %s).'
+                     % (ch.code or '', ch.title or ''),
+        })
 
     ChapterPost.objects.create(
         chapter=chapter,

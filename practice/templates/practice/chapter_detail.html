@@ -882,6 +882,12 @@
     @media (max-width: 640px) {
         .lp-preview, .lp-body { margin-left: 0.6em; }
     }
+    /* 다른 목차에 이미 연결된 글임을 알리는 줄 */
+    .linked-where {
+        color: #b06a3b;
+        font-size: 0.78rem;
+        margin-top: 3px;
+    }
     .linked-posts-card {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 16px;
@@ -1644,12 +1650,23 @@ document.addEventListener('DOMContentLoaded', function() {
             let html = '';
             data.posts.forEach(p => {
                 const typeTag = p.type ? `<span class="linked-post-type">${p.type}</span>` : '';
-                html += `<div class="search-result-item ${p.already_linked ? 'already-linked' : ''}" data-pid="${p.id}">
+                // 한 글은 목차 하나에만 붙인다.
+                // 다른 목차에 이미 붙어 있으면 어느 목차인지 알리고 막는다
+                const elsewhere = p.linked_elsewhere;
+                const blocked = p.already_linked || !!elsewhere;
+                let label = '연결';
+                if (p.already_linked) label = '연결됨';
+                else if (elsewhere) label = '다른 목차';
+                const note = elsewhere
+                    ? `<div class="linked-where">이미 연결됨 · ${elsewhere}</div>` : '';
+                const tip = elsewhere ? ` title="${elsewhere} 에 연결되어 있습니다"` : '';
+                html += `<div class="search-result-item ${blocked ? 'already-linked' : ''}" data-pid="${p.id}">
                     <div style="flex:1;">
                         ${typeTag}<span style="font-weight:500;">${p.title}</span>
                         <div style="color:#999;font-size:0.8rem;margin-top:2px;">${p.author} · ${p.created_at} · 조회 ${p.hits}</div>
+                        ${note}
                     </div>
-                    <button class="link-btn" ${p.already_linked ? 'disabled' : ''} onclick="linkBbsPost(${p.id}, this)">${p.already_linked ? '연결됨' : '연결'}</button>
+                    <button class="link-btn" ${blocked ? 'disabled' : ''} onclick="linkBbsPost(${p.id}, this)"${tip}>${label}</button>
                 </div>`;
             });
 
