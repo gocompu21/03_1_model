@@ -755,9 +755,6 @@ async function toggleAllQuestions() {
                     </div>
                     <div class="q-choices">${choicesHtml}</div>
                 </div>
-                <div class="explanation-card">
-                    <div class="exp-text">${highlightTerm(data.explanation) || '해설 없음'}</div>
-                </div>
             `;
         } catch (e) {
             allHtml += `<p style="color: red;">문제 ${qId} 불러오기 실패</p>`;
