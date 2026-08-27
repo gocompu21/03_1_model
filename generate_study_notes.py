@@ -1,15 +1,14 @@
 """
 범용 쪽집게 노트 생성 스크립트.
 Gemini Filestore API (기본서)를 활용하여 문제 추출 → 목차 추출 → 문제 분류 → 장별 콘텐츠 생성.
-EC2에서 실행: python generate_study_notes.py <과목명>
 
 사용법:
-  python generate_study_notes.py 수목생리학
-  python generate_study_notes.py 산림토양학
-  python generate_study_notes.py 수목해충학
-  python generate_study_notes.py 수목병리학
+  python generate_study_notes.py <과목명>                    # 전체 실행
+  python generate_study_notes.py <과목명> --phase phase1     # Step 0-2만
+  python generate_study_notes.py <과목명> --phase chapter --chapter 3  # 3장만 생성
+  python generate_study_notes.py <과목명> --phase phase3     # Step 4-5만
 """
-import os, sys, json, time, re, logging
+import os, sys, json, time, re, logging, argparse
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -37,13 +36,18 @@ SUBJECT_CONFIG = {
     "수목관리학": {"search": "수목관리", "prefix": "management", "store": "수목관리학"},
 }
 
-# 명령줄 인수
-if len(sys.argv) < 2:
-    print(f"사용법: python generate_study_notes.py <과목명>")
-    print(f"사용 가능: {', '.join(SUBJECT_CONFIG.keys())}")
-    sys.exit(1)
 
-SUBJECT_NAME = sys.argv[1]
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("subject", help="과목명")
+    parser.add_argument("--phase", choices=["all", "phase1", "chapter", "phase3"], default="all")
+    parser.add_argument("--chapter", type=int, default=None, help="장 번호 (phase=chapter 시)")
+    parser.add_argument("--force", action="store_true", help="기존 파일 덮어쓰기")
+    return parser.parse_args()
+
+
+args = parse_args()
+SUBJECT_NAME = args.subject
 config = SUBJECT_CONFIG.get(SUBJECT_NAME)
 if not config:
     print(f"지원하지 않는 과목: {SUBJECT_NAME}")
@@ -78,7 +82,7 @@ def query_gemini(prompt, retries=3, delay=5):
 
 def step0_extract_questions():
     """Step 0: DB에서 문제 추출."""
-    if os.path.exists(QUESTIONS_FILE):
+    if os.path.exists(QUESTIONS_FILE) and not args.force:
         with open(QUESTIONS_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         if data:
@@ -92,7 +96,7 @@ def step0_extract_questions():
     questions = Question.objects.filter(
         subject=subject,
         exam__round_number__gte=5,
-        exam__round_number__lte=11,
+        exam__round_number__lte=12,
     ).select_related("exam").order_by("exam__round_number", "number")
 
     data = []
@@ -125,7 +129,7 @@ def step0_extract_questions():
 
 def step1_get_toc():
     """Step 1: 교재 목차 추출."""
-    if os.path.exists(TOC_FILE):
+    if os.path.exists(TOC_FILE) and not args.force:
         with open(TOC_FILE, "r", encoding="utf-8") as f:
             toc = json.load(f)
         if toc:
@@ -182,7 +186,7 @@ def step1_get_toc():
 
 def step2_classify_questions(toc, questions):
     """Step 2: 문제를 장별로 분류 (Gemini 기본서 활용)."""
-    if os.path.exists(CLASSIFICATION_FILE):
+    if os.path.exists(CLASSIFICATION_FILE) and not args.force:
         with open(CLASSIFICATION_FILE, "r", encoding="utf-8") as f:
             classification = json.load(f)
         if classification:
@@ -274,7 +278,7 @@ def step3_generate_chapter(ch_info, classification, questions_by_ref):
     ch_title = ch_info["title"]
     out_path = os.path.join(DATA_DIR, f"{PREFIX}_note_ch{ch_num}.md")
 
-    if os.path.exists(out_path):
+    if os.path.exists(out_path) and not args.force:
         with open(out_path, "r", encoding="utf-8") as f:
             content = f.read()
         if len(content) > 500:
@@ -466,47 +470,71 @@ def step5_import_db():
 
 
 def main():
-    log.info(f"===== {SUBJECT_NAME} 쪽집게 노트 생성 시작 =====")
+    phase = args.phase
 
-    # Step 0: 문제 추출
-    questions = step0_extract_questions()
-    if not questions:
-        log.error("문제 추출 실패, 종료")
-        return
-    questions_by_ref = {q["ref"]: q for q in questions}
+    if phase in ("all", "phase1"):
+        log.info(f"===== {SUBJECT_NAME} Phase 1 (Step 0-2) =====")
+        questions = step0_extract_questions()
+        if not questions:
+            log.error("문제 추출 실패, 종료")
+            return
+        toc = step1_get_toc()
+        if not toc:
+            log.error("목차 추출 실패, 종료")
+            return
+        classification = step2_classify_questions(toc, questions)
+        if not classification:
+            log.error("문제 분류 실패, 종료")
+            return
+        if phase == "phase1":
+            log.info(f"Phase 1 완료. toc: {len(toc)}장")
+            return
 
-    # Step 1: 목차 추출
-    toc = step1_get_toc()
-    if not toc:
-        log.error("목차 추출 실패, 종료")
-        return
+    if phase in ("all", "chapter"):
+        # 캐시에서 로드
+        with open(QUESTIONS_FILE, "r", encoding="utf-8") as f:
+            questions = json.load(f)
+        questions_by_ref = {q["ref"]: q for q in questions}
+        with open(TOC_FILE, "r", encoding="utf-8") as f:
+            toc = json.load(f)
+        with open(CLASSIFICATION_FILE, "r", encoding="utf-8") as f:
+            classification = json.load(f)
 
-    # Step 2: 문제 분류
-    classification = step2_classify_questions(toc, questions)
-    if not classification:
-        log.error("문제 분류 실패, 종료")
-        return
+        if args.chapter is not None:
+            # 특정 장만 생성
+            ch_info = None
+            for ch in toc:
+                if ch["chapter"] == args.chapter:
+                    ch_info = ch
+                    break
+            if ch_info:
+                step3_generate_chapter(ch_info, classification, questions_by_ref)
+            else:
+                log.error(f"제{args.chapter}장을 찾을 수 없음")
+            return
+        else:
+            # 전체 장 생성
+            log.info(f"=== Step 3: 장별 콘텐츠 생성 ({len(toc)}개 장) ===")
+            for ch_info in toc:
+                step3_generate_chapter(ch_info, classification, questions_by_ref)
+                time.sleep(2)
 
-    # Step 3: 장별 콘텐츠 생성
-    log.info(f"=== Step 3: 장별 콘텐츠 생성 ({len(toc)}개 장) ===")
-    for ch_info in toc:
-        step3_generate_chapter(ch_info, classification, questions_by_ref)
-        time.sleep(2)
+    if phase in ("all", "phase3"):
+        with open(QUESTIONS_FILE, "r", encoding="utf-8") as f:
+            questions = json.load(f)
+        with open(CLASSIFICATION_FILE, "r", encoding="utf-8") as f:
+            classification = json.load(f)
 
-    # Step 4: 커버리지 검증
-    step4_verify_coverage(classification, questions)
+        step4_verify_coverage(classification, questions)
+        step5_import_db()
 
-    # Step 5: DB import
-    step5_import_db()
-
-    # 결과 요약
-    log.info("===== 완료 =====")
-    import glob as glob_mod
-    md_files = sorted(glob_mod.glob(os.path.join(DATA_DIR, f"{PREFIX}_note_ch*.md")))
-    for f in md_files:
-        with open(f, "r", encoding="utf-8") as fh:
-            lines = len(fh.readlines())
-        log.info(f"  {os.path.basename(f)}: {lines}줄")
+        log.info("===== 완료 =====")
+        import glob as glob_mod
+        md_files = sorted(glob_mod.glob(os.path.join(DATA_DIR, f"{PREFIX}_note_ch*.md")))
+        for f in md_files:
+            with open(f, "r", encoding="utf-8") as fh:
+                lines = len(fh.readlines())
+            log.info(f"  {os.path.basename(f)}: {lines}줄")
 
 
 if __name__ == "__main__":
