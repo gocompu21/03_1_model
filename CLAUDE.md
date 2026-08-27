@@ -31,7 +31,9 @@ python manage.py collectstatic
 - **study**: 학습 기록 및 Q&A (StudyQnA, StudyViewLog 모델)
 - **chat**: AI 채팅 기록 (ChatHistory 모델). Gemini API 기반
 - **practice**: 연습문제
-- **pestid**: 해충 식별 퀴즈 (PestCourse, PestQuestion, PestAttempt 모델). 사진 보고 해충명/생태 맞히기
+- **pestid**: 해충 식별 퀴즈·암기 (PestCourse, PestQuestion, PestAttempt, PestBookmark). 176종
+- **diseaseid**: 병해 암기 (DiseaseCourse, DiseaseQuestion, DiseaseBookmark). 154종
+- **treeid**: 수목 암기 (TreeCourse, TreeQuestion, TreeBookmark). 120종
 - **mock_exam**: 모의고사
 - **notebook**: 학습 노트
 - **bbs**: 게시판
@@ -287,6 +289,81 @@ python load_exam12.py              # DB import
 sudo systemctl restart gunicorn    # 서비스 재시작
 ```
 
+## DVD 암기 (`/dvd/`)
+
+사진을 보고 정답을 확인하며 넘겨보는 학습 화면. 세 앱이 같은 구조를 공유한다.
+카드 순서: 수목 암기 → 병해 암기 → 해충 암기 → 해충 식별(퀴즈).
+
+| 앱 | 화면 | 종수 | 정답 항목 | 출처 PDF |
+|---|---|---|---|---|
+| `treeid` | `/treeid/memorize/` | 120 | 수목명 + 특징 설명 | 2025 수목 식별 공부2 |
+| `diseaseid` | `/diseaseid/memorize/` | 154 | 병명·기주·병원균·추가사항 | 2026 병해 식별공부 |
+| `pestid` | `/pestid/memorize/` | 176 | 해충명·연발생횟수·월동태·여름기주 | 2026 해충식별공부 |
+
+### 공통 동작
+
+- 사진 → **다음**(정답 보기) → 정답 오버레이 → **다음**(다음 종) 반복
+- 정답은 **사진 위에 겹쳐** 표시한다 (아래 카드가 아니라 오버레이)
+- 하단 바: `[◀] n/전체 [다음] [목록]` + 관심 등록 체크박스
+- 헤더에서 모드 전환 (전체 / 기출 / 관심). 현재 모드를 뺀 나머지를 항상 노출한다
+- 관심 등록은 **사용자별**(`*Bookmark` 모델, `unique_together`)
+- 사진 위 **'한 화면' 토글**: `max-height`로 스크롤 없이 전체 보기, 선택은 localStorage에 저장
+  (키가 앱마다 다르다: `treeidFit` / `diseaseidFit` / `pestidFit`)
+- 기출 정보는 병해·해충에만 있다. 수목 PDF에는 없어 기출 모드·필터를 넣지 않았다
+
+### 화면에서 자주 어긋났던 것들
+
+- **목록 필터는 `display` 직접 조작 금지.** `display=''`로 되돌리면 CSS의 `display:grid`가
+  복원되지 않아 표가 깨진다. `.filtered { display:none }` 클래스로 토글할 것
+- **정답 오버레이 스크롤**: `scrollIntoView({block:'end'})`는 하단 고정 바에 가린다.
+  바 높이를 실측해 그만큼 더 내린다 (`scrollInfoIntoView`)
+- **`annotate()`는 `Meta.ordering`을 무너뜨린다.** 코스 목록이 무작위로 나왔던 원인.
+  `.order_by()`를 명시할 것
+- 코스명에 정답이 들어 있으면 화면뿐 아니라 **payload에서도 빼야 한다**
+  (수목 코스명 "01. 소철 ~ 노간주나무" → 소스 보기로 정답 노출)
+
+### PDF → 이미지 변환 방침 (앱마다 다르다)
+
+| | 해충 · 병해 | 수목 |
+|---|---|---|
+| 방식 | 사진 이미지만 추출해 합성 | **영역 렌더링** (PyMuPDF) |
+| 이유 | 페이지 본문에 정답이 글자로 적혀 있음 | 페이지에 수목명이 없어 글자를 넣어도 안전 |
+| 글자 | 사진에 인코딩된 것만 남음 | 설명 글자 포함 |
+
+- 수목은 `page.get_image_info()`로 **사진 칸 좌표를 읽어 글자까지 함께 잘라낸다.**
+  칸별로 자르므로 PDF가 회전 배치한 사진(`cm` 변환행렬)도 자연히 바로 선다
+- 페이지를 통째로 렌더링하면 모바일에서 글자가 너무 작다. **칸별로 잘라 2열**로 쌓는다
+  (1열은 세로 6800px·83MB, 2열은 2340px·48MB)
+- 설명문은 **텍스트 블록(문단) 단위**로 읽는다. 줄 단위로 나누면 PDF가 칸 폭에 맞춰
+  끊은 줄이 그대로 항목이 되어 한 문장이 여러 글머리표로 쪼개진다 (해당화 13개 → 5개)
+
+### 재임포트 후 배포 (세 앱 공통, 사고 잦음)
+
+`--replace`는 행을 지우고 새로 넣으므로 **PK가 새로 발급된다.** 픽스처를 그냥 올리면
+덮어써지지 않고 **옛 레코드가 남아 문제가 2배가 된다.** 서버에서 먼저 지울 것.
+
+```bash
+# 로컬
+python manage.py import_tree_pdf "..." --replace     # 또는 import_disease_pdf / import_pest_pdf
+python manage.py dumpdata treeid.TreeCourse treeid.TreeQuestion --indent=2 -o tree_fixture.json
+tar -czf tree_media.tar.gz -C media treeid           # Git Bash에서 /c/... POSIX 경로
+scp -i "C:\AWS\myServer-key-pair.pem" tree_media.tar.gz tree_fixture.json ubuntu@studynamu.com:/tmp/
+
+# 서버
+cd ~/myproject/03_1_model
+~/myproject/venv/bin/python -c "
+import os,django; os.environ['DJANGO_SETTINGS_MODULE']='config.settings'; django.setup()
+from treeid.models import TreeQuestion; TreeQuestion.objects.all().delete()"
+rm -rf media/treeid && tar -xzf /tmp/tree_media.tar.gz -C media
+~/myproject/venv/bin/python manage.py loaddata /tmp/tree_fixture.json
+```
+
+- 코스는 PK가 유지되므로(get_or_create) 지우지 않는다. 코스를 지우면 사용자 기록이
+  cascade로 함께 사라진다
+- 검증: 문제 수, `order` 연속성, 이미지 파일 누락 0, 중복 이미지 0
+- 로컬 재임포트 시 이전 이미지가 고아로 남는다. DB가 참조하지 않는 `media/<앱>/` 파일 삭제
+- 미디어는 모두 `.gitignore` (`media/pestid/`, `media/diseaseid/`, `media/treeid/`)
+
 ## 해충 식별 퀴즈 (pestid 앱)
 
 해충 사진을 보고 **해충명 / 연 발생횟수 / 월동태 / 여름기주**를 맞추는 퀴즈.
@@ -319,43 +396,15 @@ python manage.py import_pest_pdf "..." --replace                              # 
 - 상세 페이지 텍스트에는 정답이 그대로 적혀 있으므로 **페이지를 통째로 렌더링하면 안 된다.**
   사진만 추출해 한 장으로 합성한다 (`_build_image`)
 
-### 서버 배포 (픽스처 이전 방식)
+### 서버 배포
 
-서버는 가용 메모리가 약 275MB뿐이라 40MB PDF를 서버에서 파싱하지 않는다.
-**로컬에서 임포트 → 픽스처와 이미지를 전송**한다. 이미지는 `.gitignore`에 있어 git으로 가지 않는다.
+절차는 **[재임포트 후 배포](#재임포트-후-배포-세-앱-공통-사고-잦음)** 참조 (세 앱 공통).
+서버 가용 메모리가 약 275MB뿐이라 40MB PDF를 서버에서 파싱하지 않고,
+**로컬에서 임포트 → 픽스처와 이미지를 전송**한다.
 
-```bash
-# 1. 로컬: 임포트 후 픽스처 추출 (PestAttempt는 제외 — 사용자 기록 덮어쓰기 방지)
-python manage.py dumpdata pestid.PestCourse pestid.PestQuestion --indent=2 -o pestid_fixture.json
-tar -czf pestid_media.tar.gz -C media pestid    # Git Bash에서 /c/... POSIX 경로 사용
-
-# 2. 전송
-scp -i "C:\AWS\myServer-key-pair.pem" pestid_media.tar.gz pestid_fixture.json ubuntu@studynamu.com:/tmp/
-
-# 3. 서버 (venv 자동 활성화가 비대화형 SSH에는 적용되지 않으므로 절대경로로 호출)
-cd ~/myproject/03_1_model
-rm -rf media/pestid                             # 이미지를 새로 만들었으면 통째로 교체
-tar -xzf /tmp/pestid_media.tar.gz -C media
-~/myproject/venv/bin/python manage.py loaddata /tmp/pestid_fixture.json
-```
-
-- **재임포트(`--replace`) 후 배포할 때는 서버의 기존 문제를 먼저 지워야 한다.**
-  `--replace`는 기존 행을 지우고 새로 넣으므로 **PK가 새로 발급된다.** 따라서 픽스처를
-  그냥 올리면 덮어써지지 않고 **옛 레코드가 그대로 남아 문제가 2배가 된다.**
-  이미지는 교체된 뒤라 옛 레코드는 사진이 깨진다 (2026-07-30 실제 발생, 352개로 중복됨)
-
-  ```bash
-  # 서버: loaddata 전에 실행
-  ~/myproject/venv/bin/python -c "
-  import os,django; os.environ['DJANGO_SETTINGS_MODULE']='config.settings'; django.setup()
-  from pestid.models import PestQuestion; PestQuestion.objects.all().delete()"
-  ```
-
-  코스는 PK가 유지되므로(get_or_create) 지우지 않아도 된다. 오히려 코스를 지우면
-  `PestAttempt`가 cascade로 함께 사라지니 **사용자 기록을 지우지 않으려면 코스는 두고 문제만 지운다.**
-- 사고 후 검증: 문제 수 176, `order`가 1~176 연속, 이미지 파일 누락 0건, 중복 이미지 0건
+- 2026-07-30 사고: `--replace` 후 서버 문제를 지우지 않고 loaddata 해서 **352개로 중복**됐다.
+  옛 레코드는 이미지가 교체된 뒤라 사진이 깨진 상태로 남았다
 - 뷰·템플릿을 고쳤으면 `sudo systemctl restart gunicorn` 필요 (데이터만 바뀌면 불필요)
-- 로컬 재임포트 시 이전 이미지가 고아로 남는다. DB가 참조하지 않는 `media/pestid/` 파일은 삭제할 것
 
 ### 사진 크기
 
@@ -365,6 +414,109 @@ tar -xzf /tmp/pestid_media.tar.gz -C media
 - 세로가 길어진 대신 사진 위 **'한 화면' 토글**로 `max-height`를 걸어 스크롤 없이 볼 수 있다
 - 전체 이미지 용량 약 33MB (JPEG quality 80, optimize, progressive)
 - 검증: 176문제의 이미지 파일 존재 확인 → `/pestid/` 200 → `/media/pestid/<파일>` 200
+
+## 회원 가입 승인 (accounts 앱)
+
+2026-08-02 봇 가입이 확인되어(무작위 아이디 `teqzrtpgww`, 일회용 메일,
+가입 1초 후 자동 로그인, 활동 없음) 가입을 **관리자 승인제**로 바꿨다.
+
+- 가입 시 `is_active=False`로 만들고 `SignupApproval`(토큰) 생성 → 자동 로그인 없음
+- 관리자(`ADMIN_NOTIFY_EMAIL`)에게 **승인/거부 링크**가 담긴 메일 발송
+  - `/accounts/approve/<token>/`, `/accounts/reject/<token>/` — 로그인 불필요
+- `/accounts/approvals/` 관리 페이지 (staff 전용). 신청자 IP·기기 정보로 봇 판별
+- 승인되면 가입자에게 안내 메일 자동 발송
+- **기존 사용자는 영향 없음** (승인 레코드가 없고 `is_active=True`)
+
+주의: `LoginForm.confirm_login_allowed`는 **비활성 계정에서 호출되지 않는다.**
+기본 `ModelBackend`가 인증 단계에서 먼저 거절하기 때문. 그래서 `clean()`에서
+비밀번호를 직접 확인해 "승인 대기 중"을 안내한다. 이걸 놓치면 대기자에게
+"아이디 또는 비밀번호가 올바르지 않습니다"가 나간다.
+
+메일 본문의 절대 주소는 `settings.SITE_URL` 사용.
+
+## 문제 풀이 화면의 공통 규칙 (2026-08-27)
+
+기출·주제별·복습·오답노트(3종)·연습문제·용어 상세가 같은 모양을 쓴다.
+한 곳을 고치면 나머지도 같이 고쳐야 어긋나지 않는다.
+
+| 화면 | 파일 |
+|---|---|
+| 기출문제 | `study/templates/study/detail.html` |
+| 주제별 문제 | `study/templates/study/topic_solve.html` |
+| 오늘의 복습 | `templates/mypage/review_index.html` |
+| 오답노트 | `templates/mypage/wrong_answer_list.html` |
+| 기출시험 결과 | `templates/mypage/wrong_answer_full_list.html` |
+| 오답 상세 | `templates/mypage/wrong_answer_detail.html` |
+| 연습문제 | `practice/templates/practice/practice_questions.html` |
+| 용어 상세 | `glossary/templates/glossary/term_detail.html` |
+
+### 선지별 설명 (`choice_notes`)
+
+- `Question.choice_notes` = `{"1": "설명", ...}` (JSONField). 1,045문항 전체 채움
+- 화면 표시는 `choice_note` 필터 (`exam/templatetags/markdown_extras.py`)
+- `↪` 화살표 + 정답 선지에만 노란 형광 띠 (`.hl`)
+- 선지를 고르면 정답 표시·설명·관련 용어가 함께 나온다.
+  아래 '해설 보기'는 따로 눌러야 펼쳐진다
+
+### 용어 점선과 뜻 상자
+
+- 사전에 있는 낱말에만 점선을 긋는다. 없는 말에 밑줄만 그으면 눌러도 보여 줄 게 없다
+- 점선은 `radial-gradient`로 **작은 점을 촘촘히**(`2.5px 2px`) 깐다.
+  `text-decoration: dotted`는 점이 붙어 실선처럼 뭉개진다
+- **답을 고르기 전에는 선지의 점선을 감춘다**(`pointer-events: none`). 푸는 데 방해된다
+- 누르면 그 선지 아래에 뜻이 펼쳐진다. 상자가 열리며 밀린 만큼
+  스크롤을 되돌려 **누른 낱말이 제자리에 남게** 한다 (`keepInPlace`)
+
+### 수식·학명 표기
+
+데이터에 LaTeX가 섞여 들어온다. **화면에 그릴 때** 정리한다(DB는 그대로).
+
+- `glossary/views.py`의 `_unwrap_plain_math()`가 처리
+- 학명(`Genus species`, `\textit{...}`) → `<i>` **본문 글꼴** 이탤릭.
+  수식 글꼴(세리프)로 그리면 주변 한글과 어긋난다
+- 일반 낱말(`pH` `ATP` `Cellulose`) → 보통 글자
+- 온도·단위·백분율(`$15^\circ\text{C}$`, `$5\%$`) → `15°C`, `5%`
+- 진짜 수식(`$CO_2$` `$Ca^{2+}$` `$x$`)은 그대로 둔다
+- 학명 판별을 넓히면 속명(`Clavibacter`)이 잘못 풀린다. 라틴어 어미와
+  본문에서 `Genus species`로 쓰인 적이 있는지로 가린다
+
+### 목록 들여쓰기
+
+용어 설명이 `1.`(소제목) → `1)` → `-` 세 단계로 온다.
+
+- 소제목이 없는 글은 `*`가 그냥 글머리표다. 번호를 매기면 빈 줄마다
+  카운터가 돌아가 `1) 1) 1)`이 된다 → 소제목이 있을 때만 번호 (`glossary/views.py`)
+- 넘어가는 줄은 글자 자리에 맞춘다(내어쓰기). `1) 정의:` 처럼 콜론이 있으면
+  라벨 폭을 재서 그 뒤에 맞춘다 (grid, 라벨 14자 넘으면 건너뜀)
+- `1.`이 마크다운 `<ol><li>`로 오는 글은 `<li>` 자체 들여쓰기가 이미 있어
+  바깥 들여쓰기를 덜어내야 두 번 밀리지 않는다
+
+### 미리보기 (`_plain_preview`, `mypage/views.py`)
+
+나의 질의응답과 연습문제 상세의 관련 Q&A가 함께 쓴다.
+
+- 본문이 모두 HTML이라 그냥 자르면 태그 한가운데가 잘려 깨진다.
+  `<strong>`/`<em>`만 남기고 나머지는 글자로 만든 뒤 자른다
+- 잘린 자리에서 태그 짝이 깨지면 열린 것을 닫고 짝 없는 닫는 태그는 버린다
+- **소제목만 배지**(`핵심 개념` `상세 설명` 등), 나머지 굵게는 보통 글자로.
+  본문 곳곳이 굵으면 무엇이 소제목인지 헷갈린다
+- 학명(`Genus species`)의 기울임은 살린다
+
+## 화면에서 되풀이해 어긋났던 것들
+
+- **`margin-left`만 쓰면 앞 규칙의 `margin`이 통째로 덮인다.** `.bullet-item`에
+  `margin: 3px 0`을 주고 `.bullet-level2`에 `margin-left`만 주면 위아래가
+  기본값으로 돌아가 간격이 벌어진다. 상하까지 함께 적을 것
+- **음수 여백으로 상자를 끌어올리면 글자가 겹친다.** 문단 중간 줄 아래에
+  넣으려면 문단을 쪼개야 하는데 본문 HTML이 깨질 위험이 커서 하지 않는다
+- **`target="_blank"`가 남아 있으면 `preventDefault()`가 소용없다.**
+  그 자리에서 펼치려면 `target`을 지울 것
+- **Django `{# #}`는 한 줄 주석이다.** 여러 줄로 쓰면 본문에 그대로 나온다
+- **데코레이터와 함수 사이에 다른 함수를 끼워 넣지 말 것.** `@login_required`가
+  엉뚱한 함수에 붙고 뷰는 데코레이터를 잃어 500이 난다
+- MathJax는 `base.html`에만 있다. 이를 상속하지 않는 화면(복습·오답노트)에는
+  따로 넣어야 `$4$월`처럼 달러가 글자로 보이지 않는다
+- 나중에 불러오는 글(용어 뜻 등)은 `MathJax.typesetPromise([el])`로 다시 그려야 한다
 
 ## 알려진 주의사항
 
