@@ -912,6 +912,82 @@ def api_exam_questions(request):
 
 
 @login_required
+def api_questions_by_term(request):
+    """용어로 기출문제를 찾는다.
+
+    문제집 만들 때 '용어집에서 선택'으로 쓴다.
+    쉼표나 줄바꿈으로 여러 낱말을 한 번에 받는다.
+    과목을 주면 그 과목 문제만 돌려준다.
+    """
+    from exam.models import Question
+    from glossary.models import Term, TermReference
+
+    def strip_html(text):
+        return re.sub(r'<[^>]+>', '', text or '')
+
+    raw = (request.GET.get('words') or '').strip()
+    if not raw:
+        return JsonResponse({'questions': [], 'terms': [], 'missing': []})
+
+    words = [w.strip() for w in re.split(r'[,\n]+', raw) if w.strip()]
+    if not words:
+        return JsonResponse({'questions': [], 'terms': [], 'missing': []})
+
+    subject_id = request.GET.get('subject_id')
+
+    # 낱말을 사전에서 찾는다. 대표 용어가 있으면 그쪽 참조도 함께 본다
+    found, missing = [], []
+    term_ids = set()
+    for w in words:
+        t = Term.objects.filter(word__iexact=w).first()
+        if not t:
+            missing.append(w)
+            continue
+        found.append(t.word)
+        term_ids.add(t.id)
+        if t.canonical_term_id:
+            term_ids.add(t.canonical_term_id)
+        for syn in t.synonyms.all():
+            term_ids.add(syn.id)
+
+    if not term_ids:
+        return JsonResponse({'questions': [], 'terms': found, 'missing': missing})
+
+    qids = set(
+        TermReference.objects
+        .filter(term_id__in=term_ids, source_type='question')
+        .values_list('source_id', flat=True)
+    )
+    if not qids:
+        return JsonResponse({'questions': [], 'terms': found, 'missing': missing})
+
+    qs = Question.objects.filter(id__in=qids).select_related('exam')
+    if subject_id:
+        qs = qs.filter(subject_id=subject_id)
+    qs = qs.order_by('exam__round_number', 'number')
+
+    data = []
+    for q in qs:
+        clean = strip_html(q.content)
+        if len(clean) > 40:
+            clean = clean[:40] + '...'
+        rnd = q.exam.round_number if q.exam else '?'
+        data.append({
+            'id': q.id,
+            'number': q.number,
+            'round': rnd,
+            # 회차가 섞이므로 문제 번호 앞에 회차를 붙인다
+            'full_text': '%s회 %s번 %s' % (rnd, q.number, clean),
+        })
+
+    return JsonResponse({
+        'questions': data,
+        'terms': found,
+        'missing': missing,
+    })
+
+
+@login_required
 def api_save_topic_set(request):
     """주제별 문제집 저장 (AJAX)"""
     from exam.models import TopicQuestionSet, TopicQuestionSetItem, Question, Subject

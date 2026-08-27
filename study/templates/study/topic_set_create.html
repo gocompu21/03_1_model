@@ -278,6 +278,19 @@
                             {% endfor %}
                         </select>
                     </div>
+
+                    {# 용어로 찾기 — 그 용어가 붙은 기출문제를 가져온다 #}
+                    <div class="form-group">
+                        <label class="form-label">용어집에서 선택</label>
+                        <div style="display: flex; gap: 6px;">
+                            <input type="text" class="form-control" id="termInput"
+                                   placeholder="용어 입력 (쉼표로 여러 개: 탄저병, 흰가루병)"
+                                   style="flex: 1;">
+                            <button type="button" class="btn-add" id="termApplyBtn"
+                                    style="white-space: nowrap;">적용</button>
+                        </div>
+                        <div id="termMsg" style="font-size: 0.82rem; color: #777; margin-top: 5px;"></div>
+                    </div>
                     
                     <div class="select-all-row">
                         <label class="form-label" style="margin:0;">문제 목록</label>
@@ -353,6 +366,62 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
     
+    // 용어로 찾기 — 그 용어가 붙은 기출문제를 목록에 올린다
+    (function () {
+        const termInput = document.getElementById('termInput');
+        const applyBtn = document.getElementById('termApplyBtn');
+        const msg = document.getElementById('termMsg');
+        if (!termInput || !applyBtn) return;
+
+        function apply() {
+            const words = termInput.value.trim();
+            if (!words) {
+                msg.textContent = '용어를 입력하세요.';
+                return;
+            }
+            msg.textContent = '찾는 중…';
+            applyBtn.disabled = true;
+
+            // 과목을 골랐으면 그 과목 문제만 가져온다
+            const subj = document.getElementById('subjectSelect');
+            let url = '{% url "study:api_questions_by_term" %}?words='
+                      + encodeURIComponent(words);
+            if (subj && subj.value) url += '&subject_id=' + subj.value;
+
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    applyBtn.disabled = false;
+                    currentQuestions = data.questions || [];
+                    currentRound = '';        // 회차가 섞이므로 비워 둔다
+                    renderQuestions();
+
+                    const parts = [];
+                    if (data.terms && data.terms.length) {
+                        parts.push('찾은 용어: ' + data.terms.join(', '));
+                    }
+                    parts.push('문제 ' + currentQuestions.length + '개');
+                    if (data.missing && data.missing.length) {
+                        parts.push('사전에 없음: ' + data.missing.join(', '));
+                    }
+                    msg.textContent = parts.join(' · ');
+
+                    // 회차 선택은 비워 둔다 (지금 목록은 용어로 찾은 것)
+                    const es = document.getElementById('examSelect');
+                    if (es) es.value = '';
+                })
+                .catch(() => {
+                    applyBtn.disabled = false;
+                    msg.textContent = '문제를 불러오지 못했습니다.';
+                });
+        }
+
+        applyBtn.addEventListener('click', apply);
+        termInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); apply(); }
+        });
+    })();
+
     function renderQuestions() {
         if (currentQuestions.length === 0) {
             questionList.innerHTML = '<div style="text-align: center; color: #888; padding: 40px;">문제가 없습니다</div>';

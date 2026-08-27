@@ -23,6 +23,7 @@ urlpatterns = [
     path("topic-sets/<int:set_id>/edit/", views.topic_set_edit, name="topic_set_edit"),
     path("topic-sets/<int:set_id>/delete/", views.delete_topic_set, name="delete_topic_set"),
     path("api/exam_questions/", views.api_exam_questions, name="api_exam_questions"),
+    path("api/questions_by_term/", views.api_questions_by_term, name="api_questions_by_term"),
     path("api/save_topic_set/", views.api_save_topic_set, name="api_save_topic_set"),
     path("api/reorder_topic_set/", views.api_reorder_topic_set, name="api_reorder_topic_set"),
     # 기본서 학습문제 관리
