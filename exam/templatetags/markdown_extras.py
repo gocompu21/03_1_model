@@ -190,16 +190,61 @@ def format_question(text):
 # 관리자가 넣는 값이지만 그대로 |safe로 흘리면 실수나 붙여넣기로
 # 스크립트가 섞여 들어갈 수 있어, 나머지는 모두 글자로 만든다.
 @register.filter
-def choice_note(value):
+def choice_note(value, subject=None):
+    """선지별 설명.
+
+    <em>으로 감싼 핵심어 중 용어 사전에 있는 것만 점선을 긋고,
+    누르면 아래에서 뜻을 보여 준다. 사전에 없는 말은 밑줄 없이 그냥 둔다.
+    """
     if not value:
         return ""
     out = escape(value)                       # 우선 전부 무해하게 만들고
     out = out.replace("&lt;em&gt;", "<em>")   # 강조만 되살린다
     out = out.replace("&lt;/em&gt;", "</em>")
     out = _italicize(out)                     # *학명* -> 기울임
+    out = _link_terms(out, subject)           # 사전에 있는 말만 점선 링크로
     # 형광줄이 줄마다 이어지려면 인라인 요소여야 한다.
     # 블록(div)에 배경을 걸면 첫 줄에만 칠해진다
     return mark_safe('<span class="hl">' + _latin_to_italic(out) + '</span>')
+
+
+def _term_lookup(subject_name):
+    """{낱말: 용어 id}. 과목별로 한 번만 만들어 둔다."""
+    from django.core.cache import cache
+
+    key = "choice_note_terms_%s" % (subject_name or "_all")
+    got = cache.get(key)
+    if got is not None:
+        return got
+
+    from glossary.models import Term
+
+    qs = Term.objects.all()
+    if subject_name:
+        qs = qs.filter(subjects__name=subject_name)
+    got = {w: i for i, w in qs.values_list("id", "word")}
+    cache.set(key, got, 60 * 30)
+    return got
+
+
+def _link_terms(text, subject_name):
+    """<em>핵심어</em> 중 사전에 있는 것만 누를 수 있게 바꾼다."""
+    import re
+
+    lookup = _term_lookup(subject_name)
+    if not lookup:
+        return re.sub(r"</?em>", "", text)
+
+    def repl(m):
+        inner = m.group(1)
+        # 안에 <i> 같은 것이 섞여 있으면 글자만 뽑아 찾는다
+        plain = re.sub(r"<[^>]+>", "", inner).strip()
+        tid = lookup.get(plain)
+        if tid is None:
+            return inner              # 사전에 없으면 표시하지 않는다
+        return '<a class="term-link" data-term="%d">%s</a>' % (tid, inner)
+
+    return re.sub(r"<em>(.*?)</em>", repl, text, flags=re.S)
 
 
 # 학명은 형광펜이 아니라 기울임으로 쓰는 것이 관례다.

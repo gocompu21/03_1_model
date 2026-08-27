@@ -273,15 +273,76 @@
         padding-right: 0.12em;
     }
 
-    .choice-note em {
-        /* 핵심어는 글자색 밑줄로 조용히 짚는다 */
-        font-style: normal;
-        font-weight: inherit;
+    /* 용어 사전에 있는 말만 점선으로 잇는다. 누르면 아래에서 뜻을 보여 준다.
+       사전에 없는 핵심어는 표시하지 않는다 */
+    .choice-note em { font-style: normal; font-weight: inherit; }
+    .choice-note .term-link {
+        color: inherit;
+        font-weight: 600;
         text-decoration: underline;
-        text-decoration-color: currentColor;
+        text-decoration-style: dotted;
+        text-decoration-color: #8a8a8a;
         text-decoration-thickness: 1px;
-        text-underline-offset: 2px;
+        text-underline-offset: 3px;
+        cursor: pointer;
     }
+    .choice-note .term-link:hover {
+        text-decoration-style: solid;
+        text-decoration-color: #2d6a4f;
+        color: #1b4332;
+    }
+    .choice-note .term-link.on {
+        text-decoration-style: solid;
+        text-decoration-color: #2d6a4f;
+        color: #1b4332;
+    }
+
+    /* 누른 용어의 뜻. 문항 아래에 펼친다 */
+    .term-panel {
+        display: none;
+        margin: 12px 0 4px;
+        padding: 14px 16px;
+        background: #f6faf7;
+        border: 1px solid #d8e8de;
+        border-left: 3px solid #2d6a4f;
+        border-radius: 0 8px 8px 0;
+        font-size: 0.93rem;
+        line-height: 1.75;
+        color: #333;
+    }
+    .term-panel.open { display: block; }
+    .term-panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .term-panel-word {
+        font-weight: 700;
+        color: #1b4332;
+        font-size: 1rem;
+    }
+    .term-panel-close {
+        border: 0;
+        background: transparent;
+        color: #777;
+        font-size: 1.1rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 2px 6px;
+    }
+    .term-panel-body p:first-child { margin-top: 0; }
+    .term-panel-body p:last-child { margin-bottom: 0; }
+    .term-panel-body h3, .term-panel-body h4 {
+        font-size: 0.95rem; color: #2d6a4f; margin: 12px 0 6px;
+    }
+    .term-panel-body ul, .term-panel-body ol { padding-left: 20px; margin: 6px 0; }
+    .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+    .term-panel-body th, .term-panel-body td {
+        border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
+    }
+    .term-panel-body th { background: #eaf5ee; }
     .q-choices.revealed .choice-note { display: block; }
 
     /* 정답 선지의 설명은 조금 진하게.
@@ -851,7 +912,7 @@
                     <div class="choice-body">
                         <div class="choice-text">{{ q.choice1|safe }}</div>
                         {% if q.choice_notes.1 %}
-                        <div class="choice-note">{{ q.choice_notes.1|choice_note }}</div>
+                        <div class="choice-note">{{ q.choice_notes.1|choice_note:q.subject.name }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -860,7 +921,7 @@
                     <div class="choice-body">
                         <div class="choice-text">{{ q.choice2|safe }}</div>
                         {% if q.choice_notes.2 %}
-                        <div class="choice-note">{{ q.choice_notes.2|choice_note }}</div>
+                        <div class="choice-note">{{ q.choice_notes.2|choice_note:q.subject.name }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -869,7 +930,7 @@
                     <div class="choice-body">
                         <div class="choice-text">{{ q.choice3|safe }}</div>
                         {% if q.choice_notes.3 %}
-                        <div class="choice-note">{{ q.choice_notes.3|choice_note }}</div>
+                        <div class="choice-note">{{ q.choice_notes.3|choice_note:q.subject.name }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -878,7 +939,7 @@
                     <div class="choice-body">
                         <div class="choice-text">{{ q.choice4|safe }}</div>
                         {% if q.choice_notes.4 %}
-                        <div class="choice-note">{{ q.choice_notes.4|choice_note }}</div>
+                        <div class="choice-note">{{ q.choice_notes.4|choice_note:q.subject.name }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -887,7 +948,7 @@
                     <div class="choice-body">
                         <div class="choice-text">{{ q.choice5|safe }}</div>
                         {% if q.choice_notes.5 %}
-                        <div class="choice-note">{{ q.choice_notes.5|choice_note }}</div>
+                        <div class="choice-note">{{ q.choice_notes.5|choice_note:q.subject.name }}</div>
                         {% endif %}
                     </div>
                 </div>
@@ -1944,5 +2005,78 @@
             currentAudio = null;
         }
     });
-</script>
+
+    // 선지 설명의 점선 낱말을 누르면 그 문항 아래에서 뜻을 보여 준다.
+    // 나중에 붙는 문항도 있으므로 문서 전체에서 한 번만 받는다
+    (function () {
+        var cache = {};
+
+        function panelFor(card) {
+            var panel = card.querySelector('.term-panel');
+            if (panel) return panel;
+            panel = document.createElement('div');
+            panel.className = 'term-panel';
+            panel.innerHTML =
+                '<div class="term-panel-head">'
+                + '<span class="term-panel-word"></span>'
+                + '<button type="button" class="term-panel-close" title="닫기">&times;</button>'
+                + '</div><div class="term-panel-body"></div>';
+            card.appendChild(panel);
+            panel.querySelector('.term-panel-close')
+                 .addEventListener('click', function () {
+                     panel.classList.remove('open');
+                     card.querySelectorAll('.term-link.on')
+                         .forEach(function (x) { x.classList.remove('on'); });
+                 });
+            return panel;
+        }
+
+        function show(card, link, id) {
+            var panel = panelFor(card);
+            card.querySelectorAll('.term-link.on')
+                .forEach(function (x) { x.classList.remove('on'); });
+
+            // 같은 낱말을 다시 누르면 접는다
+            if (panel.classList.contains('open') && panel.dataset.term === id) {
+                panel.classList.remove('open');
+                return;
+            }
+            link.classList.add('on');
+            panel.dataset.term = id;
+            panel.classList.add('open');
+
+            var word = panel.querySelector('.term-panel-word');
+            var body = panel.querySelector('.term-panel-body');
+            if (cache[id]) {
+                word.textContent = cache[id].word;
+                body.innerHTML = cache[id].html;
+                return;
+            }
+            word.textContent = link.textContent;
+            body.textContent = '불러오는 중…';
+            fetch('/glossary/api/term/' + id + '/')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    cache[id] = { word: d.word, html: d.html || '' };
+                    if (panel.dataset.term !== id) return;
+                    word.textContent = d.word;
+                    body.innerHTML = d.html || '';
+                })
+                .catch(function () {
+                    if (panel.dataset.term === id) body.textContent = '용어를 불러오지 못했습니다.';
+                });
+        }
+
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest('.term-link');
+            if (!link) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var card = link.closest('.question-card');
+            if (!card) return;
+            show(card, link, link.dataset.term);
+        }, true);   // 선지 고르기보다 먼저 받는다
+    })();
+
+    </script>
 {% endblock %}
