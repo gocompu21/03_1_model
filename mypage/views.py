@@ -520,8 +520,20 @@ def next_wrong_answers_api(request, pk):
     return JsonResponse({"items": items, "has_more": has_more, "offset": offset + limit})
 
 
+import re
+
 # 미리보기에 남길 꾸밈. 이것 말고는 모두 걷어낸다
 _PREVIEW_KEEP = ("strong", "b", "em", "i")
+
+def _looks_species(text):
+    """'Genus species' 꼴이면 학명으로 본다 (기울임을 살린다)."""
+    t = re.sub(r'<[^>]+>', '', text or '').strip()
+    return bool(re.fullmatch(r'[A-Z][a-z]+(?:\s+[a-z][a-z-]+|\s+spp?\.)', t))
+
+
+# 미리보기에서 배지로 세울 소제목
+_PREVIEW_HEADS = ("핵심 개념", "상세 설명", "주요 내용", "정답 설명",
+                  "기본서 내용", "개요", "요약", "결론")
 
 
 def _plain_preview(source, limit=180):
@@ -603,6 +615,27 @@ def _plain_preview(source, limit=180):
         out += "…"
     if head:
         out = '<span class="pv-head">%s</span>%s' % (escape(head), out)
+
+    # 글 안에 섞여 나오는 소제목도 배지로 세운다
+    for name in _PREVIEW_HEADS:
+        if '<span class="pv-head">%s</span>' % name in out:
+            continue
+        out = re.sub(
+            r'(?<![>\w])' + re.escape(name) + r'(?![\w<])',
+            '<span class="pv-head">' + name + '</span>',
+            out,
+            count=1,
+        )
+
+    # 배지 밖의 굵게·기울임은 보통 글자로 되돌린다.
+    # 본문 곳곳이 굵으면 무엇이 소제목인지 헷갈린다 (학명 <i> 는 남긴다)
+    # 학명은 기울임이 맞으므로 <em> 을 <i> 로 살려 둔다
+    out = re.sub(r'<em>(.*?)</em>',
+                 lambda m: '<i>' + m.group(1) + '</i>'
+                 if _looks_species(m.group(1)) else m.group(1),
+                 out, flags=re.S)
+    out = re.sub(r'</?(?:strong|b|em)>', '', out)
+
     return mark_safe(out)
 
 
