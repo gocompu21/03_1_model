@@ -757,19 +757,42 @@ def topic_set_list(request):
     })
 
 
+def _chapter_code_key(code):
+    """'2.2.10' 을 (2, 2, 10) 으로 바꿔 숫자대로 견주게 한다.
+
+    문자열로 견주면 '2.2.10' 이 '2.2.9' 보다 앞에 온다.
+    숫자가 아닌 마디는 뒤로 보낸다.
+    """
+    if not code:
+        return ((1, ''),)          # 번호 없는 것은 맨 뒤로
+    key = []
+    for part in str(code).split('.'):
+        part = part.strip()
+        try:
+            key.append((0, int(part)))
+        except ValueError:
+            key.append((1, part))      # 숫자가 아니면 같은 자리에서 뒤로
+    return tuple(key)
+
+
 def _chapters_for_picker():
     """문제집에 이어 붙일 목차 목록.
 
     과목을 고르면 그 과목 것만 보이도록 과목 이름을 함께 담는다.
     Book.subject 는 문자열이라 Subject.name 과 이름으로 잇는다.
+
+    Chapter.order 는 형제 항목 안에서의 순번(1, 2, 3…)이라
+    전체를 한 줄로 늘어놓으면 뒤섞인다. 목차 번호(code)로 정렬한다.
     """
     from practice.models import Chapter
 
     rows = []
-    qs = (Chapter.objects
-          .select_related('book')
-          .order_by('book__subject', 'order', 'code'))
-    for ch in qs:
+    chapters = list(Chapter.objects.select_related('book'))
+    chapters.sort(key=lambda ch: (
+        ch.book.subject if ch.book else '',
+        _chapter_code_key(ch.code),
+    ))
+    for ch in chapters:
         rows.append({
             'id': ch.id,
             'subject': ch.book.subject if ch.book else '',
