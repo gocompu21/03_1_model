@@ -733,9 +733,14 @@ async function toggleAllQuestions() {
                 const choice = data['choice' + i];
                 const isAnswer = data.answer.includes(i);
                 const circled = ['①','②','③','④','⑤'][i-1];
+                // 선지별 설명 (기출 학습 화면과 같은 모양)
+                const note = (data.choice_notes || {})[i];
+                const noteHtml = note
+                    ? `<div class="choice-note">${note}</div>` : '';
                 choicesHtml += `
-                    <div class="choice-item ${isAnswer ? 'correct' : ''}">
+                    <div class="choice-item ${isAnswer ? 'correct is-answer' : ''}">
                         <span class="choice-num ${isAnswer ? 'correct' : ''}">${circled}</span> ${highlightTerm(choice)}
+                        ${noteHtml}
                     </div>`;
             }
             
@@ -888,6 +893,51 @@ async function toggleAllQuestions() {
     .exp-text br + br {
         display: none;
     }
+    /* 선지별 설명 — 기출 학습 화면과 같은 모양 */
+    .choice-item { flex-wrap: wrap; }
+    .choice-note {
+        flex-basis: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 7px 0 4px 34px;
+        padding-left: 18px;
+        position: relative;
+        font-size: 0.93rem;
+        line-height: 1.65;
+        color: #4a4a4a;
+        word-break: keep-all;
+    }
+    .choice-note::before {
+        content: "↪";
+        position: absolute;
+        left: 0;
+        top: -1px;
+        color: #d94a3d;
+        font-size: 1.05em;
+        line-height: 1.55;
+    }
+    .choice-note i {
+        font-style: italic;
+        font-family: inherit;
+        padding-right: 0.12em;
+    }
+    /* 정답 선지의 설명에는 형광 띠 */
+    .choice-item.is-answer .choice-note .hl {
+        background-image: linear-gradient(#fff35c, #fff35c);
+        background-size: 100% 0.42em;
+        background-position: 0 88%;
+        background-repeat: no-repeat;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+    }
+    @media (max-width: 768px) {
+        .choice-note {
+            margin-left: 8px;
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+    }
+
     /* 선지별 답변 hanging indent */
     .choice-explanation {
         position: relative;

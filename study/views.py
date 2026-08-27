@@ -385,6 +385,8 @@ def api_question(request, question_id):
     """API: 문제 데이터 반환 (JSON)"""
     import markdown as md
     import re
+
+    from exam.templatetags.markdown_extras import choice_note
     
     try:
         question = Question.objects.select_related('exam').get(id=question_id)
@@ -445,6 +447,12 @@ def api_question(request, question_id):
         "answer": question.answer,
         "explanation": explanation_html,
         "image": question.image.url if question.image else None,
+        # 선지별 설명. 용어 상세 화면에서 선지 밑에 붙인다
+        "choice_notes": {
+            str(k): str(choice_note(v))
+            for k, v in (question.choice_notes or {}).items()
+            if v
+        },
     }
     return JsonResponse(data)
 
