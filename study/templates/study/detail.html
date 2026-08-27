@@ -1287,10 +1287,10 @@
                             let borderColor = '#1976d2';
                             if (term.reference_count >= 10) borderColor = '#d32f2f';
                             else if (term.reference_count >= 5) borderColor = '#f57c00';
-                            borderStyle = `border: 1px solid #2d6a4f; border-right-width: 5px; border-right-color: ${borderColor};`;
+                            borderStyle = `border: 1px solid #2d6a4f; border-right-width: 3px; border-right-color: ${borderColor};`;
                         }
                         html += `<a href="/glossary/term/${term.id}/" target="glossary_popup"
-                            style="display: inline-block; padding: 1px 8px; line-height: 1.35; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
+                            style="display: inline-block; padding: 1px 5px; line-height: 1.35; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
                             ${term.word}</a>`;
                     });
                     html += '</div></div>';
