@@ -1225,6 +1225,52 @@
         card.classList.remove('editing');
     }
 
+    // 관련 용어를 불러 문항 아래에 붙인다.
+    // 답을 고를 때, '해설 보기', '전체 펼치기' 세 곳에서 함께 쓴다
+    function loadTerms(card) {
+        if (!card) return;
+        const termsContainer = card.querySelector('.terms-container');
+        if (!termsContainer) return;
+        if (termsContainer.getAttribute('data-loaded') !== 'false') {
+            // 이미 불러 둔 것은 다시 보여 주기만 한다
+            if (termsContainer.innerHTML.trim()) {
+                termsContainer.style.display = 'block';
+            }
+            return;
+        }
+        termsContainer.setAttribute('data-loaded', 'loading');
+        const questionId = termsContainer.getAttribute('data-question-id');
+        fetch(`/study/api/question/${questionId}/terms/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.terms && data.terms.length > 0) {
+                    let html = '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">';
+                    html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>';
+                    html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
+                    data.terms.forEach(term => {
+                        let borderStyle = 'border: 1px solid #2d6a4f;';
+                        if (term.reference_count > 0) {
+                            let borderColor = '#1976d2';
+                            if (term.reference_count >= 10) borderColor = '#d32f2f';
+                            else if (term.reference_count >= 5) borderColor = '#f57c00';
+                            borderStyle = `border: 1px solid #2d6a4f; border-right-width: 5px; border-right-color: ${borderColor};`;
+                        }
+                        html += `<a href="/glossary/term/${term.id}/" target="glossary_popup"
+                            style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
+                            ${term.word}</a>`;
+                    });
+                    html += '</div></div>';
+                    termsContainer.innerHTML = html;
+                    termsContainer.style.display = 'block';
+                }
+                termsContainer.setAttribute('data-loaded', 'true');
+            })
+            .catch(err => {
+                termsContainer.setAttribute('data-loaded', 'false');
+                console.log('Terms fetch error:', err);
+            });
+    }
+
     // Select Choice
     function selectChoice(choiceItem, choiceNum) {
         const parent = choiceItem.closest('.q-choices');
@@ -1239,6 +1285,9 @@
         // 아래 해설은 '해설 보기'를 눌렀을 때만 펼친다
         markCorrect(parent);
         parent.classList.add('revealed');
+
+        // 정답이 드러나는 시점이므로 관련 용어도 함께 보여 준다
+        loadTerms(card);
     }
 
     // 정답 선지에 표시를 남긴다 (여러 곳에서 쓴다)
@@ -1284,36 +1333,7 @@
                 qChoices.classList.add('revealed');
 
                 // Lazy load related terms via AJAX
-                const termsContainer = card.querySelector('.terms-container');
-                if (termsContainer && termsContainer.getAttribute('data-loaded') === 'false') {
-                    const questionId = termsContainer.getAttribute('data-question-id');
-                    fetch(`/study/api/question/${questionId}/terms/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.terms && data.terms.length > 0) {
-                                let html = '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">';
-                                html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>';
-                                html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
-                                data.terms.forEach(term => {
-                                    let borderStyle = 'border: 1px solid #2d6a4f;';
-                                    if (term.reference_count > 0) {
-                                        let borderColor = '#1976d2';
-                                        if (term.reference_count >= 10) borderColor = '#d32f2f';
-                                        else if (term.reference_count >= 5) borderColor = '#f57c00';
-                                        borderStyle = `border: 1px solid #2d6a4f; border-right-width: 5px; border-right-color: ${borderColor};`;
-                                    }
-                                    html += `<a href="/glossary/term/${term.id}/" target="glossary_popup"
-                                        style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
-                                        ${term.word}</a>`;
-                                });
-                                html += '</div></div>';
-                                termsContainer.innerHTML = html;
-                                termsContainer.style.display = 'block';
-                            }
-                            termsContainer.setAttribute('data-loaded', 'true');
-                        })
-                        .catch(err => console.log('Terms fetch error:', err));
-                }
+                loadTerms(card);
 
                 // MathJax is handled automatically on page load, no manual call needed
             } else if (card && !isHidden) {
@@ -1369,35 +1389,7 @@
 
             // Lazy load related terms for all questions via AJAX
             document.querySelectorAll('.terms-container').forEach(termsContainer => {
-                if (termsContainer.getAttribute('data-loaded') === 'false') {
-                    const questionId = termsContainer.getAttribute('data-question-id');
-                    fetch(`/study/api/question/${questionId}/terms/`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.terms && data.terms.length > 0) {
-                                let html = '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">';
-                                html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>';
-                                html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
-                                data.terms.forEach(term => {
-                                    let borderStyle = 'border: 1px solid #2d6a4f;';
-                                    if (term.reference_count > 0) {
-                                        let borderColor = '#1976d2';
-                                        if (term.reference_count >= 10) borderColor = '#d32f2f';
-                                        else if (term.reference_count >= 5) borderColor = '#f57c00';
-                                        borderStyle = `border: 1px solid #2d6a4f; border-right-width: 5px; border-right-color: ${borderColor};`;
-                                    }
-                                    html += `<a href="/glossary/term/${term.id}/" target="glossary_popup"
-                                        style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
-                                        ${term.word}</a>`;
-                                });
-                                html += '</div></div>';
-                                termsContainer.innerHTML = html;
-                                termsContainer.style.display = 'block';
-                            }
-                            termsContainer.setAttribute('data-loaded', 'true');
-                        })
-                        .catch(err => console.log('Terms fetch error:', err));
-                }
+                loadTerms(termsContainer.closest('.question-card'));
             });
 
             // MathJax is handled automatically on page load, no manual call needed
