@@ -421,7 +421,7 @@
         border-left: 3px solid #2d6a4f;
         border-radius: 0 8px 8px 0;
         font-size: 0.93rem;
-        line-height: 1.75;
+        line-height: 1.55;
         color: #333;
     }
     .term-panel.open { display: block; }
@@ -457,12 +457,20 @@
         cursor: pointer;
         padding: 2px 6px;
     }
+    /* 문단마다 여백이 붙어 한 화면에 담기는 양이 적었다.
+       줄 간격과 문단 사이를 함께 좁힌다 */
+    .term-panel-body p { margin: 0 0 5px; }
     .term-panel-body p:first-child { margin-top: 0; }
     .term-panel-body p:last-child { margin-bottom: 0; }
     .term-panel-body h3, .term-panel-body h4 {
-        font-size: 0.95rem; color: #2d6a4f; margin: 12px 0 6px;
+        font-size: 0.95rem; color: #2d6a4f; margin: 11px 0 4px;
     }
-    .term-panel-body ul, .term-panel-body ol { padding-left: 20px; margin: 6px 0; }
+    .term-panel-body h3:first-child,
+    .term-panel-body h4:first-child { margin-top: 0; }
+    .term-panel-body ul, .term-panel-body ol { padding-left: 19px; margin: 4px 0 6px; }
+    .term-panel-body li { margin-bottom: 2px; }
+    .term-panel-body li > p { margin: 0; }
+    .term-panel-body br { line-height: 1.2; }
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
     .term-panel-body th, .term-panel-body td {
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
