@@ -74,6 +74,12 @@ class PracticeQuestion(models.Model):
     choice5 = models.CharField(max_length=500, verbose_name="선지 5")
     answer = models.IntegerField(verbose_name="정답")  # 1-5
     explanation = models.TextField(blank=True, verbose_name="해설")
+    choice_notes = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name="선지별 답변",
+        help_text='{"1": "설명", ...} 형태. 기출문제와 같은 구조',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
