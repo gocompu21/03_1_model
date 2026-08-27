@@ -351,6 +351,26 @@
     .term-panel-body li { margin-bottom: 2px; }
     .term-panel-body li > p { margin: 0; }
     .term-panel-body br { line-height: 1.2; }
+
+    /* 내어쓰기: '1)' 같은 기호 다음 줄이 번호 아래로 돌아오지 않고
+       글자가 시작된 자리에 맞춰지도록 한다 (용어 상세 화면과 같은 방식) */
+    .term-panel-body .bullet-item {
+        position: relative;
+        padding-left: 1.75em;
+        margin: 3px 0;
+    }
+    .term-panel-body .bullet-item .bullet {
+        position: absolute;
+        left: 0;
+        font-weight: 700;
+    }
+    .term-panel-body .bullet-level1 { margin-left: 0; }
+    .term-panel-body .bullet-level2 {
+        margin-left: 1.1em;
+        padding-left: 1.1em;
+    }
+    .term-panel-body .bullet-level2 .bullet { font-weight: 400; }
+    .term-panel-body .bullet-indent { margin-left: 2.8em; }
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
     .term-panel-body th, .term-panel-body td {
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
