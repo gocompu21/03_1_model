@@ -525,26 +525,12 @@
     }
     .sector-solve-btn:hover { background: linear-gradient(135deg, #1b4332, #2d6a4f); }
 
-    /* 기출문제 배지 — '5-1' 처럼 회차-문제번호.
-       '5-50' 과 '11-37' 은 자릿수가 달라, 폭을 고정해야
-       지문 시작이 가지런하고 글자를 가리지 않는다 */
-    .exam-badge {
-        background: #eaf5ee;
-        border: 1px solid #cfe0d5;
-        border-radius: 10px;
-        padding: 1px 0;
-        font-size: 0.85rem;
-        line-height: 1.5;
-        width: 54px;
-        text-align: center;
-        box-sizing: border-box;
-    }
-    /* 배지 폭(54) + 왼쪽 여백(15) + 사이 간격(10) */
-    .exam-question-list .question-item { padding-left: 79px; }
-    @media (max-width: 768px) {
-        .exam-badge { width: 48px; font-size: 0.8rem; }
-        /* 좁은 화면은 왼쪽 여백이 8px */
-        .exam-question-list .question-item { padding-left: 64px; }
+    /* 지문 뒤에 붙는 출처 — '(5-50)' 처럼 회차-문제번호.
+       본문이 아니므로 흐리게 두어 읽는 데 방해되지 않게 한다 */
+    .exam-ref {
+        color: #8aa295;
+        font-size: 0.88em;
+        white-space: nowrap;
     }
     /* 문제집이 여럿이면 사이를 가른다 */
     .exam-set-row + .exam-set-row {
@@ -1206,11 +1192,13 @@
                         📝 문제 풀기
                     </a>
                 </div>
-                <ul class="question-list exam-question-list">
+                <ul class="question-list">
                     {% for q in row.questions %}
                     <li class="question-item">
-                        <span class="question-number exam-badge">{{ q.badge }}</span>
-                        <span class="question-preview">{{ q.content|striptags|truncatechars:80 }}</span>
+                        <span class="question-number">({{ forloop.counter }})</span>
+                        <span class="question-preview">{{ q.content|striptags|truncatechars:80 }}
+                            <span class="exam-ref">({{ q.badge }})</span>
+                        </span>
                     </li>
                     {% endfor %}
                 </ul>
