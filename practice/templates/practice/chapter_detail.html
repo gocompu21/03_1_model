@@ -1818,12 +1818,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         }
 
-        // 본문 링크는 손대지 않는다(새 창). 하단 관련 용어 배지만 가로챈다
         document.addEventListener('click', function (e) {
-            var link = e.target.closest('.term-badge[data-term]');
-            if (!link) return;
+            // 하단 관련 용어 배지
+            var badge = e.target.closest('.term-badge[data-term]');
+            if (badge) {
+                e.preventDefault();
+                show(badge, badge.dataset.term);
+                return;
+            }
+
+            // 본문의 점선 낱말 — 새 창을 띄우지 않고
+            // 하단 관련 용어에서 같은 낱말을 골라 그 아래에 보여 준다
+            var inText = e.target.closest('.glossary-link[data-term]');
+            if (!inText) return;
+            var id = inText.dataset.term;
+            var target = document.querySelector('.term-badge[data-term="' + id + '"]');
+            if (!target) return;          // 목록에 없으면 본래대로 새 창
             e.preventDefault();
-            show(link, link.dataset.term);
+            show(target, id);
+            // 관련 용어 자리로 옮겨 준다
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
         });
     })();
 
