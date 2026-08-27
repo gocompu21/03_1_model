@@ -1371,27 +1371,51 @@
             }
         }
 
+        // 스크롤되는 자리를 찾는다 (화면마다 다르다)
+        function scroller(el) {
+            for (var n = el; n && n !== document.body; n = n.parentElement) {
+                var ov = getComputedStyle(n).overflowY;
+                if ((ov === 'auto' || ov === 'scroll') && n.scrollHeight > n.clientHeight) {
+                    return n;
+                }
+            }
+            return document.scrollingElement || document.documentElement;
+        }
+
+        // 상자가 열리면 그 아래 내용이 밀린다. 누른 선지는 제자리에 있어야
+        // 무엇을 눌렀는지 놓치지 않는다. 밀린 만큼 스크롤을 되돌린다
+        function keepInPlace(link, act) {
+            var sc = scroller(link);
+            var before = link.getBoundingClientRect().top;
+            act();
+            var after = link.getBoundingClientRect().top;
+            var diff = after - before;
+            if (Math.abs(diff) > 1) sc.scrollTop += diff;
+        }
+
         function show(card, link, id) {
             var panel = panelFor(card);
-            placeUnder(panel, link);
+            keepInPlace(link, function () { placeUnder(panel, link); });
             card.querySelectorAll('.term-link.on')
                 .forEach(function (x) { x.classList.remove('on'); });
 
             // 같은 낱말을 다시 누르면 접는다
             if (panel.classList.contains('open') && panel.dataset.term === id) {
-                panel.classList.remove('open');
+                keepInPlace(link, function () { panel.classList.remove('open'); });
                 return;
             }
             link.classList.add('on');
             panel.dataset.term = id;
-            panel.classList.add('open');
+            keepInPlace(link, function () { panel.classList.add('open'); });
 
             var word = panel.querySelector('.term-panel-word');
             var body = panel.querySelector('.term-panel-body');
             if (cache[id]) {
                 word.textContent = cache[id].word;
-                body.innerHTML = cache[id].html;
-                markLabels(body);
+                keepInPlace(link, function () {
+                    body.innerHTML = cache[id].html;
+                    markLabels(body);
+                });
                 typeset(body);
                 return;
             }
@@ -1403,8 +1427,10 @@
                     cache[id] = { word: d.word, html: d.html || '' };
                     if (panel.dataset.term !== id) return;
                     word.textContent = d.word;
-                    body.innerHTML = d.html || '';
-                    markLabels(body);
+                    keepInPlace(link, function () {
+                        body.innerHTML = d.html || '';
+                        markLabels(body);
+                    });
                     typeset(body);
                 })
                 .catch(function () {
