@@ -212,6 +212,12 @@ def _render_term_html(term):
     # 2단계: - (들여쓰기 포함)
     def convert_to_numbered_list(text):
         lines = text.split('\n')
+
+        # 소제목(### 1. ...)이 있으면 그 아래 '*' 는 번호를 매길 자리다.
+        # 소제목이 없는 글은 '*' 가 그냥 글머리표이므로 번호를 매기면
+        # 빈 줄마다 카운터가 돌아가 '1) 1) 1)' 이 된다
+        has_heading = any(re.match(r'^#{1,6}\s', ln) for ln in lines)
+
         result = []
         counter1 = 0  # 1단계 카운터
         prev_was_list = False
@@ -223,13 +229,22 @@ def _render_term_html(term):
                 prev_was_list = True
             # 1단계 리스트 (* 로 시작) - 들여쓰기 없음
             elif re.match(r'^\*\s+', line):
-                counter1 += 1
-                line = re.sub(r'^\*\s+', f'{counter1}) ', line)
+                if has_heading:
+                    counter1 += 1
+                    line = re.sub(r'^\*\s+', f'{counter1}) ', line)
+                else:
+                    line = re.sub(r'^\*\s+', '\u2022 ', line)
                 prev_was_list = True
             # 빈 줄이나 다른 내용
             elif not line.strip() or (not prev_was_list and line.strip()):
-                if not re.match(r'^\s{4,}', line):  # 들여쓰기가 아니면 카운터 리셋
+                # 소제목을 만나면 번호를 다시 1부터
+                if re.match(r'^#{1,6}\s', line):
                     counter1 = 0
+                elif not re.match(r'^\s{4,}', line):
+                    # 빈 줄만으로는 리셋하지 않는다. 한 소제목 안에서
+                    # 문단이 나뉘어도 번호는 이어져야 한다
+                    if line.strip():
+                        counter1 = 0
                 prev_was_list = False
 
             result.append(line)
@@ -253,12 +268,12 @@ def _render_term_html(term):
     )
     # 1단계 번호 (1칸 들여쓰기)
     rendered_content = re.sub(
-        r'<br />\n(\d+\))',
+        r'<br />\n(\d+\)|•)',
         r'</p>\n<p class="bullet-item bullet-level1"><span class="bullet">\1</span>',
         rendered_content
     )
     rendered_content = re.sub(
-        r'<p>(\d+\))',
+        r'<p>(\d+\)|•)',
         r'<p class="bullet-item bullet-level1"><span class="bullet">\1</span>',
         rendered_content
     )
