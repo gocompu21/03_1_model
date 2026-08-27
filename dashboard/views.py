@@ -562,7 +562,16 @@ def api_generate_quiz(request):
         manager.sync_all_stores()
         
         # 프롬프트 구성
-        prompt = f'''{chapter.code} {chapter.title}에 대한 내용 이해 문제를 5지선다형(문제번호\t문제\t보기1\t보기2\t보기3\t보기4\t보기5\t정답\t해설)으로 중복없이 최대한 출제하고 csv 형태로 만들어 주되 분리자는 tab으로 해'''
+        prompt = f'''{chapter.code} {chapter.title}에 대한 내용 이해 문제를 5지선다형으로 중복없이 최대한 출제해 주세요.
+
+탭(tab)으로 나눈 한 줄에 아래 순서대로 담아 주세요. 줄바꿈 없이 한 문제당 한 줄입니다.
+
+문제번호\t문제\t보기1\t보기2\t보기3\t보기4\t보기5\t정답\t해설\t선지1설명\t선지2설명\t선지3설명\t선지4설명\t선지5설명
+
+선지별 설명은 그 선지가 왜 맞는지/틀리는지를 한두 문장으로 적습니다.
+- '맞는 설명입니다' '옳지 않습니다' 같은 상투적인 문구만 쓰지 마세요.
+- 근거가 되는 시기·수치·이름을 빠뜨리지 마세요.
+- 정답 선지에는 왜 정답인지가 드러나야 합니다.'''
         
         result = manager.query_store(store_name, prompt)
         
@@ -589,6 +598,13 @@ def api_generate_quiz(request):
                         'answer': int(parts[7].strip()) if len(parts) > 7 and parts[7].strip().isdigit() else 1,
                         'explanation': parts[8].strip() if len(parts) > 8 else '',
                     }
+                    # 선지별 설명 (9~13번째 칸). 비어 있으면 담지 않는다
+                    notes = {}
+                    for i in range(5):
+                        col = 9 + i
+                        if len(parts) > col and parts[col].strip():
+                            notes[str(i + 1)] = parts[col].strip()
+                    q['choice_notes'] = notes
                     questions.append(q)
                 except (ValueError, IndexError):
                     continue
@@ -714,6 +730,7 @@ def api_save_quiz(request):
                 choice5=q.get('choice5', ''),
                 answer=q.get('answer', 1),
                 explanation=q.get('explanation', ''),
+                choice_notes=q.get('choice_notes') or {},
             )
             next_number += 1
             created_count += 1

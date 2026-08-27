@@ -532,31 +532,56 @@
                 <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                     <div class="choice-item">
                         <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span><span class="choice-text">{{ q.choice1|safe }}</span>
-                        {% if q.answer == 1 %}
+                        {% if q.choice_notes %}
+                            {% if q.choice_notes.1 %}
+                            <div class="inline-exp">{{ q.choice_notes.1|choice_note:q.chapter.book.subject }}</div>
+                            {% endif %}
+                        {% elif q.answer == 1 %}
+                        {# 선지별 답변이 없는 옛 문제는 정답 선지에 전체 해설을 붙인다 #}
                         <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span><span class="choice-text">{{ q.choice2|safe }}</span>
-                        {% if q.answer == 2 %}
+                        {% if q.choice_notes %}
+                            {% if q.choice_notes.2 %}
+                            <div class="inline-exp">{{ q.choice_notes.2|choice_note:q.chapter.book.subject }}</div>
+                            {% endif %}
+                        {% elif q.answer == 2 %}
+                        {# 선지별 답변이 없는 옛 문제는 정답 선지에 전체 해설을 붙인다 #}
                         <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span><span class="choice-text">{{ q.choice3|safe }}</span>
-                        {% if q.answer == 3 %}
+                        {% if q.choice_notes %}
+                            {% if q.choice_notes.3 %}
+                            <div class="inline-exp">{{ q.choice_notes.3|choice_note:q.chapter.book.subject }}</div>
+                            {% endif %}
+                        {% elif q.answer == 3 %}
+                        {# 선지별 답변이 없는 옛 문제는 정답 선지에 전체 해설을 붙인다 #}
                         <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span><span class="choice-text">{{ q.choice4|safe }}</span>
-                        {% if q.answer == 4 %}
+                        {% if q.choice_notes %}
+                            {% if q.choice_notes.4 %}
+                            <div class="inline-exp">{{ q.choice_notes.4|choice_note:q.chapter.book.subject }}</div>
+                            {% endif %}
+                        {% elif q.answer == 4 %}
+                        {# 선지별 답변이 없는 옛 문제는 정답 선지에 전체 해설을 붙인다 #}
                         <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
                     <div class="choice-item">
                         <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span><span class="choice-text">{{ q.choice5|safe }}</span>
-                        {% if q.answer == 5 %}
+                        {% if q.choice_notes %}
+                            {% if q.choice_notes.5 %}
+                            <div class="inline-exp">{{ q.choice_notes.5|choice_note:q.chapter.book.subject }}</div>
+                            {% endif %}
+                        {% elif q.answer == 5 %}
+                        {# 선지별 답변이 없는 옛 문제는 정답 선지에 전체 해설을 붙인다 #}
                         <div class="inline-exp">{{ q.explanation|default:"해설이 없습니다."|inline_explanation }}</div>
                         {% endif %}
                     </div>
