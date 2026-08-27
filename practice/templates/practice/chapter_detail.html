@@ -1635,27 +1635,53 @@ document.addEventListener('DOMContentLoaded', function() {
             if (Math.abs(diff) > 1) sc.scrollTop += diff;
         }
 
+        // 상자는 문단(<p>) 안에 넣을 수 없다. 블록을 넣으면 HTML 이 깨진다.
+        // 대신 문단 뒤에 두고, 누른 낱말이 있는 '줄' 바로 아래로 끌어올린다
         function panelFor(link) {
-            // 그 낱말이 든 문단 바로 다음에 상자를 놓는다
-            var block = link.closest('p, li, div.content-body') || link.parentElement;
-            var next = block.nextElementSibling;
-            if (next && next.classList.contains('term-panel')) return next;
-
-            var panel = document.createElement('div');
-            panel.className = 'term-panel';
-            panel.innerHTML =
-                '<div class="term-panel-head">'
-                + '<span class="term-panel-word"></span>'
-                + '<button type="button" class="term-panel-close" title="닫기">&times;</button>'
-                + '</div><div class="term-panel-body"></div>';
-            block.parentNode.insertBefore(panel, block.nextSibling);
-            panel.querySelector('.term-panel-close')
-                 .addEventListener('click', function () {
-                     panel.classList.remove('open');
-                     document.querySelectorAll('.glossary-link.on')
-                         .forEach(function (x) { x.classList.remove('on'); });
-                 });
+            var block = link.closest('p, li, h1, h2, h3, h4, div.content-body')
+                        || link.parentElement;
+            var panel = document.querySelector('.term-panel');
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.className = 'term-panel';
+                panel.innerHTML =
+                    '<div class="term-panel-head">'
+                    + '<span class="term-panel-word"></span>'
+                    + '<button type="button" class="term-panel-close" title="닫기">&times;</button>'
+                    + '</div><div class="term-panel-body"></div>';
+                panel.querySelector('.term-panel-close')
+                     .addEventListener('click', function () {
+                         panel.classList.remove('open');
+                         panel.style.marginTop = '';
+                         panel.style.marginBottom = '';
+                         document.querySelectorAll('.glossary-link.on')
+                             .forEach(function (x) { x.classList.remove('on'); });
+                     });
+            }
+            if (panel.previousElementSibling !== block) {
+                block.parentNode.insertBefore(panel, block.nextSibling);
+            }
             return panel;
+        }
+
+        // 누른 낱말이 문단의 몇 번째 줄에 있는지 재어, 그 줄 바로 아래로 올린다.
+        // 문단 끝까지 남은 줄만큼 위로 당기면 된다
+        function liftToLine(panel, link) {
+            panel.style.marginTop = '';
+            panel.style.marginBottom = '';
+            var block = panel.previousElementSibling;
+            if (!block) return;
+            var blockBottom = block.getBoundingClientRect().bottom;
+            var lineBottom = link.getBoundingClientRect().bottom;
+            var below = blockBottom - lineBottom;      // 그 줄 아래에 남은 높이
+            if (below > 4) {
+                // 위로 당기면 문단의 남은 줄과 겹친다.
+                // 그만큼 아래쪽에 자리를 비워 밀어낸다
+                panel.style.marginTop = (-below) + 'px';
+                panel.style.marginBottom = (below + 12) + 'px';
+            } else {
+                panel.style.marginBottom = '';
+            }
         }
 
         function show(link, id) {
@@ -1672,7 +1698,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             link.classList.add('on');
             panel.dataset.term = id;
-            keepInPlace(link, function () { panel.classList.add('open'); });
+            keepInPlace(link, function () {
+                panel.classList.add('open');
+                liftToLine(panel, link);
+            });
 
             var word = panel.querySelector('.term-panel-word');
             var body = panel.querySelector('.term-panel-body');
@@ -1681,6 +1710,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 keepInPlace(link, function () {
                     word.textContent = w;
                     body.innerHTML = html;
+                    liftToLine(panel, link);
                 });
                 if (window.MathJax && MathJax.typesetPromise) {
                     MathJax.typesetPromise([body]).catch(function () {});
