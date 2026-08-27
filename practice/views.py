@@ -520,6 +520,7 @@ def api_link_post(request, chapter_id):
         return JsonResponse({'success': False, 'error': '게시글 ID가 없습니다.'})
 
     from bbs.models import Post
+    from mypage.views import _plain_preview
     post = get_object_or_404(Post, id=post_id)
 
     if ChapterPost.objects.filter(chapter=chapter, post=post).exists():
@@ -540,6 +541,9 @@ def api_link_post(request, chapter_id):
             'author': post.author.first_name or post.author.username,
             'created_at': post.created_at.strftime('%Y-%m-%d'),
             'hits': post.hits,
+            # 목록에 바로 붙일 수 있게 앞부분과 본문도 함께 보낸다
+            'preview': str(_plain_preview(post.content)),
+            'content': post.content or '',
         }
     })
 
