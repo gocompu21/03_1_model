@@ -503,6 +503,57 @@
     }
     
     /* Questions Section */
+    /* 섹터 머리줄의 '문제 풀기' 단추 */
+    .questions-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .sector-solve-btn {
+        display: inline-block;
+        background: linear-gradient(135deg, #2d6a4f, #40916c);
+        color: #fff;
+        text-decoration: none;
+        padding: 7px 16px;
+        border-radius: 20px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .sector-solve-btn:hover { background: linear-gradient(135deg, #1b4332, #2d6a4f); }
+
+    /* 회차 배지 — 어느 회차가 몇 문제인지 알려 준다 */
+    .round-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        padding: 4px 0 2px;
+    }
+    .round-badge {
+        display: inline-block;
+        background: #eaf5ee;
+        color: #1b4332;
+        border: 1px solid #cfe0d5;
+        border-radius: 14px;
+        padding: 4px 12px;
+        font-size: 0.85rem;
+    }
+    .round-badge b { font-weight: 700; }
+    .round-total {
+        color: #777;
+        font-size: 0.83rem;
+        margin-left: 4px;
+    }
+    /* 문제집이 여럿이면 사이를 가른다 */
+    .exam-set-row + .exam-set-row {
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px dashed #e0e6e2;
+    }
     .questions-card {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 16px;
@@ -1131,6 +1182,9 @@
         <div class="questions-card">
             <div class="questions-header">
                 <h2 class="questions-title">📝 내용이해 문제</h2>
+                <a href="{% url 'practice:practice_questions' chapter.id %}" class="sector-solve-btn">
+                    📝 문제 풀기
+                </a>
             </div>
             <ul class="question-list">
                 {% for q in questions %}
@@ -1142,17 +1196,35 @@
             </ul>
         </div>
         {% endif %}
+
+        <!-- 기출문제풀이 — 이 목차에 이어 붙인 주제별 문제집 -->
+        {% if exam_sets %}
+        <div class="questions-card">
+            {% for row in exam_sets %}
+            <div class="exam-set-row">
+                <div class="questions-header">
+                    <h2 class="questions-title">🗂️ 기출문제풀이{% if exam_sets|length > 1 %} — {{ row.set.title }}{% endif %}</h2>
+                    <a href="{% url 'study:topic_solve' row.set.id %}" class="sector-solve-btn">
+                        📝 문제 풀기
+                    </a>
+                </div>
+                <div class="round-badges">
+                    {% for r in row.rounds %}
+                    <span class="round-badge">{{ r.round }}회 <b>{{ r.count }}</b>문제</span>
+                    {% endfor %}
+                    <span class="round-total">모두 {{ row.total }}문제</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         
         <!-- Bottom Navigation -->
         <div class="bottom-nav">
             <a href="{% url 'practice:chapter_list' chapter.book.id %}#chapter-{{ chapter.id }}" class="btn btn-secondary">
                 📚 목차로 돌아가기
             </a>
-            {% if questions %}
-            <a href="{% url 'practice:practice_questions' chapter.id %}" class="btn btn-primary">
-                📝 문제 풀기
-            </a>
-            {% endif %}
+            {# 문제 풀기 단추는 각 섹터 머리줄로 옮겼다 #}
         </div>
     </div>
 </div>

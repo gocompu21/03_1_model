@@ -757,6 +757,27 @@ def topic_set_list(request):
     })
 
 
+def _chapters_for_picker():
+    """문제집에 이어 붙일 목차 목록.
+
+    과목을 고르면 그 과목 것만 보이도록 과목 이름을 함께 담는다.
+    Book.subject 는 문자열이라 Subject.name 과 이름으로 잇는다.
+    """
+    from practice.models import Chapter
+
+    rows = []
+    qs = (Chapter.objects
+          .select_related('book')
+          .order_by('book__subject', 'order', 'code'))
+    for ch in qs:
+        rows.append({
+            'id': ch.id,
+            'subject': ch.book.subject if ch.book else '',
+            'label': '%s %s' % (ch.code or '', ch.title or ''),
+        })
+    return rows
+
+
 @login_required
 def topic_set_create(request):
     """주제별 문제집 생성 페이지"""
@@ -771,7 +792,8 @@ def topic_set_create(request):
     
     return render(request, 'study/topic_set_create.html', {
         'exams': exams,
-        'subjects': subjects
+        'subjects': subjects,
+        'chapters_json': json.dumps(_chapters_for_picker(), ensure_ascii=False),
     })
 
 
@@ -811,7 +833,8 @@ def topic_set_edit(request, set_id):
         'exams': exams,
         'subjects': subjects,
         'topic_set': topic_set,
-        'initial_cart_json': json.dumps(initial_cart)
+        'initial_cart_json': json.dumps(initial_cart),
+        'chapters_json': json.dumps(_chapters_for_picker(), ensure_ascii=False),
     })
 
 
@@ -882,6 +905,7 @@ def api_save_topic_set(request):
         description = data.get('description', '').strip()
         question_ids = data.get('question_ids', [])
         subject_id = data.get('subject_id')
+        chapter_id = data.get('chapter_id')
         set_id = data.get('set_id') # 수정 시 ID
         
         if not title:
@@ -897,6 +921,15 @@ def api_save_topic_set(request):
                 subject = Subject.objects.get(id=subject_id)
             except Subject.DoesNotExist:
                 pass
+
+        # 목차 (고르면 그 목차 상세 화면에 기출문제풀이가 나온다)
+        chapter = None
+        if chapter_id:
+            from practice.models import Chapter
+            try:
+                chapter = Chapter.objects.get(id=chapter_id)
+            except Chapter.DoesNotExist:
+                pass
         
         if set_id:
             # 수정 모드
@@ -904,6 +937,7 @@ def api_save_topic_set(request):
             topic_set.title = title
             topic_set.description = description
             topic_set.subject = subject
+            topic_set.chapter = chapter
             topic_set.save()
             
             # 기존 아이템 삭제 후 재생성 (순서 재정렬 위해)
@@ -919,6 +953,7 @@ def api_save_topic_set(request):
                 title=title,
                 description=description,
                 subject=subject,
+                chapter=chapter,
                 created_by=request.user,
                 is_public=True,
                 order=new_order

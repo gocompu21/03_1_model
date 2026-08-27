@@ -92,6 +92,15 @@ class TopicQuestionSet(models.Model):
     title = models.CharField(max_length=200, verbose_name="문제집 제목")
     description = models.TextField(blank=True, verbose_name="설명")
     subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, null=True, blank=True, related_name='topic_sets', verbose_name="과목")
+    chapter = models.ForeignKey(
+        'practice.Chapter',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='topic_sets',
+        verbose_name="목차",
+        help_text="목차를 고르면 그 목차 상세 화면에 기출문제풀이가 나온다",
+    )
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='topic_sets')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="생성일")
     is_public = models.BooleanField(default=True, verbose_name="공개 여부")

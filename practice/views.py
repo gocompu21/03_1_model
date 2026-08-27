@@ -318,6 +318,42 @@ def api_post_hit(request, post_id):
     return JsonResponse({'ok': True, 'counted': True, 'hits': hits})
 
 
+def _chapter_exam_sets(chapter):
+    """목차에 이어 붙인 주제별 문제집을 회차별 요약과 함께 돌려준다.
+
+    화면에는 '5회 3문제' 처럼 배지로 보여 주고,
+    '문제 풀기'를 누르면 그 문제집 전체를 푼다.
+    """
+    from collections import Counter
+
+    from exam.models import TopicQuestionSet
+
+    sets = (TopicQuestionSet.objects
+            .filter(chapter=chapter, is_public=True)
+            .prefetch_related('items__question__exam')
+            .order_by('order', '-created_at'))
+
+    rows = []
+    for ts in sets:
+        counter = Counter()
+        total = 0
+        for item in ts.items.all():
+            exam = getattr(item.question, 'exam', None)
+            if exam is None:
+                continue
+            counter[exam.round_number] += 1
+            total += 1
+        if not total:
+            continue
+        rows.append({
+            'set': ts,
+            'total': total,
+            'rounds': [{'round': r, 'count': n}
+                       for r, n in sorted(counter.items())],
+        })
+    return rows
+
+
 @login_required
 def chapter_detail(request, chapter_id):
     """목차 컨텐츠 상세 보기"""
@@ -374,12 +410,16 @@ def chapter_detail(request, chapter_id):
         lp.preview = _qa_preview(lp.post.content)
         lp.body = _qa_body(lp.post.content)
 
+    # 이 목차에 이어 붙인 주제별 문제집 (기출문제풀이)
+    exam_sets = _chapter_exam_sets(chapter)
+
     return render(request, 'practice/chapter_detail.html', {
         'chapter': chapter,
         'content': content,
         'questions': questions,
         'siblings': nearby_chapters,  # 이름은 그대로 유지 (템플릿 호환)
         'linked_posts': linked_posts,
+        'exam_sets': exam_sets,
     })
 
 

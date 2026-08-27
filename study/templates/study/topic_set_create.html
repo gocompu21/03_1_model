@@ -250,6 +250,12 @@
                                 {% endfor %}
                             </select>
                         </div>
+                        <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
+                            <label class="form-label" style="margin: 0; white-space: nowrap;">목차</label>
+                            <select class="form-control" id="chapterSelect" style="flex: 1;">
+                                <option value="">목차 선택 (선택)</option>
+                            </select>
+                        </div>
                     </div>
                     <div style="display: flex; align-items: flex-start; gap: 6px;">
                         <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px; padding-top: 6px;">설명</label>
@@ -473,6 +479,7 @@ document.addEventListener('DOMContentLoaded', function() {
             title: title,
             description: description,
             subject_id: subjectId,
+            chapter_id: document.getElementById('chapterSelect').value || null,
             question_ids: questionIds
         };
         
@@ -499,6 +506,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // 목차 고르기 — 과목을 고르면 그 과목 것만 보인다
+    const ALL_CHAPTERS = JSON.parse('{{ chapters_json|escapejs|default:"[]" }}');
+    const chapterSelect = document.getElementById('chapterSelect');
+
+    function fillChapters(subjectName, keepId) {
+        if (!chapterSelect) return;
+        const before = keepId || chapterSelect.value;
+        chapterSelect.innerHTML = '<option value="">목차 선택 (선택)</option>';
+        ALL_CHAPTERS.forEach(function (ch) {
+            // 과목을 고르지 않았으면 전부, 골랐으면 그 과목만
+            if (subjectName && ch.subject !== subjectName) return;
+            const o = document.createElement('option');
+            o.value = ch.id;
+            o.textContent = ch.label;
+            chapterSelect.appendChild(o);
+        });
+        if (before) chapterSelect.value = before;
+    }
+
+    (function () {
+        const sel = document.getElementById('subjectSelect');
+        if (!sel) return;
+        sel.addEventListener('change', function () {
+            const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+            fillChapters(sel.value ? name : '');
+        });
+    })();
+
     // 초기 데이터 로드 (수정 모드)
     {% if topic_set %}
     titleInput.value = "{{ topic_set.title|escapejs }}";
@@ -507,6 +542,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (subjectSelect) {
         subjectSelect.value = "{{ topic_set.subject.id|default:'' }}";
     }
+    fillChapters("{{ topic_set.subject.name|escapejs }}", "{{ topic_set.chapter.id|default:'' }}");
     
     {% if initial_cart_json %}
     const initialCart = JSON.parse('{{ initial_cart_json|escapejs }}');
