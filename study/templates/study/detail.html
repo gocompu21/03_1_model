@@ -1033,7 +1033,30 @@
 </div>
 
 <script>
+    // 화면에 다가온 문항의 용어를 미리 받아 둔다.
+    // 답을 고른 뒤에 부르면 그때부터 기다려야 해서 늦게 보인다.
+    // 140문항을 한꺼번에 부르면 그 자체로 느려지므로 보이는 것부터 받는다
+    function prefetchTerms() {
+        const cards = document.querySelectorAll('.question-card');
+        if (!('IntersectionObserver' in window)) {
+            // 옛 브라우저는 앞의 몇 개만 받아 둔다
+            Array.from(cards).slice(0, 10)
+                .forEach(card => loadTerms(card, false));
+            return;
+        }
+        const io = new IntersectionObserver((entries, obs) => {
+            entries.forEach(en => {
+                if (!en.isIntersecting) return;
+                loadTerms(en.target, false);
+                obs.unobserve(en.target);
+            });
+        }, { rootMargin: '600px' });   // 화면에 닿기 전에 미리
+        cards.forEach(card => io.observe(card));
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
+        prefetchTerms();
+
         // 1. Collect Subjects
         const cards = document.querySelectorAll('.question-card');
         const subjects = new Set();
@@ -1229,13 +1252,18 @@
 
     // 관련 용어를 불러 문항 아래에 붙인다.
     // 답을 고를 때, '해설 보기', '전체 펼치기' 세 곳에서 함께 쓴다
-    function loadTerms(card) {
+    // 답을 고르는 순간 바로 나와야 하므로 미리 받아 둔다.
+    // show=false 면 받아만 두고 화면에는 내놓지 않는다
+    function loadTerms(card, show) {
         if (!card) return;
         const termsContainer = card.querySelector('.terms-container');
         if (!termsContainer) return;
-        if (termsContainer.getAttribute('data-loaded') !== 'false') {
-            // 이미 불러 둔 것은 다시 보여 주기만 한다
-            if (termsContainer.innerHTML.trim()) {
+        if (show !== false) termsContainer.dataset.wanted = '1';
+
+        const state = termsContainer.getAttribute('data-loaded');
+        if (state !== 'false') {
+            // 이미 받아 둔 것은 보여 주기만 한다
+            if (termsContainer.dataset.wanted === '1' && termsContainer.innerHTML.trim()) {
                 termsContainer.style.display = 'block';
             }
             return;
@@ -1263,7 +1291,10 @@
                     });
                     html += '</div></div>';
                     termsContainer.innerHTML = html;
-                    termsContainer.style.display = 'block';
+                    // 미리 받아 둔 것이면 아직 내놓지 않는다
+                    if (termsContainer.dataset.wanted === '1') {
+                        termsContainer.style.display = 'block';
+                    }
                 }
                 termsContainer.setAttribute('data-loaded', 'true');
             })
@@ -1334,8 +1365,8 @@
                 // 정답이 드러나는 시점이 같으므로 선지별 설명도 함께 펼친다
                 qChoices.classList.add('revealed');
 
-                // Lazy load related terms via AJAX
-                loadTerms(card);
+                // 관련 용어는 여기서 부르지 않는다.
+                // 선지를 골라 답을 볼 때만 문항 아래에 따로 보여 준다
 
                 // MathJax is handled automatically on page load, no manual call needed
             } else if (card && !isHidden) {
@@ -1388,11 +1419,6 @@
             text.textContent = '전체 접기';
             btn.style.backgroundColor = '#d4edda';
             btn.style.color = '#155724';
-
-            // Lazy load related terms for all questions via AJAX
-            document.querySelectorAll('.terms-container').forEach(termsContainer => {
-                loadTerms(termsContainer.closest('.question-card'));
-            });
 
             // MathJax is handled automatically on page load, no manual call needed
         } else {
