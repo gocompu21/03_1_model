@@ -891,7 +891,7 @@
                 {% if content %}
                     {# 용어를 먼저 찾아 점선 링크로 바꾸고 마크다운을 그린다.
                        순서를 바꾸면 마크다운이 만든 태그 속을 건드려 깨진다 #}
-                    {{ content.content|autolink_terms:chapter.book.subject.name|markdown|link_terms|safe }}
+                    {{ content.content|autolink_terms:chapter.book.subject|markdown|link_terms|safe }}
                 {% else %}
                     {% if user.is_staff %}
                     <div class="empty-content">
