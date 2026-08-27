@@ -8,6 +8,7 @@ urlpatterns = [
     path('create/', views.term_create, name='term_create'),
     path('api/add/', views.api_add_term, name='api_add_term'),
     path('api/upload-image/', views.api_upload_image, name='api_upload_image'),
+    path('api/term/<int:pk>/', views.api_term_detail, name='api_term_detail'),
     path('term/<int:pk>/', views.term_detail, name='term_detail'),
     path('term/<int:pk>/edit/', views.term_edit, name='term_edit'),
     path('term/<int:pk>/fetch/', views.fetch_term_from_textbook, name='term_fetch'),

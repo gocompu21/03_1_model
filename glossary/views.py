@@ -106,13 +106,12 @@ def term_list(request):
     return render(request, 'glossary/term_list.html', context)
 
 
-@login_required
-def term_detail(request, pk):
-    """용어 상세 (ID로 조회)"""
+def _render_term_html(term):
+    """용어 content 를 HTML 로 렌더링 (마크다운 + LaTeX 보호).
+    term_detail 페이지와 기출 풀이 인라인 표시(api_term_detail)가 공유"""
     import markdown as md
     import re
-    term = get_object_or_404(Term.objects.prefetch_related('subjects', 'references'), pk=pk)
-    
+
     content = term.content or ''
     
     # JSON에서 가져온 데이터의 이중 이스케이프 수정 (\\text -> \text)
@@ -196,7 +195,24 @@ def term_detail(request, pk):
     # LaTeX 수식 복원
     for i, formula in enumerate(latex_formulas):
         rendered_content = rendered_content.replace(f'LATEXPLACEHOLDER{i}ENDLATEX', formula)
-    
+
+    return rendered_content
+
+
+def api_term_detail(request, pk):
+    """용어 상세 JSON — 기출 풀이 페이지에서 팝업 대신 인라인으로 보여줄 때 사용"""
+    from django.http import JsonResponse
+    term = get_object_or_404(Term, pk=pk)
+    return JsonResponse({'id': term.id, 'word': term.word,
+                         'html': _render_term_html(term)})
+
+
+@login_required
+def term_detail(request, pk):
+    """용어 상세 (ID로 조회)"""
+    term = get_object_or_404(Term.objects.prefetch_related('subjects', 'references'), pk=pk)
+    rendered_content = _render_term_html(term)
+
     # 과목 필터링 (기출문제 연결 시 타 과목 문제 제외)
     subject_id = request.GET.get('subject')
     references = list(term.references.all())

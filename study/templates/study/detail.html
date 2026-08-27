@@ -1252,6 +1252,41 @@
         card.classList.remove('editing');
     }
 
+    // 용어 칩 클릭: 새 창 대신 칩 아래 인라인 패널에 상세를 펼친다
+    function showTermInline(el, termId) {
+        const wrap = el.closest('.terms-container');
+        const panel = wrap ? wrap.querySelector('.term-inline-detail') : null;
+        if (!panel) return true;   // 패널이 없으면 기존 링크 동작으로 폴백
+
+        // 같은 용어를 다시 클릭하면 닫는다
+        if (panel.style.display !== 'none' && panel.dataset.termId == termId) {
+            panel.style.display = 'none';
+            panel.dataset.termId = '';
+            return false;
+        }
+        panel.dataset.termId = termId;
+        panel.style.display = 'block';
+        panel.innerHTML = '<div style="color:#999; font-size:0.85rem;">불러오는 중…</div>';
+
+        fetch(`/glossary/api/term/${termId}/`)
+            .then(r => r.json())
+            .then(data => {
+                if (panel.dataset.termId != termId) return;  // 그새 다른 용어를 눌렀으면 무시
+                panel.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <strong style="font-size:0.9rem; color:#3c4a42;">${data.word}</strong>
+                        <span onclick="const p=this.closest('.term-inline-detail'); p.style.display='none'; p.dataset.termId='';"
+                              style="cursor:pointer; color:#aaa; padding:0 4px;">✕</span>
+                    </div>
+                    <div class="markdown-content" style="font-size:0.88rem; line-height:1.7; color:#444;">${data.html}</div>`;
+                if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([panel]);
+            })
+            .catch(() => {
+                panel.innerHTML = '<div style="color:#b55; font-size:0.85rem;">용어를 불러오지 못했습니다.</div>';
+            });
+        return false;
+    }
+
     // 관련 용어를 불러 문항 아래에 붙인다.
     // 답을 고를 때, '해설 보기', '전체 펼치기' 세 곳에서 함께 쓴다
     // 답을 고르는 순간 바로 나와야 하므로 미리 받아 둔다.
@@ -1290,11 +1325,14 @@
                             else if (term.reference_count >= 5) borderColor = '#c8b48e'; // 저채도 황갈색
                             borderStyle = `border: 1px solid #e2e5e2; border-right-width: 3px; border-right-color: ${borderColor};`;
                         }
-                        html += `<a href="/glossary/term/${term.id}/" target="glossary_popup"
+                        html += `<a href="/glossary/term/${term.id}/" onclick="return showTermInline(this, ${term.id})"
                             style="display: inline-block; padding: 1px 5px; line-height: 1.35; background: #f7f8f7; color: #5a6b60; text-decoration: none; border-radius: 3px; font-size: 0.8rem; ${borderStyle} transition: all 0.2s;">
                             ${term.word}</a>`;
                     });
-                    html += '</div></div>';
+                    html += '</div>';
+                    // 용어 클릭 시 새 창 대신 이 자리에 펼쳐지는 상세 패널
+                    html += '<div class="term-inline-detail" data-term-id="" style="display: none; margin-top: 8px; padding: 10px 14px; background: #fafbfa; border: 1px solid #e2e5e2; border-left: 3px solid #b8c4bc; border-radius: 4px;"></div>';
+                    html += '</div>';
                     termsContainer.innerHTML = html;
                     // 미리 받아 둔 것이면 아직 내놓지 않는다
                     if (termsContainer.dataset.wanted === '1') {
