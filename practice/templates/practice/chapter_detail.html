@@ -260,6 +260,10 @@
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
     }
     .term-panel-body th { background: #eaf5ee; }
+    .term-badge.on {
+        background: #2d6a4f !important;
+        color: #fff !important;
+    }
     .glossary-link.on {
         color: #1b4332;
         background-image: linear-gradient(#2d6a4f, #2d6a4f);
@@ -977,7 +981,8 @@
                 <h3 style="font-size: 1.1rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h3>
                 <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                     {% for term in related_terms %}
-                    <a href="{% url 'glossary:term_detail' term.pk %}" target="glossary_popup" 
+                    <a href="{% url 'glossary:term_detail' term.pk %}" target="glossary_popup"
+                       class="term-badge" data-term="{{ term.pk }}"
                        style="display: inline-block; padding: 4px 10px; background: transparent; color: #1b4332; text-decoration: none; border-radius: 4px; font-size: 0.8rem; border: 1px solid #2d6a4f; 
                        {% if term.reference_count > 0 %}
                        border-right-width: 5px; 
@@ -988,6 +993,8 @@
                     </a>
                     {% endfor %}
                 </div>
+                <!-- 배지를 누르면 여기에 뜻이 펼쳐진다 -->
+                <div id="termPanelHost"></div>
             </div>
             {% endif %}
         </div>
@@ -1638,8 +1645,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // 상자는 문단(<p>) 안에 넣을 수 없다. 블록을 넣으면 HTML 이 깨진다.
         // 대신 문단 뒤에 두고, 누른 낱말이 있는 '줄' 바로 아래로 끌어올린다
         function panelFor(link) {
-            var block = link.closest('p, li, h1, h2, h3, h4, div.content-body')
-                        || link.parentElement;
+            var host = document.getElementById('termPanelHost');
             var panel = document.querySelector('.term-panel');
             if (!panel) {
                 panel = document.createElement('div');
@@ -1654,36 +1660,20 @@ document.addEventListener('DOMContentLoaded', function() {
                          panel.classList.remove('open');
                          panel.style.marginTop = '';
                          panel.style.marginBottom = '';
-                         document.querySelectorAll('.glossary-link.on')
+                         document.querySelectorAll('.term-badge.on')
                              .forEach(function (x) { x.classList.remove('on'); });
                      });
             }
-            if (panel.previousElementSibling !== block) {
-                block.parentNode.insertBefore(panel, block.nextSibling);
-            }
+            if (host && panel.parentNode !== host) host.appendChild(panel);
             return panel;
         }
 
-        // 누른 낱말이 문단의 몇 번째 줄에 있는지 재어, 그 줄 바로 아래로 올린다.
-        // 문단 끝까지 남은 줄만큼 위로 당기면 된다
-        function liftToLine(panel, link) {
-            panel.style.marginTop = '';
-            panel.style.marginBottom = '';
-            var block = panel.previousElementSibling;
-            if (!block) return;
-            var blockBottom = block.getBoundingClientRect().bottom;
-            var lineBottom = link.getBoundingClientRect().bottom;
-            // 음수 여백으로 끌어올리면 문단의 남은 줄과 글자가 겹친다.
-            // 겹침 없이 줄 단위로 넣으려면 문단을 쪼개야 하는데
-            // 본문 HTML 이 깨질 위험이 커서 문단 아래에 그대로 둔다
-            void blockBottom; void lineBottom;
-        }
 
         function show(link, id) {
             var panel;
             keepInPlace(link, function () { panel = panelFor(link); });
 
-            document.querySelectorAll('.glossary-link.on')
+            document.querySelectorAll('.term-badge.on')
                 .forEach(function (x) { x.classList.remove('on'); });
 
             // 같은 낱말을 다시 누르면 접는다
@@ -1693,10 +1683,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             link.classList.add('on');
             panel.dataset.term = id;
-            keepInPlace(link, function () {
-                panel.classList.add('open');
-                liftToLine(panel, link);
-            });
+            keepInPlace(link, function () { panel.classList.add('open'); });
 
             var word = panel.querySelector('.term-panel-word');
             var body = panel.querySelector('.term-panel-body');
@@ -1705,7 +1692,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 keepInPlace(link, function () {
                     word.textContent = w;
                     body.innerHTML = html;
-                    liftToLine(panel, link);
                 });
                 if (window.MathJax && MathJax.typesetPromise) {
                     MathJax.typesetPromise([body]).catch(function () {});
@@ -1730,8 +1716,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         }
 
+        // 본문 링크는 손대지 않는다(새 창). 하단 관련 용어 배지만 가로챈다
         document.addEventListener('click', function (e) {
-            var link = e.target.closest('.glossary-link[data-term]');
+            var link = e.target.closest('.term-badge[data-term]');
             if (!link) return;
             e.preventDefault();
             show(link, link.dataset.term);
