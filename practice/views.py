@@ -305,22 +305,15 @@ def api_post_hit(request, post_id):
 
     본래 제목을 눌러 게시글 화면으로 가면 그곳에서 올랐는데,
     그 자리에서 펼치도록 바꾸면서 조회가 잡히지 않았다.
-    한 사람이 접었다 펴기를 되풀이해도 한 번만 센다.
+    게시판(bbs)과 마찬가지로 펼칠 때마다 센다.
     """
     from bbs.models import Post
     from django.db.models import F
-
-    seen = request.session.get('qa_seen_posts') or []
-    if post_id in seen:
-        post = Post.objects.filter(id=post_id).values_list('hits', flat=True).first()
-        return JsonResponse({'ok': True, 'counted': False, 'hits': post or 0})
 
     updated = Post.objects.filter(id=post_id).update(hits=F('hits') + 1)
     if not updated:
         return JsonResponse({'ok': False}, status=404)
 
-    seen.append(post_id)
-    request.session['qa_seen_posts'] = seen[-200:]   # 너무 커지지 않게
     hits = Post.objects.filter(id=post_id).values_list('hits', flat=True).first()
     return JsonResponse({'ok': True, 'counted': True, 'hits': hits})
 

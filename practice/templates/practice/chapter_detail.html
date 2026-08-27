@@ -1870,16 +1870,15 @@ document.addEventListener('DOMContentLoaded', function() {
             e.stopPropagation();
             item.classList.toggle('open');
 
-            // 펼칠 때 조회수를 올린다.
+            // 펼칠 때마다 조회수를 올린다.
             // 게시글 화면으로 가지 않으므로 여기서 대신 센다
-            if (item.classList.contains('open') && item.dataset.hit !== '1') {
-                item.dataset.hit = '1';
+            if (item.classList.contains('open')) {
                 var pid = item.dataset.postId;
                 if (pid) {
                     fetch('/practice/api/post/' + pid + '/hit/', {
                         method: 'POST',
                         headers: {'X-CSRFToken': csrfToken}
-                    }).catch(function () { item.dataset.hit = ''; });
+                    }).catch(function () {});
                 }
             }
             if (item.classList.contains('open') &&
