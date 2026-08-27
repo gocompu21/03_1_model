@@ -767,13 +767,19 @@
     /* 관련 Q&A — 제목 밑에 앞부분을 보여 주고 누르면 펼친다
        (나의 질의응답 화면과 같은 방식) */
     .linked-post-item { flex-wrap: wrap; cursor: pointer; }
+    /* 제목이 시작되는 자리(배지 폭 + 여백)에 맞춰 들여쓴다.
+       왼쪽 세로선으로 제목과 내용을 눈으로 가른다 */
     .lp-preview {
         flex-basis: 100%;
         width: 100%;
+        box-sizing: border-box;
         font-size: 0.87rem;
         color: #666;
         line-height: 1.6;
-        margin: 5px 0 2px 0;
+        margin: 6px 0 2px 0;
+        padding-left: 12px;
+        margin-left: 3.6em;
+        border-left: 2px solid #e3ece6;
         word-break: break-word;
     }
     .lp-preview .pv-head {
@@ -793,12 +799,13 @@
         display: none;
         flex-basis: 100%;
         width: 100%;
+        box-sizing: border-box;
         font-size: 0.9rem;
         color: #333;
         line-height: 1.75;
-        margin: 6px 0 6px;
-        padding-top: 12px;
-        border-top: 1px solid #e8e8e8;
+        margin: 6px 0 8px 3.6em;
+        padding: 10px 0 0 14px;
+        border-left: 2px solid #cfe0d5;
         word-break: break-word;
     }
     .linked-post-item.open .lp-preview { display: none; }
@@ -829,6 +836,10 @@
     .lp-body table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
     .lp-body th, .lp-body td { border: 1px solid #dde5e0; padding: 7px 10px; text-align: left; }
     .lp-body th { background: #eaf5ee; color: #1b4332; font-weight: 700; }
+
+    @media (max-width: 640px) {
+        .lp-preview, .lp-body { margin-left: 0.6em; }
+    }
     .linked-posts-card {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 16px;
