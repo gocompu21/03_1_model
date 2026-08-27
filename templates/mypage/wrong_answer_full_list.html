@@ -425,6 +425,17 @@
         color: #333;
     }
     .term-panel.open { display: block; }
+    /* 선지 칸 안으로 들어가므로 줄 전체를 차지해야 아래로 내려간다.
+       선지 설명과 왼쪽을 맞춘다 */
+    .choice-item > .term-panel {
+        flex-basis: 100%;
+        width: 100%;
+        box-sizing: border-box;
+        margin-left: 34px;
+    }
+    @media (max-width: 768px) {
+        .choice-item > .term-panel { margin-left: 8px; }
+    }
     .term-panel-head {
         display: flex;
         align-items: center;
@@ -1187,8 +1198,22 @@
             return panel;
         }
 
+        // 누른 낱말이 있는 선지 바로 아래로 옮긴다.
+        // 문항 맨 끝(관련 용어 아래)에 두면 어느 선지 얘기인지 멀어진다
+        function placeUnder(panel, link) {
+            var item = link.closest('.choice-item');
+            if (!item) return;                       // 설명 밖이면 그대로 둔다
+            var note = item.querySelector('.choice-note');
+            if (note && note.nextSibling !== panel) {
+                note.parentNode.insertBefore(panel, note.nextSibling);
+            } else if (!note && item.lastChild !== panel) {
+                item.appendChild(panel);
+            }
+        }
+
         function show(card, link, id) {
             var panel = panelFor(card);
+            placeUnder(panel, link);
             card.querySelectorAll('.term-link.on')
                 .forEach(function (x) { x.classList.remove('on'); });
 
