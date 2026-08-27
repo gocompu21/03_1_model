@@ -529,8 +529,11 @@
        본문이 아니므로 흐리게 두어 읽는 데 방해되지 않게 한다 */
     .exam-ref {
         color: #8aa295;
-        font-size: 0.88em;
+        font-size: 0.86em;
         white-space: nowrap;
+        /* 지문과 붙지 않게 한 칸, 글자 크기가 작아 내려앉으므로 살짝 올린다 */
+        margin-left: 6px;
+        vertical-align: 1px;
     }
     /* 문제집이 여럿이면 사이를 가른다 */
     .exam-set-row + .exam-set-row {
@@ -1196,9 +1199,7 @@
                     {% for q in row.questions %}
                     <li class="question-item">
                         <span class="question-number">({{ forloop.counter }})</span>
-                        <span class="question-preview">{{ q.content|striptags|truncatechars:80 }}
-                            <span class="exam-ref">({{ q.badge }})</span>
-                        </span>
+                        <span class="question-preview">{{ q.content|striptags|truncatechars:80 }}<span class="exam-ref">({{ q.badge }})</span></span>
                     </li>
                     {% endfor %}
                 </ul>
