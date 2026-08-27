@@ -245,7 +245,6 @@ def upload_chapters(request):
     return render(request, 'practice/upload_chapters.html', {'books': books})
 
 
-@login_required
 def _qa_body(html):
     """관련 Q&A 본문을 화면에 맞게 다듬는다.
 
@@ -295,6 +294,7 @@ def _qa_preview(html, limit=180):
     return _plain_preview(_qa_body(html), limit)
 
 
+@login_required
 def chapter_detail(request, chapter_id):
     """목차 컨텐츠 상세 보기"""
     chapter = get_object_or_404(Chapter, id=chapter_id)
