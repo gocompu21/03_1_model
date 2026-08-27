@@ -820,6 +820,28 @@
             }
         }
     </style>
+    <!-- MathJax. 기본서 해설에 $	ext{SO}_2$ 같은 수식 표기가 있어
+         없으면 "$4$월" 처럼 달러 기호가 그대로 보인다.
+         base.html 을 상속하지 않는 화면이라 여기에 따로 둔다 -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                packages: {'[+]': ['ams', 'mhchem', 'newcommand']},
+                processEscapes: true
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/mhchem', '[tex]/newcommand']
+            },
+            chtml: { scale: 1, matchFontHeight: true },
+            options: {
+                enableAssistiveMml: false,
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code', 'mjx-container']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 
 <body>
@@ -1178,6 +1200,14 @@
     (function () {
         var cache = {};
 
+        // 용어 설명에 $	ext{SO}_2$ 같은 수식이 들어 있다.
+        // 나중에 붙는 글이라 MathJax 에게 다시 그려 달라고 해야 한다
+        function typeset(el) {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([el]).catch(function () {});
+            }
+        }
+
         function panelFor(card) {
             var panel = card.querySelector('.term-panel');
             if (panel) return panel;
@@ -1231,6 +1261,7 @@
             if (cache[id]) {
                 word.textContent = cache[id].word;
                 body.innerHTML = cache[id].html;
+                typeset(body);
                 return;
             }
             word.textContent = link.textContent;
@@ -1242,6 +1273,7 @@
                     if (panel.dataset.term !== id) return;
                     word.textContent = d.word;
                     body.innerHTML = d.html || '';
+                    typeset(body);
                 })
                 .catch(function () {
                     if (panel.dataset.term === id) body.textContent = '용어를 불러오지 못했습니다.';
