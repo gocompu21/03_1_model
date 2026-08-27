@@ -893,6 +893,12 @@
                 </div>
             </div>
 
+            <!-- Related Terms (AJAX lazy loading).
+                 해설 블록 밖에 둔다. 안에 두면 '해설 보기'를 누르기 전까지
+                 부모가 display:none 이라 용어만 따로 보여 줄 수 없다.
+                 위치: '해설 듣기' 버튼 줄 위 (2026-08-27 사용자 요청) -->
+            <div id="terms-container-{{ q.id }}" class="terms-container" data-question-id="{{ q.id }}" data-loaded="false" style="display: none;"></div>
+
             <!-- Toggle Button for Explanation -->
             <div style="margin-top: 10px; text-align: right; display: flex; justify-content: flex-end; gap: 15px; align-items: center;">
                 {% if request.user.is_staff %}<button type="button" class="edit-btn" onclick="startEdit(this)" title="수정">&#9998;</button>{% endif %}
@@ -1002,10 +1008,6 @@
                 </div>
             </div>
 
-            <!-- Related Terms (AJAX lazy loading).
-                 해설 블록 밖에 둔다. 안에 두면 '해설 보기'를 누르기 전까지
-                 부모가 display:none 이라 용어만 따로 보여 줄 수 없다 -->
-            <div id="terms-container-{{ q.id }}" class="terms-container" data-question-id="{{ q.id }}" data-loaded="false" style="display: none;"></div>
         </div>
         {% endfor %}
     </div>
