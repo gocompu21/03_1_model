@@ -82,7 +82,7 @@ class Command(BaseCommand):
             # Configure Gemini client
             client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-            model = "gemini-3-pro-image-preview"
+            model = "gemini-3-pro-image"
             contents = [
                 types.Content(
                     role="user",

@@ -77,7 +77,7 @@ def generate_infographic(question, client):
     )
     
     for chunk in client.models.generate_content_stream(
-        model="gemini-3-pro-image-preview",
+        model="gemini-3-pro-image",
         contents=contents,
         config=config,
     ):

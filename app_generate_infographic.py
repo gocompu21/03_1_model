@@ -92,7 +92,7 @@ def generate_infographic(question, client):
     """Generate infographic image for a question using Gemini API."""
     prompt = build_infographic_prompt(question)
     
-    model = "gemini-3-pro-image-preview"
+    model = "gemini-3-pro-image"
     contents = [
         types.Content(
             role="user",

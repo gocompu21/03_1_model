@@ -792,7 +792,7 @@ Requirements:
         
         # Gemini Client 설정
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        model = "gemini-3-pro-image-preview"
+        model = "gemini-3-pro-image"
         
         contents = [
             types.Content(
@@ -1007,7 +1007,7 @@ def api_generate_image_variations(request):
         description = analysis_response.text
         
         # 2. Image Generation (Text-to-Image) for 3 styles (Removed Cartoon)
-        gen_model = "gemini-3-pro-image-preview"
+        gen_model = "gemini-3-pro-image"
         
         styles = {
             'watercolor': "Create a beautiful Watercolor painting of: ",
@@ -1106,7 +1106,7 @@ def api_generate_image_from_text(request):
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
         # Image Generation (Text-to-Image)
-        gen_model = "gemini-3-pro-image-preview"
+        gen_model = "gemini-3-pro-image"
         
         gen_config = types.GenerateContentConfig(
             response_modalities=["IMAGE"],
@@ -1207,9 +1207,9 @@ def api_edit_image(request):
         # Gemini Client
         client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
-        # Use gemini-3-pro-image-preview for Image-to-Image generation
+        # Use gemini-3-pro-image for Image-to-Image generation
         # gemini-2.0-flash-exp does not support image output modality yet
-        model = "gemini-3-pro-image-preview"
+        model = "gemini-3-pro-image"
         
         # Construct content for editing
         # "Edit this image: [image] \n Instruction: [prompt]"
