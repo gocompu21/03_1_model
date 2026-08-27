@@ -1060,8 +1060,8 @@
             <!-- Related Terms -->
             {% get_relevant_terms content.content chapter.book.subject as related_terms %}
             {% if related_terms %}
-            <div style="margin-top: 40px; border-top: 1px dashed #ddd; padding-top: 20px;">
-                <h3 style="font-size: 1.1rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h3>
+            <div style="margin-top: 24px; border-top: 1px dashed #ddd; padding-top: 12px;">
+                <h3 style="font-size: 1.1rem; color: #2d6a4f; margin: 0 0 10px;">🔑 관련 용어</h3>
                 <div style="display: flex; flex-wrap: wrap; gap: 4px;">
                     {% for term in related_terms %}
                     <a href="{% url 'glossary:term_detail' term.pk %}" target="glossary_popup"
