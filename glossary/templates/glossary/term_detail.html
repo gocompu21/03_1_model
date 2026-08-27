@@ -734,9 +734,10 @@ async function toggleAllQuestions() {
                 const isAnswer = data.answer.includes(i);
                 const circled = ['①','②','③','④','⑤'][i-1];
                 // 선지별 설명 (기출 학습 화면과 같은 모양)
+                // 선지 설명 안의 용어도 해설과 똑같이 짚어 준다
                 const note = (data.choice_notes || {})[i];
                 const noteHtml = note
-                    ? `<div class="choice-note">${note}</div>` : '';
+                    ? `<div class="choice-note">${highlightTerm(note)}</div>` : '';
                 choicesHtml += `
                     <div class="choice-item ${isAnswer ? 'correct is-answer' : ''}">
                         <span class="choice-num ${isAnswer ? 'correct' : ''}">${circled}</span> ${highlightTerm(choice)}
@@ -984,6 +985,10 @@ async function toggleAllQuestions() {
         color: #d93025;
         font-size: inherit;
         font-weight: inherit;
+        /* 글자색만으로는 눈에 잘 안 걸린다. 연한 바탕을 함께 깐다 */
+        background: #fdf3d0;
+        border-radius: 3px;
+        padding: 0 2px;
     }
 
     /* 모바일 - 여백 최소화 */
