@@ -764,6 +764,71 @@
     }
 
     /* ===== Linked BBS Posts Section ===== */
+    /* 관련 Q&A — 제목 밑에 앞부분을 보여 주고 누르면 펼친다
+       (나의 질의응답 화면과 같은 방식) */
+    .linked-post-item { flex-wrap: wrap; cursor: pointer; }
+    .lp-preview {
+        flex-basis: 100%;
+        width: 100%;
+        font-size: 0.87rem;
+        color: #666;
+        line-height: 1.6;
+        margin: 5px 0 2px 0;
+        word-break: break-word;
+    }
+    .lp-preview .pv-head {
+        display: inline-block;
+        background: #eaf5ee;
+        color: #1b4332;
+        font-weight: 700;
+        font-size: 0.78rem;
+        padding: 1px 8px;
+        border-radius: 4px;
+        margin-right: 7px;
+    }
+    .lp-preview strong, .lp-preview b { color: #2d4a3a; font-weight: 700; }
+    .lp-preview em, .lp-preview i { color: #40684f; }
+
+    .lp-body {
+        display: none;
+        flex-basis: 100%;
+        width: 100%;
+        font-size: 0.9rem;
+        color: #333;
+        line-height: 1.75;
+        margin: 6px 0 6px;
+        padding-top: 12px;
+        border-top: 1px solid #e8e8e8;
+        word-break: break-word;
+    }
+    .linked-post-item.open .lp-preview { display: none; }
+    .linked-post-item.open .lp-body { display: block; }
+
+    .lp-body h3 {
+        font-size: 0.97rem; color: #1b4332; font-weight: 700;
+        margin: 16px 0 8px; padding-left: 10px;
+        border-left: 4px solid #2d6a4f; line-height: 1.4;
+    }
+    .lp-body h3:first-child { margin-top: 0; }
+    .lp-body h4 { font-size: 0.93rem; color: #2d6a4f; margin: 13px 0 6px; }
+    .lp-body p { margin: 0 0 9px; }
+    .lp-body ul, .lp-body ol { margin: 0 0 10px; padding-left: 20px; }
+    .lp-body li { margin-bottom: 6px; }
+    .lp-body li::marker { color: #2d6a4f; font-weight: 700; }
+    .lp-body strong {
+        color: #14452f; font-weight: 700;
+        background: linear-gradient(#eaf5ee, #eaf5ee);
+        background-size: 100% 0.45em;
+        background-position: 0 88%;
+        background-repeat: no-repeat;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+    }
+    .lp-body img { max-width: 100%; height: auto; border-radius: 6px; }
+    .lp-body .table-wrap { overflow-x: auto; margin: 10px 0; }
+    .lp-body table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+    .lp-body th, .lp-body td { border: 1px solid #dde5e0; padding: 7px 10px; text-align: left; }
+    .lp-body th { background: #eaf5ee; color: #1b4332; font-weight: 700; }
     .linked-posts-card {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 16px;
@@ -1018,6 +1083,9 @@
                     {% if user.is_staff %}
                     <button class="unlink-btn" onclick="unlinkPost({{ lp.post.id }})">해제</button>
                     {% endif %}
+                    {# 제목 밑에 앞부분을 보여 주고, 누르면 본문이 펼쳐진다 #}
+                    <div class="lp-preview">{{ lp.preview|safe }}</div>
+                    <div class="lp-body">{{ lp.post.content|safe }}</div>
                 </div>
                 {% empty %}
                 <div id="no-linked-posts" style="text-align: center; color: #999; padding: 15px; font-size: 0.9rem;">
@@ -1722,6 +1790,34 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!link) return;
             e.preventDefault();
             show(link, link.dataset.term);
+        });
+    })();
+
+
+    // 관련 Q&A: 누르면 본문을 펼친다 (제목 링크와 해제 단추는 그대로)
+    (function () {
+        var list = document.querySelector('.linked-posts-card');
+        if (!list) return;
+
+        // 표는 좁은 화면에서 밀려 나가므로 감싸 둔다
+        list.querySelectorAll('.lp-body table').forEach(function (t) {
+            if (t.parentNode.classList.contains('table-wrap')) return;
+            var w = document.createElement('div');
+            w.className = 'table-wrap';
+            t.parentNode.insertBefore(w, t);
+            w.appendChild(t);
+        });
+
+        list.addEventListener('click', function (e) {
+            if (e.target.closest('a')) return;          // 제목 링크는 본래대로
+            if (e.target.closest('.unlink-btn')) return;
+            var item = e.target.closest('.linked-post-item');
+            if (!item) return;
+            item.classList.toggle('open');
+            if (item.classList.contains('open') &&
+                window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([item]).catch(function () {});
+            }
         });
     })();
 

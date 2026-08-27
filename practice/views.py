@@ -296,6 +296,11 @@ def chapter_detail(request, chapter_id):
         chapter=chapter
     ).select_related('post', 'post__author', 'post__type')
 
+    # 제목 밑에 본문 앞부분을 보여 준다 (나의 질의응답과 같은 방식)
+    from mypage.views import _plain_preview
+    for lp in linked_posts:
+        lp.preview = _plain_preview(lp.post.content)
+
     return render(request, 'practice/chapter_detail.html', {
         'chapter': chapter,
         'content': content,
