@@ -60,15 +60,24 @@ def glossary_styles():
     """Glossary 링크 스타일 CSS 반환"""
     return mark_safe('''
     <style>
+        /* 다른 화면(기출·복습·오답노트)의 용어 점선과 같은 모양.
+           text-decoration 의 dotted 는 점이 붙어 실선처럼 뭉개진다.
+           작은 점을 촘촘히 깔아 얌전하게 보이도록 한다 */
         .glossary-link {
-            color: #2d6a4f;
-            text-decoration: underline;
-            text-decoration-style: dotted;
+            color: inherit;
+            font-weight: inherit;
+            text-decoration: none;
             cursor: pointer;
+            background-image: radial-gradient(circle, #9bb0c4 0.7px, transparent 0.8px);
+            background-size: 2.5px 2px;
+            background-position: 0 100%;
+            background-repeat: repeat-x;
+            padding-bottom: 1px;
         }
         .glossary-link:hover {
-            background: #e8f5e9;
-            text-decoration-style: solid;
+            color: #1b4332;
+            background-image: linear-gradient(#2d6a4f, #2d6a4f);
+            background-size: 100% 1.5px;
         }
         .glossary-missing {
             color: #999;
