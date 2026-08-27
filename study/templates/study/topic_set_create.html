@@ -236,26 +236,27 @@
             <div class="panel" style="margin-bottom: 15px;">
                 <div class="panel-header">📄 문제집 정보</div>
                 <div class="panel-body">
+                    {# 과목 → 목차 → 제목 순. 목차를 고르면 제목이 자동으로 채워진다 #}
                     <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 8px;">
-                        <div style="display: flex; align-items: center; gap: 6px; flex: 2;">
-                            <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px;">제목 <span style="color:red">*</span></label>
-                            <input type="text" class="form-control" id="titleInput" placeholder="예: 탄저병 관련 기출문제" style="flex: 1;">
-                        </div>
                         <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
-                            <label class="form-label" style="margin: 0; white-space: nowrap;">과목</label>
+                            <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px;">과목 <span style="color:red">*</span></label>
                             <select class="form-control" id="subjectSelect" style="flex: 1;">
-                                <option value="">과목 선택 (필수)</option>
+                                <option value="">과목 선택</option>
                                 {% for subject in subjects %}
                                 <option value="{{ subject.id }}">{{ subject.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px; flex: 1;">
-                            <label class="form-label" style="margin: 0; white-space: nowrap;">목차</label>
+                        <div style="display: flex; align-items: center; gap: 6px; flex: 2;">
+                            <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px;">목차</label>
                             <select class="form-control" id="chapterSelect" style="flex: 1;">
                                 <option value="">목차 선택 (선택)</option>
                             </select>
                         </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
+                        <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px;">제목 <span style="color:red">*</span></label>
+                        <input type="text" class="form-control" id="titleInput" placeholder="목차를 고르면 자동으로 채워집니다" style="flex: 1;">
                     </div>
                     <div style="display: flex; align-items: flex-start; gap: 6px;">
                         <label class="form-label" style="margin: 0; white-space: nowrap; min-width: 35px; padding-top: 6px;">설명</label>
@@ -531,6 +532,24 @@ document.addEventListener('DOMContentLoaded', function() {
         sel.addEventListener('change', function () {
             const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
             fillChapters(sel.value ? name : '');
+        });
+    })();
+
+    // 목차를 고르면 그 이름을 제목으로 쓴다.
+    // 사람이 손으로 고친 제목은 덮어쓰지 않는다
+    (function () {
+        if (!chapterSelect || !titleInput) return;
+
+        titleInput.addEventListener('input', function () {
+            // 사람이 직접 쓴 순간부터는 자동으로 바꾸지 않는다
+            titleInput.dataset.edited = titleInput.value.trim() ? '1' : '';
+        });
+
+        chapterSelect.addEventListener('change', function () {
+            if (!chapterSelect.value) return;
+            if (titleInput.dataset.edited === '1') return;
+            const opt = chapterSelect.options[chapterSelect.selectedIndex];
+            if (opt) titleInput.value = opt.textContent.trim();
         });
     })();
 
