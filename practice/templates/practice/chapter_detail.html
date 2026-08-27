@@ -876,13 +876,15 @@
     .linked-post-info a {
         color: #333;
         text-decoration: none;
-        font-weight: normal;
+        font-weight: 600;
         font-size: 0.95rem;
     }
     .linked-post-info a:hover {
         color: #2d6a4f;
-        text-decoration: underline;
+        /* 새 창으로 가지 않고 그 자리에서 펼치므로 밑줄은 넣지 않는다 */
     }
+    /* 펼친 항목의 제목은 진하게 남겨 어디를 폈는지 알 수 있게 */
+    .linked-post-item.open .linked-post-info a { color: #1b4332; }
     .linked-post-meta {
         color: #999;
         font-size: 0.8rem;
@@ -1820,10 +1822,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         list.addEventListener('click', function (e) {
-            if (e.target.closest('a')) return;          // 제목 링크는 본래대로
             if (e.target.closest('.unlink-btn')) return;
             var item = e.target.closest('.linked-post-item');
             if (!item) return;
+            // 제목을 눌러도 새 창으로 가지 않고 그 자리에서 펼친다.
+            // 본문 안의 링크는 본래대로 따라간다
+            var a = e.target.closest('a');
+            if (a && !a.closest('.lp-body')) e.preventDefault();
+            else if (a) return;
             item.classList.toggle('open');
             if (item.classList.contains('open') &&
                 window.MathJax && MathJax.typesetPromise) {
