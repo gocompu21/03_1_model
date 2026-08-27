@@ -1096,7 +1096,9 @@
                         {% if lp.post.type %}
                         <span class="linked-post-type">{{ lp.post.type.name }}</span>
                         {% endif %}
-                        <a href="{% url 'bbs:post_detail' lp.post.pk %}" target="_blank">{{ lp.post.title|safe }}</a>
+                        {# 그 자리에서 펼치므로 새 창으로 열지 않는다.
+                           href 는 남겨 새 탭으로 열기(가운데 클릭)는 되게 한다 #}
+                        <a href="{% url 'bbs:post_detail' lp.post.pk %}">{{ lp.post.title|safe }}</a>
                     </div>
                     {% if user.is_staff %}
                     <button class="unlink-btn" onclick="unlinkPost({{ lp.post.id }})">해제</button>
@@ -1646,7 +1648,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 화면에 이미 있는 항목과 같은 구조로 만든다.
                 // 제목만 넣으면 미리보기와 펼칠 본문이 없어 다른 항목과 어긋난다
                 item.innerHTML = `<div class="linked-post-info">
-                    ${typeTag}<a href="/bbs/${lk.post_id}/" target="_blank">${lk.title}</a>
+                    ${typeTag}<a href="/bbs/${lk.post_id}/">${lk.title}</a>
                 </div><button class="unlink-btn" onclick="unlinkPost(${lk.post_id})">해제</button>
                 <div class="lp-preview"></div><div class="lp-body"></div>`;
                 // 본문에 백틱이 들어 있으면 문자열이 깨지므로 따로 넣는다
@@ -1864,7 +1866,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!head) return;
             var item = head.closest('.linked-post-item');
             if (!item) return;
-            e.preventDefault();          // 새 창으로 가지 않는다
+            // 제목이 <a> 라 그냥 두면 게시글 화면으로 넘어간다
+            e.preventDefault();
+            e.stopPropagation();
             item.classList.toggle('open');
 
             // 펼칠 때 조회수를 올린다.
