@@ -239,10 +239,29 @@ def _link_terms(text, subject_name):
         inner = m.group(1)
         # 안에 <i> 같은 것이 섞여 있으면 글자만 뽑아 찾는다
         plain = re.sub(r"<[^>]+>", "", inner).strip()
+
         tid = lookup.get(plain)
-        if tid is None:
-            return inner              # 사전에 없으면 표시하지 않는다
-        return '<a class="term-link" data-term="%d">%s</a>' % (tid, inner)
+        if tid is not None:
+            return '<a class="term-link" data-term="%d">%s</a>' % (tid, inner)
+
+        # 통째로는 없어도 안에 사전 낱말이 들어 있는 경우가 많다.
+        # "나출자낭(표징)" -> "나출자낭", "표징이 나타나지 않습니다" -> "표징"
+        # 태그가 섞인 것은 자리를 옮기기 어려우니 건드리지 않는다
+        if "<" not in inner:
+            best = None
+            for word, wid in lookup.items():
+                if len(word) < 2 or word not in inner:
+                    continue
+                if best is None or len(word) > len(best[0]):
+                    best = (word, wid)
+            if best:
+                word, wid = best
+                i = inner.index(word)
+                return "%s<a class=\"term-link\" data-term=\"%d\">%s</a>%s" % (
+                    inner[:i], wid, word, inner[i + len(word):]
+                )
+
+        return inner                  # 사전에 없으면 표시하지 않는다
 
     return re.sub(r"<em>(.*?)</em>", repl, text, flags=re.S)
 
