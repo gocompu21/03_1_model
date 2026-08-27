@@ -115,7 +115,9 @@ _LATIN_ONE = _re.compile(
 _LATIN_TWO = _re.compile(r'[A-Z][a-z]+\s+[a-z][a-z-]+\Z')
 _LATIN_SPP = _re.compile(r'[A-Z][a-z]+\s+spp?\.\Z')
 _PLAIN_WORD = _re.compile(r'[A-Za-z][A-Za-z .\-]*\Z')
-_MATH_WRAP = _re.compile(r'\$([^$\n]{1,40})\$')
+_MATH_WRAP = _re.compile(r'\$([^$\n]{1,60})\$')
+# 숫자와 단위뿐인 것 (50%, 2mm, 1 ~ 2m, 0)
+_NUM_UNIT = _re.compile(r'[\d.,~\u00d7\u2248\s\-]*[\d%]+\s*[A-Za-z%\u00b0\u03bc]{0,6}\Z')
 
 # 라틴어 꼴이지만 학명이 아닌 일반 용어
 _NOT_LATIN = {
@@ -139,6 +141,26 @@ def _unwrap_plain_math(text):
     """
     def repl(m):
         inner = m.group(1).strip()
+
+        # \textit{Valsa abietis} 같은 학명 표기 -> 본문 글꼴 이탤릭
+        _TEXTIT = _re.compile(r'\\+(?:textit|mathit|emph)\{([^{}]*)\}\Z')
+        m2 = _TEXTIT.match(inner)
+        if m2:
+            return '<i>' + m2.group(1).strip() + '</i>'
+
+        # $50\%$, $2\text{mm}$, $1 \sim 2\text{m}$ 처럼
+        # 숫자와 단위뿐인 것은 수식으로 그릴 이유가 없다
+        plain = inner
+        plain = _re.sub(r'\\+(?:sim|thicksim)', '~', plain)
+        plain = _re.sub(r'\\+times', '×', plain)
+        plain = _re.sub(r'\\+approx', '≈', plain)
+        plain = _re.sub(r'\\+text\{([A-Za-z%°μ]+)\}', lambda mm: mm.group(1), plain)
+        plain = _re.sub(r'\\+%', '%', plain)
+        plain = _re.sub(r'\\+,', ' ', plain)
+        plain = plain.replace('\\ ', ' ')
+        if _NUM_UNIT.match(plain):
+            return ' '.join(plain.split())
+
         if not _PLAIN_WORD.match(inner):
             return m.group(0)          # 수식이거나 기호가 섞였다
         if len(inner) <= 2:
