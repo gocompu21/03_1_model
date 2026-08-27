@@ -560,6 +560,35 @@
         padding-left: 0;
     }
 
+
+    /* '1.' 이 마크다운 목록(<ol><li>)으로 그려지는 용어가 있다.
+       그 안의 '-' 는 <li> 자체 들여쓰기를 이미 받으므로
+       바깥에서 주던 들여쓰기를 덜어낸다 (안 그러면 두 번 밀린다) */
+    .term-panel-body li .bullet-item {
+        margin-left: 0;
+    }
+    .term-panel-body li .bullet-level2 {
+        margin: 2px 0 2px 0.2em;
+        padding-left: 1.1em;
+    }
+    .term-panel-body li .bullet-level1 {
+        margin: 3px 0 3px 0;
+    }
+
+    /* '1.' 이 마크다운 목록(<ol><li>)으로 그려지는 용어가 있다.
+       그 안의 '-' 는 <li> 자체 들여쓰기를 이미 받으므로
+       바깥에서 주던 들여쓰기를 덜어낸다 (안 그러면 두 번 밀린다) */
+    .term-inline-detail li .bullet-item {
+        margin-left: 0;
+    }
+    .term-inline-detail li .bullet-level2 {
+        margin: 2px 0 2px 0.2em;
+        padding-left: 1.1em;
+    }
+    .term-inline-detail li .bullet-level1 {
+        margin: 3px 0 3px 0;
+    }
+
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
     .term-panel-body th, .term-panel-body td {
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
