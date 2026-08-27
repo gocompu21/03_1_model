@@ -1096,8 +1096,7 @@
                         {% if lp.post.type %}
                         <span class="linked-post-type">{{ lp.post.type.name }}</span>
                         {% endif %}
-                        {# 그 자리에서 펼치므로 새 창으로 열지 않는다.
-                           href 는 남겨 새 탭으로 열기(가운데 클릭)는 되게 한다 #}
+                        {# 그 자리에서 펼치므로 target 을 두지 않는다 (href 는 새 탭 열기용) #}
                         <a href="{% url 'bbs:post_detail' lp.post.pk %}">{{ lp.post.title|safe }}</a>
                     </div>
                     {% if user.is_staff %}
