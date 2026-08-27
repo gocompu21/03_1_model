@@ -491,6 +491,15 @@
         .term-panel-body .bullet-item.has-label > .bullet { position: absolute; }
     }
 
+    /* 학명은 본문 글꼴의 이탤릭으로. 수식 글꼴(세리프)이 아니다.
+       기울면 뒤 한글에 닿으므로 오른쪽에 살짝 여백을 준다 */
+    .term-panel-body i,
+    .term-inline-detail i {
+        font-style: italic;
+        font-family: inherit;
+        padding-right: 0.1em;
+    }
+
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
     .term-panel-body th, .term-panel-body td {
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;

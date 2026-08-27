@@ -106,6 +106,52 @@ def term_list(request):
     return render(request, 'glossary/term_list.html', context)
 
 
+import re as _re
+
+# 학명 꼴: 한 낱말이면 대문자로 시작하는 라틴어, 두 낱말이면 'Genus species'
+_LATIN_ONE = _re.compile(
+    r'[A-Z][a-z]+(?:us|um|a|ae|er|ia|ium|ella|monas|bacter|myces|spora|phora'
+    r'|ptera|idae|aceae|ales|ota|osis|ix|ans|ens)\Z')
+_LATIN_TWO = _re.compile(r'[A-Z][a-z]+\s+[a-z][a-z-]+\Z')
+_LATIN_SPP = _re.compile(r'[A-Z][a-z]+\s+spp?\.\Z')
+_PLAIN_WORD = _re.compile(r'[A-Za-z][A-Za-z .\-]*\Z')
+_MATH_WRAP = _re.compile(r'\$([^$\n]{1,40})\$')
+
+# 라틴어 꼴이지만 학명이 아닌 일반 용어
+_NOT_LATIN = {
+    'Cellulose', 'Lignin', 'Mycorrhiza', 'Haustorium', 'Lichen', 'Algae',
+    'Melanin', 'Sapwood', 'Chroma', 'Value', 'Hue', 'Basidiospore',
+    'Ascospore', 'Conidia', 'Mycelium', 'Hypha', 'Chitin', 'Septum',
+    'Spore', 'Cutin', 'Suberin', 'Pectin', 'Callose', 'Chlorophyll',
+    'Xylem', 'Phloem', 'Cambium', 'Stoma', 'Stomata', 'Lenticel',
+    'Cuticle', 'Auxin', 'Ethylene', 'Oxisol', 'Ultisol', 'Alfisol',
+    'Mollisol', 'Spodosol', 'Entisol', 'Inceptisol', 'Aridisol',
+    'Histosol', 'Vertisol', 'Andisol', 'Gelisol', 'Taxis', 'Geotaxis',
+}
+
+
+def _unwrap_plain_math(text):
+    """수식일 이유가 없는 $...$ 를 걷어낸다.
+
+    학명은 이탤릭이 맞지만 수식 글꼴(세리프)이 아니라 본문 글꼴이어야 하므로
+    <i> 로 바꾼다. 그 밖의 영문 낱말은 보통 글자로 되돌린다.
+    수식 기호(_ ^ { } 백슬래시)가 든 것과 한두 글자 변수는 그대로 둔다.
+    """
+    def repl(m):
+        inner = m.group(1).strip()
+        if not _PLAIN_WORD.match(inner):
+            return m.group(0)          # 수식이거나 기호가 섞였다
+        if len(inner) <= 2:
+            return m.group(0)          # $x$, $K$ 같은 변수
+        if inner in _NOT_LATIN:
+            return inner               # 학명이 아닌 일반 용어
+        if _LATIN_TWO.match(inner) or _LATIN_SPP.match(inner) or _LATIN_ONE.match(inner):
+            return '<i>' + inner + '</i>'
+        return inner                   # 그 밖의 영문 낱말은 보통 글자로
+
+    return _MATH_WRAP.sub(repl, text)
+
+
 def _render_term_html(term):
     """용어 content 를 HTML 로 렌더링 (마크다운 + LaTeX 보호).
     term_detail 페이지와 기출 풀이 인라인 표시(api_term_detail)가 공유"""
@@ -119,6 +165,9 @@ def _render_term_html(term):
     # lambda 함수를 사용하면 replacement 이스케이프 문제를 피할 수 있음
     content = re.sub(r'\\\\', lambda m: chr(92), content)  # \\ -> \ 변환 (chr(92) = \)
     
+    # 수식일 이유가 없는 $...$ 를 먼저 걷어낸다 (학명은 <i> 로)
+    content = _unwrap_plain_math(content)
+
     # LaTeX 수식을 임시로 보호 (마크다운 변환에서 제외)
     latex_formulas = []
     def save_latex(match):
