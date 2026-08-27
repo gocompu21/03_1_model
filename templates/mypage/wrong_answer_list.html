@@ -356,9 +356,11 @@
         left: 0;
         font-weight: 700;
     }
-    .term-panel-body .bullet-level1 { margin-left: 0; }
+    /* margin-left 만 쓰면 위 .bullet-item 의 margin(3px 0)이 통째로 덮여
+       문단 기본 여백이 살아난다. 상하 간격을 함께 적는다 */
+    .term-panel-body .bullet-level1 { margin: 3px 0 3px 0; }
     .term-panel-body .bullet-level2 {
-        margin-left: 1.1em;
+        margin: 2px 0 2px 1.1em;
         padding-left: 1.1em;
     }
     .term-panel-body .bullet-level2 .bullet { font-weight: 400; }
