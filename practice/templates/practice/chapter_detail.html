@@ -1673,15 +1673,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!block) return;
             var blockBottom = block.getBoundingClientRect().bottom;
             var lineBottom = link.getBoundingClientRect().bottom;
-            var below = blockBottom - lineBottom;      // 그 줄 아래에 남은 높이
-            if (below > 4) {
-                // 위로 당기면 문단의 남은 줄과 겹친다.
-                // 그만큼 아래쪽에 자리를 비워 밀어낸다
-                panel.style.marginTop = (-below) + 'px';
-                panel.style.marginBottom = (below + 12) + 'px';
-            } else {
-                panel.style.marginBottom = '';
-            }
+            // 음수 여백으로 끌어올리면 문단의 남은 줄과 글자가 겹친다.
+            // 겹침 없이 줄 단위로 넣으려면 문단을 쪼개야 하는데
+            // 본문 HTML 이 깨질 위험이 커서 문단 아래에 그대로 둔다
+            void blockBottom; void lineBottom;
         }
 
         function show(link, id) {
