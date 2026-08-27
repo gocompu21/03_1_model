@@ -408,6 +408,38 @@
     }
     .term-panel-body .bullet-level2 .bullet { font-weight: 400; }
     .term-panel-body .bullet-indent { margin-left: 2.8em; }
+    /* 관련 용어 배지를 눌렀을 때 열리는 상자.
+       term-panel 과 다른 자리라 같은 규칙을 함께 적어 준다 */
+    .term-inline-detail .markdown-content p { margin: 0 0 5px; }
+    .term-inline-detail .markdown-content p:first-child { margin-top: 0; }
+    .term-inline-detail .markdown-content p:last-child { margin-bottom: 0; }
+    .term-inline-detail .markdown-content h3,
+    .term-inline-detail .markdown-content h4 {
+        font-size: 0.92rem; color: #2d6a4f; margin: 11px 0 4px;
+    }
+    .term-inline-detail .markdown-content h3:first-child,
+    .term-inline-detail .markdown-content h4:first-child { margin-top: 0; }
+    .term-inline-detail .markdown-content ul,
+    .term-inline-detail .markdown-content ol { padding-left: 19px; margin: 4px 0 6px; }
+    .term-inline-detail .markdown-content li { margin-bottom: 2px; }
+
+    /* 내어쓰기 — '1)' 다음 줄이 글자 자리에 맞춰지도록 */
+    .term-inline-detail .bullet-item {
+        position: relative;
+        padding-left: 1.75em;
+        margin: 3px 0;
+    }
+    .term-inline-detail .bullet-item .bullet {
+        position: absolute; left: 0; font-weight: 700;
+    }
+    .term-inline-detail .bullet-level1 { margin: 3px 0 3px 0; }
+    .term-inline-detail .bullet-level2 {
+        margin: 2px 0 2px 1.1em;
+        padding-left: 1.1em;
+    }
+    .term-inline-detail .bullet-level2 .bullet { font-weight: 400; }
+    .term-inline-detail .bullet-indent { margin-left: 2.8em; }
+
     .term-panel-body table { border-collapse: collapse; width: 100%; margin: 8px 0; }
     .term-panel-body th, .term-panel-body td {
         border: 1px solid #dde5e0; padding: 6px 9px; font-size: 0.9rem;
@@ -1409,7 +1441,7 @@
                         <span onclick="const p=this.closest('.term-inline-detail'); p.style.display='none'; p.dataset.termId='';"
                               style="cursor:pointer; color:#aaa; padding:0 4px;">✕</span>
                     </div>
-                    <div class="markdown-content" style="font-size:0.88rem; line-height:1.7; color:#444;">${data.html}</div>`;
+                    <div class="markdown-content" style="font-size:0.88rem; line-height:1.55; color:#444;">${data.html}</div>`;
                 if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([panel]);
             })
             .catch(() => {
