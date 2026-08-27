@@ -699,7 +699,7 @@
                 </div>
 
                 {% if q.image %}
-                <div class="q-image"><img src="{{ q.image.url }}" onclick="openImageModal(this.src)"></div>
+                <div class="q-image"><img loading="lazy" src="{{ q.image.url }}" onclick="openImageModal(this.src)"></div>
                 {% endif %}
 
                 <div class="q-choices" data-answer="{{ ans }}" data-mine="{{ selected }}">
@@ -749,7 +749,7 @@
 
                 {% if q.infographic_image %}
                 <div class="infographic-container">
-                    <img src="{{ q.infographic_image.url }}" onclick="openImageModal(this.src)">
+                    <img loading="lazy" src="{{ q.infographic_image.url }}" onclick="openImageModal(this.src)">
                 </div>
                 {% endif %}
 

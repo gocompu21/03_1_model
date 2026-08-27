@@ -825,7 +825,7 @@
 
                     {% if result.question.image %}
                     <div class="q-image">
-                        <img src="{{ result.question.image.url }}" onclick="openImageModal(this.src)">
+                        <img loading="lazy" src="{{ result.question.image.url }}" onclick="openImageModal(this.src)">
                     </div>
                     {% endif %}
 
@@ -876,7 +876,7 @@
 
                     {% if result.question.infographic_image %}
                     <div class="infographic-container">
-                        <img src="{{ result.question.infographic_image.url }}" onclick="openImageModal(this.src)">
+                        <img loading="lazy" src="{{ result.question.infographic_image.url }}" onclick="openImageModal(this.src)">
                     </div>
                     {% endif %}
                 </div>

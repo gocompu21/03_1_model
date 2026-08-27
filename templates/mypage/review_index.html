@@ -788,7 +788,7 @@
                     </div>
 
                     {% if q.image %}
-                    <div class="q-image"><img src="{{ q.image.url }}"></div>
+                    <div class="q-image"><img loading="lazy" src="{{ q.image.url }}"></div>
                     {% endif %}
 
                     <div class="q-choices" data-answer="{{ q.answer }}">
@@ -833,7 +833,7 @@
 
                     {% if q.infographic_image %}
                     <div class="infographic-container">
-                        <img src="{{ q.infographic_image.url }}">
+                        <img loading="lazy" src="{{ q.infographic_image.url }}">
                     </div>
                     {% endif %}
                 </div>
