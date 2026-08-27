@@ -992,9 +992,6 @@
                 </div>
                 {% endif %}
 
-                <!-- Related Terms (AJAX lazy loading) -->
-                <div id="terms-container-{{ q.id }}" class="terms-container" data-question-id="{{ q.id }}" data-loaded="false" style="display: none;"></div>
-
                 <!-- Close button -->
                 <div style="text-align: center; margin-top: 10px; cursor: pointer;" onclick="toggleExplanation('exp-{{ q.id }}')" title="해설 접기">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
@@ -1004,6 +1001,11 @@
                     </svg>
                 </div>
             </div>
+
+            <!-- Related Terms (AJAX lazy loading).
+                 해설 블록 밖에 둔다. 안에 두면 '해설 보기'를 누르기 전까지
+                 부모가 display:none 이라 용어만 따로 보여 줄 수 없다 -->
+            <div id="terms-container-{{ q.id }}" class="terms-container" data-question-id="{{ q.id }}" data-loaded="false" style="display: none;"></div>
         </div>
         {% endfor %}
     </div>
@@ -1244,7 +1246,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.terms && data.terms.length > 0) {
-                    let html = '<div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #ddd;">';
+                    let html = '<div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed #ddd;">';
                     html += '<h4 style="font-size: 0.95rem; color: #2d6a4f; margin-bottom: 10px;">🔑 관련 용어</h4>';
                     html += '<div style="display: flex; flex-wrap: wrap; gap: 4px;">';
                     data.terms.forEach(term => {
