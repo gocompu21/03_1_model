@@ -51,16 +51,33 @@
     }
 
     /* Tabs Header Layout */
-    .tabs-header {
-        display: flex;
-        background: white;
-        border-bottom: 2px solid #e0e0e0;
+    /* 제목 줄을 감싸는 자리. 문제 카드가 든 content-area 와 같은
+       좌우 여백을 주어야 안쪽 상자의 시작점이 맞는다 */
+    .tabs-wrap {
+        /* 아래 문제 영역(스크롤이 생기는 곳)과 사이를 띄운다 */
+        padding: 15px 15px 12px;
         position: sticky;
         top: 0;
         z-index: 100;
-        padding: 15px 20px;
+        background: #f8f6e6;
+        flex-shrink: 0;
+        /* 아래 문제 영역에 세로 스크롤바가 생기면 그만큼 좁아진다.
+           제목 줄도 같은 폭이 되도록 오른쪽을 그만큼 물린다 */
+        padding-right: calc(15px + var(--sbw, 0px));
+    }
+
+    .tabs-header {
+        display: flex;
+        background: white;
+        padding: 10px 15px;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        /* 아래 문제 박스와 모서리·테두리를 맞춘다 */
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
     }
 
     .header-title {
@@ -98,7 +115,8 @@
     /* Content Area */
     .content-area {
         flex: 1;
-        padding: 20px;
+        /* 제목 줄과 좌우를 맞춘다. 위 여백은 tabs-wrap 이 대신 준다 */
+        padding: 0 15px 20px;
         overflow-y: auto;
     }
 
@@ -108,7 +126,8 @@
         border: 1px solid #ccc;
         border-radius: 8px;
         padding: 30px;
-        margin-bottom: 30px;
+        /* 제목 줄과 문제 영역 사이(12px)와 같은 간격 */
+        margin-bottom: 12px;
         box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
     }
 
@@ -344,10 +363,16 @@
             min-height: 100vh;
         }
 
+        .tabs-wrap { padding: 0; }
+
         .tabs-header {
             padding: 10px 12px;
             gap: 8px;
             flex-wrap: wrap;
+            /* 모바일은 카드가 화면 끝까지 붙는 설계다. 제목 줄도 맞춘다 */
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
         }
 
         .header-title {
@@ -479,6 +504,7 @@
 
 <div class="practice-container">
     <!-- Header -->
+    <div class="tabs-wrap">
     <div class="tabs-header">
         <div class="header-title">
             📖 {{ chapter.book.name }} > {{ chapter.code }} {{ chapter.title }}
@@ -510,6 +536,8 @@
     </div>
 
     <!-- Questions Content -->
+    </div>
+
     <div class="content-area">
         {% if questions %}
             {% for q in questions %}
@@ -758,5 +786,23 @@
             btn.style.color = '#856404';
         }
     }
+
+    // 세로 스크롤바가 오른쪽을 먹는 폭을 재어 제목 줄과 맞춘다.
+    // 폭은 브라우저·설정마다 달라 값을 박아 둘 수 없다
+    (function () {
+        function syncScrollbar() {
+            var area = document.querySelector('.content-area');
+            if (!area) return;
+            var w = area.offsetWidth - area.clientWidth;
+            document.documentElement.style.setProperty('--sbw', w + 'px');
+        }
+        syncScrollbar();
+        window.addEventListener('resize', syncScrollbar);
+        // 문제를 펼치면 스크롤이 생기거나 사라진다
+        document.addEventListener('click', function () {
+            setTimeout(syncScrollbar, 60);
+        });
+    })();
+
 </script>
 {% endblock %}
