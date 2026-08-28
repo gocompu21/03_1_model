@@ -710,7 +710,7 @@ def topic_solve(request, set_id):
     return render(request, 'study/topic_solve.html', {
         'topic_set': topic_set,
         'questions': questions,
-        'title_terms_json': json.dumps(_title_terms(topic_set), ensure_ascii=False),
+        'title_terms': _title_terms(topic_set),
     })
 
 

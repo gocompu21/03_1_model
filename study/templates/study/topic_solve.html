@@ -871,6 +871,8 @@
 
     </div>
 
+    {{ title_terms|json_script:"title-terms-data" }}
+
     <div class="content-area" id="question-list">
         {% for q in questions %}
         <div class="question-card" data-subject="{{ q.subject.name }}">
@@ -1758,7 +1760,8 @@
     // 제목과 관련된 용어를 문제 본문에서 짚어 준다.
     // 무엇을 묻는 문제인지 눈에 들어오게 하려는 것
     (function () {
-        var words = JSON.parse('{{ title_terms_json|escapejs|default:"[]" }}');
+        var el = document.getElementById('title-terms-data');
+        var words = el ? JSON.parse(el.textContent) : [];
         if (!words.length) return;
 
         var re = new RegExp(
