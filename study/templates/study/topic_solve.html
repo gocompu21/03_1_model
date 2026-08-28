@@ -1776,7 +1776,7 @@
             var n;
             while ((n = walker.nextNode())) {
                 // 이미 짚은 곳과 수식 안은 건드리지 않는다
-                if (n.parentElement.closest('.title-term, mjx-container, script, style')) continue;
+                if (n.parentElement.closest('.title-term, .choice-num, mjx-container, script, style')) continue;
                 if (re.test(n.nodeValue)) targets.push(n);
                 re.lastIndex = 0;
             }
@@ -1802,7 +1802,8 @@
             });
         }
 
-        document.querySelectorAll('.q-content, .choice-text').forEach(mark);
+        // 선지는 .choice-item 이다 (.choice-text 는 이 화면에 없다)
+        document.querySelectorAll('.q-content, .choice-item').forEach(mark);
     })();
 
 </script>
