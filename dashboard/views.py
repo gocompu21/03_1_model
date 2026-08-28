@@ -569,18 +569,24 @@ def api_generate_quiz(request):
 문제번호\t문제\t보기1\t보기2\t보기3\t보기4\t보기5\t정답\t해설\t선지1설명\t선지2설명\t선지3설명\t선지4설명\t선지5설명
 
 한 줄은 반드시 탭 13개로 나뉜 14칸이어야 합니다.
-마지막 14번째 칸이 '선지5설명'입니다. 이 칸을 빠뜨리는 일이 잦으니
-줄을 끝내기 전에 선지5설명까지 들어갔는지 꼭 확인하세요.
+칸을 하나라도 건너뛰면 뒤의 내용이 앞으로 당겨져 설명이 엉뚱한 선지에 붙습니다.
+
+특히 **정답 선지의 설명을 빠뜨리는 일이 잦습니다.**
+오답 선지만 설명하고 정답 선지 칸을 건너뛰면 안 됩니다.
+정답이 3번이면 '선지3설명' 칸에도 반드시 내용이 들어가야 합니다.
 
 선지별 설명은 그 선지가 왜 맞는지/틀리는지를 한두 문장으로 적습니다.
-- 다섯 선지 모두에 설명을 답니다. 하나도 비우지 마세요.
+- 다섯 선지 모두에 설명을 답니다. 정답 선지도 예외가 아닙니다.
+- 각 설명은 반드시 그 번호의 선지에 대한 것이어야 합니다.
 - '맞는 설명입니다' '옳지 않습니다' 같은 상투적인 문구만 쓰지 마세요.
 - 근거가 되는 시기·수치·이름을 빠뜨리지 마세요.
-- 정답 선지에는 왜 정답인지가 드러나야 합니다.'''
+- 정답 선지에는 왜 정답인지가 드러나야 합니다.
+- 굵게(**) 같은 마크다운 표기는 쓰지 마세요.'''
         
         result = manager.query_store(store_name, prompt)
         
         # TSV 파싱
+        import re as _re
         questions = []
         missing_notes = []   # 선지별 설명이 빈 곳
         lines = result.strip().split('\n')
@@ -608,20 +614,34 @@ def api_generate_quiz(request):
                     notes = {}
                     for i in range(5):
                         col = 9 + i
-                        if len(parts) > col and parts[col].strip():
-                            notes[str(i + 1)] = parts[col].strip()
-                    q['choice_notes'] = notes
-                    # 마지막 칸(선지5설명)이 빠진 채로 오는 일이 잦다.
-                    # 다섯 선지 중 하나라도 비면 화면에서 그 선지만 설명이 없어
-                    # 빠뜨린 것처럼 보이므로, 어느 것이 없는지 남겨 둔다
-                    if len(notes) < 5:
+                        val = parts[col].strip() if len(parts) > col else ''
+                        # 칸이 밀리면 정답 번호 같은 숫자가 설명 자리로 들어온다.
+                        # 그대로 두면 화면에 '3' 한 글자만 뜨므로 버린다
+                        if val and not val.isdigit() and len(val) >= 10:
+                            notes[str(i + 1)] = val
+                    # 마크다운 굵게 표기는 화면에서 별표로 보인다
+                    notes = {k: _re.sub(r'\*+', '', v).strip()
+                             for k, v in notes.items()}
+
+                    # 정답 선지 설명을 건너뛰고 오답 4개만 보내는 일이 잦다.
+                    # 그러면 정답 자리부터 뒤가 한 칸씩 당겨져 설명이 엉뚱한
+                    # 선지에 붙는다. 밀린 것을 그대로 저장하면 안 되므로 버린다
+                    if len(notes) == 4 and str(q['answer']) in notes:
+                        notes = {}
                         missing_notes.append(
-                            '%s번 문제: 선지 %s' % (
+                            '%s번 문제: 정답(%s번) 설명이 빠져 설명이 밀렸습니다. '
+                            '이 문제는 선지별 설명 없이 저장됩니다.'
+                            % (q['number'], q['answer'])
+                        )
+                    elif len(notes) < 5:
+                        missing_notes.append(
+                            '%s번 문제: 선지 %s 설명 없음' % (
                                 q['number'],
                                 ', '.join(str(i) for i in range(1, 6)
                                           if str(i) not in notes),
                             )
                         )
+                    q['choice_notes'] = notes
                     questions.append(q)
                 except (ValueError, IndexError):
                     continue
