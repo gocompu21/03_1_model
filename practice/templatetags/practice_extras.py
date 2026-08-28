@@ -12,6 +12,17 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def stars(n):
+    """기출 빈도를 별로 그린다 (채운 별 n개 + 빈 별)"""
+    try:
+        n = int(n)
+    except (TypeError, ValueError):
+        return ''
+    n = max(0, min(5, n))
+    return '★' * n + '☆' * (5 - n)
+
+
+@register.filter
 def make_list_with(value, arg):
     """두 값을 리스트로 만들기"""
     return [value, arg]

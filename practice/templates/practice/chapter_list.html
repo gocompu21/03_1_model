@@ -409,7 +409,18 @@
     .chapter-title {
         flex: 1;
     }
-    
+
+    /* 기출 빈도 별. 제목을 가리지 않도록 작고 연하게 */
+    .exam-stars {
+        margin-left: 6px;
+        font-size: 0.75em;
+        color: #e8a33d;
+        letter-spacing: -1px;
+        white-space: nowrap;
+        position: relative;
+        top: -1px;
+    }
+
     /* 문제 수 배지 */
     .chapter-count {
         background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
@@ -649,7 +660,7 @@
 
     <div class="chapter-tree">
         {% for chapter in root_chapters %}
-            {% include 'practice/_chapter_item.html' with chapter=chapter %}
+            {% include 'practice/_chapter_item.html' with chapter=chapter exam_stars=exam_stars %}
         {% empty %}
             <p class="empty-state">등록된 목차가 없습니다.</p>
         {% endfor %}

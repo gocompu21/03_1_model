@@ -17,16 +17,46 @@ def book_list(request):
 
 
 @login_required
+def _exam_star_map(book):
+    """목차별 기출 빈도를 별 개수로 만든다.
+
+    목차에 이어 붙인 주제별 문제집의 기출 문항 수로 센다.
+    목차마다 따로 세면 느리므로 한 번에 읽어 사전으로 만든다.
+    """
+    from exam.models import TopicQuestionSet
+    from django.db.models import Count
+
+    rows = (TopicQuestionSet.objects
+            .filter(chapter__book=book, chapter__isnull=False)
+            .annotate(n=Count('items'))
+            .values_list('chapter_id', 'n'))
+
+    def stars(n):
+        # 0~16문항으로 폭이 넓어 다섯 단계로 나눈다
+        if n >= 10:
+            return 5
+        if n >= 6:
+            return 4
+        if n >= 4:
+            return 3
+        if n >= 2:
+            return 2
+        return 1 if n else 0
+
+    return {cid: {'n': n, 'stars': stars(n)} for cid, n in rows if n}
+
+
 def chapter_list(request, book_id):
     """교재의 목차 트리"""
     book = get_object_or_404(Book, id=book_id)
-    
+
     # 최상위 목차만 가져오기 (하위는 템플릿에서 재귀적으로)
     root_chapters = Chapter.objects.filter(book=book, parent=None).order_by('order', 'code')
-    
+
     return render(request, 'practice/chapter_list.html', {
         'book': book,
         'root_chapters': root_chapters,
+        'exam_stars': _exam_star_map(book),
     })
 
 

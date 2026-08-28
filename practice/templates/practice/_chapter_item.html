@@ -22,6 +22,12 @@
             {% if chapter|has_content %}
                 <span style="margin-left: 2px; font-size: 0.8em; position: relative; top: -2px;" title="학습 컨텐츠 있음">📝</span>
             {% endif %}
+            {# 기출에 나온 만큼 별을 붙인다 #}
+            {% with st=exam_stars|get_item:chapter.id %}
+                {% if st %}
+                <span class="exam-stars" title="기출 {{ st.n }}문항">{{ st.stars|stars }}</span>
+                {% endif %}
+            {% endwith %}
         </span>
     </a>
     {% else %}
@@ -34,7 +40,8 @@
 {% if chapter.children.all %}
     <div id="children-{{ chapter.id }}" class="chapter-children" style="transition: all 0.3s ease; overflow: hidden; display: block;">
     {% for child in chapter.children.all %}
-        {% include 'practice/_chapter_item.html' with chapter=child %}
+        {# exam_stars 를 함께 넘겨야 하위 목차에서도 별이 보인다 #}
+        {% include 'practice/_chapter_item.html' with chapter=child exam_stars=exam_stars %}
     {% endfor %}
     </div>
 {% endif %}
