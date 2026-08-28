@@ -34,7 +34,8 @@
     /* 제목 줄을 감싸는 자리. 문제 카드가 든 content-area 와 같은
        좌우 여백을 주어야 안쪽 상자의 시작점이 맞는다 */
     .tabs-wrap {
-        padding: 15px 15px 0;
+        /* 아래 문제 영역(스크롤이 생기는 곳)과 사이를 띄운다 */
+        padding: 15px 15px 12px;
         position: sticky;
         top: 0;
         z-index: 100;
@@ -106,8 +107,8 @@
     /* Content Area */
     .content-area {
         flex: 1;
-        /* 제목 줄과 좌우를 맞춘다 */
-        padding: 20px 15px;
+        /* 제목 줄과 좌우를 맞춘다. 위 여백은 tabs-wrap 이 대신 준다 */
+        padding: 0 15px 20px;
         overflow-y: auto;
     }
 
