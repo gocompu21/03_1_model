@@ -34,6 +34,7 @@
     /* 제목 줄을 감싸는 자리. 문제 카드가 든 content-area 와 같은
        좌우 여백을 주어야 안쪽 상자의 시작점이 맞는다 */
     .tabs-wrap {
+        /* content-area 의 스크롤바 자리(대략 15px)만큼 오른쪽을 더 준다 */
         padding: 15px 15px 0;
         position: sticky;
         top: 0;
@@ -44,10 +45,14 @@
 
     .tabs-header {
         display: flex;
-        flex-direction: column;
+        /* 제목과 버튼을 한 줄에 나란히 */
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
         background: white;
         padding: 10px 15px;
-        gap: 8px;
+        gap: 10px;
         box-sizing: border-box;
         /* 아래 문제 박스와 모서리·테두리를 맞춘다 */
         border: 1px solid #ccc;
@@ -59,14 +64,16 @@
         display: flex;
         justify-content: flex-end;
         gap: 10px;
-        width: 100%;
+        flex-shrink: 0;
     }
 
     .topic-title {
         font-size: 1.1rem;
         font-weight: bold;
         color: #2c5f2d;
-        width: 100%;
+        /* 제목이 길면 줄어들되 버튼을 밀어내지 않는다 */
+        flex: 1;
+        min-width: 0;
     }
 
     .tab-btn {
@@ -100,6 +107,8 @@
         /* 제목 줄과 좌우를 맞춘다 */
         padding: 20px 15px;
         overflow-y: auto;
+        /* 스크롤바가 오른쪽을 먹어 제목 줄과 폭이 어긋나는 것을 막는다 */
+        scrollbar-gutter: stable;
     }
 
     .question-card {
@@ -825,7 +834,11 @@
 <div class="study-container">
     <div class="tabs-wrap">
     <div class="tabs-header">
-        <!-- 버튼 영역 (우측 정렬) -->
+        <!-- 제목 (왼쪽) -->
+        <div class="topic-title">
+            📚 {{ topic_set.title }}
+        </div>
+        <!-- 버튼 (오른쪽) -->
         <div class="header-buttons">
             <!-- Expand All Button -->
             <button class="tab-btn" id="expand-all-btn" onclick="toggleAllExplanations()" style="background-color: #fff3cd; color: #856404;">
@@ -842,10 +855,6 @@
             </svg>
             <span>목록으로</span>
         </a>
-        </div>
-        <!-- 제목 영역 (두 번째 줄) -->
-        <div class="topic-title">
-            📚 {{ topic_set.title }}
         </div>
     </div>
 
