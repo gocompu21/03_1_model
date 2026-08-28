@@ -43,7 +43,14 @@ def topic_bold(value):
         i = text.find(pat)
         if i > 1 and (best is None or i < best):
             best = i
-    head, tail = (text[:best], text[best:]) if best else (text, '')
+
+    if best:
+        head, tail = text[:best], text[best:]
+    else:
+        # 위 말들이 없으면 물음표까지만 굵게 한다.
+        # 〈보기〉가 딸린 문제는 물음표 뒤가 보기 내용이라 굵으면 안 된다
+        m = re.search(r'\?', text)
+        head, tail = (text[:m.end()], text[m.end():]) if m else (text, '')
 
     return mark_safe('<b>%s</b>%s' % (escape(head), escape(tail)))
 
