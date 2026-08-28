@@ -52,7 +52,7 @@ def topic_bold(value):
         m = re.search(r'\?', text)
         head, tail = (text[:m.end()], text[m.end():]) if m else (text, '')
 
-    return mark_safe('<b>%s</b>%s' % (escape(head), escape(tail)))
+    return mark_safe('<b class="q-topic">%s</b>%s' % (escape(head), escape(tail)))
 
 
 @register.filter
