@@ -490,6 +490,12 @@ def content_create(request):
             chapter=chapter
         ).select_related('post', 'post__author', 'post__type')
 
+        # 상세 화면과 같은 틀을 쓰므로 앞부분·본문도 함께 채운다.
+        # 빠뜨리면 저장 직후 화면에서만 미리보기가 사라진다
+        for lp in linked_posts:
+            lp.preview = _qa_preview(lp.post.content)
+            lp.body = _qa_body(lp.post.content)
+
         # 같은 페이지에서 저장 완료 표시 (다른 페이지로 메시지 전파 방지)
         return render(request, 'practice/chapter_detail.html', {
             'chapter': chapter,
@@ -556,6 +562,12 @@ def content_update(request, content_id):
         linked_posts = ChapterPost.objects.filter(
             chapter=content.chapter
         ).select_related('post', 'post__author', 'post__type')
+
+        # 상세 화면과 같은 틀을 쓰므로 앞부분·본문도 함께 채운다.
+        # 빠뜨리면 수정 직후 화면에서만 미리보기가 사라진다
+        for lp in linked_posts:
+            lp.preview = _qa_preview(lp.post.content)
+            lp.body = _qa_body(lp.post.content)
 
         # 같은 페이지에서 수정 완료 표시
         return render(request, 'practice/chapter_detail.html', {
