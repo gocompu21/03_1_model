@@ -568,7 +568,12 @@ def api_generate_quiz(request):
 
 문제번호\t문제\t보기1\t보기2\t보기3\t보기4\t보기5\t정답\t해설\t선지1설명\t선지2설명\t선지3설명\t선지4설명\t선지5설명
 
+한 줄은 반드시 탭 13개로 나뉜 14칸이어야 합니다.
+마지막 14번째 칸이 '선지5설명'입니다. 이 칸을 빠뜨리는 일이 잦으니
+줄을 끝내기 전에 선지5설명까지 들어갔는지 꼭 확인하세요.
+
 선지별 설명은 그 선지가 왜 맞는지/틀리는지를 한두 문장으로 적습니다.
+- 다섯 선지 모두에 설명을 답니다. 하나도 비우지 마세요.
 - '맞는 설명입니다' '옳지 않습니다' 같은 상투적인 문구만 쓰지 마세요.
 - 근거가 되는 시기·수치·이름을 빠뜨리지 마세요.
 - 정답 선지에는 왜 정답인지가 드러나야 합니다.'''
@@ -577,6 +582,7 @@ def api_generate_quiz(request):
         
         # TSV 파싱
         questions = []
+        missing_notes = []   # 선지별 설명이 빈 곳
         lines = result.strip().split('\n')
         for line in lines:
             if not line.strip():
@@ -605,6 +611,17 @@ def api_generate_quiz(request):
                         if len(parts) > col and parts[col].strip():
                             notes[str(i + 1)] = parts[col].strip()
                     q['choice_notes'] = notes
+                    # 마지막 칸(선지5설명)이 빠진 채로 오는 일이 잦다.
+                    # 다섯 선지 중 하나라도 비면 화면에서 그 선지만 설명이 없어
+                    # 빠뜨린 것처럼 보이므로, 어느 것이 없는지 남겨 둔다
+                    if len(notes) < 5:
+                        missing_notes.append(
+                            '%s번 문제: 선지 %s' % (
+                                q['number'],
+                                ', '.join(str(i) for i in range(1, 6)
+                                          if str(i) not in notes),
+                            )
+                        )
                     questions.append(q)
                 except (ValueError, IndexError):
                     continue
@@ -616,6 +633,7 @@ def api_generate_quiz(request):
             'chapter_code': chapter.code,
             'chapter_title': chapter.title,
             'prompt': prompt,
+            'missing_notes': missing_notes,
         })
         
     except Chapter.DoesNotExist:
