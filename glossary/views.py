@@ -152,6 +152,8 @@ def _unwrap_plain_math(text):
         # 숫자와 단위뿐인 것은 수식으로 그릴 이유가 없다
         plain = inner
         plain = _re.sub(r'\\+(?:sim|thicksim)', '~', plain)
+        # 15^\circ C -> 15°C. 온도는 수식으로 그릴 이유가 없다
+        plain = _re.sub(r'\^\s*\{?\s*\\+(?:circ|degree)\s*\}?', '°', plain)
         plain = _re.sub(r'\\+times', '×', plain)
         plain = _re.sub(r'\\+approx', '≈', plain)
         plain = _re.sub(r'\\+text\{([A-Za-z%°μ]+)\}', lambda mm: mm.group(1), plain)
