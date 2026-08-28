@@ -16,7 +16,6 @@ def book_list(request):
     return render(request, 'practice/book_list.html', {'books': books})
 
 
-@login_required
 def _exam_star_map(book):
     """목차별 기출 빈도를 별 개수로 만든다.
 
@@ -46,6 +45,7 @@ def _exam_star_map(book):
     return {cid: {'n': n, 'stars': stars(n)} for cid, n in rows if n}
 
 
+@login_required
 def chapter_list(request, book_id):
     """교재의 목차 트리"""
     book = get_object_or_404(Book, id=book_id)
