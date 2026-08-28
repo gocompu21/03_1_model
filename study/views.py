@@ -617,6 +617,33 @@ def analysis_detail(request, round_number):
     return render(request, "study/analysis_detail.html", context)
 
 
+def _title_terms(topic_set):
+    """문제집 제목에 든 사전 용어를 찾는다.
+
+    '7.1.1 대벌레' 처럼 제목에 그 주제어가 들어 있다.
+    문제 본문에서 그 낱말을 짚어 주면 무엇을 묻는 문제인지 눈에 들어온다.
+    """
+    from glossary.utils import get_terms_pattern
+
+    title = (topic_set.title or '').strip()
+    subject = topic_set.subject.name if topic_set.subject_id else None
+    if not title or not subject:
+        return []
+
+    pattern, term_map = get_terms_pattern(subject)
+    if not pattern:
+        return []
+
+    found = []
+    for m in pattern.finditer(title):
+        term = term_map.get(m.group(0))
+        if term and term.word not in found:
+            found.append(term.word)
+    # 긴 낱말을 먼저 짚어야 짧은 낱말이 그 안을 파고들지 않는다
+    found.sort(key=len, reverse=True)
+    return found
+
+
 @login_required
 def topic_solve(request, set_id):
     """주제별 문제집 풀기"""
@@ -682,7 +709,8 @@ def topic_solve(request, set_id):
     
     return render(request, 'study/topic_solve.html', {
         'topic_set': topic_set,
-        'questions': questions
+        'questions': questions,
+        'title_terms_json': json.dumps(_title_terms(topic_set), ensure_ascii=False),
     })
 
 

@@ -112,6 +112,15 @@
         overflow-y: auto;
     }
 
+    /* 제목과 관련된 용어를 짚어 준다 (용어 상세 화면과 같은 모양) */
+    .title-term {
+        color: #d93025;
+        font-size: inherit;
+        font-weight: inherit;
+        background: #fdf3d0;
+        border-radius: 3px;
+        padding: 0 2px;
+    }
     .question-card {
         background: white;
         border: 1px solid #ccc;
@@ -1743,6 +1752,54 @@
         document.addEventListener('click', function () {
             setTimeout(syncScrollbar, 60);
         });
+    })();
+
+
+    // 제목과 관련된 용어를 문제 본문에서 짚어 준다.
+    // 무엇을 묻는 문제인지 눈에 들어오게 하려는 것
+    (function () {
+        var words = JSON.parse('{{ title_terms_json|escapejs|default:"[]" }}');
+        if (!words.length) return;
+
+        var re = new RegExp(
+            words.map(function (w) {
+                return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }).join('|'), 'g');
+
+        function mark(root) {
+            if (!root) return;
+            var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            var targets = [];
+            var n;
+            while ((n = walker.nextNode())) {
+                // 이미 짚은 곳과 수식 안은 건드리지 않는다
+                if (n.parentElement.closest('.title-term, mjx-container, script, style')) continue;
+                if (re.test(n.nodeValue)) targets.push(n);
+                re.lastIndex = 0;
+            }
+            targets.forEach(function (node) {
+                var frag = document.createDocumentFragment();
+                var last = 0, m;
+                re.lastIndex = 0;
+                while ((m = re.exec(node.nodeValue))) {
+                    if (m.index > last) {
+                        frag.appendChild(document.createTextNode(
+                            node.nodeValue.slice(last, m.index)));
+                    }
+                    var span = document.createElement('span');
+                    span.className = 'title-term';
+                    span.textContent = m[0];
+                    frag.appendChild(span);
+                    last = m.index + m[0].length;
+                }
+                if (last < node.nodeValue.length) {
+                    frag.appendChild(document.createTextNode(node.nodeValue.slice(last)));
+                }
+                node.parentNode.replaceChild(frag, node);
+            });
+        }
+
+        document.querySelectorAll('.q-content, .choice-text').forEach(mark);
     })();
 
 </script>
