@@ -35,14 +35,17 @@
         display: flex;
         flex-direction: column;
         background: white;
-        border-bottom: 2px solid #e0e0e0;
         position: sticky;
         top: 0;
         z-index: 100;
         padding: 10px 15px;
         gap: 8px;
-        width: 100%;
         box-sizing: border-box;
+        /* 아래 문제 박스와 좌우·모서리를 맞춘다 */
+        margin: 15px 15px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.05);
     }
 
     .header-buttons {
@@ -87,7 +90,8 @@
     /* Content Area */
     .content-area {
         flex: 1;
-        padding: 20px 0;
+        /* 제목 줄과 좌우를 맞춘다 */
+        padding: 20px 15px;
         overflow-y: auto;
     }
 
@@ -679,6 +683,11 @@
         .tabs-header {
             padding: 10px;
             gap: 8px;
+            /* 모바일은 카드가 화면 끝까지 붙는 설계다. 제목 줄도 맞춘다 */
+            margin: 0;
+            border-left: none;
+            border-right: none;
+            border-radius: 0;
         }
 
         .topic-title {
