@@ -449,10 +449,18 @@
     .exam-freq .round-badge[data-round="11"] { background: #c0ca33; color: #333; }
     .exam-freq .round-badge[data-round="12"] { background: #ffb300; color: #333; }
 
-    /* 좁은 화면에서는 배지를 감추고 막대와 수만 남긴다 */
+    /* 좁은 화면에서도 배지를 보인다. 대신 조금 더 작게 */
     @media (max-width: 640px) {
-        .exam-freq .round-badge { display: none; }
-        .exam-freq { margin-left: 6px; }
+        .exam-freq {
+            margin-left: 4px;
+            gap: 2px;
+        }
+        .exam-freq .round-badge {
+            width: 30px;
+            font-size: 0.52rem;
+            line-height: 13px;
+            border-radius: 7px;
+        }
     }
 
     /* 문제 수 배지 */
