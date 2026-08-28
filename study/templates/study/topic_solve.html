@@ -25,7 +25,9 @@
         height: calc(100vh - 60px);
         max-width: 1200px;
         margin: 0 auto;
-        background: white;
+        /* 문제 카드 사이가 바탕색으로 보여야 카드가 구분된다
+           (연습문제 화면과 같은 색) */
+        background: #f8f6e6;
     }
 
     /* Top Bar */
@@ -665,13 +667,13 @@
     /* 반응형 - 모바일 */
     @media (max-width: 480px) {
         body {
-            background: white;
+            background: #f8f6e6;
         }
 
         .study-container {
             height: auto;
             min-height: 100vh;
-            background: white;
+            background: #f8f6e6;
         }
 
         .tabs-header {
