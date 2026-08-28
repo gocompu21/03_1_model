@@ -450,6 +450,14 @@
     .exam-freq .round-badge[data-round="11"] { background: #c0ca33; color: #333; }
     .exam-freq .round-badge[data-round="12"] { background: #ffb300; color: #333; }
 
+    /* 링크로 찾아온 목차를 잠깐 짚어 준다 */
+    .chapter-item.chapter-hit {
+        background: #fff8dd;
+        border-radius: 6px;
+        box-shadow: 0 0 0 2px #f0d264;
+        transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+
     /* 좁은 화면에서도 배지를 보인다. 대신 조금 더 작게 */
     @media (max-width: 640px) {
         .exam-freq {
@@ -795,5 +803,35 @@
             }
         });
     }
+
+    // #chapter-<id> 로 들어오면 그 목차로 스크롤하고 잠시 짚어 준다.
+    // 브라우저 기본 이동은 위 고정 막대에 가려 목차가 안 보인다
+    (function () {
+        function goToHash() {
+            var id = (location.hash || '').replace('#', '');
+            if (!id) return;
+            var el = document.getElementById(id);
+            if (!el) return;
+
+            // 상단에 붙어 있는 것들의 높이를 실측해 그만큼 더 내린다
+            var top = 0;
+            document.querySelectorAll('header, .navbar, .sticky-top').forEach(function (h) {
+                var st = window.getComputedStyle(h);
+                if (st.position === 'fixed' || st.position === 'sticky') {
+                    top = Math.max(top, h.getBoundingClientRect().height);
+                }
+            });
+
+            var y = el.getBoundingClientRect().top + window.pageYOffset - top - 20;
+            window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+
+            el.classList.add('chapter-hit');
+            setTimeout(function () { el.classList.remove('chapter-hit'); }, 2200);
+        }
+
+        // 목차를 모두 펼친 뒤라야 자리가 정해진다
+        window.addEventListener('load', function () { setTimeout(goToHash, 60); });
+        window.addEventListener('hashchange', goToHash);
+    })();
 </script>
 {% endblock %}

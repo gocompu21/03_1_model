@@ -1104,16 +1104,17 @@
             <!-- Header -->
             <div class="content-header">
                 <div class="chapter-path">
+                    {# 목차 목록으로 갈 때는 그 자리로 스크롤되도록 #chapter-<id> 를 붙인다 #}
                     <a href="{% url 'practice:book_list' %}">📚 교재 목록</a> &gt;
-                    <a href="{% url 'practice:chapter_list' chapter.book.id %}">{{ chapter.book.name }}</a> &gt;
+                    <a href="{% url 'practice:chapter_list' chapter.book.id %}#chapter-{{ chapter.id }}">{{ chapter.book.name }}</a> &gt;
                     {% for ancestor in chapter.get_ancestors %}
                     {% if ancestor.has_content %}
                     <a href="{% url 'practice:chapter_detail' ancestor.id %}">{{ ancestor.title }}</a> &gt;
                     {% else %}
-                    <span>{{ ancestor.title }}</span> &gt;
+                    <a href="{% url 'practice:chapter_list' chapter.book.id %}#chapter-{{ ancestor.id }}">{{ ancestor.title }}</a> &gt;
                     {% endif %}
                     {% endfor %}
-                    <span>{{ chapter.title }}</span>
+                    <a href="{% url 'practice:chapter_list' chapter.book.id %}#chapter-{{ chapter.id }}">{{ chapter.title }}</a>
                 </div>
                 <h1 class="chapter-title">
                     <span class="chapter-code">{{ chapter.code }}</span>
