@@ -420,15 +420,16 @@
         vertical-align: middle;
     }
 
-    /* 배지는 모두 같은 크기로 (5-25, 12-7 처럼 자릿수가 달라도) */
+    /* 배지는 모두 같은 크기로 (5-25, 12-7 처럼 자릿수가 달라도).
+       모서리를 살짝만 둥글려 알약 모양보다 좌우 자리를 덜 쓴다 */
     .exam-freq .round-badge {
         display: inline-block;
-        width: 34px;
+        width: 30px;
         box-sizing: border-box;
         text-align: center;
         color: white;
-        padding: 0 2px;
-        border-radius: 8px;
+        padding: 0 1px;
+        border-radius: 3px;
         font-size: 0.58rem;
         line-height: 14px;
         white-space: nowrap;
@@ -456,10 +457,10 @@
             gap: 2px;
         }
         .exam-freq .round-badge {
-            width: 30px;
+            width: 27px;
             font-size: 0.52rem;
             line-height: 13px;
-            border-radius: 7px;
+            border-radius: 3px;
         }
     }
 
