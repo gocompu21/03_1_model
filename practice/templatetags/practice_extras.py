@@ -24,11 +24,13 @@ def plain_text(value):
     if not value:
         return ''
     text = str(value)
+    # <보기> 처럼 한글이 든 꺾쇠는 태그가 아니라 글이다. 먼저 지켜 둔다
+    text = re.sub(r'<([^<>]*[가-힣][^<>]*)>', r'〈\1〉', text)
     # <br>, </div> 등이 붙은 자리는 띄어 준다 (글자가 서로 붙지 않게)
     text = re.sub(r'<(br|/p|/div|/li|/tr)[^>]*>', ' ', text, flags=re.I)
     text = re.sub(r'<[^>]+>', '', text)      # 남은 태그 제거
     text = html.unescape(text)               # &lt; -> <, &nbsp; -> 공백
-    # 엔티티가 풀리며 다시 생긴 <보기> 같은 꺾쇠 낱말은 홑화살괄호로
+    # 엔티티가 풀리며 다시 생긴 꺾쇠도 홑화살괄호로
     text = text.replace('<', '〈').replace('>', '〉')
     return re.sub(r'\s+', ' ', text).strip()
 
