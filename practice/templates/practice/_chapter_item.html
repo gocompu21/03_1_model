@@ -22,10 +22,16 @@
             {% if chapter|has_content %}
                 <span style="margin-left: 2px; font-size: 0.8em; position: relative; top: -2px;" title="학습 컨텐츠 있음">📝</span>
             {% endif %}
-            {# 기출에 나온 만큼 별을 붙인다 #}
+            {# 기출 빈도 — 용어집 화면과 같은 모양 (막대 + 수 + 회차) #}
             {% with st=exam_stars|get_item:chapter.id %}
                 {% if st %}
-                <span class="exam-stars" title="기출 {{ st.n }}문항">{{ st.stars|stars }}</span>
+                <span class="exam-freq" title="기출 {{ st.n }}문항">
+                    <span class="freq-bar">
+                        {% for on in st.seg %}<span class="bar-segment{% if on %} active{% endif %}"></span>{% endfor %}
+                    </span>
+                    <span class="freq-num count-{{ st.n }}">{{ st.n }}</span>
+                    {% for r in st.rounds %}<span class="round-badge" data-round="{{ r }}">{{ r }}회</span>{% endfor %}
+                </span>
                 {% endif %}
             {% endwith %}
         </span>

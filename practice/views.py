@@ -17,32 +17,35 @@ def book_list(request):
 
 
 def _exam_star_map(book):
-    """목차별 기출 빈도를 별 개수로 만든다.
+    """목차별 기출 빈도를 용어집 화면과 같은 모양으로 만든다.
 
-    목차에 이어 붙인 주제별 문제집의 기출 문항 수로 센다.
-    목차마다 따로 세면 느리므로 한 번에 읽어 사전으로 만든다.
+    막대 5칸 + 문항 수 + 회차 배지. 목차에 이어 붙인 주제별 문제집을 센다.
+    목차마다 따로 읽으면 느리므로 한 번에 가져와 사전으로 만든다.
     """
-    from exam.models import TopicQuestionSet
-    from django.db.models import Count
+    from exam.models import TopicQuestionSetItem
 
-    rows = (TopicQuestionSet.objects
-            .filter(chapter__book=book, chapter__isnull=False)
-            .annotate(n=Count('items'))
-            .values_list('chapter_id', 'n'))
+    rows = (TopicQuestionSetItem.objects
+            .filter(question_set__chapter__book=book,
+                    question_set__chapter__isnull=False)
+            .values_list('question_set__chapter_id',
+                         'question__exam__round_number'))
 
-    def stars(n):
-        # 0~16문항으로 폭이 넓어 다섯 단계로 나눈다
-        if n >= 10:
-            return 5
-        if n >= 6:
-            return 4
-        if n >= 4:
-            return 3
-        if n >= 2:
-            return 2
-        return 1 if n else 0
+    by_chapter = {}
+    for cid, rnd in rows:
+        by_chapter.setdefault(cid, []).append(rnd)
 
-    return {cid: {'n': n, 'stars': stars(n)} for cid, n in rows if n}
+    out = {}
+    for cid, rounds in by_chapter.items():
+        n = len(rounds)
+        # 같은 회차가 여러 번 나와도 배지는 하나만 (5회, 6회 …)
+        uniq = sorted(set(r for r in rounds if r))
+        out[cid] = {
+            'n': n,
+            'rounds': uniq,
+            # 용어집과 같은 칸 기준 (1/3/5/10/15문항)
+            'seg': [n >= 1, n >= 3, n >= 5, n >= 10, n >= 15],
+        }
+    return out
 
 
 @login_required

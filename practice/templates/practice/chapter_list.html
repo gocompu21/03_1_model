@@ -410,15 +410,82 @@
         flex: 1;
     }
 
-    /* 기출 빈도 별. 제목을 가리지 않도록 작고 연하게 */
-    .exam-stars {
-        margin-left: 6px;
-        font-size: 0.75em;
-        color: #e8a33d;
-        letter-spacing: -1px;
+    /* 기출 빈도 — 용어집 화면과 같은 모양 (막대 + 문항 수 + 회차 배지) */
+    .exam-freq {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: 8px;
+        flex-wrap: wrap;
+        vertical-align: middle;
+    }
+
+    .exam-freq .freq-bar {
+        display: inline-flex;
+        gap: 2px;
+        align-items: center;
+        height: 12px;
+        flex-shrink: 0;
+    }
+
+    .exam-freq .bar-segment {
+        width: 5px;
+        height: 9px;
+        background: transparent;
+        border-radius: 1px;
+    }
+
+    /* 1 / 3 / 5 / 10 / 15문항에서 한 칸씩 채워진다 */
+    .exam-freq .bar-segment.active:nth-child(1) { background: #90caf9; }
+    .exam-freq .bar-segment.active:nth-child(2) { background: #42a5f5; }
+    .exam-freq .bar-segment.active:nth-child(3) { background: #ab47bc; }
+    .exam-freq .bar-segment.active:nth-child(4) { background: #ff9800; }
+    .exam-freq .bar-segment.active:nth-child(5) { background: #f44336; }
+
+    .exam-freq .freq-num {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #888;
+        margin-right: 2px;
+    }
+
+    .exam-freq .count-3, .exam-freq .count-4 { color: #1976d2; }
+    .exam-freq .count-5, .exam-freq .count-6, .exam-freq .count-7,
+    .exam-freq .count-8, .exam-freq .count-9 { color: #7b1fa2; }
+    .exam-freq .count-10, .exam-freq .count-11, .exam-freq .count-12,
+    .exam-freq .count-13, .exam-freq .count-14 { color: #e65100; }
+    .exam-freq .count-15, .exam-freq .count-16, .exam-freq .count-17,
+    .exam-freq .count-18, .exam-freq .count-19, .exam-freq .count-20 { color: #c62828; }
+
+    .exam-freq .round-badge {
+        display: inline-block;
+        color: white;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-size: 0.65rem;
+        line-height: 1.5;
         white-space: nowrap;
-        position: relative;
-        top: -1px;
+        background: #757575;
+    }
+
+    /* 회차별 색 (용어집과 같은 배색) */
+    .exam-freq .round-badge[data-round="1"] { background: #e53935; }
+    .exam-freq .round-badge[data-round="2"] { background: #d81b60; }
+    .exam-freq .round-badge[data-round="3"] { background: #8e24aa; }
+    .exam-freq .round-badge[data-round="4"] { background: #5e35b1; }
+    .exam-freq .round-badge[data-round="5"] { background: #3949ab; }
+    .exam-freq .round-badge[data-round="6"] { background: #1e88e5; }
+    .exam-freq .round-badge[data-round="7"] { background: #00acc1; }
+    .exam-freq .round-badge[data-round="8"] { background: #00897b; }
+    .exam-freq .round-badge[data-round="9"] { background: #43a047; }
+    .exam-freq .round-badge[data-round="10"] { background: #7cb342; }
+    .exam-freq .round-badge[data-round="11"] { background: #c0ca33; color: #333; }
+    .exam-freq .round-badge[data-round="12"] { background: #ffb300; color: #333; }
+
+    /* 좁은 화면에서는 배지를 감추고 막대와 수만 남긴다 */
+    @media (max-width: 640px) {
+        .exam-freq .round-badge { display: none; }
+        .exam-freq { margin-left: 6px; }
     }
 
     /* 문제 수 배지 */
