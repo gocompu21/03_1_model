@@ -12,6 +12,43 @@ def get_item(dictionary, key):
 
 
 @register.filter
+def topic_bold(value):
+    """문제 미리보기에서 무엇을 묻는지(주제)를 굵게 만든다.
+
+    '오리나무잎벌레의 피해에 대한 설명으로 옳은 것은?' 처럼
+    앞쪽이 주제이고 뒤쪽은 '~옳은 것은?' 같은 상투적인 말이다.
+    주제만 굵게 하면 목록에서 무엇을 묻는 문제인지 한눈에 들어온다.
+    """
+    import re
+    from django.utils.html import escape
+    from django.utils.safestring import mark_safe
+
+    text = plain_text(value)
+    if not text:
+        return ''
+
+    # 너무 길면 자른다 (자른 뒤에 굵게 해야 태그가 깨지지 않는다)
+    if len(text) > 80:
+        text = text[:80].rstrip() + '…'
+
+    # 주제와 물음을 가르는 자리. 가장 앞에 나오는 것을 쓴다
+    cuts = [
+        '에 대한 설명', '에 관한 설명', '에 대한 내용', '에 관한 내용',
+        '의 연결이', '의 연결로', '에 해당하는', '으로 옳', '로 옳',
+        '으로 바르게', '로 바르게', '을 순서대로', '를 순서대로',
+        '이 아닌 것', '가 아닌 것', '은 것은?', '는 것은?',
+    ]
+    best = None
+    for pat in cuts:
+        i = text.find(pat)
+        if i > 1 and (best is None or i < best):
+            best = i
+    head, tail = (text[:best], text[best:]) if best else (text, '')
+
+    return mark_safe('<b>%s</b>%s' % (escape(head), escape(tail)))
+
+
+@register.filter
 def plain_text(value):
     """미리보기용으로 태그를 걷어내고 &lt; 같은 엔티티도 글자로 되돌린다.
 

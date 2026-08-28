@@ -1239,7 +1239,7 @@
                 {% for q in questions %}
                 <li class="question-item">
                     <span class="question-number">({{ q.number }})</span>
-                    <span class="question-preview">{{ q.content|plain_text|truncatechars:80 }}</span>
+                    <span class="question-preview">{{ q.content|topic_bold }}</span>
                 </li>
                 {% endfor %}
             </ul>
@@ -1261,7 +1261,7 @@
                     {% for q in row.questions %}
                     <li class="question-item">
                         <span class="question-number">({{ forloop.counter }})</span>
-                        <span class="question-preview">{{ q.content|plain_text|truncatechars:80 }}<span class="exam-ref">({{ q.badge }})</span></span>
+                        <span class="question-preview">{{ q.content|topic_bold }}<span class="exam-ref">({{ q.badge }})</span></span>
                     </li>
                     {% endfor %}
                 </ul>
