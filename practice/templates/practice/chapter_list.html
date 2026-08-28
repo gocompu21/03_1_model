@@ -414,56 +414,23 @@
     .exam-freq {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 3px;
         margin-left: 8px;
         flex-wrap: wrap;
         vertical-align: middle;
     }
 
-    .exam-freq .freq-bar {
-        display: inline-flex;
-        gap: 2px;
-        align-items: center;
-        height: 12px;
-        flex-shrink: 0;
-    }
-
-    .exam-freq .bar-segment {
-        width: 5px;
-        height: 9px;
-        background: transparent;
-        border-radius: 1px;
-    }
-
-    /* 1 / 3 / 5 / 10 / 15문항에서 한 칸씩 채워진다 */
-    .exam-freq .bar-segment.active:nth-child(1) { background: #90caf9; }
-    .exam-freq .bar-segment.active:nth-child(2) { background: #42a5f5; }
-    .exam-freq .bar-segment.active:nth-child(3) { background: #ab47bc; }
-    .exam-freq .bar-segment.active:nth-child(4) { background: #ff9800; }
-    .exam-freq .bar-segment.active:nth-child(5) { background: #f44336; }
-
-    .exam-freq .freq-num {
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: #888;
-        margin-right: 2px;
-    }
-
-    .exam-freq .count-3, .exam-freq .count-4 { color: #1976d2; }
-    .exam-freq .count-5, .exam-freq .count-6, .exam-freq .count-7,
-    .exam-freq .count-8, .exam-freq .count-9 { color: #7b1fa2; }
-    .exam-freq .count-10, .exam-freq .count-11, .exam-freq .count-12,
-    .exam-freq .count-13, .exam-freq .count-14 { color: #e65100; }
-    .exam-freq .count-15, .exam-freq .count-16, .exam-freq .count-17,
-    .exam-freq .count-18, .exam-freq .count-19, .exam-freq .count-20 { color: #c62828; }
-
+    /* 배지는 모두 같은 크기로 (5-25, 12-7 처럼 자릿수가 달라도) */
     .exam-freq .round-badge {
         display: inline-block;
+        width: 34px;
+        box-sizing: border-box;
+        text-align: center;
         color: white;
-        padding: 1px 6px;
-        border-radius: 10px;
-        font-size: 0.65rem;
-        line-height: 1.5;
+        padding: 0 2px;
+        border-radius: 8px;
+        font-size: 0.58rem;
+        line-height: 14px;
         white-space: nowrap;
         background: #757575;
     }

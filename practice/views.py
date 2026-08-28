@@ -28,22 +28,21 @@ def _exam_star_map(book):
             .filter(question_set__chapter__book=book,
                     question_set__chapter__isnull=False)
             .values_list('question_set__chapter_id',
-                         'question__exam__round_number'))
+                         'question__exam__round_number',
+                         'question__number'))
 
     by_chapter = {}
-    for cid, rnd in rows:
-        by_chapter.setdefault(cid, []).append(rnd)
+    for cid, rnd, num in rows:
+        if rnd and num:
+            by_chapter.setdefault(cid, set()).add((rnd, num))
 
     out = {}
-    for cid, rounds in by_chapter.items():
-        n = len(rounds)
-        # 같은 회차가 여러 번 나와도 배지는 하나만 (5회, 6회 …)
-        uniq = sorted(set(r for r in rounds if r))
+    for cid, pairs in by_chapter.items():
+        items = sorted(pairs)
         out[cid] = {
-            'n': n,
-            'rounds': uniq,
-            # 용어집과 같은 칸 기준 (1/3/5/10/15문항)
-            'seg': [n >= 1, n >= 3, n >= 5, n >= 10, n >= 15],
+            'n': len(items),
+            # 회차-문제번호 (5-25 꼴)
+            'refs': [{'round': r, 'label': '%d-%d' % (r, q)} for r, q in items],
         }
     return out
 
