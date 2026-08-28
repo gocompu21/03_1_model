@@ -35,6 +35,28 @@ def has_content(chapter):
 
 
 @register.filter
+def clean_math(value):
+    """선지·문제에 든 $...$ 표기를 정리한다.
+
+    학명이 $Adoretus tenuimaculatus$ 로 저장된 것이 있다. 그대로 두면
+    MathJax 가 수식으로 그려 세리프체가 되고 낱말 사이 공백까지 사라진다.
+    학명은 <i> 로, 그 밖의 영문은 보통 글자로 바꾸고
+    진짜 수식($CO_2$ 등)은 건드리지 않는다.
+    """
+    from django.utils.safestring import mark_safe
+
+    if not value:
+        return ''
+
+    try:
+        from glossary.views import _unwrap_plain_math
+    except Exception:
+        return mark_safe(str(value))
+
+    return mark_safe(_unwrap_plain_math(str(value)))
+
+
+@register.filter
 def inline_explanation(value):
     """정답 선지 밑에 붙일 해설.
 

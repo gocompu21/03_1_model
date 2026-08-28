@@ -553,13 +553,13 @@
                         {% endif %}
                     </div>
                     <div class="q-content">
-                        {{ q.number }}. {{ q.content|safe|linebreaksbr }}
+                        {{ q.number }}. {{ q.content|clean_math|linebreaksbr }}
                     </div>
                 </div>
 
                 <div class="q-choices" data-question-id="{{ q.id }}" data-answer="{{ q.answer }}">
                     <div class="choice-item">
-                        <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span><span class="choice-text">{{ q.choice1|safe }}</span>
+                        <span class="choice-num" data-choice="1" onclick="selectChoice(this)">①</span><span class="choice-text">{{ q.choice1|clean_math }}</span>
                         {% if q.choice_notes %}
                             {% if q.choice_notes.1 %}
                             <div class="inline-exp">{{ q.choice_notes.1|choice_note:q.chapter.book.subject }}</div>
@@ -570,7 +570,7 @@
                         {% endif %}
                     </div>
                     <div class="choice-item">
-                        <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span><span class="choice-text">{{ q.choice2|safe }}</span>
+                        <span class="choice-num" data-choice="2" onclick="selectChoice(this)">②</span><span class="choice-text">{{ q.choice2|clean_math }}</span>
                         {% if q.choice_notes %}
                             {% if q.choice_notes.2 %}
                             <div class="inline-exp">{{ q.choice_notes.2|choice_note:q.chapter.book.subject }}</div>
@@ -581,7 +581,7 @@
                         {% endif %}
                     </div>
                     <div class="choice-item">
-                        <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span><span class="choice-text">{{ q.choice3|safe }}</span>
+                        <span class="choice-num" data-choice="3" onclick="selectChoice(this)">③</span><span class="choice-text">{{ q.choice3|clean_math }}</span>
                         {% if q.choice_notes %}
                             {% if q.choice_notes.3 %}
                             <div class="inline-exp">{{ q.choice_notes.3|choice_note:q.chapter.book.subject }}</div>
@@ -592,7 +592,7 @@
                         {% endif %}
                     </div>
                     <div class="choice-item">
-                        <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span><span class="choice-text">{{ q.choice4|safe }}</span>
+                        <span class="choice-num" data-choice="4" onclick="selectChoice(this)">④</span><span class="choice-text">{{ q.choice4|clean_math }}</span>
                         {% if q.choice_notes %}
                             {% if q.choice_notes.4 %}
                             <div class="inline-exp">{{ q.choice_notes.4|choice_note:q.chapter.book.subject }}</div>
@@ -603,7 +603,7 @@
                         {% endif %}
                     </div>
                     <div class="choice-item">
-                        <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span><span class="choice-text">{{ q.choice5|safe }}</span>
+                        <span class="choice-num" data-choice="5" onclick="selectChoice(this)">⑤</span><span class="choice-text">{{ q.choice5|clean_math }}</span>
                         {% if q.choice_notes %}
                             {% if q.choice_notes.5 %}
                             <div class="inline-exp">{{ q.choice_notes.5|choice_note:q.chapter.book.subject }}</div>
