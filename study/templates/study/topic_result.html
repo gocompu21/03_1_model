@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load markdown_extras %}
+{% load practice_extras %}
 
 {% block content %}
 <style>
@@ -209,7 +210,7 @@
         </div>
         <div class="result-content">
             <div class="result-q-num">
-                {{ forloop.counter }}. {{ result.question.content|striptags|truncatechars:60 }}
+                {{ forloop.counter }}. {{ result.question.content|plain_text|truncatechars:60 }}
                 <span class="result-q-badge">{{ result.question.exam.round_number }}회 {{ result.question.number }}번</span>
             </div>
             <div class="result-answer">

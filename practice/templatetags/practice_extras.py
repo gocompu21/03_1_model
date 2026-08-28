@@ -11,6 +11,28 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 
+@register.filter
+def plain_text(value):
+    """미리보기용으로 태그를 걷어내고 &lt; 같은 엔티티도 글자로 되돌린다.
+
+    문제 본문에 '&lt;보기&gt;' 가 엔티티로 저장된 것이 있다.
+    striptags 만 쓰면 엔티티가 그대로 남아 화면에 '&lt;보기&gt;' 로 보인다.
+    """
+    import html
+    import re
+
+    if not value:
+        return ''
+    text = str(value)
+    # <br>, </div> 등이 붙은 자리는 띄어 준다 (글자가 서로 붙지 않게)
+    text = re.sub(r'<(br|/p|/div|/li|/tr)[^>]*>', ' ', text, flags=re.I)
+    text = re.sub(r'<[^>]+>', '', text)      # 남은 태그 제거
+    text = html.unescape(text)               # &lt; -> <, &nbsp; -> 공백
+    # 엔티티가 풀리며 다시 생긴 <보기> 같은 꺾쇠 낱말은 홑화살괄호로
+    text = text.replace('<', '〈').replace('>', '〉')
+    return re.sub(r'\s+', ' ', text).strip()
+
+
 
 
 @register.filter
