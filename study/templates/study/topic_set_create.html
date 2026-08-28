@@ -503,26 +503,6 @@ document.addEventListener('DOMContentLoaded', function() {
         renderCart();
     });
     
-    // 목차를 바꿨을 때 앞서 고른 것을 비운다.
-    // 목차가 곧 주제라 앞 목차의 문제가 남으면 섞인 문제집이 된다
-    window.resetPicks = function () {
-        cart.clear();
-        renderCart();
-
-        currentQuestions = [];
-        currentRound = '';
-        examSelect.value = '';
-        if (selectAll) selectAll.checked = false;
-        addBtn.disabled = true;
-        questionList.innerHTML =
-            '<div style="text-align: center; color: #888; padding: 40px;">회차를 먼저 선택하세요</div>';
-
-        const msg = document.getElementById('termMsg');
-        if (msg) msg.textContent = '';
-        const term = document.getElementById('termInput');
-        if (term) term.value = '';
-    };
-
     function renderCart() {
         cartCount.textContent = `${cart.size}문제`;
         saveBtn.disabled = cart.size === 0;
@@ -643,14 +623,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const sel = document.getElementById('subjectSelect');
         if (!sel) return;
         sel.addEventListener('change', function () {
-            const before = chapterSelect ? chapterSelect.value : '';
             const name = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
             fillChapters(sel.value ? name : '');
-            // 과목이 바뀌어 앞서 고른 목차가 목록에서 빠졌으면
-            // 그 목차로 담은 문제도 더는 맞지 않는다
-            if (before && chapterSelect && chapterSelect.value !== before) {
-                resetPicks();
-            }
         });
     })();
 
@@ -665,10 +639,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         chapterSelect.addEventListener('change', function () {
-            // 목차가 바뀌면 다른 주제가 된다. 앞 목차에서 고른 문제가
-            // 남아 있으면 엉뚱한 문제집이 되므로 목록과 담은 문제를 비운다
-            resetPicks();
-
             if (!chapterSelect.value) return;
             if (titleInput.dataset.edited === '1') return;
             const opt = chapterSelect.options[chapterSelect.selectedIndex];
