@@ -374,6 +374,7 @@ def _chapter_exam_sets(chapter):
             questions.append({
                 # 배지는 '5-1' 처럼 회차-문제번호
                 'badge': '%s-%s' % (exam.round_number, q.number),
+                'round': exam.round_number,   # 배지 색을 회차별로 주려고
                 'content': q.content,
             })
         if not questions:
