@@ -36,6 +36,12 @@ Requirements:
 5. No text overload: Use icons, diagrams, and short labels rather than long text.
 6. Language: Korean labels only - no English labels. Every Korean word must be a
    real, correctly spelled word. Never invent syllables.
+7. Life cycle: draw it as a simple ring of stages joined by arrows, going clockwise
+   in the order the text gives - overwintering stage first, then each later stage.
+   Every arrow must point from a stage to the one that actually follows it. An
+   egg-laying arrow leaves the ADULT, never the egg. Do NOT draw a twelve-month
+   calendar ring: put the month beside its own stage label instead, because month
+   ticks and stage positions drift apart and the order comes out wrong.
 {extra}
 """
 
@@ -105,7 +111,7 @@ def generate(chapter, context, extra='', photo=None):
         context=context,
         photo_note=_PHOTO_NOTE if photo else '',
         vocab=_vocab_note(context, chapter.title),
-        extra=('7. %s' % extra) if extra else '',
+        extra=('8. %s' % extra) if extra else '',
     )
 
     parts = [types.Part.from_text(text=prompt)]
