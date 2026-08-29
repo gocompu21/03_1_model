@@ -885,6 +885,22 @@
     </div> <!-- Close main-wrapper -->
 
     <script>
+        // 세션이 끊긴 뒤 보낸 요청은 CSRF 검사에 걸려 로그인 화면으로 넘겨진다.
+        // 그 HTML 을 JSON 으로 읽으려다 "Unexpected token '<'" 가 나던 것을
+        // 사용자가 알아볼 수 있는 안내로 바꾼다.
+        class SessionExpired extends Error {
+            constructor() {
+                super('session expired');
+                this.name = 'SessionExpired';
+            }
+        }
+
+        const SESSION_EXPIRED_HTML =
+            '<span style="color: #e63946;">⏱️ 로그인이 풀렸습니다.</span> ' +
+            '오래 열어 두면 자동으로 풀립니다. ' +
+            '<a href="javascript:location.reload()">새로고침</a> 한 뒤 다시 물어봐 주세요. ' +
+            '(적어 두신 질문은 위에 그대로 있습니다)';
+
         document.addEventListener("DOMContentLoaded", function () {
             // 1. Element Initialization
             const chatForm = document.getElementById('chat-form');
@@ -1020,6 +1036,13 @@
 
                     if (!response.ok) throw new Error('Network response was not ok');
 
+                    // 세션이 끊기면 CSRF 검사에 걸려 로그인 화면으로 넘겨진다.
+                    // fetch 는 그것을 따라가므로 응답이 JSON 이 아닌 HTML 로 온다.
+                    // 그대로 .json() 을 부르면 "Unexpected token '<'" 가 뜬다.
+                    if (!(response.headers.get('content-type') || '').includes('application/json')) {
+                        throw new SessionExpired();
+                    }
+
                     const data = await response.json();
 
                     // Show AI Response
@@ -1028,6 +1051,8 @@
                 } catch (error) {
                     if (error.name === 'AbortError') {
                         appendMessage('ai', '<span style="color: #e63946;">🛑 요청이 중단되었습니다.</span>');
+                    } else if (error instanceof SessionExpired) {
+                        appendMessage('ai', SESSION_EXPIRED_HTML);
                     } else {
                         appendMessage('ai', `오류가 발생했습니다: ${error.message}`);
                     }
@@ -1128,16 +1153,25 @@
                     method: 'POST',
                     body: formData
                 });
-                
+
+                // 세션이 끊기면 JSON 대신 로그인 화면 HTML 이 온다
+                if (!(response.headers.get('content-type') || '').includes('application/json')) {
+                    throw new SessionExpired();
+                }
+
                 const data = await response.json();
-                
+
                 if (data.success) {
                     alert('용어집에 추가되었습니다!');
                 } else {
                     alert(data.error || '추가에 실패했습니다.');
                 }
             } catch (error) {
-                alert('오류가 발생했습니다: ' + error.message);
+                if (error instanceof SessionExpired) {
+                    alert('로그인이 풀렸습니다. 새로고침 한 뒤 다시 시도해 주세요.');
+                } else {
+                    alert('오류가 발생했습니다: ' + error.message);
+                }
             }
         }
     </script>
