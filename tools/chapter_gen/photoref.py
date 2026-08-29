@@ -26,7 +26,7 @@ Topic: {title}
 
 Key Concepts:
 {context}
-{photo_note}
+{photo_note}{vocab}
 Requirements:
 1. Visual Style: Realistic style (highly detailed and accurate). High resolution.
 2. Layout: Organized, easy to follow flow. Show each item once - never repeat a
@@ -38,6 +38,41 @@ Requirements:
    real, correctly spelled word. Never invent syllables.
 {extra}
 """
+
+# 자주 깨지는 낱말은 대개 이 전문어들이다. 본문에 있는 것만 골라 올바른 표기를
+# 미리 건네면 모델이 베껴 쓸 근거가 생긴다.
+#   '믐길이'(몸길이) '곰슬'(곰솔) '불완진변테'(불완전변태) '그물응병'(그을음병)
+# 금지 목록이 아니라 허용 목록이어야 한다. 틀린 글자를 프롬프트에 넣으면
+# 그 글자가 그림에 그대로 찍힌다.
+_TERMS = [
+    '몸길이', '무시충', '유시충', '약충', '성충', '간모', '알', '번데기',
+    '암컷성충', '수컷성충', '노숙약충', '정착약충', '후약충', '전성충',
+    '더듬이', '겹눈', '뿔관', '끝편', '끝판', '배 등판', '가운뎃가슴',
+    '종아리마디', '육질돌기', '센털', '알주머니', '밀랍', '왁스물질',
+    '기주', '기주식물', '여름기주', '겨울기주', '기주이동',
+    '월동', '월동란', '부화', '산란', '탈피', '우화', '하기휴면',
+    '단위생식', '자가수정', '불완전변태', '완전변태', '세대',
+    '흡즙', '즙액', '감로', '그을음병', '부생성 그을음병', '조기 낙엽',
+    '수세 약화', '고사', '피해율', '밀도',
+    '방제', '천적', '무당벌레류', '풀잠자리류', '꽃등에류',
+    '가지치기', '소각', '약제 살포', '기계유유제',
+    '생물적 방제', '화학적 방제', '물리적 방제', '경종적 방제',
+    '분포', '흰색', '하얀색', '노란색', '담황색', '흑갈색', '적갈색', '암갈색',
+]
+
+
+def _vocab_note(context, title):
+    """본문에 나오는 전문어만 골라 올바른 표기를 건넨다."""
+    hit = [t for t in _TERMS if t in context]
+    if title and title not in hit:
+        hit.insert(0, title)
+    if len(hit) < 3:
+        return ''
+    return ("""
+Spelling reference - these Korean words appear in this topic. When a label needs
+one of them, copy it exactly as written here, character for character:
+%s
+""" % '  '.join(hit))
 
 
 def find_photo(title):
@@ -69,6 +104,7 @@ def generate(chapter, context, extra='', photo=None):
         title=chapter.title,
         context=context,
         photo_note=_PHOTO_NOTE if photo else '',
+        vocab=_vocab_note(context, chapter.title),
         extra=('7. %s' % extra) if extra else '',
     )
 
