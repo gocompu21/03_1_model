@@ -13,6 +13,9 @@ from practice.models import Chapter
 from fileSearchStore import GeminiStoreManager
 from glossary.views import _unwrap_plain_math
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import photoref
+
 CHS = [int(x) for x in sys.argv[1:] if x.isdigit()]
 assert CHS, '목차 id 를 넘겨 주세요'
 OUT = '/tmp/prep'
@@ -83,8 +86,8 @@ def one(cid):
     html = fix_section_numbers(post('/dashboard/api/textbook/content/',
                                     {'chapter_id': cid})['content'])
     ctx = re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', html)).strip()[:1000]
-    img = post('/dashboard/api/textbook/image/',
-               {'chapter_id': cid, 'context': ctx}).get('image_url', '')
+    # 같은 종의 DVD 암기 사진이 있으면 참조로 넣는다 (없으면 글만으로)
+    img, used_photo = photoref.generate(ch, ctx)
 
     d = post('/dashboard/api/textbook/quiz/', {'chapter_id': cid})
     qs = d.get('questions', [])
@@ -108,8 +111,9 @@ def one(cid):
                'content': html, 'image': img, 'questions': qs, 'warns': warns},
               open('%s/%d.json' % (OUT, cid), 'w', encoding='utf-8'),
               ensure_ascii=False, indent=2)
-    print('  본문 %d자 / 이미지 %s / 문제 %d개 (5칸 %d개)'
-          % (len(html), img.split('/')[-1], len(qs),
+    print('  본문 %d자 / 이미지 %s%s / 문제 %d개 (5칸 %d개)'
+          % (len(html), img.split('/')[-1],
+             ' (사진 참조)' if used_photo else ' (사진 없음)', len(qs),
              sum(1 for q in qs if len(q['choice_notes']) == 5)))
     for w in warns:
         print('  [경고] %s' % w)
