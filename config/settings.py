@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "treeid",
     "dvdexam",
     "lecture",
+    "poll",
 ]
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

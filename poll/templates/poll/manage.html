@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<title>설문 통계</title>
+{% include "poll/_style.html" %}
+</head>
+<body>
+<div class="wrap wide">
+  <header class="top">
+    <h1><i class="fa-solid fa-chart-column"></i> 설문 진행 상황</h1>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <a class="btn" href="{% url 'poll:manage' %}"><i class="fa-solid fa-rotate-right"></i> 새로고침</a>
+      <a class="btn" href="{% url 'poll:export_csv' %}"><i class="fa-solid fa-file-csv"></i> CSV 받기</a>
+      <a class="btn primary" href="{% url 'poll:survey' %}"><i class="fa-solid fa-list-check"></i> 설문 화면</a>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><div class="v">{{ total }}</div><div class="k">총 응답</div></div>
+      <div class="stat"><div class="v">{{ today_count }}</div><div class="k">오늘 응답</div></div>
+      <div class="stat"><div class="v">{% if avg_age is not None %}{{ avg_age }}세{% else %}-{% endif %}</div><div class="k">평균 나이</div></div>
+      <div class="stat"><div class="v">{% if avg_score is not None %}{{ avg_score }}점{% else %}-{% endif %}</div><div class="k">평균 점수</div></div>
+      <div class="stat"><div class="v" style="font-size:18px">{% if last_at %}{{ last_at|date:"n/j H:i" }}{% else %}-{% endif %}</div><div class="k">마지막 제출</div></div>
+    </div>
+  </div>
+
+  {% if not total %}
+  <div class="card muted" style="text-align:center">아직 응답이 없습니다.</div>
+  {% endif %}
+
+  <div class="grid2">
+    <div class="card">
+      <h2>수준 분포</h2>
+      <p class="hint">30점 미만 입문 · 60점 미만 초급 · 그 이상 중급</p>
+      {% for b in level_bars %}
+      <div class="bar"><span>{{ b.label }}</span><div class="track"><div class="fill" style="width:{{ b.pct }}%"></div></div><span class="n">{{ b.count }}명 ({{ b.pct }}%)</span></div>
+      {% endfor %}
+    </div>
+    <div class="card">
+      <h2>나이 분포</h2>
+      {% for b in age_bars %}
+      <div class="bar"><span>{{ b.label }}</span><div class="track"><div class="fill" style="width:{{ b.pct }}%"></div></div><span class="n">{{ b.count }}명 ({{ b.pct }}%)</span></div>
+      {% endfor %}
+    </div>
+    {% for title, bars in sections %}
+    <div class="card">
+      <h2>{{ title }}</h2>
+      {% for b in bars %}
+      <div class="bar"><span>{{ b.label }}</span><div class="track"><div class="fill" style="width:{{ b.pct }}%"></div></div><span class="n">{{ b.count }}명 ({{ b.pct }}%)</span></div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>8. 용어 이해도</h2>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>용어</th>{% for lv, lvlabel in term_levels %}<th>{{ lvlabel }}</th>{% endfor %}</tr>
+        {% for row in term_rows %}
+        <tr><td>{{ row.label }}</td>{% for c in row.cells %}<td>{{ c.count }}명 ({{ c.pct }}%)</td>{% endfor %}</tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>9. OX 정답률</h2>
+    {% for o in ox_rows %}
+    <p style="margin:4px 0">{{ o.text }} <b>(정답 {{ o.answer }})</b></p>
+    <div class="bar"><span>정답</span><div class="track"><div class="fill" style="width:{{ o.pct }}%"></div></div><span class="n">{{ o.right }}명 ({{ o.pct }}%)</span></div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <h2>12. 배우고 싶은 것</h2>
+    {% if wishes %}
+    <ul>{% for r in wishes %}<li><b>{{ r.name }}</b>: {{ r.wish|linebreaksbr }}</li>{% endfor %}</ul>
+    {% else %}<p class="muted">아직 없습니다.</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>응답자 ({{ total }}명)</h2>
+    <div class="tbl-wrap">
+      <table>
+        <tr><th>이름</th><th>나이</th><th>점수</th><th>수준</th><th>제출 시각</th><th></th></tr>
+        {% for r in responses %}
+        <tr>
+          <td>{{ r.name }}</td><td>{{ r.age }}</td><td>{{ r.score }}</td><td>{{ r.level }}</td>
+          <td>{{ r.submitted_at|date:"n/j H:i" }}</td>
+          <td>
+            <form method="post" action="{% url 'poll:delete' r.pk %}" onsubmit="return confirm('{{ r.name|escapejs }}님의 응답을 지울까요?');" style="margin:0">
+              {% csrf_token %}<button type="submit" class="btn danger"><i class="fa-solid fa-trash"></i> 삭제</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="muted">응답이 없습니다.</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

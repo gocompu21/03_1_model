@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<title>AI 기초 설문</title>
+{% include "poll/_style.html" %}
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1><i class="fa-solid fa-robot"></i> AI 기초 설문</h1>
+    <a class="btn" href="{% url 'poll:manage' %}"><i class="fa-solid fa-user-tie"></i> 매니저</a>
+  </header>
+  <p class="muted">약 3분 걸립니다. 정답·오답은 없으니 편하게 답해 주세요.</p>
+
+  {% if errors %}
+  <div class="errors" role="alert">
+    <b><i class="fa-solid fa-circle-exclamation"></i> 아래 항목을 확인해 주세요.</b>
+    <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="card">
+      <h2>1. 이름 <span style="color:#c0392b">*</span></h2>
+      <input type="text" name="name" value="{{ data.name|default:'' }}" maxlength="50" autocomplete="name" placeholder="예: 홍길동">
+      <p class="hint" style="margin:8px 0 0">같은 이름으로 다시 내면 앞의 답이 고쳐집니다.</p>
+    </div>
+
+    <div class="card">
+      <h2>2. 나이</h2>
+      <input type="number" name="age" value="{{ data.age|default:'' }}" min="10" max="99" inputmode="numeric" placeholder="예: 62">
+    </div>
+
+    <div class="card">
+      <h2>3. 컴퓨터·스마트폰은 어느 정도 쓰시나요?</h2>
+      <div class="opts">
+        {% for k, label in skill_choices %}
+        <label class="opt"><input type="radio" name="skill" value="{{ k }}" {% if data.skill == k %}checked{% endif %}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>4. 써 본 AI를 모두 골라 주세요</h2>
+      <div class="opts" id="ai-tools">
+        {% for k, label in ai_tool_choices %}
+        <label class="opt"><input type="checkbox" name="ai_tools" value="{{ k }}" {% if k in data.ai_tools %}checked{% endif %}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5. AI를 얼마나 자주 쓰시나요?</h2>
+      <div class="opts">
+        {% for k, label in frequency_choices %}
+        <label class="opt"><input type="radio" name="frequency" value="{{ k }}" {% if data.frequency == k %}checked{% endif %}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>6. AI로 주로 하는 일 <span class="muted" style="font-size:16px">(여러 개, 선택)</span></h2>
+      <div class="opts">
+        {% for k, label in use_choices %}
+        <label class="opt"><input type="checkbox" name="uses" value="{{ k }}" {% if k in data.uses %}checked{% endif %}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>7. AI 유료 구독을 해 보셨나요?</h2>
+      <div class="opts">
+        {% for k, label in subscription_choices %}
+        <label class="opt"><input type="radio" name="subscription" value="{{ k }}" {% if data.subscription == k %}checked{% endif %}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>8. 이 낱말을 아시나요?</h2>
+      {% for k, label, sel in terms %}
+      <div class="term">
+        <b>{{ label }}</b>
+        <div class="row3">
+          {% for lv, lvlabel in term_levels %}
+          <label class="opt"><input type="radio" name="term_{{ k }}" value="{{ lv }}" {% if sel == lv %}checked{% endif %}><span>{{ lvlabel }}</span></label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="card">
+      <h2>9. 맞으면 O, 틀리면 X</h2>
+      {% for k, text, sel in ox_questions %}
+      <div class="term">
+        <b>{{ text }}</b>
+        <div class="opts" style="grid-template-columns:1fr 1fr">
+          <label class="opt"><input type="radio" name="ox_{{ k }}" value="O" {% if sel == "O" %}checked{% endif %}><span style="font-size:24px">O</span></label>
+          <label class="opt"><input type="radio" name="ox_{{ k }}" value="X" {% if sel == "X" %}checked{% endif %}><span style="font-size:24px">X</span></label>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="card">
+      <h2>10. 스스로 생각하는 AI 수준은?</h2>
+      <div class="opts" style="grid-template-columns:repeat(5, 1fr)">
+        {% for k, label in self_level_choices %}
+        <label class="opt"><input type="radio" name="self_level" value="{{ k }}" {% if data.self_level == k %}checked{% endif %}><span style="font-size:16px">{{ label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>11. 어렵거나 걱정되는 점 <span class="muted" style="font-size:16px">(여러 개, 선택)</span></h2>
+      <div class="opts">
+        {% for k, label in concern_choices %}
+        <label class="opt"><input type="checkbox" name="concerns" value="{{ k }}" {% if k in data.concerns %}checked{% endif %}><span>{{ label }}</span></label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>12. 배우고 싶은 것 <span class="muted" style="font-size:16px">(선택)</span></h2>
+      <textarea name="wish" rows="3" placeholder="자유롭게 적어 주세요">{{ data.wish|default:'' }}</textarea>
+    </div>
+
+    <button type="submit" class="btn primary big"><i class="fa-solid fa-paper-plane"></i> 제출하기</button>
+  </form>
+  <p style="height:24px"></p>
+</div>
+<script>
+  // '써 본 적 없음'을 고르면 나머지를 해제하고, 다른 것을 고르면 '써 본 적 없음'을 해제한다
+  document.querySelectorAll('#ai-tools input').forEach(function (cb) {
+    cb.addEventListener('change', function () {
+      if (!cb.checked) return;
+      document.querySelectorAll('#ai-tools input').forEach(function (o) {
+        if (o !== cb && (cb.value === 'none' || o.value === 'none')) o.checked = false;
+      });
+    });
+  });
+</script>
+</body>
+</html>

@@ -48,6 +48,7 @@ urlpatterns = [
     path("dvdexam/", include("dvdexam.urls")),
     path("lecture/", include("lecture.urls")),
     path("dashboard/", include("dashboard.urls")),
+    path("poll/", include("poll.urls")),
 ]
 
 if settings.DEBUG:

@@ -705,6 +705,20 @@ python /tmp/fill_notes.py 483 484 485 --go     # 읽어 본 뒤 저장 (태그·
 미국흰불나방 13, 솔나방 12, 황다리독나방 8, 목화진딧물·회양목명나방 7.
 기출이 0인 목차는 문제집을 만들지 않는다.
 
+## AI 기초 설문 (poll 앱)
+
+AI 수업 첫날 수강생의 AI 기초 지식을 알아보는 12문항 설문.
+
+- `/poll/` 설문 — **로그인 불필요**. 오른쪽 위 '매니저' 버튼 → `/poll/manage/`
+- `/poll/manage/` — **staff 전용**(아니면 `/accounts/login/?next=`). 요약·수준·나이대 분포,
+  문항별 막대, 용어 표, OX 정답률, 응답자 표(삭제 POST), CSV(BOM, 엑셀 한글 정상)
+- 모델 `PollResponse` 하나. 이름 unique — **같은 이름으로 다시 내면 앞 답을 덮어쓴다**
+- 보기 목록은 `poll/models.py` 상수(화면·통계·CSV 공용)
+- 점수: 써 본 AI 수(최대 3) + 빈도(0~4) + 용어 합(0~10) + OX 정답(0~2) + (자기평가-1)(0~4)
+  = 23점 → 100점 환산. 30 미만 입문, 60 미만 초급, 그 이상 중급. `save()`에서 계산
+- 로컬은 exam 마이그레이션 누락으로 `migrate`가 멈춘다. 스크래치 settings에서
+  로컬 앱을 `MIGRATION_MODULES=None`으로 두고 `migrate --run-syncdb`로 확인했다
+
 ## Korean Language Context
 
 모든 UI와 데이터는 한국어. 과목 예시:

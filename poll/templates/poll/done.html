@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<title>설문 완료</title>
+{% include "poll/_style.html" %}
+</head>
+<body>
+<div class="wrap">
+  <div class="card" style="text-align:center; margin-top:40px; padding:40px 20px">
+    <div style="font-size:56px; color:#2d6a4f"><i class="fa-solid fa-circle-check"></i></div>
+    <h1 style="color:#2d6a4f; font-size:28px">{{ name }}님, 감사합니다</h1>
+    <p class="muted">답변이 저장되었습니다. 오늘 수업에 잘 반영하겠습니다.</p>
+    <a class="btn" href="{% url 'poll:survey' %}"><i class="fa-solid fa-pen"></i> 답 고치기</a>
+    <p class="hint" style="margin-top:12px">같은 이름으로 다시 내면 앞의 답이 고쳐집니다.</p>
+  </div>
+</div>
+</body>
+</html>
