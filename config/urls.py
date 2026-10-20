@@ -47,7 +47,6 @@ urlpatterns = [
     path("treeid/", include("treeid.urls")),
     path("dvdexam/", include("dvdexam.urls")),
     path("lecture/", include("lecture.urls")),
-    path("poll/", include("poll.urls")),
     path("dashboard/", include("dashboard.urls")),
 ]
 
