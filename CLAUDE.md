@@ -518,6 +518,22 @@ python manage.py import_pest_pdf "..." --replace                              # 
   따로 넣어야 `$4$월`처럼 달러가 글자로 보이지 않는다
 - 나중에 불러오는 글(용어 뜻 등)은 `MathJax.typesetPromise([el])`로 다시 그려야 한다
 
+## AI 기초 설문 (poll 앱)
+
+처음 수업을 듣는 수강생의 AI 기초 수준을 가늠하는 12문항 설문 (2026-10-20).
+
+- `/poll/` — **로그인 불필요.** 이름만 적고 답한다. 오른쪽 위 '매니저' 버튼 → `/poll/manage/`
+- `/poll/manage/` — **staff 전용**(아니면 `/accounts/login/`으로). 요약·수준 분포·문항별
+  막대(CSS)·용어 이해도·OX 정답률·배우고 싶은 것·응답자 표(삭제), `manage/csv/` CSV 받기(BOM, 엑셀 한글)
+- **같은 이름으로 다시 내면 앞 응답을 덮어쓴다** (`name` unique). 동명이인은 구분 못 한다
+- 점수(`PollResponse.compute_score`, 0~100) = 써 본 AI 수(최대 3) + 빈도(0~4)
+  + 용어 5개(각 0~2) + OX 2문제 + 자기평가(0~4), 합 23점을 100점으로 환산.
+  0~29 입문 / 30~59 초급 / 60 이상 중급 (`LEVELS`)
+- 보기 상수는 `poll/models.py`에 있고 화면·통계·CSV가 함께 쓴다. 템플릿은 `templates/poll/`
+  (base.html 비상속 독립 페이지, 50~70대 고려해 글자·버튼 크게)
+- 로컬 저장소에 `exam/migrations/0013_merge_20260825_1952.py`가 없어 로컬 `migrate`가
+  `NodeNotFoundError`로 멈춘다(0014가 참조). 서버에는 있는 것으로 보인다
+
 ## 알려진 주의사항
 
 ### content 필드의 HTML
