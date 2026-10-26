@@ -8,7 +8,8 @@ class SiteSettings(models.Model):
     # 2026-08-26 정리: gemini-3-pro-preview 와 gemini-2.0-flash-exp 는
     # 구글이 내려 404가 나므로 뺐다. 실제 호출해 되는 것만 남긴다
     GEMINI_MODEL_CHOICES = [
-        ('gemini-3.7-flash', 'Gemini 3.7 Flash (권장)'),
+        ('gemini-3.8-flash', 'Gemini 3.8 Flash (최신·권장)'),
+        ('gemini-3.7-flash', 'Gemini 3.7 Flash'),
         ('gemini-3.1-pro-preview', 'Gemini 3.1 Pro Preview (고품질·느림)'),
         ('gemini-3-flash-preview', 'Gemini 3 Flash Preview'),
         ('gemini-2.5-pro', 'Gemini 2.5 Pro'),
@@ -20,7 +21,7 @@ class SiteSettings(models.Model):
     chat_model = models.CharField(
         max_length=50,
         choices=GEMINI_MODEL_CHOICES,
-        default='gemini-3.7-flash',
+        default='gemini-3.8-flash',
         verbose_name='나무주치의 모델'
     )
 
@@ -28,7 +29,7 @@ class SiteSettings(models.Model):
     textbook_model = models.CharField(
         max_length=50,
         choices=GEMINI_MODEL_CHOICES,
-        default='gemini-3.7-flash',
+        default='gemini-3.8-flash',
         verbose_name='기본서 모델'
     )
 
