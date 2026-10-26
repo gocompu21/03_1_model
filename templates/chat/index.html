@@ -259,6 +259,148 @@
             background-color: #d62828;
         }
 
+        /* 사진 첨부 */
+        .input-group {
+            flex-wrap: wrap;
+        }
+
+        .attach-wrap {
+            position: relative;
+        }
+
+        .attach-btn {
+            background-color: #d8f3dc;
+            color: #2d6a4f;
+            border: none;
+            width: 54px;
+            height: 60px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .attach-btn:hover {
+            background-color: #b7e4c7;
+        }
+
+        .attach-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .attach-count {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #e63946;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            line-height: 18px;
+            border-radius: 9px;
+            display: none;
+        }
+
+        .attach-menu {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 0;
+            background: white;
+            border: 1px solid #d8f3dc;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            z-index: 20;
+            white-space: nowrap;
+        }
+
+        .attach-menu.open {
+            display: block;
+        }
+
+        .attach-menu button {
+            display: block;
+            width: 100%;
+            padding: 12px 18px;
+            border: none;
+            background: white;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .attach-menu button:hover {
+            background: #f1faf3;
+        }
+
+        .attach-menu .attach-hint {
+            padding: 8px 18px;
+            font-size: 0.75rem;
+            color: #888;
+            border-top: 1px solid #eee;
+        }
+
+        .photo-preview {
+            flex-basis: 100%;
+            order: -1;
+            display: none;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .photo-preview.has-photos {
+            display: flex;
+        }
+
+        .photo-thumb {
+            position: relative;
+            width: 72px;
+            height: 72px;
+        }
+
+        .photo-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #d8f3dc;
+        }
+
+        .photo-thumb .remove-photo {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 0.8rem;
+            line-height: 22px;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .msg-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .msg-photos img {
+            max-width: 180px;
+            max-height: 180px;
+            border-radius: 8px;
+            border: 1px solid #cfe8d6;
+            object-fit: cover;
+        }
+
         /* Progress UI */
         .progress-ui {
             display: none;
@@ -613,6 +755,24 @@
                 box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
             }
 
+            .attach-btn {
+                width: 46px;
+                height: 46px;
+                min-width: 46px;
+                border-radius: 50%;
+                font-size: 1.2rem;
+            }
+
+            .photo-thumb {
+                width: 64px;
+                height: 64px;
+            }
+
+            .msg-photos img {
+                max-width: 120px;
+                max-height: 120px;
+            }
+
             /* Progress UI */
             .progress-ui {
                 width: 160px;
@@ -755,7 +915,8 @@
             }
 
             .send-btn,
-            .stop-btn {
+            .stop-btn,
+            .attach-btn {
                 width: 42px;
                 height: 42px;
                 min-width: 42px;
@@ -832,6 +993,11 @@
                 {% if user_input %}
                 <div class="message user-message">
                     <strong>질문:</strong> {{ user_input }}
+                    {% if selected_history %}{% with photos=selected_history.images.all %}{% if photos %}
+                    <div class="msg-photos">
+                        {% for ci in photos %}<a href="{{ ci.image.url }}" target="_blank" rel="noopener"><img src="{{ ci.image.url }}" alt="질문 사진"></a>{% endfor %}
+                    </div>
+                    {% endif %}{% endwith %}{% endif %}
                     <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc;">
                         <select id="subject-select-static" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.8rem;">
                             <option value="">과목 선택</option>
@@ -864,9 +1030,22 @@
                 {% endif %}
             </div>
 
-            <form id="chat-form" method="post" class="input-group">
+            <form id="chat-form" method="post" class="input-group" enctype="multipart/form-data">
                 {% csrf_token %}
-                <textarea id="user-input" name="user_input" placeholder="질문을 입력하세요..." required></textarea>
+                <div id="photo-preview" class="photo-preview"></div>
+
+                <div class="attach-wrap">
+                    <button type="button" id="attach-btn" class="attach-btn" title="사진 첨부">📷<span id="attach-count" class="attach-count"></span></button>
+                    <div id="attach-menu" class="attach-menu">
+                        <button type="button" id="pick-camera">📸 카메라로 촬영</button>
+                        <button type="button" id="pick-album">🖼️ 앨범에서 선택</button>
+                        <div class="attach-hint">사진은 최대 3장까지</div>
+                    </div>
+                    <input type="file" id="camera-input" accept="image/*" capture="environment" hidden>
+                    <input type="file" id="album-input" name="images" accept="image/*" multiple hidden>
+                </div>
+
+                <textarea id="user-input" name="user_input" placeholder="질문을 입력하세요..."></textarea>
 
                 <button type="submit" id="send-btn" class="send-btn">
                     <span>보내기</span>
@@ -911,6 +1090,17 @@
             const timerSpan = document.getElementById('timer');
             const chatBox = document.getElementById('chat-box');
             const welcomeMsg = document.getElementById('welcome-msg');
+            const attachBtn = document.getElementById('attach-btn');
+            const attachMenu = document.getElementById('attach-menu');
+            const attachCount = document.getElementById('attach-count');
+            const cameraInput = document.getElementById('camera-input');
+            const albumInput = document.getElementById('album-input');
+            const photoPreview = document.getElementById('photo-preview');
+
+            // 보낼 사진: { blob, url } — 보내기 전에 미리 줄여 둔다
+            const MAX_PHOTOS = 3;
+            const MAX_SIDE = 1600;
+            let pendingPhotos = [];
 
             let abortController = null;
             let timerInterval = null;
@@ -945,7 +1135,67 @@
             let lastQuestion = '';
             let lastResponse = '';
 
-            function appendMessage(role, text, addGlossaryBtn = false) {
+            function escapeHtml(str) {
+                return str.replace(/[&<>"']/g, c => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+                })[c]);
+            }
+
+            // 휴대폰 사진(수 MB)을 그대로 올리면 느리고 서버 업로드 한도에 걸린다.
+            // 긴 변 1600px JPEG 로 줄여서 보낸다. 브라우저가 못 읽는 형식은 원본 그대로.
+            function shrinkPhoto(file) {
+                return new Promise(resolve => {
+                    const url = URL.createObjectURL(file);
+                    const img = new Image();
+                    img.onload = () => {
+                        const ratio = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+                        const canvas = document.createElement('canvas');
+                        canvas.width = Math.round(img.naturalWidth * ratio);
+                        canvas.height = Math.round(img.naturalHeight * ratio);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        URL.revokeObjectURL(url);
+                        canvas.toBlob(blob => resolve(blob || file), 'image/jpeg', 0.85);
+                    };
+                    img.onerror = () => {
+                        URL.revokeObjectURL(url);
+                        resolve(file);
+                    };
+                    img.src = url;
+                });
+            }
+
+            function renderPhotoPreview() {
+                photoPreview.innerHTML = '';
+                pendingPhotos.forEach((p, i) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'photo-thumb';
+                    thumb.innerHTML = `<img src="${p.url}" alt="첨부 사진 ${i + 1}"><button type="button" class="remove-photo" title="빼기">✕</button>`;
+                    thumb.querySelector('.remove-photo').onclick = () => {
+                        URL.revokeObjectURL(p.url);
+                        pendingPhotos.splice(i, 1);
+                        renderPhotoPreview();
+                    };
+                    photoPreview.appendChild(thumb);
+                });
+                photoPreview.classList.toggle('has-photos', pendingPhotos.length > 0);
+                attachCount.textContent = pendingPhotos.length;
+                attachCount.style.display = pendingPhotos.length ? 'block' : 'none';
+            }
+
+            async function addPhotos(fileList) {
+                const files = Array.from(fileList).filter(f => f.type.startsWith('image/') || f.type === '');
+                const room = MAX_PHOTOS - pendingPhotos.length;
+                if (files.length > room) {
+                    alert(`사진은 최대 ${MAX_PHOTOS}장까지 올릴 수 있습니다.`);
+                }
+                for (const file of files.slice(0, Math.max(room, 0))) {
+                    const blob = await shrinkPhoto(file);
+                    pendingPhotos.push({ blob, url: URL.createObjectURL(blob) });
+                }
+                renderPhotoPreview();
+            }
+
+            function appendMessage(role, text, addGlossaryBtn = false, photoUrls = []) {
                 if (welcomeMsg) welcomeMsg.style.display = 'none';
 
                 const msgDiv = document.createElement('div');
@@ -953,7 +1203,19 @@
                 
                 if (role === 'user') {
                     lastQuestion = text;
-                    msgDiv.innerHTML = `<strong>질문:</strong> ${text}`;
+                    msgDiv.innerHTML = `<strong>질문:</strong> ${escapeHtml(text)}`;
+                    if (photoUrls.length) {
+                        const photos = document.createElement('div');
+                        photos.className = 'msg-photos';
+                        photoUrls.forEach(url => {
+                            const im = document.createElement('img');
+                            im.src = url;
+                            im.alt = '질문 사진';
+                            im.onload = () => { chatBox.scrollTop = chatBox.scrollHeight; };
+                            photos.appendChild(im);
+                        });
+                        msgDiv.appendChild(photos);
+                    }
                 } else {
                     lastResponse = text;
                     msgDiv.innerHTML = `<strong>나무주치의 답변:</strong><br>${text}`;
@@ -1004,12 +1266,17 @@
             }
 
             async function handleChatSubmit() {
-                const question = userInput.value.trim();
+                const photos = pendingPhotos;
+                const question = userInput.value.trim() || (photos.length ? '이 사진을 보고 진단해 주세요.' : '');
                 if (!question) return;
 
                 // UI Reset
                 userInput.value = '';
                 userInput.disabled = true;
+                attachBtn.disabled = true;
+                attachMenu.classList.remove('open');
+                pendingPhotos = [];
+                renderPhotoPreview();
 
                 // Hide Send button, Show Stop button
                 sendBtn.style.display = 'none';
@@ -1017,7 +1284,7 @@
                 progressUi.style.display = 'block';
 
                 // Show User Message immediately
-                appendMessage('user', question);
+                appendMessage('user', question, false, photos.map(p => p.url));
 
                 // Start Request
                 abortController = new AbortController();
@@ -1026,6 +1293,7 @@
                 try {
                     const formData = new FormData();
                     formData.append('user_input', question);
+                    photos.forEach((p, i) => formData.append('images', p.blob, `photo${i + 1}.jpg`));
                     formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
 
                     const response = await fetch("{% url 'chat:api_ask' %}", {
@@ -1034,6 +1302,11 @@
                         signal: abortController.signal
                     });
 
+                    if (response.status === 413) throw new Error('사진 용량이 너무 큽니다. 사진 수를 줄여 다시 보내 주세요.');
+                    if (response.status === 400) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.error || '요청을 처리할 수 없습니다.');
+                    }
                     if (!response.ok) throw new Error('Network response was not ok');
 
                     // 세션이 끊기면 CSRF 검사에 걸려 로그인 화면으로 넘겨진다.
@@ -1060,6 +1333,7 @@
                     // Reset UI
                     stopTimer();
                     userInput.disabled = false;
+                    attachBtn.disabled = false;
                     userInput.focus();
 
                     // Show Send button, Hide Stop button
@@ -1076,7 +1350,7 @@
                 // Support Ctrl+Enter
                 if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
                     e.preventDefault();
-                    if (!userInput.disabled && userInput.value.trim() !== "") {
+                    if (!userInput.disabled && (userInput.value.trim() !== "" || pendingPhotos.length)) {
                         handleChatSubmit();
                     }
                 }
@@ -1085,6 +1359,32 @@
             chatForm.addEventListener('submit', function (e) {
                 e.preventDefault();
                 handleChatSubmit();
+            });
+
+            attachBtn.onclick = function (e) {
+                e.stopPropagation();
+                if (pendingPhotos.length >= MAX_PHOTOS) {
+                    alert(`사진은 최대 ${MAX_PHOTOS}장까지 올릴 수 있습니다.`);
+                    return;
+                }
+                attachMenu.classList.toggle('open');
+            };
+            document.getElementById('pick-camera').onclick = () => {
+                attachMenu.classList.remove('open');
+                cameraInput.click();
+            };
+            document.getElementById('pick-album').onclick = () => {
+                attachMenu.classList.remove('open');
+                albumInput.click();
+            };
+            document.addEventListener('click', e => {
+                if (!attachMenu.contains(e.target)) attachMenu.classList.remove('open');
+            });
+            [cameraInput, albumInput].forEach(input => {
+                input.addEventListener('change', async () => {
+                    await addPhotos(input.files);
+                    input.value = '';
+                });
             });
 
             stopBtn.onclick = function () {

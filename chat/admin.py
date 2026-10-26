@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import ChatHistory
+from .models import ChatHistory, ChatImage
+
+
+class ChatImageInline(admin.TabularInline):
+    model = ChatImage
+    extra = 0
 
 
 @admin.register(ChatHistory)
@@ -8,6 +13,7 @@ class ChatHistoryAdmin(admin.ModelAdmin):
     list_filter = ("created_at", "is_success")
     search_fields = ("user_input", "ai_response")
     list_per_page = 10
+    inlines = [ChatImageInline]
 
     def formatted_created_at(self, obj):
         return obj.created_at.strftime("%y/%m/%d")

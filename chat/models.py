@@ -21,3 +21,18 @@ class ChatHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class ChatImage(models.Model):
+    """질문에 붙인 사진. 줄여서 JPEG 로 저장한 사본이다."""
+
+    history = models.ForeignKey(
+        ChatHistory, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="chat/%Y/%m/", verbose_name="사진")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]
+        verbose_name = "질문 사진"
+        verbose_name_plural = "질문 사진 목록"

@@ -6,9 +6,13 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 import google.generativeai as genai
 import markdown
+import io
 import time
 import re
-from .models import ChatHistory
+import uuid
+from django.core.files.base import ContentFile
+from PIL import Image, ImageOps, UnidentifiedImageError
+from .models import ChatHistory, ChatImage
 from dashboard.models import SiteSettings
 
 # 나무주치의 시스템 프롬프트
@@ -59,6 +63,103 @@ SYSTEM_PROMPT = """당신은 '나무주치의'로, 나무의사 자격시험을 
 
 질문: """
 
+# 사진 첨부
+MAX_IMAGES = 3                      # 한 질문에 붙일 수 있는 사진 수
+MAX_IMAGE_BYTES = 15 * 1024 * 1024  # 한 장 원본 크기 상한
+MAX_IMAGE_SIDE = 1600               # 긴 변을 이만큼으로 줄여 보내고 저장한다
+ALLOWED_IMAGE_FORMATS = {"JPEG", "MPO", "PNG", "WEBP", "GIF", "BMP"}
+PHOTO_ONLY_QUESTION = "이 사진을 보고 진단해 주세요."
+
+PHOTO_NOTE = """
+
+(질문과 함께 사진 {n}장을 첨부했습니다. 반드시 사진을 직접 보고 답하세요.
+답변 맨 앞에 '### 사진 소견' 제목으로 사진에서 보이는 수종·부위·병징/표징·해충의 형태와 피해 양상을
+구체적으로 적고, 그것을 근거로 가능성이 높은 진단, 감별할 대상, 현장에서 확인할 방법과 방제를 설명하세요.
+사진만으로 확정하기 어려우면 그렇다고 밝히고 무엇을 더 찍어 보면 좋을지 알려 주세요.
+사진이 수목과 관계없으면 보이는 것을 짧게 말하고 그 점을 알려 주세요.)"""
+
+
+class ImageError(ValueError):
+    """사용자에게 그대로 보여 줄 사진 오류"""
+
+
+def _prepare_images(files):
+    """올린 사진을 검사하고 줄여서 JPEG 바이트 목록으로 돌려준다."""
+    if len(files) > MAX_IMAGES:
+        raise ImageError(f"사진은 {MAX_IMAGES}장까지 올릴 수 있습니다.")
+
+    prepared = []
+    for f in files:
+        if f.size > MAX_IMAGE_BYTES:
+            raise ImageError(
+                f"사진 한 장은 {MAX_IMAGE_BYTES // (1024 * 1024)}MB 까지 올릴 수 있습니다."
+            )
+        try:
+            img = Image.open(f)
+            if img.format not in ALLOWED_IMAGE_FORMATS:
+                raise ImageError("JPG, PNG, WEBP 사진만 올릴 수 있습니다.")
+            img = ImageOps.exif_transpose(img)  # 휴대폰 사진의 회전 정보를 반영
+            img.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            buf = io.BytesIO()
+            img.save(buf, "JPEG", quality=85, optimize=True)
+        except ImageError:
+            raise
+        except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
+            raise ImageError("사진 파일을 읽을 수 없습니다. 다른 사진으로 다시 시도해 주세요.")
+        prepared.append(buf.getvalue())
+    return prepared
+
+
+def _ask_tree_doctor(user_input, images):
+    """Gemini 에 질문(과 사진)을 넘기고 (HTML 답변, 성공 여부)를 돌려준다."""
+    try:
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        chat_model_name = SiteSettings.get_chat_model()
+        model = genai.GenerativeModel(chat_model_name)
+        # 시스템 프롬프트와 사용자 질문 결합
+        full_prompt = SYSTEM_PROMPT + user_input
+        if images:
+            full_prompt += PHOTO_NOTE.format(n=len(images))
+        contents = [full_prompt] + [
+            {"mime_type": "image/jpeg", "data": data} for data in images
+        ]
+        response = model.generate_content(contents)
+
+        # Convert (1), (2), (3) to 1), 2), 3) format
+        response_raw = response.text
+        response_raw = re.sub(r'\((\d+)\)', r'\1)', response_raw)
+
+        # Convert Markdown to HTML for display
+        return markdown.markdown(response_raw, extensions=['tables', 'fenced_code']), True
+
+    except Exception as e:
+        return f"Error: {str(e)}", False
+
+
+def _save_images(history, images):
+    """줄인 사진을 기록에 붙이고 저장된 ChatImage 목록을 돌려준다."""
+    saved = []
+    for data in images:
+        ci = ChatImage(history=history)
+        ci.image.save(f"{uuid.uuid4().hex}.jpg", ContentFile(data), save=True)
+        saved.append(ci)
+    return saved
+
+
+def _photos_html(chat_images):
+    """게시글 본문 맨 위에 넣을 사진 마크업"""
+    if not chat_images:
+        return ""
+    imgs = "".join(
+        f'<a href="{ci.image.url}" target="_blank" rel="noopener">'
+        f'<img src="{ci.image.url}" alt="질문 사진" '
+        f'style="max-width:100%; max-height:420px; border-radius:8px; margin:0 8px 8px 0;"></a>'
+        for ci in chat_images
+    )
+    return f'<div class="chat-photos" style="margin-bottom:16px;">{imgs}</div>\n\n'
+
 
 @login_required
 def index(request):
@@ -77,42 +178,32 @@ def index(request):
 
     # Handle New Chat Submission
     if request.method == "POST":
-        user_input = request.POST.get("user_input")
-        if user_input:
+        user_input = (request.POST.get("user_input") or "").strip()
+        image_error = ""
+        try:
+            images = _prepare_images(request.FILES.getlist("images"))
+        except ImageError as e:
+            images, image_error = [], str(e)
+        if images and not user_input:
+            user_input = PHOTO_ONLY_QUESTION
+        if image_error:
+            response_text = image_error
+        elif user_input:
             start_time = time.time()
-            is_success = False
-
-            try:
-                genai.configure(api_key=settings.GEMINI_API_KEY)
-                chat_model_name = SiteSettings.get_chat_model()
-                model = genai.GenerativeModel(chat_model_name)
-                # 시스템 프롬프트와 사용자 질문 결합
-                full_prompt = SYSTEM_PROMPT + user_input
-                response = model.generate_content(full_prompt)
-
-                # Convert (1), (2), (3) to 1), 2), 3) format
-                response_raw = response.text
-                response_raw = re.sub(r'\((\d+)\)', r'\1)', response_raw)
-
-                # Convert Markdown to HTML for display
-                response_text = markdown.markdown(response_raw, extensions=['tables', 'fenced_code'])
-                is_success = True
-
-            except Exception as e:
-                response_text = f"Error: {str(e)}"
-                is_success = False
+            response_text, is_success = _ask_tree_doctor(user_input, images)
 
             end_time = time.time()
             response_time = end_time - start_time
 
             # Save to Database
-            ChatHistory.objects.create(
+            selected_history = ChatHistory.objects.create(
                 user=request.user,
                 user_input=user_input,
                 ai_response=response_text,
                 response_time=response_time,
                 is_success=is_success,
             )
+            chat_images = _save_images(selected_history, images)
 
             # Auto-create BBS Post (Tree Doctor) - 실패한 응답은 게시하지 않음
             if is_success:
@@ -125,7 +216,7 @@ def index(request):
                     p = Post.objects.create(
                         author=request.user,
                         title=f"[나무주치의] {user_input}"[:200],
-                        content=str(response_text),
+                        content=_photos_html(chat_images) + str(response_text),
                         type=post_type,
                     )
                     with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
@@ -166,33 +257,18 @@ def index(request):
 @login_required
 def chat_api(request):
     if request.method == "POST":
-        user_input = request.POST.get("user_input")
+        user_input = (request.POST.get("user_input") or "").strip()
+        try:
+            images = _prepare_images(request.FILES.getlist("images"))
+        except ImageError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+        if images and not user_input:
+            user_input = PHOTO_ONLY_QUESTION
         if not user_input:
             return JsonResponse({"error": "No input provided"}, status=400)
 
         start_time = time.time()
-        is_success = False
-        response_text = ""
-
-        try:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            chat_model_name = SiteSettings.get_chat_model()
-            model = genai.GenerativeModel(chat_model_name)
-            # 시스템 프롬프트와 사용자 질문 결합
-            full_prompt = SYSTEM_PROMPT + user_input
-            response = model.generate_content(full_prompt)
-
-            # Convert (1), (2), (3) to 1), 2), 3) format
-            response_raw = response.text
-            response_raw = re.sub(r'\((\d+)\)', r'\1)', response_raw)
-
-            # Convert Markdown to HTML
-            response_text = markdown.markdown(response_raw, extensions=['tables', 'fenced_code'])
-            is_success = True
-
-        except Exception as e:
-            response_text = f"Error: {str(e)}"
-            is_success = False
+        response_text, is_success = _ask_tree_doctor(user_input, images)
 
         end_time = time.time()
         response_time = end_time - start_time
@@ -205,6 +281,7 @@ def chat_api(request):
             response_time=response_time,
             is_success=is_success,
         )
+        chat_images = _save_images(history, images)
 
         # Auto-create BBS Post (Tree Doctor) - 실패한 응답은 게시하지 않음
         if is_success:
@@ -217,7 +294,7 @@ def chat_api(request):
                 p = Post.objects.create(
                     author=request.user,
                     title=user_input[:200],
-                    content=str(response_text),
+                    content=_photos_html(chat_images) + str(response_text),
                     type=post_type,
                 )
                 with open("debug_chat_log.txt", "a", encoding="utf-8") as f:
@@ -234,6 +311,7 @@ def chat_api(request):
                 "response_time": response_time,
                 "created_at": history.created_at.strftime("%m/%d %H:%M"),
                 "history_id": history.id,
+                "image_urls": [ci.image.url for ci in chat_images],
             }
         )
 
